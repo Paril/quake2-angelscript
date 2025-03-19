@@ -1,0 +1,6 @@
+{
+    "angelScript.implicitMutualInclusion": true,
+    "angelScript.formatter.useTabIndent": true,
+    "angelScript.supportsForEach": true,
+    "angelScript.supportsTypedEnumerations": true
+}

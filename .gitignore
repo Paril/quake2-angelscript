@@ -1,0 +1,16 @@
+.vs
+build
+out
+bin
+
+vcpkg.json
+game.sln
+game.vcxproj
+game.vcxproj.filters
+..build
+
+*.user
+*.patch
+*.bak
+*.zip
+*.dll
