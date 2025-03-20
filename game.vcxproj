@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{2fc49121-c1be-42cb-9f34-69aca69f94e9}</ProjectGuid>
+    <RootNamespace>game</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)_x64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)_x64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>C:\Users\mende\Documents\Github\quake2-angelscript\as;C:\Users\mende\Documents\Github\quake2-angelscript\as\thirdparty\angelscript\include;C:\Users\mende\Documents\Github\quake2-angelscript\as\thirdparty\fmt\include;C:\Users\mende\Documents\Github\quake2-angelscript\as\thirdparty\jsoncpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <TreatSpecificWarningsAsErrors>4533;4700;4703;4146;4308;4532</TreatSpecificWarningsAsErrors>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>true</OmitFramePointers>
+    </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;NO_FMT_SOURCE;KEX_Q2GAME_DYNAMIC;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>4267;4244</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="as\debugger\as_debugger.cpp" />
+    <ClCompile Include="as\debugger\as_debugger_imgui.cpp" />
+    <ClCompile Include="as\debugger\imgui.cpp" />
+    <ClCompile Include="as\debugger\imgui_demo.cpp" />
+    <ClCompile Include="as\debugger\imgui_draw.cpp" />
+    <ClCompile Include="as\debugger\imgui_impl_dx9.cpp" />
+    <ClCompile Include="as\debugger\imgui_impl_win32.cpp" />
+    <ClCompile Include="as\debugger\imgui_tables.cpp" />
+    <ClCompile Include="as\debugger\imgui_widgets.cpp" />
+    <ClCompile Include="as\debugger\TextEditor.cpp" />
+    <ClCompile Include="as\q2as_cgame.cpp" />
+    <ClCompile Include="as\q2as_cvar.cpp" />
+    <ClCompile Include="as\q2as_debugging.cpp" />
+    <ClCompile Include="as\q2as_game.cpp" />
+    <ClCompile Include="as\q2as_imports.cpp" />
+    <ClCompile Include="as\q2as_json.cpp" />
+    <ClCompile Include="as\q2as_limits.cpp" />
+    <ClCompile Include="as\q2as_main.cpp" />
+    <ClCompile Include="as\q2as_math.cpp" />
+    <ClCompile Include="as\q2as_playerstate.cpp" />
+    <ClCompile Include="as\q2as_pmove.cpp" />
+    <ClCompile Include="as\q2as_predefined.cpp" />
+    <ClCompile Include="as\q2as_random.cpp" />
+    <ClCompile Include="as\q2as_reflect.cpp" />
+    <ClCompile Include="as\q2as_state.cpp" />
+    <ClCompile Include="as\q2as_stringex.cpp" />
+    <ClCompile Include="as\q2as_stringhashset.cpp" />
+    <ClCompile Include="as\q2as_thirdparty.cpp" />
+    <ClCompile Include="as\q2as_time.cpp" />
+    <ClCompile Include="as\q2as_tokenizer.cpp" />
+    <ClCompile Include="as\q2as_trace.cpp" />
+    <ClCompile Include="as\q2as_util.cpp" />
+    <ClCompile Include="as\q2as_vec3.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_atomic.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_builder.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_bytecode.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_arm.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_arm64.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_mips.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_ppc.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_ppc_64.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_riscv64.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_sh4.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x64_gcc.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x64_mingw.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x64_msvc.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x86.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_xenon.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_compiler.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_configgroup.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_context.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_datatype.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_gc.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_generic.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_globalproperty.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_memory.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_module.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_objecttype.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_outputbuffer.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_parser.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_restore.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptcode.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptengine.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptfunction.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptnode.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptobject.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_string.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_string_util.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_thread.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_tokenizer.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_typeinfo.cpp" />
+    <ClCompile Include="as\thirdparty\angelscript\source\as_variablescope.cpp" />
+    <ClCompile Include="as\thirdparty\datetime\datetime.cpp" />
+    <ClCompile Include="as\thirdparty\fmt\src\os.cc" />
+    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_reader.cpp" />
+    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_value.cpp" />
+    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_writer.cpp" />
+    <ClCompile Include="as\thirdparty\scriptany\scriptany.cpp" />
+    <ClCompile Include="as\thirdparty\scriptarray\scriptarray.cpp" />
+    <ClCompile Include="as\thirdparty\scriptdictionary\scriptdictionary.cpp" />
+    <ClCompile Include="as\thirdparty\scripthelper\scripthelper.cpp" />
+    <ClCompile Include="as\thirdparty\scriptstdstring\scriptstdstring.cpp" />
+    <ClCompile Include="as\thirdparty\scriptstdstring\scriptstdstring_utils.cpp" />
+    <ClCompile Include="as\thirdparty\weakref\weakref.cpp" />
+    <ClCompile Include="as\yyjson.c" />
+    <ClCompile Include="bots\bot_debug.cpp" />
+    <ClCompile Include="bots\bot_exports.cpp" />
+    <ClCompile Include="bots\bot_think.cpp" />
+    <ClCompile Include="bots\bot_utils.cpp" />
+    <ClCompile Include="cg_main.cpp" />
+    <ClCompile Include="cg_screen.cpp" />
+    <ClCompile Include="ctf\g_ctf.cpp" />
+    <ClCompile Include="ctf\p_ctf_menu.cpp" />
+    <ClCompile Include="g_ai.cpp" />
+    <ClCompile Include="g_chase.cpp" />
+    <ClCompile Include="g_cmds.cpp" />
+    <ClCompile Include="g_combat.cpp" />
+    <ClCompile Include="g_func.cpp" />
+    <ClCompile Include="g_items.cpp" />
+    <ClCompile Include="g_main.cpp" />
+    <ClCompile Include="g_misc.cpp" />
+    <ClCompile Include="g_monster.cpp" />
+    <ClCompile Include="g_phys.cpp" />
+    <ClCompile Include="g_save.cpp" />
+    <ClCompile Include="g_spawn.cpp" />
+    <ClCompile Include="g_svcmds.cpp" />
+    <ClCompile Include="g_target.cpp" />
+    <ClCompile Include="g_trigger.cpp" />
+    <ClCompile Include="g_turret.cpp" />
+    <ClCompile Include="g_utils.cpp" />
+    <ClCompile Include="g_weapon.cpp" />
+    <ClCompile Include="m_actor.cpp" />
+    <ClCompile Include="m_arachnid.cpp" />
+    <ClCompile Include="m_berserk.cpp" />
+    <ClCompile Include="m_boss2.cpp" />
+    <ClCompile Include="m_boss3.cpp" />
+    <ClCompile Include="m_boss31.cpp" />
+    <ClCompile Include="m_boss32.cpp" />
+    <ClCompile Include="m_brain.cpp" />
+    <ClCompile Include="m_chick.cpp" />
+    <ClCompile Include="m_flipper.cpp" />
+    <ClCompile Include="m_float.cpp" />
+    <ClCompile Include="m_flyer.cpp" />
+    <ClCompile Include="m_gladiator.cpp" />
+    <ClCompile Include="m_guardian.cpp" />
+    <ClCompile Include="m_guncmdr.cpp" />
+    <ClCompile Include="m_gunner.cpp" />
+    <ClCompile Include="m_hover.cpp" />
+    <ClCompile Include="m_infantry.cpp" />
+    <ClCompile Include="m_insane.cpp" />
+    <ClCompile Include="m_medic.cpp" />
+    <ClCompile Include="m_move.cpp" />
+    <ClCompile Include="m_mutant.cpp" />
+    <ClCompile Include="m_parasite.cpp" />
+    <ClCompile Include="m_shambler.cpp" />
+    <ClCompile Include="m_soldier.cpp" />
+    <ClCompile Include="m_supertank.cpp" />
+    <ClCompile Include="m_tank.cpp" />
+    <ClCompile Include="p_client.cpp" />
+    <ClCompile Include="p_hud.cpp" />
+    <ClCompile Include="p_move.cpp" />
+    <ClCompile Include="p_trail.cpp" />
+    <ClCompile Include="p_view.cpp" />
+    <ClCompile Include="p_weapon.cpp" />
+    <ClCompile Include="q_std.cpp" />
+    <ClCompile Include="rogue\g_rogue_combat.cpp" />
+    <ClCompile Include="rogue\g_rogue_func.cpp" />
+    <ClCompile Include="rogue\g_rogue_items.cpp" />
+    <ClCompile Include="rogue\g_rogue_misc.cpp" />
+    <ClCompile Include="rogue\g_rogue_monster.cpp" />
+    <ClCompile Include="rogue\g_rogue_newai.cpp" />
+    <ClCompile Include="rogue\g_rogue_newdm.cpp" />
+    <ClCompile Include="rogue\g_rogue_newfnc.cpp" />
+    <ClCompile Include="rogue\g_rogue_newtarg.cpp" />
+    <ClCompile Include="rogue\g_rogue_newtrig.cpp" />
+    <ClCompile Include="rogue\g_rogue_newweap.cpp" />
+    <ClCompile Include="rogue\g_rogue_phys.cpp" />
+    <ClCompile Include="rogue\g_rogue_spawn.cpp" />
+    <ClCompile Include="rogue\g_rogue_sphere.cpp" />
+    <ClCompile Include="rogue\g_rogue_utils.cpp" />
+    <ClCompile Include="rogue\m_rogue_carrier.cpp" />
+    <ClCompile Include="rogue\m_rogue_stalker.cpp" />
+    <ClCompile Include="rogue\m_rogue_turret.cpp" />
+    <ClCompile Include="rogue\m_rogue_widow.cpp" />
+    <ClCompile Include="rogue\m_rogue_widow2.cpp" />
+    <ClCompile Include="rogue\p_rogue_weapon.cpp" />
+    <ClCompile Include="rogue\rogue_dm_ball.cpp" />
+    <ClCompile Include="rogue\rogue_dm_tag.cpp" />
+    <ClCompile Include="xatrix\g_xatrix_func.cpp" />
+    <ClCompile Include="xatrix\g_xatrix_items.cpp" />
+    <ClCompile Include="xatrix\g_xatrix_misc.cpp" />
+    <ClCompile Include="xatrix\g_xatrix_monster.cpp" />
+    <ClCompile Include="xatrix\g_xatrix_target.cpp" />
+    <ClCompile Include="xatrix\g_xatrix_weapon.cpp" />
+    <ClCompile Include="xatrix\m_xatrix_fixbot.cpp" />
+    <ClCompile Include="xatrix\m_xatrix_gekk.cpp" />
+    <ClCompile Include="xatrix\p_xatrix_weapon.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="as\ctrack.hpp" />
+    <ClInclude Include="as\debugger\as_debugger.h" />
+    <ClInclude Include="as\debugger\as_debugger_imgui.h" />
+    <ClInclude Include="as\debugger\imconfig.h" />
+    <ClInclude Include="as\debugger\imgui.h" />
+    <ClInclude Include="as\debugger\imgui_impl_dx9.h" />
+    <ClInclude Include="as\debugger\imgui_impl_win32.h" />
+    <ClInclude Include="as\debugger\imgui_internal.h" />
+    <ClInclude Include="as\debugger\imstb_rectpack.h" />
+    <ClInclude Include="as\debugger\imstb_textedit.h" />
+    <ClInclude Include="as\debugger\imstb_truetype.h" />
+    <ClInclude Include="as\debugger\TextEditor.h" />
+    <ClInclude Include="as\palinteer.h" />
+    <ClInclude Include="as\q2as_cgame.h" />
+    <ClInclude Include="as\q2as_fixedarray.h" />
+    <ClInclude Include="as\q2as_game.h" />
+    <ClInclude Include="as\q2as_json.h" />
+    <ClInclude Include="as\q2as_local.h" />
+    <ClInclude Include="as\q2as_main.h" />
+    <ClInclude Include="as\q2as_modules.h" />
+    <ClInclude Include="as\q2as_pmove.h" />
+    <ClInclude Include="as\q2as_predefined.h" />
+    <ClInclude Include="as\q2as_reg.h" />
+    <ClInclude Include="as\q2as_stringex.h" />
+    <ClInclude Include="as\spall.h" />
+    <ClInclude Include="as\thirdparty\angelscript\include\angelscript.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_array.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_atomic.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_builder.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_bytecode.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_callfunc.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_compiler.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_config.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_configgroup.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_context.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_criticalsection.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_datatype.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_debug.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_gc.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_generic.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_map.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_memory.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_module.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_namespace.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_objecttype.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_outputbuffer.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_parser.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_property.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_restore.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptcode.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptengine.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptfunction.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptnode.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptobject.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_string.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_string_util.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_symboltable.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_texts.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_thread.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_tokendef.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_tokenizer.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_typeinfo.h" />
+    <ClInclude Include="as\thirdparty\angelscript\source\as_variablescope.h" />
+    <ClInclude Include="as\thirdparty\datetime\datetime.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\args.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\base.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\chrono.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\color.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\compile.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\core.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\format-inl.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\format.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\os.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\ostream.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\printf.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\ranges.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\std.h" />
+    <ClInclude Include="as\thirdparty\fmt\include\fmt\xchar.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\allocator.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\assertions.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\config.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\forwards.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\json.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\json_features.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\reader.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\value.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\version.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\include\json\writer.h" />
+    <ClInclude Include="as\thirdparty\jsoncpp\src\lib_json\json_tool.h" />
+    <ClInclude Include="as\thirdparty\scriptany\scriptany.h" />
+    <ClInclude Include="as\thirdparty\scriptarray\scriptarray.h" />
+    <ClInclude Include="as\thirdparty\scriptdictionary\scriptdictionary.h" />
+    <ClInclude Include="as\thirdparty\scripthelper\scripthelper.h" />
+    <ClInclude Include="as\thirdparty\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="as\thirdparty\weakref\weakref.h" />
+    <ClInclude Include="as\yyjson.h" />
+    <ClInclude Include="bg_local.h" />
+    <ClInclude Include="bots\bot_debug.h" />
+    <ClInclude Include="bots\bot_exports.h" />
+    <ClInclude Include="bots\bot_includes.h" />
+    <ClInclude Include="bots\bot_think.h" />
+    <ClInclude Include="bots\bot_utils.h" />
+    <ClInclude Include="cg_local.h" />
+    <ClInclude Include="ctf\g_ctf.h" />
+    <ClInclude Include="ctf\p_ctf_menu.h" />
+    <ClInclude Include="game.h" />
+    <ClInclude Include="g_local.h" />
+    <ClInclude Include="g_statusbar.h" />
+    <ClInclude Include="m_actor.h" />
+    <ClInclude Include="m_arachnid.h" />
+    <ClInclude Include="m_berserk.h" />
+    <ClInclude Include="m_boss2.h" />
+    <ClInclude Include="m_boss31.h" />
+    <ClInclude Include="m_boss32.h" />
+    <ClInclude Include="m_brain.h" />
+    <ClInclude Include="m_chick.h" />
+    <ClInclude Include="m_flash.h" />
+    <ClInclude Include="m_flipper.h" />
+    <ClInclude Include="m_float.h" />
+    <ClInclude Include="m_flyer.h" />
+    <ClInclude Include="m_gladiator.h" />
+    <ClInclude Include="m_guardian.h" />
+    <ClInclude Include="m_gunner.h" />
+    <ClInclude Include="m_hover.h" />
+    <ClInclude Include="m_infantry.h" />
+    <ClInclude Include="m_insane.h" />
+    <ClInclude Include="m_medic.h" />
+    <ClInclude Include="m_mutant.h" />
+    <ClInclude Include="m_parasite.h" />
+    <ClInclude Include="m_player.h" />
+    <ClInclude Include="m_rider.h" />
+    <ClInclude Include="m_shambler.h" />
+    <ClInclude Include="m_soldier.h" />
+    <ClInclude Include="m_supertank.h" />
+    <ClInclude Include="m_tank.h" />
+    <ClInclude Include="q_std.h" />
+    <ClInclude Include="q_vec3.h" />
+    <ClInclude Include="rogue\m_rogue_carrier.h" />
+    <ClInclude Include="rogue\m_rogue_stalker.h" />
+    <ClInclude Include="rogue\m_rogue_turret.h" />
+    <ClInclude Include="rogue\m_rogue_widow.h" />
+    <ClInclude Include="rogue\m_rogue_widow2.h" />
+    <ClInclude Include="xatrix\m_xatrix_fixbot.h" />
+    <ClInclude Include="xatrix\m_xatrix_gekk.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="as\thirdparty\jsoncpp\src\lib_json\json_valueiterator.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="as\thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>

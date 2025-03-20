@@ -74,7 +74,7 @@ string CDebugger::ToString(void *value, asUINT typeId, int expandMembers, asIScr
 			asITypeInfo *t = engine->GetTypeInfoById(typeId);
 			for( int n = t->GetEnumValueCount(); n-- > 0; )
 			{
-				int enumVal;
+				asINT64 enumVal;
 				const char *enumName = t->GetEnumValueByIndex(n, &enumVal);
 				if( enumVal == *(int*)value )
 				{
