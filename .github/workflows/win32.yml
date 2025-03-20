@@ -1,10 +1,6 @@
 name: Win32 Build
 
-on:
-  push:
-    branches:
-      - main
-      - x64-build
+on: push
 
 jobs:
   build:
