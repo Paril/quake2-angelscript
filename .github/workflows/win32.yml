@@ -27,7 +27,9 @@ jobs:
 
     - name: Copy scripts to build folder
       continue-on-error: true
-      run: robocopy ./as/scripts ./build/scripts /E; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+      run: |
+        robocopy ./as/scripts ./build/scripts /E; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+        Compress-Archive -Path build/* -Destination x64Build.zip
 
     # - name: Archive build output
     #   uses: actions/upload-artifact@v4
@@ -39,9 +41,7 @@ jobs:
       uses: ncipollo/release-action@v1
       id: create_release
       with:
-        tag_name: ${{ github.ref }}
         name: nightly-release-${{ github.event.repository.updated_at}}
-        artifacts: "*.zip"
         draft: true
 
     - name: upload windows artifact
