@@ -40,5 +40,5 @@ jobs:
       with:
         tag: nightly-${{ github.event.repository.updated_at}}
         name: nightly-release-${{ github.event.repository.updated_at}}
-        artifacts: "x64ReleaseBuild*"
+        artifacts: "x64ReleaseBuild.zip"
         draft: true
