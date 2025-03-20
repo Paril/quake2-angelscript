@@ -34,24 +34,3 @@ jobs:
         name: nightly-release-${{ github.event.repository.updated_at}}
         draft: true
         files: x64Build.zip
-
-    # - name: Archive build output
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: x64ReleaseBuild
-    #     path: build
-
-    # - name: Create release
-    #   uses: ncipollo/release-action@v1
-    #   id: create_release
-    #   with:
-    #     name: nightly-release-${{ github.event.repository.updated_at}}
-    #     draft: true
-
-    # - name: upload windows artifact
-    #   uses: actions/upload-release-asset@v1
-    #   with:
-    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-    #     asset_path: ./build
-    #     asset_name: x64Build.zip
-    #     asset_content_type: application/zip
