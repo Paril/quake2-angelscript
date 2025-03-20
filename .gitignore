@@ -4,8 +4,6 @@ out
 bin
 
 vcpkg.json
-game.sln
-game.vcxproj
 game.vcxproj.filters
 ..build
 
@@ -14,3 +12,12 @@ game.vcxproj.filters
 *.bak
 *.zip
 *.dll
+
+*.obj
+*.tlog
+*.log
+*.recipe
+*.pdb
+*.exp
+
+x64

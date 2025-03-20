@@ -4,6 +4,7 @@
 #include "../q_std.h"
 #include "angelscript.h"
 #include <map>
+#include <memory>
 
 // auto-destruct wrapper for an execution context
 struct q2as_ctx_t
