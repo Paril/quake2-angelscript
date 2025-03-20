@@ -24,3 +24,9 @@ jobs:
     
     - name: Build app for release
       run: msbuild game.sln -t:rebuild -verbosity:diag -property:Configuration=Release
+
+    - name: Archive build output
+      uses: actions/upload-artifact@v4
+      with:
+        name: build output
+        path: build
