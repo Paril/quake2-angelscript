@@ -1,0 +1,25 @@
+name: Win32 Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
+    
+    - name: Build app for release
+      run: msbuild game.sln -t:rebuild -verbosity:diag -property:Configuration=Release
