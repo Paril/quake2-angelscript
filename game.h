@@ -8,7 +8,7 @@
 #include <limits.h>
 
 // compatibility with legacy float[3] stuff for engine
-#ifdef GAME_INCLUDE
+#ifndef GAME_INCLUDE
     using gvec3_t = vec3_t;
     using gvec3_ptr_t = vec3_t *;
     using gvec3_cptr_t = const vec3_t *;
@@ -406,8 +406,8 @@ struct pmove_state_t
 {
 	pmtype_t pm_type;
 
-	vec3_t                 origin;
-	vec3_t                 velocity;
+	//vec3_t                 origin;
+	//vec3_t                 velocity;
 	pmflags_t			   pm_flags; // ducked, jump_held, etc
 	uint16_t			   pm_time;
 	int16_t				   gravity;
@@ -504,7 +504,7 @@ struct pmove_t
     contents_t (*pointcontents)(gvec3_cref_t point);
 
     // [KEX] variables (in)
-    vec3_t viewoffset; // last viewoffset (for accurate calculation of blending)
+    //vec3_t viewoffset; // last viewoffset (for accurate calculation of blending)
 
     // [KEX] results (out)
     gvec4_t screen_blend;
@@ -1811,8 +1811,8 @@ struct edict_shared_t
 	int32_t  areanum, areanum2;
 
 	svflags_t  svflags;
-	vec3_t	   mins, maxs;
-	vec3_t	   absmin, absmax, size;
+	//vec3_t	   mins, maxs;
+	//vec3_t	   absmin, absmax, size;
 	solid_t	   solid;
 	contents_t clipmask;
 	edict_t	   *owner;
@@ -2047,7 +2047,7 @@ struct shadow_light_data_t
 	float		fade_end;
 	int			lightstyle = -1;
 	float		coneangle = 45;
-    vec3_t      conedirection;
+    //vec3_t      conedirection;
 };
 
 enum server_flags_t

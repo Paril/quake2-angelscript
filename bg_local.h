@@ -4,7 +4,7 @@
 // g_local.h -- local definitions for game module
 #pragma once
 
-#include "q_std.h"
+//#include "q_std.h"
 
 // define GAME_INCLUDE so that game.h does not define the
 // short, server-visible gclient_t and edict_t structures,

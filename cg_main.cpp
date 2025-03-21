@@ -2,7 +2,6 @@
 // Licensed under the GNU General Public License 2.0.
 
 #include "cg_local.h"
-#include "m_flash.h"
 #include "as/q2as_main.h"
 
 cgame_import_t cgi;
@@ -78,13 +77,13 @@ void CG_ClearNotify(int32_t isplit);
 void CG_ClearCenterprint(int32_t isplit);
 void CG_NotifyMessage(int32_t isplit, const char *msg, bool is_chat);
 
-void CG_GetMonsterFlashOffset(monster_muzzleflash_id_t id, gvec3_ref_t offset)
-{
-	if (id >= q_countof(monster_flash_offset))
-		cgi.Com_Error("Bad muzzle flash offset");
-
-	offset = monster_flash_offset[id];
-}
+//void CG_GetMonsterFlashOffset(monster_muzzleflash_id_t id, gvec3_ref_t offset)
+//{
+//	if (id >= q_countof(monster_flash_offset))
+//		cgi.Com_Error("Bad muzzle flash offset");
+//
+//	offset = monster_flash_offset[id];
+//}
 
 /*
 =================

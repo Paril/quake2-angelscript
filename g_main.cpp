@@ -5,7 +5,7 @@
 #include "as/q2as_main.h"
 
 CHECK_GCLIENT_INTEGRITY;
-CHECK_EDICT_INTEGRITY;
+//CHECK_EDICT_INTEGRITY;
 
 std::mt19937 mt_rand;
 
@@ -173,7 +173,7 @@ is loaded.
 void PreInitGame()
 {
 	developer = gi.cvar("developer", "0", CVAR_NOFLAGS);
-	maxclients = gi.cvar("maxclients", G_Fmt("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
+	//maxclients = gi.cvar("maxclients", G_Fmt("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 	deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
 	coop = gi.cvar("coop", "0", CVAR_LATCH);
 	//teamplay = gi.cvar("teamplay", "0", CVAR_LATCH);
@@ -284,7 +284,7 @@ void InitGame()
 
 	maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
 	skill = gi.cvar("skill", "1", CVAR_LATCH);
-	maxentities = gi.cvar("maxentities", G_Fmt("{}", MAX_EDICTS).data(), CVAR_LATCH);
+	//maxentities = gi.cvar("maxentities", G_Fmt("{}", MAX_EDICTS).data(), CVAR_LATCH);
 	gamerules = gi.cvar("gamerules", "0", CVAR_LATCH); // PGM
 
 	// change anytime vars
@@ -383,7 +383,7 @@ void InitGame()
 	
 	// how far back we should support lag origins for
 	game.max_lag_origins = 20 * (0.1f / gi.frame_time_s);
-	game.lag_origins = (vec3_t *) gi.TagMalloc(game.maxclients * sizeof(vec3_t) * game.max_lag_origins, TAG_GAME);
+	//game.lag_origins = (vec3_t *) gi.TagMalloc(game.maxclients * sizeof(vec3_t) * game.max_lag_origins, TAG_GAME);
 }
 
 //===================================================================
@@ -462,7 +462,7 @@ edict_t *CreateTargetChangeLevel(const char *map)
 
 	ent = G_Spawn();
 	ent->classname = "target_changelevel";
-	Q_strlcpy(level.nextmap, map, sizeof(level.nextmap));
+	//Q_strlcpy(level.nextmap, map, sizeof(level.nextmap));
 	ent->map = level.nextmap;
 	return ent;
 }
@@ -514,61 +514,61 @@ void EndDMLevel()
 
 		while (1)
 		{
-			map = COM_ParseEx(&str, " ");
+			//map = COM_ParseEx(&str, " ");
 
 			if (!*map)
 				break;
 
-			if (Q_strcasecmp(map, level.mapname) == 0)
-			{
-				// it's in the list, go to the next one
-				map = COM_ParseEx(&str, " ");
-				if (!*map)
-				{
-					// end of list, go to first one
-					if (!first_map[0]) // there isn't a first one, same level
-					{
-						BeginIntermission(CreateTargetChangeLevel(level.mapname));
-						return;
-					}
-					else
-					{
-						// [Paril-KEX] re-shuffle if necessary
-						if (g_map_list_shuffle->integer)
-						{
-							auto values = str_split(g_map_list->string, ' ');
+			//if (Q_strcasecmp(map, level.mapname) == 0)
+			//{
+			//	// it's in the list, go to the next one
+			//	map = COM_ParseEx(&str, " ");
+			//	if (!*map)
+			//	{
+			//		// end of list, go to first one
+			//		if (!first_map[0]) // there isn't a first one, same level
+			//		{
+			//			BeginIntermission(CreateTargetChangeLevel(level.mapname));
+			//			return;
+			//		}
+			//		else
+			//		{
+			//			// [Paril-KEX] re-shuffle if necessary
+			//			if (g_map_list_shuffle->integer)
+			//			{
+			//				auto values = str_split(g_map_list->string, ' ');
 
-							if (values.size() == 1)
-							{
-								// meh
-								BeginIntermission(CreateTargetChangeLevel(level.mapname));
-								return;
-							}
+			//				if (values.size() == 1)
+			//				{
+			//					// meh
+			//					BeginIntermission(CreateTargetChangeLevel(level.mapname));
+			//					return;
+			//				}
 
-							std::shuffle(values.begin(), values.end(), mt_rand);
+			//				std::shuffle(values.begin(), values.end(), mt_rand);
 
-							// if the current map is the map at the front, push it to the end
-							if (values[0] == level.mapname)
-								std::swap(values[0], values[values.size() - 1]);
+			//				// if the current map is the map at the front, push it to the end
+			//				if (values[0] == level.mapname)
+			//					std::swap(values[0], values[values.size() - 1]);
 
-							gi.cvar_forceset("g_map_list", fmt::format("{}", join_strings(values, " ")).data());
+			//				gi.cvar_forceset("g_map_list", fmt::format("{}", join_strings(values, " ")).data());
 
-							BeginIntermission(CreateTargetChangeLevel(values[0].c_str()));
-							return;
-						}
+			//				BeginIntermission(CreateTargetChangeLevel(values[0].c_str()));
+			//				return;
+			//			}
 
-						BeginIntermission(CreateTargetChangeLevel(first_map));
-						return;
-					}
-				}
-				else
-				{
-					BeginIntermission(CreateTargetChangeLevel(map));
-					return;
-				}
-			}
-			if (!first_map[0])
-				Q_strlcpy(first_map, map, sizeof(first_map));
+			//			BeginIntermission(CreateTargetChangeLevel(first_map));
+			//			return;
+			//		}
+			//	}
+			//	else
+			//	{
+			//		BeginIntermission(CreateTargetChangeLevel(map));
+			//		return;
+			//	}
+			//}
+			//if (!first_map[0])
+			//	Q_strlcpy(first_map, map, sizeof(first_map));
 		}
 	}
 
@@ -607,12 +607,12 @@ void CheckNeedPass()
 	{
 		need = 0;
 
-		if (*password->string && Q_strcasecmp(password->string, "none"))
-			need |= 1;
-		if (*spectator_password->string && Q_strcasecmp(spectator_password->string, "none"))
-			need |= 2;
+		//if (*password->string && Q_strcasecmp(password->string, "none"))
+		//	need |= 1;
+		//if (*spectator_password->string && Q_strcasecmp(spectator_password->string, "none"))
+		//	need |= 2;
 
-		gi.cvar_set("needpass", G_Fmt("{}", need).data());
+		//gi.cvar_set("needpass", G_Fmt("{}", need).data());
 	}
 }
 
@@ -750,12 +750,12 @@ void ExitLevel()
 	// end game
 	size_t start_offset = (level.changemap[0] == '*' ? 1 : 0);
 
-    if (strlen(level.changemap) > (6 + start_offset) &&
-		!Q_strncasecmp(level.changemap + start_offset, "victor", 6) &&
-		!Q_strncasecmp(level.changemap + strlen(level.changemap) - 4, ".pcx", 4))
-		gi.AddCommandString(G_Fmt("endgame \"{}\"\n", level.changemap + start_offset).data());
-	else
-		gi.AddCommandString(G_Fmt("gamemap \"{}\"\n", level.changemap).data());
+ //   if (strlen(level.changemap) > (6 + start_offset) &&
+	//	!Q_strncasecmp(level.changemap + start_offset, "victor", 6) &&
+	//	!Q_strncasecmp(level.changemap + strlen(level.changemap) - 4, ".pcx", 4))
+	//	gi.AddCommandString(G_Fmt("endgame \"{}\"\n", level.changemap + start_offset).data());
+	//else
+	//	gi.AddCommandString(G_Fmt("gamemap \"{}\"\n", level.changemap).data());
 
 	level.changemap = nullptr;
 }
@@ -766,7 +766,7 @@ static void G_CheckCvars()
 	{
 		// [Paril-KEX] air accel handled by game DLL now, and allow
 		// it to be changed in sp/coop
-		gi.configstring(CS_AIRACCEL, G_Fmt("{}", sv_airaccelerate->integer).data());
+		//gi.configstring(CS_AIRACCEL, G_Fmt("{}", sv_airaccelerate->integer).data());
 		pm_config.airaccel = sv_airaccelerate->integer;
 	}
 
@@ -796,22 +796,22 @@ inline void G_RunFrame_(bool main_loop)
 
 	//Bot_UpdateDebug();
 
-	level.time += FRAME_TIME_MS;
+	//level.time += FRAME_TIME_MS;
 
-	if (level.intermission_fading)
-	{
-		if (level.intermission_fade_time > level.time)
-		{
-			float alpha = clamp(1.0f - (level.intermission_fade_time - level.time - 300_ms).seconds(), 0.f, 1.f);
+	//if (level.intermission_fading)
+	//{
+	//	if (level.intermission_fade_time > level.time)
+	//	{
+	//		//float alpha = clamp(1.0f - (level.intermission_fade_time - level.time - 300_ms).seconds(), 0.f, 1.f);
 
-			for (auto player : active_players())
-				player->client->ps.screen_blend = { 0, 0, 0, alpha };
-		}
-		else
-		{
-			level.intermission_fade = level.intermission_fading = false;
-			ExitLevel();
-		}
+	//		//for (auto player : active_players())
+	//		//	player->client->ps.screen_blend = { 0, 0, 0, alpha };
+	//	}
+	//	else
+	//	{
+	//		level.intermission_fade = level.intermission_fading = false;
+	//		ExitLevel();
+	//	}
 
 		return;
 	}
@@ -876,8 +876,8 @@ inline void G_RunFrame_(bool main_loop)
 		level.current_entity = ent;
 
 		// Paril: RF_BEAM entities update their old_origin by hand.
-		if (!(ent->s.renderfx & RF_BEAM))
-			ent->s.old_origin = ent->s.origin;
+		//if (!(ent->s.renderfx & RF_BEAM))
+		//	ent->s.old_origin = ent->s.origin;
 
 		// if the ground entity moved, make sure we are still on it
 		if ((ent->groundentity) && (ent->groundentity->linkcount != ent->groundentity_linkcount))
