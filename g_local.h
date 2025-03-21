@@ -7,7 +7,7 @@
 #include "bg_local.h"
 
 // the "gameversion" client command will print this plus compile date
-constexpr const char *GAMEVERSION = "baseq2";
+constexpr const char* GAMEVERSION = "baseq2";
 
 //==================================================================
 
@@ -25,14 +25,14 @@ constexpr bool is_valid_loc_embed_v = !std::is_null_pointer_v<T> && (std::is_flo
 struct local_game_import_t : game_import_t
 {
 	inline local_game_import_t() = default;
-	inline local_game_import_t(const game_import_t &imports) :
+	inline local_game_import_t(const game_import_t& imports) :
 		game_import_t(imports)
 	{
 	}
 
 private:
 	// shared buffer for wrappers below
-    static char print_buffer[0x10000];
+	static char print_buffer[0x10000];
 
 public:
 #ifdef USE_CPP20_FORMAT
@@ -42,13 +42,13 @@ public:
 #define Com_PrintFmt(str, ...) \
 	Com_PrintFmt_(FMT_STRING(str), __VA_ARGS__)
 
-    template<typename S, typename... Args>
-    inline void Com_PrintFmt_(const S &format_str, Args &&... args)
+	template<typename S, typename... Args>
+	inline void Com_PrintFmt_(const S& format_str, Args &&... args)
 #endif
-    {
+	{
 		G_FmtTo_(print_buffer, format_str, std::forward<Args>(args)...);
- 		Com_Print(print_buffer);
-    }
+		Com_Print(print_buffer);
+	}
 
 #ifdef USE_CPP20_FORMAT
 	template<typename... Args>
@@ -57,13 +57,13 @@ public:
 #define Com_ErrorFmt(str, ...) \
 	Com_ErrorFmt_(FMT_STRING(str), __VA_ARGS__)
 
-    template<typename S, typename... Args>
-    inline void Com_ErrorFmt_(const S &format_str, Args &&... args)
+	template<typename S, typename... Args>
+	inline void Com_ErrorFmt_(const S& format_str, Args &&... args)
 #endif
-    {
+	{
 		G_FmtTo_(print_buffer, format_str, std::forward<Args>(args)...);
 		Com_Error(print_buffer);
-    }
+	}
 
 private:
 	// localized print functions
@@ -127,49 +127,49 @@ public:
 		Loc_Print(e, PRINT_CENTER, base, &buffer_ptrs.front(), sizeof...(args));
 	}
 
-    // collision detection
-    [[nodiscard]] inline trace_t trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const edict_t *passent, contents_t contentmask)
+	// collision detection
+	[[nodiscard]] inline trace_t trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const edict_t* passent, contents_t contentmask)
 	{
 		return game_import_t::trace(start, &mins, &maxs, end, passent, contentmask);
 	}
 
-    [[nodiscard]] inline trace_t traceline(const vec3_t &start, const vec3_t &end, const edict_t *passent, contents_t contentmask)
+	[[nodiscard]] inline trace_t traceline(const vec3_t& start, const vec3_t& end, const edict_t* passent, contents_t contentmask)
 	{
 		return game_import_t::trace(start, nullptr, nullptr, end, passent, contentmask);
 	}
 
 	// [Paril-KEX] clip the box against the specified entity
-    [[nodiscard]] inline trace_t clip(edict_t *entity, const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, contents_t contentmask)
+	[[nodiscard]] inline trace_t clip(edict_t* entity, const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, contents_t contentmask)
 	{
 		return game_import_t::clip(entity, start, &mins, &maxs, end, contentmask);
 	}
 
-    [[nodiscard]] inline trace_t clip(edict_t *entity, const vec3_t &start, const vec3_t &end, contents_t contentmask)
+	[[nodiscard]] inline trace_t clip(edict_t* entity, const vec3_t& start, const vec3_t& end, contents_t contentmask)
 	{
 		return game_import_t::clip(entity, start, nullptr, nullptr, end, contentmask);
 	}
 
-	void unicast(edict_t *ent, bool reliable, uint32_t dupe_key = 0)
+	void unicast(edict_t* ent, bool reliable, uint32_t dupe_key = 0)
 	{
 		game_import_t::unicast(ent, reliable, dupe_key);
 	}
 
-	void local_sound(edict_t *target, const vec3_t &origin, edict_t *ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
+	void local_sound(edict_t* target, const vec3_t& origin, edict_t* ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
 	{
 		game_import_t::local_sound(target, &origin, ent, channel, soundindex, volume, attenuation, timeofs, dupe_key);
 	}
 
-	void local_sound(edict_t *target, edict_t *ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
+	void local_sound(edict_t* target, edict_t* ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
 	{
 		game_import_t::local_sound(target, nullptr, ent, channel, soundindex, volume, attenuation, timeofs, dupe_key);
 	}
 
-	void local_sound(const vec3_t &origin, edict_t *ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
+	void local_sound(const vec3_t& origin, edict_t* ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
 	{
 		game_import_t::local_sound(ent, &origin, ent, channel, soundindex, volume, attenuation, timeofs, dupe_key);
 	}
 
-	void local_sound(edict_t *ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
+	void local_sound(edict_t* ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key = 0)
 	{
 		game_import_t::local_sound(ent, nullptr, ent, channel, soundindex, volume, attenuation, timeofs, dupe_key);
 	}
@@ -194,21 +194,21 @@ struct spawnflags_t
 	{
 		return value;
 	}
-	
+
 	// has any flags at all (!!a)
 	constexpr bool any() const { return !!value; }
 	// has any of the given flags (!!(a & b))
-	constexpr bool has(const spawnflags_t &flags) const { return !!(value & flags.value); }
+	constexpr bool has(const spawnflags_t& flags) const { return !!(value & flags.value); }
 	// has all of the given flags ((a & b) == b)
-	constexpr bool has_all(const spawnflags_t &flags) const { return (value & flags.value) == flags.value; }
+	constexpr bool has_all(const spawnflags_t& flags) const { return (value & flags.value) == flags.value; }
 	constexpr bool operator!() const { return !value; }
 
-	constexpr bool operator==(const spawnflags_t &flags) const
+	constexpr bool operator==(const spawnflags_t& flags) const
 	{
 		return value == flags.value;
 	}
 
-	constexpr bool operator!=(const spawnflags_t &flags) const
+	constexpr bool operator!=(const spawnflags_t& flags) const
 	{
 		return value != flags.value;
 	}
@@ -217,29 +217,29 @@ struct spawnflags_t
 	{
 		return spawnflags_t(~value);
 	}
-	constexpr spawnflags_t operator|(const spawnflags_t &v2) const
+	constexpr spawnflags_t operator|(const spawnflags_t& v2) const
 	{
 		return spawnflags_t(value | v2.value);
 	}
-	constexpr spawnflags_t operator&(const spawnflags_t &v2) const
+	constexpr spawnflags_t operator&(const spawnflags_t& v2) const
 	{
 		return spawnflags_t(value & v2.value);
 	}
-	constexpr spawnflags_t operator^(const spawnflags_t &v2) const
+	constexpr spawnflags_t operator^(const spawnflags_t& v2) const
 	{
 		return spawnflags_t(value ^ v2.value);
 	}
-	constexpr spawnflags_t &operator|=(const spawnflags_t &v2)
+	constexpr spawnflags_t& operator|=(const spawnflags_t& v2)
 	{
 		value |= v2.value;
 		return *this;
 	}
-	constexpr spawnflags_t &operator&=(const spawnflags_t &v2)
+	constexpr spawnflags_t& operator&=(const spawnflags_t& v2)
 	{
 		value &= v2.value;
 		return *this;
 	}
-	constexpr spawnflags_t &operator^=(const spawnflags_t &v2)
+	constexpr spawnflags_t& operator^=(const spawnflags_t& v2)
 	{
 		value ^= v2.value;
 		return *this;
@@ -250,16 +250,16 @@ struct spawnflags_t
 // because these 8 bits are instead used for power cube bits.
 constexpr spawnflags_t  SPAWNFLAG_NONE = spawnflags_t(0);
 constexpr spawnflags_t	SPAWNFLAG_NOT_EASY = spawnflags_t(0x00000100),
-						SPAWNFLAG_NOT_MEDIUM = spawnflags_t(0x00000200),
-						SPAWNFLAG_NOT_HARD = spawnflags_t(0x00000400),
-						SPAWNFLAG_NOT_DEATHMATCH = spawnflags_t(0x00000800),
-						SPAWNFLAG_NOT_COOP = spawnflags_t(0x00001000),
-						SPAWNFLAG_RESERVED1 = spawnflags_t(0x00002000),
-						SPAWNFLAG_COOP_ONLY = spawnflags_t(0x00004000),
-						SPAWNFLAG_RESERVED2 = spawnflags_t(0x00008000);
+SPAWNFLAG_NOT_MEDIUM = spawnflags_t(0x00000200),
+SPAWNFLAG_NOT_HARD = spawnflags_t(0x00000400),
+SPAWNFLAG_NOT_DEATHMATCH = spawnflags_t(0x00000800),
+SPAWNFLAG_NOT_COOP = spawnflags_t(0x00001000),
+SPAWNFLAG_RESERVED1 = spawnflags_t(0x00002000),
+SPAWNFLAG_COOP_ONLY = spawnflags_t(0x00004000),
+SPAWNFLAG_RESERVED2 = spawnflags_t(0x00008000);
 
 constexpr spawnflags_t SPAWNFLAG_EDITOR_MASK = (SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_DEATHMATCH |
-							SPAWNFLAG_NOT_COOP | SPAWNFLAG_RESERVED1 | SPAWNFLAG_COOP_ONLY | SPAWNFLAG_RESERVED2);
+	SPAWNFLAG_NOT_COOP | SPAWNFLAG_RESERVED1 | SPAWNFLAG_COOP_ONLY | SPAWNFLAG_RESERVED2);
 
 // use this for global spawnflags
 constexpr spawnflags_t operator "" _spawnflag(unsigned long long int v)
@@ -291,40 +291,40 @@ private:
 	int64_t _ms = 0;
 
 	// internal; use _sec/_ms/_min or gtime_t::from_sec(n)/gtime_t::from_ms(n)/gtime_t::from_min(n)
-	constexpr explicit gtime_t(const int64_t &ms) : _ms(ms)
+	constexpr explicit gtime_t(const int64_t& ms) : _ms(ms)
 	{
 	}
 
 public:
 	constexpr gtime_t() = default;
-	constexpr gtime_t(const gtime_t &) = default;
-	constexpr gtime_t &operator=(const gtime_t &) = default;
+	constexpr gtime_t(const gtime_t&) = default;
+	constexpr gtime_t& operator=(const gtime_t&) = default;
 
 	// constructors are here, explicitly named, so you always
 	// know what you're getting.
 
 	// new time from ms
-	static constexpr gtime_t from_ms(const int64_t &ms)
+	static constexpr gtime_t from_ms(const int64_t& ms)
 	{
 		return gtime_t(ms);
 	}
 
 	// new time from seconds
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	static constexpr gtime_t from_sec(const T &s)
+	static constexpr gtime_t from_sec(const T& s)
 	{
 		return gtime_t(static_cast<int64_t>(s * 1000));
 	}
 
 	// new time from minutes
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	static constexpr gtime_t from_min(const T &s)
+	static constexpr gtime_t from_min(const T& s)
 	{
 		return gtime_t(static_cast<int64_t>(s * 60000));
 	}
 
 	// new time from hz
-	static constexpr gtime_t from_hz(const uint64_t &hz)
+	static constexpr gtime_t from_hz(const uint64_t& hz)
 	{
 		return from_ms(static_cast<int64_t>((1.0 / hz) * 1000));
 	}
@@ -344,7 +344,7 @@ public:
 	}
 
 	// get value in milliseconds
-	constexpr const int64_t &milliseconds() const
+	constexpr const int64_t& milliseconds() const
 	{
 		return _ms;
 	}
@@ -367,67 +367,67 @@ public:
 	}
 
 	// operations with other times as input
-	constexpr gtime_t operator+(const gtime_t &r) const
+	constexpr gtime_t operator+(const gtime_t& r) const
 	{
 		return gtime_t(_ms + r._ms);
 	}
-	constexpr gtime_t operator-(const gtime_t &r) const
+	constexpr gtime_t operator-(const gtime_t& r) const
 	{
 		return gtime_t(_ms - r._ms);
 	}
-	constexpr gtime_t &operator+=(const gtime_t &r)
+	constexpr gtime_t& operator+=(const gtime_t& r)
 	{
 		return *this = *this + r;
 	}
-	constexpr gtime_t &operator-=(const gtime_t &r)
+	constexpr gtime_t& operator-=(const gtime_t& r)
 	{
 		return *this = *this - r;
 	}
 
 	// operations with scalars as input
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	constexpr gtime_t operator*(const T &r) const
+	constexpr gtime_t operator*(const T& r) const
 	{
 		return gtime_t::from_ms(static_cast<int64_t>(_ms * r));
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	constexpr gtime_t operator/(const T &r) const
+	constexpr gtime_t operator/(const T& r) const
 	{
 		return gtime_t::from_ms(static_cast<int64_t>(_ms / r));
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	constexpr gtime_t &operator*=(const T &r)
+	constexpr gtime_t& operator*=(const T& r)
 	{
 		return *this = *this * r;
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	constexpr gtime_t &operator/=(const T &r)
+	constexpr gtime_t& operator/=(const T& r)
 	{
 		return *this = *this / r;
 	}
 
 	// comparisons with gtime_ts
-	constexpr bool operator==(const gtime_t &time) const
+	constexpr bool operator==(const gtime_t& time) const
 	{
 		return _ms == time._ms;
 	}
-	constexpr bool operator!=(const gtime_t &time) const
+	constexpr bool operator!=(const gtime_t& time) const
 	{
 		return _ms != time._ms;
 	}
-	constexpr bool operator<(const gtime_t &time) const
+	constexpr bool operator<(const gtime_t& time) const
 	{
 		return _ms < time._ms;
 	}
-	constexpr bool operator>(const gtime_t &time) const
+	constexpr bool operator>(const gtime_t& time) const
 	{
 		return _ms > time._ms;
 	}
-	constexpr bool operator<=(const gtime_t &time) const
+	constexpr bool operator<=(const gtime_t& time) const
 	{
 		return _ms <= time._ms;
 	}
-	constexpr bool operator>=(const gtime_t &time) const
+	constexpr bool operator>=(const gtime_t& time) const
 	{
 		return _ms >= time._ms;
 	}
@@ -524,14 +524,14 @@ enum save_data_tag_t
 // in g_save.cpp.
 struct save_data_list_t
 {
-	const char			   *name; // name of savable object; persisted in the JSON file
+	const char* name; // name of savable object; persisted in the JSON file
 	save_data_tag_t			tag;
-	const void			   *ptr; // pointer to raw data
-	const save_data_list_t *next; // next in list
+	const void* ptr; // pointer to raw data
+	const save_data_list_t* next; // next in list
 
-	save_data_list_t(const char *name, save_data_tag_t tag, const void *ptr);
+	save_data_list_t(const char* name, save_data_tag_t tag, const void* ptr);
 
-	static const save_data_list_t *fetch(const void *link_ptr, save_data_tag_t tag);
+	static const save_data_list_t* fetch(const void* link_ptr, save_data_tag_t tag);
 };
 
 #include <functional>
@@ -542,13 +542,13 @@ struct save_data_list_t
 template<typename T, size_t Tag>
 struct save_data_t
 {
-	using value_type = typename std::conditional<std::is_pointer<T>::value &&
-												 std::is_function<typename std::remove_pointer<T>::type>::value,
-												 T,
-												 const T *>::type;
+	using value_type = typename std::conditional<std::is_pointer<T>::value&&
+		std::is_function<typename std::remove_pointer<T>::type>::value,
+		T,
+		const T*>::type;
 private:
 	value_type value;
-	const save_data_list_t *list;
+	const save_data_list_t* list;
 
 public:
 	constexpr save_data_t() :
@@ -562,7 +562,7 @@ public:
 	{
 	}
 
-	constexpr save_data_t(const save_data_list_t *list_in) :
+	constexpr save_data_t(const save_data_list_t* list_in) :
 		value(list_in->ptr),
 		list(list_in)
 	{
@@ -570,37 +570,37 @@ public:
 
 	inline save_data_t(value_type ptr_in) :
 		value(ptr_in),
-		list(ptr_in ? save_data_list_t::fetch(reinterpret_cast<const void *>(ptr_in), static_cast<save_data_tag_t>(Tag)) : nullptr)
+		list(ptr_in ? save_data_list_t::fetch(reinterpret_cast<const void*>(ptr_in), static_cast<save_data_tag_t>(Tag)) : nullptr)
 	{
 	}
 
-	inline save_data_t(const save_data_t<T, Tag> &ref_in) :
+	inline save_data_t(const save_data_t<T, Tag>& ref_in) :
 		save_data_t(ref_in.value)
 	{
 	}
 
-	inline save_data_t &operator=(value_type ptr_in)
+	inline save_data_t& operator=(value_type ptr_in)
 	{
 		if (value != ptr_in)
 		{
 			value = ptr_in;
-			list = value ? save_data_list_t::fetch(reinterpret_cast<const void *>(ptr_in), static_cast<save_data_tag_t>(Tag)) : nullptr;
+			list = value ? save_data_list_t::fetch(reinterpret_cast<const void*>(ptr_in), static_cast<save_data_tag_t>(Tag)) : nullptr;
 		}
 
 		return *this;
 	}
-	
+
 	constexpr const value_type pointer() const { return value; }
-	constexpr const save_data_list_t *save_list() const { return list; }
-	constexpr const char *name() const { return value ? list->name : "null"; }
+	constexpr const save_data_list_t* save_list() const { return list; }
+	constexpr const char* name() const { return value ? list->name : "null"; }
 	constexpr const value_type operator->() const { return value; }
 	constexpr explicit operator bool() const { return value; }
 	constexpr bool operator==(value_type ptr_in) const { return value == ptr_in; }
 	constexpr bool operator!=(value_type ptr_in) const { return value != ptr_in; }
-	constexpr bool operator==(const save_data_t<T, Tag> *ptr_in) const { return value == ptr_in->value; }
-	constexpr bool operator==(const save_data_t<T, Tag> &ref_in) const { return value == ref_in.value; }
-	constexpr bool operator!=(const save_data_t<T, Tag> *ptr_in) const { return value != ptr_in->value; }
-	constexpr bool operator!=(const save_data_t<T, Tag> &ref_in) const { return value != ref_in.value; }
+	constexpr bool operator==(const save_data_t<T, Tag>* ptr_in) const { return value == ptr_in->value; }
+	constexpr bool operator==(const save_data_t<T, Tag>& ref_in) const { return value == ref_in.value; }
+	constexpr bool operator!=(const save_data_t<T, Tag>* ptr_in) const { return value != ptr_in->value; }
+	constexpr bool operator!=(const save_data_t<T, Tag>& ref_in) const { return value != ref_in.value; }
 
 	// invoke wrapper, for function-likes
 	template<typename... Args>
@@ -623,7 +623,7 @@ constexpr float MELEE_DISTANCE = 50;
 constexpr size_t BODY_QUEUE_SIZE = 8;
 
 // null trace used when touches don't need a trace
-constexpr trace_t null_trace {};
+constexpr trace_t null_trace{};
 
 enum weaponstate_t
 {
@@ -636,13 +636,13 @@ enum weaponstate_t
 // gib flags
 enum gib_type_t
 {
-	GIB_NONE =      0, // no flags (organic)
-	GIB_METALLIC =  1, // bouncier
-	GIB_ACID =		2, // acidic (gekk)
-	GIB_HEAD =		4, // head gib; the input entity will transform into this
-	GIB_DEBRIS =	8, // explode outwards rather than in velocity, no blood
-	GIB_SKINNED =	16, // use skinnum
-	GIB_UPRIGHT =   32, // stay upright on ground
+	GIB_NONE = 0, // no flags (organic)
+	GIB_METALLIC = 1, // bouncier
+	GIB_ACID = 2, // acidic (gekk)
+	GIB_HEAD = 4, // head gib; the input entity will transform into this
+	GIB_DEBRIS = 8, // explode outwards rather than in velocity, no blood
+	GIB_SKINNED = 16, // use skinnum
+	GIB_UPRIGHT = 32, // stay upright on ground
 };
 MAKE_ENUM_BITFLAGS(gib_type_t);
 
@@ -679,8 +679,8 @@ enum monster_ai_flags_t : uint64_t
 	AI_SPAWNED_COMMANDER = bit_v<22>, // both do_not_count and spawned are set for spawned monsters
 	AI_SPAWNED_NEEDS_GIB = bit_v<23>, // only return commander slots when gibbed
 	AI_BLOCKED = bit_v<25>, // used by blocked_checkattack: set to say I'm attacking while blocked
-							// (prevents run-attacks)
-							// ROGUE
+	// (prevents run-attacks)
+	// ROGUE
 	AI_SPAWNED_ALIVE = bit_v<26>, // [Paril-KEX] for spawning dead
 	AI_SPAWNED_DEAD = bit_v<27>,
 	AI_HIGH_TICK_RATE = bit_v<28>, // not limited by 10hz actions
@@ -775,78 +775,78 @@ enum movetype_t {
 
 // edict->flags
 enum ent_flags_t : uint64_t {
-	FL_NONE                 = 0, // no flags
-	FL_FLY                  = bit_v<0>,
-	FL_SWIM                 = bit_v<1>, // implied immunity to drowning
-	FL_IMMUNE_LASER         = bit_v<2>,
-	FL_INWATER              = bit_v<3>,
-	FL_GODMODE              = bit_v<4>,
-	FL_NOTARGET             = bit_v<5>,
-	FL_IMMUNE_SLIME         = bit_v<6>,
-	FL_IMMUNE_LAVA          = bit_v<7>,
-	FL_PARTIALGROUND        = bit_v<8>, // not all corners are valid
-	FL_WATERJUMP            = bit_v<9>, // player jumping out of water
-	FL_TEAMSLAVE            = bit_v<10>, // not the first on the team
-	FL_NO_KNOCKBACK         = bit_v<11>,
-	FL_POWER_ARMOR          = bit_v<12>, // power armor (if any) is active
+	FL_NONE = 0, // no flags
+	FL_FLY = bit_v<0>,
+	FL_SWIM = bit_v<1>, // implied immunity to drowning
+	FL_IMMUNE_LASER = bit_v<2>,
+	FL_INWATER = bit_v<3>,
+	FL_GODMODE = bit_v<4>,
+	FL_NOTARGET = bit_v<5>,
+	FL_IMMUNE_SLIME = bit_v<6>,
+	FL_IMMUNE_LAVA = bit_v<7>,
+	FL_PARTIALGROUND = bit_v<8>, // not all corners are valid
+	FL_WATERJUMP = bit_v<9>, // player jumping out of water
+	FL_TEAMSLAVE = bit_v<10>, // not the first on the team
+	FL_NO_KNOCKBACK = bit_v<11>,
+	FL_POWER_ARMOR = bit_v<12>, // power armor (if any) is active
 
 	// ROGUE
-	FL_MECHANICAL           = bit_v<13>, // entity is mechanical, use sparks not blood
-	FL_SAM_RAIMI            = bit_v<14>, // entity is in sam raimi cam mode
-	FL_DISGUISED            = bit_v<15>, // entity is in disguise, monsters will not recognize.
-	FL_NOGIB                = bit_v<16>, // player has been vaporized by a nuke, drop no gibs
-	FL_DAMAGEABLE           = bit_v<17>,
-	FL_STATIONARY           = bit_v<18>,
+	FL_MECHANICAL = bit_v<13>, // entity is mechanical, use sparks not blood
+	FL_SAM_RAIMI = bit_v<14>, // entity is in sam raimi cam mode
+	FL_DISGUISED = bit_v<15>, // entity is in disguise, monsters will not recognize.
+	FL_NOGIB = bit_v<16>, // player has been vaporized by a nuke, drop no gibs
+	FL_DAMAGEABLE = bit_v<17>,
+	FL_STATIONARY = bit_v<18>,
 	// ROGUE
 
 	FL_ALIVE_KNOCKBACK_ONLY = bit_v<19>, // only apply knockback if alive or on same frame as death
-	FL_NO_DAMAGE_EFFECTS    = bit_v<20>,
+	FL_NO_DAMAGE_EFFECTS = bit_v<20>,
 
 	// [Paril-KEX] gets scaled by coop health scaling
-	FL_COOP_HEALTH_SCALE    = bit_v<21>,
-	FL_FLASHLIGHT			= bit_v<22>, // enable flashlight
-	FL_KILL_VELOCITY		= bit_v<23>, // for berserker slam
-	FL_NOVISIBLE            = bit_v<24>, // super invisibility
-	FL_DODGE				= bit_v<25>, // monster should try to dodge this
-	FL_TEAMMASTER			= bit_v<26>, // is a team master (only here so that entities abusing teammaster/teamchain for stuff don't break)
-	FL_LOCKED				= bit_v<27>, // entity is locked for the purposes of navigation
-	FL_ALWAYS_TOUCH         = bit_v<28>, // always touch, even if we normally wouldn't
-	FL_NO_STANDING			= bit_v<29>, // don't allow "standing" on non-brush entities
-	FL_WANTS_POWER_ARMOR    = bit_v<30>, // for players, auto-shield
+	FL_COOP_HEALTH_SCALE = bit_v<21>,
+	FL_FLASHLIGHT = bit_v<22>, // enable flashlight
+	FL_KILL_VELOCITY = bit_v<23>, // for berserker slam
+	FL_NOVISIBLE = bit_v<24>, // super invisibility
+	FL_DODGE = bit_v<25>, // monster should try to dodge this
+	FL_TEAMMASTER = bit_v<26>, // is a team master (only here so that entities abusing teammaster/teamchain for stuff don't break)
+	FL_LOCKED = bit_v<27>, // entity is locked for the purposes of navigation
+	FL_ALWAYS_TOUCH = bit_v<28>, // always touch, even if we normally wouldn't
+	FL_NO_STANDING = bit_v<29>, // don't allow "standing" on non-brush entities
+	FL_WANTS_POWER_ARMOR = bit_v<30>, // for players, auto-shield
 
-    FL_RESPAWN              = bit_v<31>, // used for item respawning
-	FL_TRAP					= bit_v<32>, // entity is a trap of some kind
-	FL_TRAP_LASER_FIELD		= bit_v<33>, // enough of a special case to get it's own flag...
-	FL_IMMORTAL             = bit_v<34>  // never go below 1hp
+	FL_RESPAWN = bit_v<31>, // used for item respawning
+	FL_TRAP = bit_v<32>, // entity is a trap of some kind
+	FL_TRAP_LASER_FIELD = bit_v<33>, // enough of a special case to get it's own flag...
+	FL_IMMORTAL = bit_v<34>  // never go below 1hp
 };
-MAKE_ENUM_BITFLAGS( ent_flags_t );
+MAKE_ENUM_BITFLAGS(ent_flags_t);
 
 // gitem_t->flags
 enum item_flags_t : uint32_t
 {
-	IF_NONE			= 0,
-	IF_WEAPON		= bit_v<0>, // use makes active weapon
-	IF_AMMO			= bit_v<1>,
-	IF_ARMOR		= bit_v<2>,
-	IF_STAY_COOP	= bit_v<3>,
-	IF_KEY			= bit_v<4>,
-	IF_POWERUP		= bit_v<5>,
+	IF_NONE = 0,
+	IF_WEAPON = bit_v<0>, // use makes active weapon
+	IF_AMMO = bit_v<1>,
+	IF_ARMOR = bit_v<2>,
+	IF_STAY_COOP = bit_v<3>,
+	IF_KEY = bit_v<4>,
+	IF_POWERUP = bit_v<5>,
 	// ROGUE
 	IF_NOT_GIVEABLE = bit_v<6>, // item can not be given
 	// ROGUE
-	IF_HEALTH		= bit_v<7>,
+	IF_HEALTH = bit_v<7>,
 	// ZOID
-	IF_TECH			= bit_v<8>,
-	IF_NO_HASTE		= bit_v<9>,
+	IF_TECH = bit_v<8>,
+	IF_NO_HASTE = bit_v<9>,
 	// ZOID
 
 	IF_NO_INFINITE_AMMO = bit_v<10>, // [Paril-KEX] don't allow infinite ammo to affect
-	IF_POWERUP_WHEEL    = bit_v<11>, // [Paril-KEX] item should be in powerup wheel
-	IF_POWERUP_ONOFF    = bit_v<12>, // [Paril-KEX] for wheel; can't store more than one, show on/off state
+	IF_POWERUP_WHEEL = bit_v<11>, // [Paril-KEX] item should be in powerup wheel
+	IF_POWERUP_ONOFF = bit_v<12>, // [Paril-KEX] for wheel; can't store more than one, show on/off state
 
 	IF_NOT_RANDOM = bit_v<13>, // [Paril-KEX] item never shows up in randomizations
 
-	IF_ANY			= 0xFFFFFFFF
+	IF_ANY = 0xFFFFFFFF
 };
 
 MAKE_ENUM_BITFLAGS(item_flags_t);
@@ -954,7 +954,7 @@ enum item_id_t : int32_t {
 	IT_TECH_STRENGTH,
 	IT_TECH_HASTE,
 	IT_TECH_REGENERATION,
-	
+
 	IT_ITEM_FLASHLIGHT,
 	IT_ITEM_COMPASS,
 
@@ -964,40 +964,40 @@ enum item_id_t : int32_t {
 struct gitem_t
 {
 	item_id_t	id;		   // matches item list index
-	const char *classname; // spawning name
-	bool (*pickup)(edict_t *ent, edict_t *other);
-	void (*use)(edict_t *ent, gitem_t *item);
-	void (*drop)(edict_t *ent, gitem_t *item);
-	void (*weaponthink)(edict_t *ent);
-	const char *pickup_sound;
-	const char *world_model;
+	const char* classname; // spawning name
+	bool (*pickup)(edict_t* ent, edict_t* other);
+	void (*use)(edict_t* ent, gitem_t* item);
+	void (*drop)(edict_t* ent, gitem_t* item);
+	void (*weaponthink)(edict_t* ent);
+	const char* pickup_sound;
+	const char* world_model;
 	effects_t	world_model_flags;
-	const char *view_model;
+	const char* view_model;
 
 	// client side info
-	const char *icon;
-	const char *use_name; // for use command, english only
-	const char *pickup_name; // for printing on pickup
-	const char *pickup_name_definite; // definite article version for languages that need it
+	const char* icon;
+	const char* use_name; // for use command, english only
+	const char* pickup_name; // for printing on pickup
+	const char* pickup_name_definite; // definite article version for languages that need it
 
 	int			 quantity = 0;	  // for ammo how much, for weapons how much is used per shot
 	item_id_t	 ammo = IT_NULL;  // for weapons
 	item_id_t	 chain = IT_NULL; // weapon chain root
 	item_flags_t flags = IF_NONE; // IT_* flags
 
-	const char *vwep_model = nullptr; // vwep model string (for weapons)
+	const char* vwep_model = nullptr; // vwep model string (for weapons)
 
-	const gitem_armor_t *armor_info = nullptr;
+	const gitem_armor_t* armor_info = nullptr;
 	int					 tag = 0;
 
-	const char *precaches = nullptr; // string of all models, sounds, and images this item will use
+	const char* precaches = nullptr; // string of all models, sounds, and images this item will use
 
 	int32_t				sort_id = 0; // used by some items to control their sorting
 	int32_t				quantity_warn = 5; // when to warn on low ammo
 
 	// set in InitItems, don't set by hand
 	// circular list of chained weapons
-	gitem_t *chain_next = nullptr;
+	gitem_t* chain_next = nullptr;
 	// set in SP_worldspawn, don't set by hand
 	// model index for vwep
 	int32_t vwep_index = 0;
@@ -1120,7 +1120,7 @@ struct game_locals_t
 	char	helpmessage2[MAX_TOKEN_CHARS];
 	int32_t help1changed, help2changed;
 
-	gclient_t *clients; // [maxclients]
+	gclient_t* clients; // [maxclients]
 
 	// can't store spawnpoint in level, because
 	// it would get overwritten by the savegame restore
@@ -1139,7 +1139,7 @@ struct game_locals_t
 	int32_t airacceleration_modified, gravity_modified;
 	std::array<level_entry_t, MAX_LEVELS_PER_UNIT> level_entries;
 	int32_t max_lag_origins;
-	vec3_t *lag_origins; // maxclients * max_lag_origins
+	vec3_t* lag_origins; // maxclients * max_lag_origins
 };
 
 constexpr size_t MAX_HEALTH_BARS = 2;
@@ -1160,8 +1160,8 @@ struct level_locals_t
 
 	// intermission state
 	gtime_t		intermissiontime; // time the intermission was started
-	const char *changemap;
-	const char *achievement;
+	const char* changemap;
+	const char* achievement;
 	bool		exitintermission;
 	bool		intermission_eou;
 	bool		intermission_clear; // [Paril-KEX] clear inventory on switch
@@ -1182,27 +1182,27 @@ struct level_locals_t
 	int32_t found_goals;
 
 	int32_t total_monsters;
-	std::array<edict_t *, MAX_EDICTS> monsters_registered; // only for debug
+	std::array<edict_t*, MAX_EDICTS> monsters_registered; // only for debug
 	int32_t killed_monsters;
 
-	edict_t *current_entity; // entity running from G_RunFrame
+	edict_t* current_entity; // entity running from G_RunFrame
 	int32_t	 body_que;		 // dead bodies
 
 	int32_t power_cubes; // ugly necessity for coop
 
 	// ROGUE
-	edict_t *disguise_violator;
+	edict_t* disguise_violator;
 	gtime_t	 disguise_violation_time;
 	int32_t  disguise_icon; // [Paril-KEX]
 	// ROGUE
-	
+
 	int32_t shadow_light_count; // [Sam-KEX]
 	bool is_n64, is_psx;
 	gtime_t coop_level_restart_time; // restart the level after this time
 	bool instantitems; // instantitems 1 set in worldspawn
 
 	// N64 goal stuff
-	const char *goals; // nullptr if no goals in world
+	const char* goals; // nullptr if no goals in world
 	int32_t goal_num; // current relative goal number, increased with each target_goal
 
 	// offset for the first vwep model, for
@@ -1220,18 +1220,18 @@ struct level_locals_t
 	int32_t coop_scale_players;
 
 	// [Paril-KEX] current level entry
-	level_entry_t *entry;
+	level_entry_t* entry;
 
 	// [Paril-KEX] current poi
 	bool valid_poi;
 	vec3_t current_poi;
 	int32_t current_poi_image;
 	int32_t current_poi_stage;
-	edict_t *current_dynamic_poi;
-	vec3_t *poi_points[MAX_SPLIT_PLAYERS]; // temporary storage for POIs in coop
+	edict_t* current_dynamic_poi;
+	vec3_t* poi_points[MAX_SPLIT_PLAYERS]; // temporary storage for POIs in coop
 
 	// start items
-	const char *start_items;
+	const char* start_items;
 	// disable grappling hook
 	bool no_grapple;
 
@@ -1240,24 +1240,24 @@ struct level_locals_t
 	// level is a hub map, and shouldn't be included in EOU stuff
 	bool hub_map;
 	// active health bar entities
-	std::array<edict_t *, MAX_HEALTH_BARS> health_bar_entities;
+	std::array<edict_t*, MAX_HEALTH_BARS> health_bar_entities;
 	int32_t intermission_server_frame;
 	bool deadly_kill_box;
 	bool story_active;
 	gtime_t next_auto_save;
 	gtime_t next_match_report;
 
-	const char *primary_objective_string;
-	const char *secondary_objective_string;
+	const char* primary_objective_string;
+	const char* secondary_objective_string;
 
-	const char *primary_objective_title;
-	const char *secondary_objective_title;
+	const char* primary_objective_title;
+	const char* secondary_objective_title;
 };
 
 struct shadow_light_temp_t
 {
 	shadow_light_data_t data;
-	const char	*lightstyletarget = nullptr;
+	const char* lightstyletarget = nullptr;
 };
 
 void G_LoadShadowLights();
@@ -1271,19 +1271,19 @@ void G_LoadShadowLights();
 struct spawn_temp_t
 {
 	// world vars
-	const char	 *sky;
+	const char* sky;
 	float  skyrotate;
 	vec3_t skyaxis;
 	int32_t skyautorotate = 1;
-	const char	 *nextmap;
+	const char* nextmap;
 
 	float		lip;
 	float		distance;
 	float		height;
-	const char	*noise;
+	const char* noise;
 	float		pausetime;
-	const char	*item;
-	const char	*gravity;
+	const char* item;
+	const char* gravity;
 
 	float minyaw;
 	float maxyaw;
@@ -1295,34 +1295,34 @@ struct spawn_temp_t
 	int instantitems;
 	float radius; // [Paril-KEX]
 	bool hub_map; // [Paril-KEX]
-	const char *achievement; // [Paril-KEX]
+	const char* achievement; // [Paril-KEX]
 
 	// [Paril-KEX]
-	const char *goals;
+	const char* goals;
 
 	// [Paril-KEX]
-	const char *image;
+	const char* image;
 
 	int fade_start_dist = 96;
 	int fade_end_dist = 384;
-	const char *start_items;
+	const char* start_items;
 	int no_grapple = 0;
 	float health_multiplier = 1.0f;
 	int physics_flags_sp = 0, physics_flags_dm = 0;
 
-	const char *reinforcements; // [Paril-KEX]
-	const char *noise_start, *noise_middle, *noise_end; // [Paril-KEX]
+	const char* reinforcements; // [Paril-KEX]
+	const char* noise_start, * noise_middle, * noise_end; // [Paril-KEX]
 	int32_t loop_count; // [Paril-KEX]
 
-	std::unordered_set<const char *> keys_specified;
+	std::unordered_set<const char*> keys_specified;
 
-	const char *primary_objective_string;
-	const char *secondary_objective_string;
+	const char* primary_objective_string;
+	const char* secondary_objective_string;
 
-	const char *primary_objective_title;
-	const char *secondary_objective_title;
+	const char* primary_objective_title;
+	const char* secondary_objective_title;
 
-	inline bool was_key_specified(const char *key) const
+	inline bool was_key_specified(const char* key) const
 	{
 		return keys_specified.find(key) != keys_specified.end();
 	}
@@ -1347,11 +1347,11 @@ enum move_state_t
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_##ns, reinterpret_cast<const void *>(n)); \
 	auto n
 
-DEFINE_DATA_FUNC(moveinfo_endfunc, MOVEINFO_ENDFUNC, void, edict_t *self);
+DEFINE_DATA_FUNC(moveinfo_endfunc, MOVEINFO_ENDFUNC, void, edict_t* self);
 #define MOVEINFO_ENDFUNC(n) \
 	SAVE_DATA_FUNC(n, MOVEINFO_ENDFUNC, void, edict_t *self)
 
-DEFINE_DATA_FUNC(moveinfo_blocked, MOVEINFO_BLOCKED, void, edict_t *self, edict_t *other);
+DEFINE_DATA_FUNC(moveinfo_blocked, MOVEINFO_BLOCKED, void, edict_t* self, edict_t* other);
 #define MOVEINFO_BLOCKED(n) \
 	SAVE_DATA_FUNC(n, MOVEINFO_BLOCKED, void, edict_t *self, edict_t *other)
 
@@ -1363,10 +1363,10 @@ DEFINE_DATA_FUNC(moveinfo_blocked, MOVEINFO_BLOCKED, void, edict_t *self, edict_
 template<typename T, int32_t tag>
 struct savable_allocated_memory_t
 {
-	T		*ptr;
+	T* ptr;
 	size_t	count;
 
-	constexpr savable_allocated_memory_t(T *ptr, size_t count) :
+	constexpr savable_allocated_memory_t(T* ptr, size_t count) :
 		ptr(ptr),
 		count(count)
 	{
@@ -1378,11 +1378,11 @@ struct savable_allocated_memory_t
 	}
 
 	// no copy
-	constexpr savable_allocated_memory_t(const savable_allocated_memory_t &) = delete;
-	constexpr savable_allocated_memory_t &operator=(const savable_allocated_memory_t &) = delete;
+	constexpr savable_allocated_memory_t(const savable_allocated_memory_t&) = delete;
+	constexpr savable_allocated_memory_t& operator=(const savable_allocated_memory_t&) = delete;
 
 	// free move
-	constexpr savable_allocated_memory_t(savable_allocated_memory_t &&move)
+	constexpr savable_allocated_memory_t(savable_allocated_memory_t&& move)
 	{
 		ptr = move.ptr;
 		count = move.count;
@@ -1391,7 +1391,7 @@ struct savable_allocated_memory_t
 		move.count = 0;
 	}
 
-	constexpr savable_allocated_memory_t &operator=(savable_allocated_memory_t &&move)
+	constexpr savable_allocated_memory_t& operator=(savable_allocated_memory_t&& move)
 	{
 		ptr = move.ptr;
 		count = move.count;
@@ -1412,8 +1412,8 @@ struct savable_allocated_memory_t
 		}
 	}
 
-	constexpr explicit operator T *() { return ptr; }
-	constexpr explicit operator const T *() const { return ptr; }
+	constexpr explicit operator T* () { return ptr; }
+	constexpr explicit operator const T* () const { return ptr; }
 
 	constexpr std::add_lvalue_reference_t<T> operator[](const size_t index) { return ptr[index]; }
 	constexpr const std::add_lvalue_reference_t<T> operator[](const size_t index) const { return ptr[index]; }
@@ -1428,7 +1428,7 @@ inline savable_allocated_memory_t<T, tag> make_savable_memory(size_t count)
 	if (!count)
 		return { nullptr, 0 };
 
-	return { reinterpret_cast<T *>(gi.TagMalloc(sizeof(T) * count, tag)), count };
+	return { reinterpret_cast<T*>(gi.TagMalloc(sizeof(T) * count, tag)), count };
 }
 
 struct moveinfo_t
@@ -1473,9 +1473,9 @@ struct moveinfo_t
 
 struct mframe_t
 {
-	void (*aifunc)(edict_t *self, float dist) = nullptr;
+	void (*aifunc)(edict_t* self, float dist) = nullptr;
 	float dist = 0;
-	void (*thinkfunc)(edict_t *self) = nullptr;
+	void (*thinkfunc)(edict_t* self) = nullptr;
 	int32_t lerp_frame = -1;
 };
 
@@ -1483,8 +1483,8 @@ struct mmove_t
 {
 	int32_t	  firstframe;
 	int32_t	  lastframe;
-	const mframe_t *frame;
-	void (*endfunc)(edict_t *self);
+	const mframe_t* frame;
+	void (*endfunc)(edict_t* self);
 	float sidestep_scale;
 
 #ifdef _DEBUG
@@ -1492,7 +1492,7 @@ struct mmove_t
 #endif
 
 	template<size_t N>
-	inline mmove_t(int32_t firstframe, int32_t lastframe, const mframe_t (&frames)[N], void (*endfunc)(edict_t *self) = nullptr, float sidestep_scale = 0.0f) :
+	inline mmove_t(int32_t firstframe, int32_t lastframe, const mframe_t(&frames)[N], void (*endfunc)(edict_t* self) = nullptr, float sidestep_scale = 0.0f) :
 		firstframe(firstframe),
 		lastframe(lastframe),
 		frame(frames),
@@ -1511,67 +1511,67 @@ using save_mmove_t = save_data_t<mmove_t, SAVE_DATA_MMOVE>;
 	static const save_data_list_t save__##n(#n, SAVE_DATA_MMOVE, &n); \
 	const mmove_t n
 
-DEFINE_DATA_FUNC(monsterinfo_stand, MONSTERINFO_STAND, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_stand, MONSTERINFO_STAND, void, edict_t* self);
 #define MONSTERINFO_STAND(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_STAND, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_idle, MONSTERINFO_IDLE, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_idle, MONSTERINFO_IDLE, void, edict_t* self);
 #define MONSTERINFO_IDLE(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_IDLE, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_search, MONSTERINFO_SEARCH, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_search, MONSTERINFO_SEARCH, void, edict_t* self);
 #define MONSTERINFO_SEARCH(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_SEARCH, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_walk, MONSTERINFO_WALK, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_walk, MONSTERINFO_WALK, void, edict_t* self);
 #define MONSTERINFO_WALK(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_WALK, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_run, MONSTERINFO_RUN, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_run, MONSTERINFO_RUN, void, edict_t* self);
 #define MONSTERINFO_RUN(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_RUN, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_dodge, MONSTERINFO_DODGE, void, edict_t *self, edict_t *attacker, gtime_t eta, trace_t *tr, bool gravity);
+DEFINE_DATA_FUNC(monsterinfo_dodge, MONSTERINFO_DODGE, void, edict_t* self, edict_t* attacker, gtime_t eta, trace_t* tr, bool gravity);
 #define MONSTERINFO_DODGE(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_DODGE, void, edict_t *self, edict_t *attacker, gtime_t eta, trace_t *tr, bool gravity)
 
-DEFINE_DATA_FUNC(monsterinfo_attack, MONSTERINFO_ATTACK, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_attack, MONSTERINFO_ATTACK, void, edict_t* self);
 #define MONSTERINFO_ATTACK(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_ATTACK, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_melee, MONSTERINFO_MELEE, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_melee, MONSTERINFO_MELEE, void, edict_t* self);
 #define MONSTERINFO_MELEE(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_MELEE, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_sight, MONSTERINFO_SIGHT, void, edict_t *self, edict_t *other);
+DEFINE_DATA_FUNC(monsterinfo_sight, MONSTERINFO_SIGHT, void, edict_t* self, edict_t* other);
 #define MONSTERINFO_SIGHT(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_SIGHT, void, edict_t *self, edict_t *other)
 
-DEFINE_DATA_FUNC(monsterinfo_checkattack, MONSTERINFO_CHECKATTACK, bool, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_checkattack, MONSTERINFO_CHECKATTACK, bool, edict_t* self);
 #define MONSTERINFO_CHECKATTACK(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_CHECKATTACK, bool, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_setskin, MONSTERINFO_SETSKIN, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_setskin, MONSTERINFO_SETSKIN, void, edict_t* self);
 #define MONSTERINFO_SETSKIN(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_SETSKIN, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_blocked, MONSTERINFO_BLOCKED, bool, edict_t *self, float dist);
+DEFINE_DATA_FUNC(monsterinfo_blocked, MONSTERINFO_BLOCKED, bool, edict_t* self, float dist);
 #define MONSTERINFO_BLOCKED(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_BLOCKED, bool, edict_t *self, float dist)
 
-DEFINE_DATA_FUNC(monsterinfo_physicschange, MONSTERINFO_PHYSCHANGED, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_physicschange, MONSTERINFO_PHYSCHANGED, void, edict_t* self);
 #define MONSTERINFO_PHYSCHANGED(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_PHYSCHANGED, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_duck, MONSTERINFO_DUCK, bool, edict_t *self, gtime_t eta);
+DEFINE_DATA_FUNC(monsterinfo_duck, MONSTERINFO_DUCK, bool, edict_t* self, gtime_t eta);
 #define MONSTERINFO_DUCK(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_DUCK, bool, edict_t *self, gtime_t eta)
 
-DEFINE_DATA_FUNC(monsterinfo_unduck, MONSTERINFO_UNDUCK, void, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_unduck, MONSTERINFO_UNDUCK, void, edict_t* self);
 #define MONSTERINFO_UNDUCK(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_UNDUCK, void, edict_t *self)
 
-DEFINE_DATA_FUNC(monsterinfo_sidestep, MONSTERINFO_SIDESTEP, bool, edict_t *self);
+DEFINE_DATA_FUNC(monsterinfo_sidestep, MONSTERINFO_SIDESTEP, bool, edict_t* self);
 #define MONSTERINFO_SIDESTEP(n) \
 	SAVE_DATA_FUNC(n, MONSTERINFO_SIDESTEP, bool, edict_t *self)
 
@@ -1586,21 +1586,21 @@ enum combat_style_t
 
 struct reinforcement_t
 {
-	const char *classname;
+	const char* classname;
 	int32_t strength;
 	vec3_t mins, maxs;
 };
 
 struct reinforcement_list_t
 {
-	reinforcement_t	*reinforcements;
+	reinforcement_t* reinforcements;
 	uint32_t		num_reinforcements;
 };
 
 constexpr size_t MAX_REINFORCEMENTS = 5; // max number of spawns we can do at once.
 
-void M_SetupReinforcements(const char *reinforcements, reinforcement_list_t &list);
-std::array<uint8_t, MAX_REINFORCEMENTS> M_PickReinforcements(edict_t *self, int32_t &num_chosen, int32_t max_slots = 0);
+void M_SetupReinforcements(const char* reinforcements, reinforcement_list_t& list);
+std::array<uint8_t, MAX_REINFORCEMENTS> M_PickReinforcements(edict_t* self, int32_t& num_chosen, int32_t max_slots = 0);
 
 constexpr gtime_t HOLD_FOREVER = gtime_t::from_ms(std::numeric_limits<int64_t>::max());
 
@@ -1651,17 +1651,17 @@ struct monsterinfo_t
 	// ROGUE
 	save_monsterinfo_blocked_t blocked;
 	gtime_t	 last_hint_time; // last time the monster checked for hintpaths.
-	edict_t *goal_hint;		 // which hint_path we're trying to get to
+	edict_t* goal_hint;		 // which hint_path we're trying to get to
 	int32_t	 medicTries;
-	edict_t *badMedic1, *badMedic2; // these medics have declared this monster "unhealable"
-	edict_t *healer;				// this is who is healing this monster
+	edict_t* badMedic1, * badMedic2; // these medics have declared this monster "unhealable"
+	edict_t* healer;				// this is who is healing this monster
 	save_monsterinfo_duck_t duck;
 	save_monsterinfo_unduck_t unduck;
 	save_monsterinfo_sidestep_t sidestep;
 	float	 base_height;
 	gtime_t	 next_duck_time;
 	gtime_t	 duck_wait_time;
-	edict_t *last_player_enemy;
+	edict_t* last_player_enemy;
 	// blindfire stuff .. the boolean says whether the monster will do it, and blind_fire_time is the timing
 	// (set in the monster) of the next shot
 	bool	blindfire;		// will the monster blindfire?
@@ -1674,7 +1674,7 @@ struct monsterinfo_t
 	int32_t  slots_from_commander; // for spawned monsters, this is how many slots we took from our commander
 	int32_t	 monster_slots; // for commanders, total slots we can occupy
 	int32_t	 monster_used; // for commanders, total slots currently used
-	edict_t *commander;
+	edict_t* commander;
 	// powerup timers, used by widow, our friend
 	gtime_t quad_time;
 	gtime_t invincible_time;
@@ -1700,8 +1700,8 @@ struct monsterinfo_t
 	gtime_t	  nav_path_cache_time; // cache nav_path result for this much time
 	combat_style_t combat_style; // pathing style
 
-	edict_t   *damage_attacker;
-	edict_t   *damage_inflictor;
+	edict_t* damage_attacker;
+	edict_t* damage_inflictor;
 	int32_t   damage_blood, damage_knockback;
 	vec3_t	  damage_from;
 	mod_t	  damage_mod;
@@ -1735,37 +1735,37 @@ struct monsterinfo_t
 };
 
 // non-monsterinfo save stuff
-using save_prethink_t = save_data_t<void(*)(edict_t *self), SAVE_FUNC_PRETHINK>;
+using save_prethink_t = save_data_t<void(*)(edict_t* self), SAVE_FUNC_PRETHINK>;
 #define PRETHINK(n) \
 	void n(edict_t *self); \
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_PRETHINK, reinterpret_cast<const void *>(n)); \
 	auto n
 
-using save_think_t = save_data_t<void(*)(edict_t *self), SAVE_FUNC_THINK>;
+using save_think_t = save_data_t<void(*)(edict_t* self), SAVE_FUNC_THINK>;
 #define THINK(n) \
 	void n(edict_t *self); \
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_THINK, reinterpret_cast<const void *>(n)); \
 	auto n
 
-using save_touch_t = save_data_t<void(*)(edict_t *self, edict_t *other, const trace_t &tr, bool other_touching_self), SAVE_FUNC_TOUCH>;
+using save_touch_t = save_data_t<void(*)(edict_t* self, edict_t* other, const trace_t& tr, bool other_touching_self), SAVE_FUNC_TOUCH>;
 #define TOUCH(n) \
 	void n(edict_t *self, edict_t *other, const trace_t &tr, bool other_touching_self); \
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_TOUCH, reinterpret_cast<const void *>(n)); \
 	auto n
 
-using save_use_t = save_data_t<void(*)(edict_t *self, edict_t *other, edict_t *activator), SAVE_FUNC_USE>;
+using save_use_t = save_data_t<void(*)(edict_t* self, edict_t* other, edict_t* activator), SAVE_FUNC_USE>;
 #define USE(n) \
 	void n(edict_t *self, edict_t *other, edict_t *activator); \
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_USE, reinterpret_cast<const void *>(n)); \
 	auto n
 
-using save_pain_t = save_data_t<void(*)(edict_t *self, edict_t *other, float kick, int damage, const mod_t &mod), SAVE_FUNC_PAIN>;
+using save_pain_t = save_data_t<void(*)(edict_t* self, edict_t* other, float kick, int damage, const mod_t& mod), SAVE_FUNC_PAIN>;
 #define PAIN(n) \
 	void n(edict_t *self, edict_t *other, float kick, int damage, const mod_t &mod); \
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_PAIN, reinterpret_cast<const void *>(n)); \
 	auto n
 
-using save_die_t = save_data_t<void(*)(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t &point, const mod_t &mod), SAVE_FUNC_DIE>;
+using save_die_t = save_data_t<void(*)(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point, const mod_t& mod), SAVE_FUNC_DIE>;
 #define DIE(n) \
 	void n(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t &point, const mod_t &mod); \
 	static const save_data_list_t save__##n(#n, SAVE_FUNC_DIE, reinterpret_cast<const void *>(n)); \
@@ -1781,7 +1781,7 @@ extern game_locals_t  game;
 extern level_locals_t level;
 extern game_export_t  globals;
 
-extern edict_t *g_edicts;
+extern edict_t* g_edicts;
 
 #include <random>
 extern std::mt19937 mt_rand;
@@ -1862,78 +1862,78 @@ extern std::mt19937 mt_rand;
 
 // uniform random index from given container
 template<typename T>
-[[nodiscard]] inline int32_t random_index(const T &container)
+[[nodiscard]] inline int32_t random_index(const T& container)
 {
 	return irandom(std::size(container));
 }
 
 // uniform random element from given container
 template<typename T>
-[[nodiscard]] inline auto random_element(T &container) -> decltype(*std::begin(container))
+[[nodiscard]] inline auto random_element(T& container) -> decltype(*std::begin(container))
 {
 	return *(std::begin(container) + random_index(container));
 }
 
 // flip a coin
-[[nodiscard]]inline bool brandom()
+[[nodiscard]] inline bool brandom()
 {
 	return irandom(2) == 0;
 }
 
-extern cvar_t *developer;
-extern cvar_t *deathmatch;
-extern cvar_t *coop;
-extern cvar_t *skill;
-extern cvar_t *fraglimit;
-extern cvar_t *timelimit;
+extern cvar_t* developer;
+extern cvar_t* deathmatch;
+extern cvar_t* coop;
+extern cvar_t* skill;
+extern cvar_t* fraglimit;
+extern cvar_t* timelimit;
 // ZOID
-extern cvar_t *capturelimit;
-extern cvar_t *g_quick_weapon_switch;
-extern cvar_t *g_instant_weapon_switch;
+extern cvar_t* capturelimit;
+extern cvar_t* g_quick_weapon_switch;
+extern cvar_t* g_instant_weapon_switch;
 // ZOID
-extern cvar_t *password;
-extern cvar_t *spectator_password;
-extern cvar_t *needpass;
-extern cvar_t *g_select_empty;
-extern cvar_t *sv_dedicated;
+extern cvar_t* password;
+extern cvar_t* spectator_password;
+extern cvar_t* needpass;
+extern cvar_t* g_select_empty;
+extern cvar_t* sv_dedicated;
 
-extern cvar_t *filterban;
+extern cvar_t* filterban;
 
-extern cvar_t *sv_gravity;
-extern cvar_t *sv_maxvelocity;
+extern cvar_t* sv_gravity;
+extern cvar_t* sv_maxvelocity;
 
-extern cvar_t *gun_x, *gun_y, *gun_z;
-extern cvar_t *sv_rollspeed;
-extern cvar_t *sv_rollangle;
+extern cvar_t* gun_x, * gun_y, * gun_z;
+extern cvar_t* sv_rollspeed;
+extern cvar_t* sv_rollangle;
 
-extern cvar_t *run_pitch;
-extern cvar_t *run_roll;
-extern cvar_t *bob_up;
-extern cvar_t *bob_pitch;
-extern cvar_t *bob_roll;
+extern cvar_t* run_pitch;
+extern cvar_t* run_roll;
+extern cvar_t* bob_up;
+extern cvar_t* bob_pitch;
+extern cvar_t* bob_roll;
 
-extern cvar_t *sv_cheats;
-extern cvar_t *g_debug_monster_paths;
-extern cvar_t *g_debug_monster_kills;
-extern cvar_t *g_debug_poi;
-extern cvar_t *maxspectators;
+extern cvar_t* sv_cheats;
+extern cvar_t* g_debug_monster_paths;
+extern cvar_t* g_debug_monster_kills;
+extern cvar_t* g_debug_poi;
+extern cvar_t* maxspectators;
 
-extern cvar_t *bot_debug_follow_actor;
-extern cvar_t *bot_debug_move_to_point;
+extern cvar_t* bot_debug_follow_actor;
+extern cvar_t* bot_debug_move_to_point;
 
-extern cvar_t *flood_msgs;
-extern cvar_t *flood_persecond;
-extern cvar_t *flood_waitdelay;
+extern cvar_t* flood_msgs;
+extern cvar_t* flood_persecond;
+extern cvar_t* flood_waitdelay;
 
-extern cvar_t *sv_maplist;
+extern cvar_t* sv_maplist;
 
-extern cvar_t *g_skipViewModifiers;
+extern cvar_t* g_skipViewModifiers;
 
-extern cvar_t *sv_stopspeed; // PGM - this was a define in g_phys.c
+extern cvar_t* sv_stopspeed; // PGM - this was a define in g_phys.c
 
-extern cvar_t *g_strict_saves;
-extern cvar_t *g_coop_health_scaling;
-extern cvar_t *g_weapon_respawn_time;
+extern cvar_t* g_strict_saves;
+extern cvar_t* g_coop_health_scaling;
+extern cvar_t* g_weapon_respawn_time;
 
 extern cvar_t* g_no_health;
 extern cvar_t* g_no_items;
@@ -1960,13 +1960,13 @@ extern cvar_t* g_allow_techs;
 extern cvar_t* g_start_items;
 extern cvar_t* g_map_list;
 extern cvar_t* g_map_list_shuffle;
-extern cvar_t *g_lag_compensation;
+extern cvar_t* g_lag_compensation;
 
 // ROGUE
-extern cvar_t *gamerules;
-extern cvar_t *huntercam;
-extern cvar_t *g_dm_strong_mines;
-extern cvar_t *g_dm_random_items;
+extern cvar_t* gamerules;
+extern cvar_t* huntercam;
+extern cvar_t* g_dm_strong_mines;
+extern cvar_t* g_dm_random_items;
 // ROGUE
 
 // [Kex]
@@ -1981,14 +1981,14 @@ extern cvar_t* g_grapple_fly_speed;
 extern cvar_t* g_grapple_pull_speed;
 extern cvar_t* g_grapple_damage;
 
-extern cvar_t *sv_airaccelerate;
+extern cvar_t* sv_airaccelerate;
 
-extern cvar_t *g_damage_scale;
-extern cvar_t *g_disable_player_collision;
-extern cvar_t *ai_damage_scale;
-extern cvar_t *ai_model_scale;
-extern cvar_t *ai_allow_dm_spawn;
-extern cvar_t *ai_movement_disabled;
+extern cvar_t* g_damage_scale;
+extern cvar_t* g_disable_player_collision;
+extern cvar_t* ai_damage_scale;
+extern cvar_t* ai_model_scale;
+extern cvar_t* ai_allow_dm_spawn;
+extern cvar_t* ai_movement_disabled;
 
 #define world (&g_edicts[0])
 
@@ -2011,96 +2011,96 @@ extern gitem_t itemlist[IT_TOTAL];
 //
 // g_cmds.c
 //
-bool CheckFlood(edict_t *ent);
-void Cmd_Help_f(edict_t *ent);
-void Cmd_Score_f(edict_t *ent);
+bool CheckFlood(edict_t* ent);
+void Cmd_Help_f(edict_t* ent);
+void Cmd_Score_f(edict_t* ent);
 
 //
 // g_items.c
 //
-void	  PrecacheItem(gitem_t *it);
+void	  PrecacheItem(gitem_t* it);
 void	  InitItems();
 void	  SetItemNames();
-gitem_t	*FindItem(const char *pickup_name);
-gitem_t	*FindItemByClassname(const char *classname);
-edict_t	*Drop_Item(edict_t *ent, gitem_t *item);
-void	  SetRespawn(edict_t *ent, gtime_t delay, bool hide_self = true);
-void	  ChangeWeapon(edict_t *ent);
-void	  SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st);
-void	  Think_Weapon(edict_t *ent);
-item_id_t ArmorIndex(edict_t *ent);
-item_id_t PowerArmorType(edict_t *ent);
-gitem_t	*GetItemByIndex(item_id_t index);
-gitem_t *GetItemByAmmo(ammo_t ammo);
-gitem_t *GetItemByPowerup(powerup_t powerup);
-bool	  Add_Ammo(edict_t *ent, gitem_t *item, int count);
-void      G_CheckPowerArmor(edict_t *ent);
-void	  Touch_Item(edict_t *ent, edict_t *other, const trace_t &tr, bool other_touching_self);
-void	  droptofloor(edict_t *ent);
-void      P_ToggleFlashlight(edict_t *ent, bool state);
+gitem_t* FindItem(const char* pickup_name);
+gitem_t* FindItemByClassname(const char* classname);
+edict_t* Drop_Item(edict_t* ent, gitem_t* item);
+void	  SetRespawn(edict_t* ent, gtime_t delay, bool hide_self = true);
+void	  ChangeWeapon(edict_t* ent);
+void	  SpawnItem(edict_t* ent, gitem_t* item, const spawn_temp_t& st);
+void	  Think_Weapon(edict_t* ent);
+item_id_t ArmorIndex(edict_t* ent);
+item_id_t PowerArmorType(edict_t* ent);
+gitem_t* GetItemByIndex(item_id_t index);
+gitem_t* GetItemByAmmo(ammo_t ammo);
+gitem_t* GetItemByPowerup(powerup_t powerup);
+bool	  Add_Ammo(edict_t* ent, gitem_t* item, int count);
+void      G_CheckPowerArmor(edict_t* ent);
+void	  Touch_Item(edict_t* ent, edict_t* other, const trace_t& tr, bool other_touching_self);
+void	  droptofloor(edict_t* ent);
+void      P_ToggleFlashlight(edict_t* ent, bool state);
 bool      Entity_IsVisibleToPlayer(edict_t* ent, edict_t* player);
-void      Compass_Update(edict_t *ent, bool first);
+void      Compass_Update(edict_t* ent, bool first);
 
 //
 // g_utils.c
 //
-bool KillBox(edict_t *ent, bool from_spawning, mod_id_t mod = MOD_TELEFRAG, bool bsp_clipping = true, bool allow_safety = false);
-edict_t *G_Find(edict_t *from, std::function<bool(edict_t *e)> matcher);
+bool KillBox(edict_t* ent, bool from_spawning, mod_id_t mod = MOD_TELEFRAG, bool bsp_clipping = true, bool allow_safety = false);
+edict_t* G_Find(edict_t* from, std::function<bool(edict_t* e)> matcher);
 
 // utility template for getting the type of a field
 template<typename>
-struct member_object_type { };
+struct member_object_type {};
 template<typename T1, typename T2>
 struct member_object_type<T1 T2::*> { using type = T1; };
 template<typename T>
 using member_object_type_t = typename member_object_type<std::remove_cv_t<T>>::type;
 
 template<auto M>
-edict_t *G_FindByString(edict_t *from, const std::string_view &value)
+edict_t* G_FindByString(edict_t* from, const std::string_view& value)
 {
-	static_assert(std::is_same_v<member_object_type_t<decltype(M)>, const char *>, "can only use string member functions");
+	static_assert(std::is_same_v<member_object_type_t<decltype(M)>, const char*>, "can only use string member functions");
 
-	return G_Find(from, [&](edict_t *e) {
+	return G_Find(from, [&](edict_t* e) {
 		return e->*M && strlen(e->*M) == value.length() && !Q_strncasecmp(e->*M, value.data(), value.length());
-	});
+		});
 }
 
-edict_t *findradius(edict_t *from, const vec3_t &org, float rad);
-edict_t *G_PickTarget(const char *targetname);
-void	 G_UseTargets(edict_t *ent, edict_t *activator);
-void	 G_PrintActivationMessage(edict_t *ent, edict_t *activator, bool coop_global);
-void	 G_SetMovedir(vec3_t &angles, vec3_t &movedir);
+edict_t* findradius(edict_t* from, const vec3_t& org, float rad);
+edict_t* G_PickTarget(const char* targetname);
+void	 G_UseTargets(edict_t* ent, edict_t* activator);
+void	 G_PrintActivationMessage(edict_t* ent, edict_t* activator, bool coop_global);
+void	 G_SetMovedir(vec3_t& angles, vec3_t& movedir);
 
-void	 G_InitEdict(edict_t *e);
-edict_t *G_Spawn();
-void	 G_FreeEdict(edict_t *e);
+void	 G_InitEdict(edict_t* e);
+edict_t* G_Spawn();
+void	 G_FreeEdict(edict_t* e);
 
-void G_TouchTriggers(edict_t *ent);
-void G_TouchProjectiles(edict_t *ent, vec3_t previous_origin);
+void G_TouchTriggers(edict_t* ent);
+void G_TouchProjectiles(edict_t* ent, vec3_t previous_origin);
 
-char *G_CopyString(const char *in, int32_t tag);
-char *G_CopyString(const char *in, size_t len, int32_t tag);
+char* G_CopyString(const char* in, int32_t tag);
+char* G_CopyString(const char* in, size_t len, int32_t tag);
 
 // ROGUE
-edict_t *findradius2(edict_t *from, const vec3_t &org, float rad);
+edict_t* findradius2(edict_t* from, const vec3_t& org, float rad);
 // ROGUE
 
-void G_PlayerNotifyGoal(edict_t *player);
+void G_PlayerNotifyGoal(edict_t* player);
 
 //
 // g_spawn.c
 //
-const spawn_temp_t &ED_GetSpawnTemp();
-void  ED_ParseField(const char *key, const char *value, edict_t *ent, spawn_temp_t &st);
-void  ED_CallSpawn(edict_t *ent, const spawn_temp_t &spawntemp);
-void  ED_CallSpawn(edict_t *ent);
-char *ED_NewString(char *string);
+const spawn_temp_t& ED_GetSpawnTemp();
+void  ED_ParseField(const char* key, const char* value, edict_t* ent, spawn_temp_t& st);
+void  ED_CallSpawn(edict_t* ent, const spawn_temp_t& spawntemp);
+void  ED_CallSpawn(edict_t* ent);
+char* ED_NewString(char* string);
 
 //
 // g_target.c
 //
-void target_laser_think(edict_t *self);
-void target_laser_off(edict_t *self);
+void target_laser_think(edict_t* self);
+void target_laser_off(edict_t* self);
 
 constexpr spawnflags_t SPAWNFLAG_LASER_ON = 0x0001_spawnflag;
 constexpr spawnflags_t SPAWNFLAG_LASER_RED = 0x0002_spawnflag;
@@ -2126,11 +2126,11 @@ enum damageflags_t
 	DAMAGE_NO_KNOCKBACK = 0x00000008,  // do not affect velocity, just view angles
 	DAMAGE_BULLET = 0x00000010,		   // damage is from a bullet (used for ricochets)
 	DAMAGE_NO_PROTECTION = 0x00000020, // armor, shields, invulnerability, and godmode have no effect
-									   // ROGUE
+	// ROGUE
 	DAMAGE_DESTROY_ARMOR = 0x00000040, // damage is done to armor and health.
 	DAMAGE_NO_REG_ARMOR = 0x00000080,  // damage skips regular armor
 	DAMAGE_NO_POWER_ARMOR = 0x00000100,// damage skips power armor
-									   // ROGUE
+	// ROGUE
 	DAMAGE_NO_INDICATOR = 0x00000200   // for clients: no damage indicators
 };
 
@@ -2139,19 +2139,19 @@ MAKE_ENUM_BITFLAGS(damageflags_t);
 //
 // g_combat.c
 //
-bool OnSameTeam(edict_t *ent1, edict_t *ent2);
-bool CanDamage(edict_t *targ, edict_t *inflictor);
-bool CheckTeamDamage(edict_t *targ, edict_t *attacker);
-void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t &dir, const vec3_t &point,
-			  const vec3_t &normal, int damage, int knockback, damageflags_t dflags, mod_t mod);
-void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, damageflags_t dflags, mod_t mod);
-void Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t &point, mod_t mod);
+bool OnSameTeam(edict_t* ent1, edict_t* ent2);
+bool CanDamage(edict_t* targ, edict_t* inflictor);
+bool CheckTeamDamage(edict_t* targ, edict_t* attacker);
+void T_Damage(edict_t* targ, edict_t* inflictor, edict_t* attacker, const vec3_t& dir, const vec3_t& point,
+	const vec3_t& normal, int damage, int knockback, damageflags_t dflags, mod_t mod);
+void T_RadiusDamage(edict_t* inflictor, edict_t* attacker, float damage, edict_t* ignore, float radius, damageflags_t dflags, mod_t mod);
+void Killed(edict_t* targ, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point, mod_t mod);
 
 // ROGUE
-void T_RadiusNukeDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, mod_t mod);
-void T_RadiusClassDamage(edict_t *inflictor, edict_t *attacker, float damage, char *ignoreClass, float radius,
-						 mod_t mod);
-void cleanupHealTarget(edict_t *ent);
+void T_RadiusNukeDamage(edict_t* inflictor, edict_t* attacker, float damage, edict_t* ignore, float radius, mod_t mod);
+void T_RadiusClassDamage(edict_t* inflictor, edict_t* attacker, float damage, char* ignoreClass, float radius,
+	mod_t mod);
+void cleanupHealTarget(edict_t* ent);
 // ROGUE
 
 constexpr int32_t DEFAULT_BULLET_HSPREAD = 300;
@@ -2165,11 +2165,11 @@ constexpr int32_t DEFAULT_SSHOTGUN_COUNT = 20;
 //
 // g_func.c
 //
-void train_use(edict_t *self, edict_t *other, edict_t *activator);
-void func_train_find(edict_t *self);
-edict_t *plat_spawn_inside_trigger(edict_t *ent);
-void	 Move_Calc(edict_t *ent, const vec3_t &dest, void(*endfunc)(edict_t *self));
-void G_SetMoveinfoSounds(edict_t *self, const char *default_start, const char *default_mid, const char *default_end);
+void train_use(edict_t* self, edict_t* other, edict_t* activator);
+void func_train_find(edict_t* self);
+edict_t* plat_spawn_inside_trigger(edict_t* ent);
+void	 Move_Calc(edict_t* ent, const vec3_t& dest, void(*endfunc)(edict_t* self));
+void G_SetMoveinfoSounds(edict_t* self, const char* default_start, const char* default_mid, const char* default_end);
 
 constexpr spawnflags_t SPAWNFLAG_TRAIN_START_ON = 1_spawnflag;
 
@@ -2182,44 +2182,44 @@ constexpr spawnflags_t SPAWNFLAG_DOOR_REVERSE = 2_spawnflag;
 //
 // g_monster.c
 //
-void monster_muzzleflash(edict_t *self, const vec3_t &start, monster_muzzleflash_id_t id);
-void monster_fire_bullet(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int kick, int hspread,
-						 int vspread, monster_muzzleflash_id_t flashtype);
-void monster_fire_shotgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread,
-						  int vspread, int count, monster_muzzleflash_id_t flashtype);
-edict_t *monster_fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-						  monster_muzzleflash_id_t flashtype, effects_t effect);
-void monster_fire_flechette(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-						    monster_muzzleflash_id_t flashtype);
-void monster_fire_grenade(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed,
-						  monster_muzzleflash_id_t flashtype, float right_adjust, float up_adjust);
-void monster_fire_rocket(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-						 monster_muzzleflash_id_t flashtype);
-bool monster_fire_railgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick,
-						  monster_muzzleflash_id_t flashtype);
-void monster_fire_bfg(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, int kick,
-					  float damage_radius, monster_muzzleflash_id_t flashtype);
-bool M_CheckClearShot(edict_t *self, const vec3_t &offset);
-bool M_CheckClearShot(edict_t *self, const vec3_t &offset, vec3_t &start);
-vec3_t M_ProjectFlashSource(edict_t *self, const vec3_t &offset, const vec3_t &forward, const vec3_t &right);
-bool M_droptofloor_generic(vec3_t &origin, const vec3_t &mins, const vec3_t &maxs, bool ceiling, edict_t *ignore, contents_t mask, bool allow_partial);
-bool M_droptofloor(edict_t *ent);
-void monster_think(edict_t *self);
-void monster_dead_think(edict_t *self);
-void monster_dead(edict_t *self);
-void walkmonster_start(edict_t *self);
-void swimmonster_start(edict_t *self);
-void flymonster_start(edict_t *self);
-void monster_death_use(edict_t *self);
-void M_CatagorizePosition(edict_t *self, const vec3_t &in_point, water_level_t &waterlevel, contents_t &watertype);
-void M_WorldEffects(edict_t *ent);
-bool M_CheckAttack(edict_t *self);
-void M_CheckGround(edict_t *ent, contents_t mask);
-void monster_use(edict_t *self, edict_t *other, edict_t *activator);
-void M_ProcessPain(edict_t *e);
-bool M_ShouldReactToPain(edict_t *self, const mod_t &mod);
-void M_SetAnimation(edict_t *self, const save_mmove_t &move, bool instant = true);
-bool M_AllowSpawn( edict_t * self );
+void monster_muzzleflash(edict_t* self, const vec3_t& start, monster_muzzleflash_id_t id);
+void monster_fire_bullet(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int kick, int hspread,
+	int vspread, monster_muzzleflash_id_t flashtype);
+void monster_fire_shotgun(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread,
+	int vspread, int count, monster_muzzleflash_id_t flashtype);
+edict_t* monster_fire_blaster(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype, effects_t effect);
+void monster_fire_flechette(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype);
+void monster_fire_grenade(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype, float right_adjust, float up_adjust);
+void monster_fire_rocket(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype);
+bool monster_fire_railgun(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick,
+	monster_muzzleflash_id_t flashtype);
+void monster_fire_bfg(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, int kick,
+	float damage_radius, monster_muzzleflash_id_t flashtype);
+bool M_CheckClearShot(edict_t* self, const vec3_t& offset);
+bool M_CheckClearShot(edict_t* self, const vec3_t& offset, vec3_t& start);
+vec3_t M_ProjectFlashSource(edict_t* self, const vec3_t& offset, const vec3_t& forward, const vec3_t& right);
+bool M_droptofloor_generic(vec3_t& origin, const vec3_t& mins, const vec3_t& maxs, bool ceiling, edict_t* ignore, contents_t mask, bool allow_partial);
+bool M_droptofloor(edict_t* ent);
+void monster_think(edict_t* self);
+void monster_dead_think(edict_t* self);
+void monster_dead(edict_t* self);
+void walkmonster_start(edict_t* self);
+void swimmonster_start(edict_t* self);
+void flymonster_start(edict_t* self);
+void monster_death_use(edict_t* self);
+void M_CatagorizePosition(edict_t* self, const vec3_t& in_point, water_level_t& waterlevel, contents_t& watertype);
+void M_WorldEffects(edict_t* ent);
+bool M_CheckAttack(edict_t* self);
+void M_CheckGround(edict_t* ent, contents_t mask);
+void monster_use(edict_t* self, edict_t* other, edict_t* activator);
+void M_ProcessPain(edict_t* e);
+bool M_ShouldReactToPain(edict_t* self, const mod_t& mod);
+void M_SetAnimation(edict_t* self, const save_mmove_t& move, bool instant = true);
+bool M_AllowSpawn(edict_t* self);
 
 // Paril: used in N64. causes them to be mad at the player
 // regardless of circumstance.
@@ -2227,36 +2227,36 @@ constexpr size_t HACKFLAG_ATTACK_PLAYER = 1;
 // used in N64, appears to change their behavior for the end scene.
 constexpr size_t HACKFLAG_END_CUTSCENE = 4;
 
-bool monster_start(edict_t *self, const spawn_temp_t &st);
-void monster_start_go(edict_t *self);
+bool monster_start(edict_t* self, const spawn_temp_t& st);
+void monster_start_go(edict_t* self);
 // RAFAEL
-void monster_fire_ionripper(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-							monster_muzzleflash_id_t flashtype, effects_t effect);
-void monster_fire_heat(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-					   monster_muzzleflash_id_t flashtype, float lerp_factor);
+void monster_fire_ionripper(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype, effects_t effect);
+void monster_fire_heat(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype, float lerp_factor);
 constexpr spawnflags_t SPAWNFLAG_DABEAM_SECONDARY = 1_spawnflag;
 constexpr spawnflags_t SPAWNFLAG_DABEAM_SPAWNED = 2_spawnflag;
-void monster_fire_dabeam(edict_t *self, int damage, bool secondary, void(*update_func)(edict_t *self));
-void dabeam_update(edict_t *self, bool damage);
-void monster_fire_blueblaster(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-							  monster_muzzleflash_id_t flashtype, effects_t effect);
+void monster_fire_dabeam(edict_t* self, int damage, bool secondary, void(*update_func)(edict_t* self));
+void dabeam_update(edict_t* self, bool damage);
+void monster_fire_blueblaster(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype, effects_t effect);
 void G_Monster_CheckCoopHealthScaling();
 // RAFAEL
 // ROGUE
-void monster_fire_blaster2(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
-						   monster_muzzleflash_id_t flashtype, effects_t effect);
-void monster_fire_tracker(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, edict_t *enemy,
-						  monster_muzzleflash_id_t flashtype);
-void monster_fire_heatbeam(edict_t *self, const vec3_t &start, const vec3_t &dir, const vec3_t &offset, int damage,
-						   int kick, monster_muzzleflash_id_t flashtype);
-void stationarymonster_start(edict_t *self, const spawn_temp_t &st);
-void monster_done_dodge(edict_t *self);
+void monster_fire_blaster2(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed,
+	monster_muzzleflash_id_t flashtype, effects_t effect);
+void monster_fire_tracker(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, edict_t* enemy,
+	monster_muzzleflash_id_t flashtype);
+void monster_fire_heatbeam(edict_t* self, const vec3_t& start, const vec3_t& dir, const vec3_t& offset, int damage,
+	int kick, monster_muzzleflash_id_t flashtype);
+void stationarymonster_start(edict_t* self, const spawn_temp_t& st);
+void monster_done_dodge(edict_t* self);
 // ROGUE
 
-stuck_result_t G_FixStuckObject(edict_t *self, vec3_t check);
+stuck_result_t G_FixStuckObject(edict_t* self, vec3_t check);
 
 // this is for the count of monsters
-int32_t M_SlotsLeft(edict_t *self);
+int32_t M_SlotsLeft(edict_t* self);
 
 // shared with monsters
 constexpr spawnflags_t SPAWNFLAG_MONSTER_AMBUSH = 1_spawnflag;
@@ -2276,14 +2276,14 @@ constexpr spawnflags_t SPAWNFLAG_FIXBOT_WORKING = 32_spawnflag;
 //
 // g_misc.c
 //
-void ThrowClientHead(edict_t *self, int damage);
-void gib_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t &point, const mod_t &mod);
-edict_t *ThrowGib(edict_t *self, const char *gibname, int damage, gib_type_t type, float scale, int frame = 0);
-void BecomeExplosion1(edict_t *self);
-void misc_viper_use(edict_t *self, edict_t *other, edict_t *activator);
-void misc_strogg_ship_use(edict_t *self, edict_t *other, edict_t *activator);
-void VelocityForDamage(int damage, vec3_t &v);
-void ClipGibVelocity(edict_t *ent);
+void ThrowClientHead(edict_t* self, int damage);
+void gib_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point, const mod_t& mod);
+edict_t* ThrowGib(edict_t* self, const char* gibname, int damage, gib_type_t type, float scale, int frame = 0);
+void BecomeExplosion1(edict_t* self);
+void misc_viper_use(edict_t* self, edict_t* other, edict_t* activator);
+void misc_strogg_ship_use(edict_t* self, edict_t* other, edict_t* activator);
+void VelocityForDamage(int damage, vec3_t& v);
+void ClipGibVelocity(edict_t* ent);
 
 constexpr spawnflags_t SPAWNFLAG_PATH_CORNER_TELEPORT = 1_spawnflag;
 
@@ -2297,14 +2297,14 @@ constexpr size_t CLOCK_MESSAGE_SIZE = 9;
 //
 // g_ai.c
 //
-edict_t *AI_GetSightClient(edict_t *self);
+edict_t* AI_GetSightClient(edict_t* self);
 
-void ai_stand(edict_t *self, float dist);
-void ai_move(edict_t *self, float dist);
-void ai_walk(edict_t *self, float dist);
-void ai_turn(edict_t *self, float dist);
-void ai_run(edict_t *self, float dist);
-void ai_charge(edict_t *self, float dist);
+void ai_stand(edict_t* self, float dist);
+void ai_move(edict_t* self, float dist);
+void ai_walk(edict_t* self, float dist);
+void ai_turn(edict_t* self, float dist);
+void ai_run(edict_t* self, float dist);
+void ai_charge(edict_t* self, float dist);
 
 constexpr float RANGE_MELEE = 20; // bboxes basically touching
 constexpr float RANGE_NEAR = 440;
@@ -2312,76 +2312,76 @@ constexpr float RANGE_MID = 940;
 
 // [Paril-KEX] adjusted to return an actual distance, measured
 // in a way that is consistent regardless of what is fighting what
-float range_to(edict_t *self, edict_t *other);
+float range_to(edict_t* self, edict_t* other);
 
-void FoundTarget(edict_t *self);
-void HuntTarget(edict_t *self, bool animate_state = true);
-bool infront_cone(edict_t *self, edict_t *other, float cone);
-bool infront(edict_t *self, edict_t *other);
-bool visible(edict_t *self, edict_t *other, bool through_glass = true);
-bool FacingIdeal(edict_t *self);
+void FoundTarget(edict_t* self);
+void HuntTarget(edict_t* self, bool animate_state = true);
+bool infront_cone(edict_t* self, edict_t* other, float cone);
+bool infront(edict_t* self, edict_t* other);
+bool visible(edict_t* self, edict_t* other, bool through_glass = true);
+bool FacingIdeal(edict_t* self);
 // [Paril-KEX] generic function
-bool M_CheckAttack_Base(edict_t *self, float stand_ground_chance, float melee_chance, float near_chance, float mid_chance, float far_chance, float strafe_scalar);
+bool M_CheckAttack_Base(edict_t* self, float stand_ground_chance, float melee_chance, float near_chance, float mid_chance, float far_chance, float strafe_scalar);
 
 //
 // g_weapon.c
 //
-bool fire_hit(edict_t *self, vec3_t aim, int damage, int kick);
-void fire_bullet(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread,
-				 int vspread, mod_t mod);
-void fire_shotgun(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick, int hspread,
-				  int vspread, int count, mod_t mod);
-void blaster_touch(edict_t *self, edict_t *other, const trace_t &tr, bool other_touching_self);
-edict_t *fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, effects_t effect,
-				  mod_t mod);
-void Grenade_Explode(edict_t *ent);
-void fire_grenade(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, gtime_t timer,
-				  float damage_radius, float right_adjust, float up_adjust, bool monster);
-void fire_grenade2(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, gtime_t timer,
-				   float damage_radius, bool held);
-void rocket_touch(edict_t *ent, edict_t *other, const trace_t &tr, bool other_touching_self);
-edict_t *fire_rocket(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, float damage_radius,
-				 int radius_damage);
-bool fire_rail(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int kick);
-void fire_bfg(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, float damage_radius);
+bool fire_hit(edict_t* self, vec3_t aim, int damage, int kick);
+void fire_bullet(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread,
+	int vspread, mod_t mod);
+void fire_shotgun(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int hspread,
+	int vspread, int count, mod_t mod);
+void blaster_touch(edict_t* self, edict_t* other, const trace_t& tr, bool other_touching_self);
+edict_t* fire_blaster(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, effects_t effect,
+	mod_t mod);
+void Grenade_Explode(edict_t* ent);
+void fire_grenade(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, gtime_t timer,
+	float damage_radius, float right_adjust, float up_adjust, bool monster);
+void fire_grenade2(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, gtime_t timer,
+	float damage_radius, bool held);
+void rocket_touch(edict_t* ent, edict_t* other, const trace_t& tr, bool other_touching_self);
+edict_t* fire_rocket(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius,
+	int radius_damage);
+bool fire_rail(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick);
+void fire_bfg(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius);
 // RAFAEL
-void fire_ionripper(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, effects_t effect);
-void fire_heat(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, float damage_radius,
-			   int radius_damage, float turn_fraction);
-void fire_blueblaster(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed,
-					  effects_t effect);
-void fire_plasma(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, float damage_radius,
-				 int radius_damage);
-void fire_trap(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int speed);
+void fire_ionripper(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, effects_t effect);
+void fire_heat(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius,
+	int radius_damage, float turn_fraction);
+void fire_blueblaster(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed,
+	effects_t effect);
+void fire_plasma(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, float damage_radius,
+	int radius_damage);
+void fire_trap(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int speed);
 // RAFAEL
-void fire_disintegrator(edict_t *self, const vec3_t &start, const vec3_t &dir, int speed);
-vec3_t P_CurrentKickAngles(edict_t *ent);
-vec3_t P_CurrentKickOrigin(edict_t *ent);
-void P_AddWeaponKick(edict_t *ent, const vec3_t &origin, const vec3_t &angles);
+void fire_disintegrator(edict_t* self, const vec3_t& start, const vec3_t& dir, int speed);
+vec3_t P_CurrentKickAngles(edict_t* ent);
+vec3_t P_CurrentKickOrigin(edict_t* ent);
+void P_AddWeaponKick(edict_t* ent, const vec3_t& origin, const vec3_t& angles);
 
 // we won't ever pierce more than this many entities for a single trace.
 constexpr size_t MAX_PIERCE = 16;
 
 // base class for pierce args; this stores
 // the stuff we are piercing.
-struct pierce_args_t 
+struct pierce_args_t
 {
 	// stuff we pierced
-	std::array<edict_t *, MAX_PIERCE> pierced;
+	std::array<edict_t*, MAX_PIERCE> pierced;
 	std::array<solid_t, MAX_PIERCE> pierce_solidities;
 	size_t num_pierced = 0;
 	// the last trace that was done, when piercing stopped
 	trace_t tr;
 
 	// mark entity as pierced
-	inline bool mark(edict_t *ent);
+	inline bool mark(edict_t* ent);
 
 	// restore entities' previous solidities
 	inline void restore();
 
 	// we hit an entity; return false to stop the piercing.
 	// you can adjust the mask for the re-trace (for water, etc).
-	virtual bool hit(contents_t &mask, vec3_t &end) = 0;
+	virtual bool hit(contents_t& mask, vec3_t& end) = 0;
 
 	virtual ~pierce_args_t()
 	{
@@ -2389,14 +2389,14 @@ struct pierce_args_t
 	}
 };
 
-void pierce_trace(const vec3_t &start, const vec3_t &end, edict_t *ignore, pierce_args_t &pierce, contents_t mask);
+void pierce_trace(const vec3_t& start, const vec3_t& end, edict_t* ignore, pierce_args_t& pierce, contents_t mask);
 
 //
 // g_ptrail.c
 //
-void PlayerTrail_Add(edict_t *player);
-void PlayerTrail_Destroy(edict_t *player);
-edict_t *PlayerTrail_Pick(edict_t *self, bool next);
+void PlayerTrail_Add(edict_t* player);
+void PlayerTrail_Destroy(edict_t* player);
+edict_t* PlayerTrail_Pick(edict_t* self, bool next);
 
 //
 // g_client.c
@@ -2406,41 +2406,41 @@ constexpr spawnflags_t SPAWNFLAG_CHANGELEVEL_NO_END_OF_UNIT = 16_spawnflag;
 constexpr spawnflags_t SPAWNFLAG_CHANGELEVEL_FADE_OUT = 32_spawnflag;
 constexpr spawnflags_t SPAWNFLAG_CHANGELEVEL_IMMEDIATE_LEAVE = 64_spawnflag;
 
-void respawn(edict_t *ent);
-void BeginIntermission(edict_t *targ);
-void PutClientInServer(edict_t *ent);
-void InitClientPersistant(edict_t *ent, gclient_t *client);
-void InitClientResp(gclient_t *client);
+void respawn(edict_t* ent);
+void BeginIntermission(edict_t* targ);
+void PutClientInServer(edict_t* ent);
+void InitClientPersistant(edict_t* ent, gclient_t* client);
+void InitClientResp(gclient_t* client);
 void InitBodyQue();
-void ClientBeginServerFrame(edict_t *ent);
-void ClientUserinfoChanged(edict_t *ent, const char *userinfo);
-void P_AssignClientSkinnum(edict_t *ent);
-void P_ForceFogTransition(edict_t *ent, bool instant);
-void P_SendLevelPOI(edict_t *ent);
-unsigned int P_GetLobbyUserNum( const edict_t * player );
+void ClientBeginServerFrame(edict_t* ent);
+void ClientUserinfoChanged(edict_t* ent, const char* userinfo);
+void P_AssignClientSkinnum(edict_t* ent);
+void P_ForceFogTransition(edict_t* ent, bool instant);
+void P_SendLevelPOI(edict_t* ent);
+unsigned int P_GetLobbyUserNum(const edict_t* player);
 void G_UpdateLevelEntry();
 void G_EndOfUnitMessage();
-bool	 SelectSpawnPoint(edict_t *ent, vec3_t &origin, vec3_t &angles, bool force_spawn, bool &landmark);
+bool	 SelectSpawnPoint(edict_t* ent, vec3_t& origin, vec3_t& angles, bool force_spawn, bool& landmark);
 
 struct select_spawn_result_t
 {
-	edict_t		*spot;
+	edict_t* spot;
 	bool		any_valid = false; // set if a spawn point was found, even if it was taken
 };
 
 select_spawn_result_t SelectDeathmatchSpawnPoint(bool farthest, bool force_spawn, bool fallback_to_ctf_or_start);
-void G_PostRespawn(edict_t *self);
+void G_PostRespawn(edict_t* self);
 
 //
 // g_player.c
 //
-void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, const vec3_t &point, const mod_t &mod);
+void player_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t& point, const mod_t& mod);
 
 //
 // g_svcmds.c
 //
 void ServerCommand();
-bool SV_FilterPacket(const char *from);
+bool SV_FilterPacket(const char* from);
 
 //
 // p_view.c
@@ -2453,42 +2453,42 @@ struct step_parameters_t
 	float			bobfracsin; // sinf(bobfrac*M_PI)
 };
 
-void G_SetClientFrame(edict_t *ent, const step_parameters_t &step);
-void ClientEndServerFrame(edict_t *ent);
-void G_LagCompensate(edict_t *from_player, const vec3_t &start, const vec3_t &dir);
+void G_SetClientFrame(edict_t* ent, const step_parameters_t& step);
+void ClientEndServerFrame(edict_t* ent);
+void G_LagCompensate(edict_t* from_player, const vec3_t& start, const vec3_t& dir);
 void G_UnLagCompensate();
 
 //
 // p_hud.c
 //
-void MoveClientToIntermission(edict_t *client);
-void G_SetStats(edict_t *ent);
-void G_SetCoopStats(edict_t *ent);
-void G_SetSpectatorStats(edict_t *ent);
-void G_CheckChaseStats(edict_t *ent);
-void ValidateSelectedItem(edict_t *ent);
-void DeathmatchScoreboardMessage(edict_t *client, edict_t *killer);
+void MoveClientToIntermission(edict_t* client);
+void G_SetStats(edict_t* ent);
+void G_SetCoopStats(edict_t* ent);
+void G_SetSpectatorStats(edict_t* ent);
+void G_CheckChaseStats(edict_t* ent);
+void ValidateSelectedItem(edict_t* ent);
+void DeathmatchScoreboardMessage(edict_t* client, edict_t* killer);
 void G_ReportMatchDetails(bool is_end);
 
 //
 // p_weapon.c
 //
-void PlayerNoise(edict_t *who, const vec3_t &where, player_noise_t type);
-void P_ProjectSource(edict_t *ent, const vec3_t &angles, vec3_t distance, vec3_t &result_start, vec3_t &result_dir, bool adjust_for_pierce = false);
-void NoAmmoWeaponChange(edict_t *ent, bool sound);
-void G_RemoveAmmo(edict_t *ent);
-void G_RemoveAmmo(edict_t *ent, int32_t quantity);
-void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST,
-					int FRAME_DEACTIVATE_LAST, const int *pause_frames, const int *fire_frames,
-					void (*fire)(edict_t *ent));
-void Weapon_Repeating(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST,
-					  int FRAME_DEACTIVATE_LAST, const int *pause_frames, void (*fire)(edict_t *ent));
-void Throw_Generic(edict_t *ent, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_PRIME_SOUND,
-				   const char *prime_sound, int FRAME_THROW_HOLD, int FRAME_THROW_FIRE, const int *pause_frames,
-				   int EXPLODE, const char *primed_sound, void (*fire)(edict_t *ent, bool held), bool extra_idle_frame);
-byte P_DamageModifier(edict_t *ent);
-bool G_CheckInfiniteAmmo(gitem_t *item);
-void Weapon_PowerupSound(edict_t *ent);
+void PlayerNoise(edict_t* who, const vec3_t& where, player_noise_t type);
+void P_ProjectSource(edict_t* ent, const vec3_t& angles, vec3_t distance, vec3_t& result_start, vec3_t& result_dir, bool adjust_for_pierce = false);
+void NoAmmoWeaponChange(edict_t* ent, bool sound);
+void G_RemoveAmmo(edict_t* ent);
+void G_RemoveAmmo(edict_t* ent, int32_t quantity);
+void Weapon_Generic(edict_t* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST,
+	int FRAME_DEACTIVATE_LAST, const int* pause_frames, const int* fire_frames,
+	void (*fire)(edict_t* ent));
+void Weapon_Repeating(edict_t* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST,
+	int FRAME_DEACTIVATE_LAST, const int* pause_frames, void (*fire)(edict_t* ent));
+void Throw_Generic(edict_t* ent, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_PRIME_SOUND,
+	const char* prime_sound, int FRAME_THROW_HOLD, int FRAME_THROW_FIRE, const int* pause_frames,
+	int EXPLODE, const char* primed_sound, void (*fire)(edict_t* ent, bool held), bool extra_idle_frame);
+byte P_DamageModifier(edict_t* ent);
+bool G_CheckInfiniteAmmo(gitem_t* item);
+void Weapon_PowerupSound(edict_t* ent);
 
 constexpr gtime_t GRENADE_TIMER = 3_sec;
 constexpr float GRENADE_MINSPEED = 400.f;
@@ -2506,14 +2506,14 @@ extern byte damage_multiplier;
 //
 // m_move.c
 //
-bool M_CheckBottom_Fast_Generic(const vec3_t &absmins, const vec3_t &absmaxs, bool ceiling);
-bool M_CheckBottom_Slow_Generic(const vec3_t &origin, const vec3_t &absmins, const vec3_t &absmaxs, edict_t *ignore, contents_t mask, bool ceiling, bool allow_any_step_height);
-bool M_CheckBottom(edict_t *ent);
-bool SV_CloseEnough(edict_t *ent, edict_t *goal, float dist);
-bool M_walkmove(edict_t *ent, float yaw, float dist);
-void M_MoveToGoal(edict_t *ent, float dist);
-void M_ChangeYaw(edict_t *ent);
-bool ai_check_move(edict_t *self, float dist);
+bool M_CheckBottom_Fast_Generic(const vec3_t& absmins, const vec3_t& absmaxs, bool ceiling);
+bool M_CheckBottom_Slow_Generic(const vec3_t& origin, const vec3_t& absmins, const vec3_t& absmaxs, edict_t* ignore, contents_t mask, bool ceiling, bool allow_any_step_height);
+bool M_CheckBottom(edict_t* ent);
+bool SV_CloseEnough(edict_t* ent, edict_t* goal, float dist);
+bool M_walkmove(edict_t* ent, float yaw, float dist);
+void M_MoveToGoal(edict_t* ent, float dist);
+void M_ChangeYaw(edict_t* ent);
+bool ai_check_move(edict_t* self, float dist);
 
 //
 // g_phys.c
@@ -2521,50 +2521,50 @@ bool ai_check_move(edict_t *self, float dist);
 constexpr float sv_friction = 6;
 constexpr float sv_waterfriction = 1;
 
-void G_RunEntity(edict_t *ent);
-bool SV_RunThink(edict_t *ent);
-void SV_AddRotationalFriction(edict_t *ent);
-void SV_AddGravity(edict_t *ent);
-void SV_CheckVelocity(edict_t *ent);
-void	SV_FlyMove(edict_t *ent, float time, contents_t mask);
-contents_t G_GetClipMask(edict_t *ent);
-void G_Impact(edict_t *e1, const trace_t &trace);
+void G_RunEntity(edict_t* ent);
+bool SV_RunThink(edict_t* ent);
+void SV_AddRotationalFriction(edict_t* ent);
+void SV_AddGravity(edict_t* ent);
+void SV_CheckVelocity(edict_t* ent);
+void	SV_FlyMove(edict_t* ent, float time, contents_t mask);
+contents_t G_GetClipMask(edict_t* ent);
+void G_Impact(edict_t* e1, const trace_t& trace);
 
 //
 // g_main.c
 //
 void SaveClientData();
-void FetchClientEntData(edict_t *ent);
+void FetchClientEntData(edict_t* ent);
 void EndDMLevel();
 
 //
 // g_chase.c
 //
-void UpdateChaseCam(edict_t *ent);
-void ChaseNext(edict_t *ent);
-void ChasePrev(edict_t *ent);
-void GetChaseTarget(edict_t *ent);
+void UpdateChaseCam(edict_t* ent);
+void ChaseNext(edict_t* ent);
+void ChasePrev(edict_t* ent);
+void GetChaseTarget(edict_t* ent);
 
 //====================
 // ROGUE PROTOTYPES
 //
 // g_newweap.c
 //
-void fire_flechette(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, int kick);
-void fire_prox(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed);
-void fire_nuke(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int speed);
-bool fire_player_melee(edict_t *self, const vec3_t &start, const vec3_t &aim, int reach, int damage, int kick, mod_t mod);
-void fire_tesla(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed);
-void fire_blaster2(edict_t *self, const vec3_t &start, const vec3_t &aimdir, int damage, int speed, effects_t effect,
-				   bool hyper);
-void fire_heatbeam(edict_t *self, const vec3_t &start, const vec3_t &aimdir, const vec3_t &offset, int damage, int kick,
-				   bool monster);
-void fire_tracker(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed, edict_t *enemy);
+void fire_flechette(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, int kick);
+void fire_prox(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed);
+void fire_nuke(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int speed);
+bool fire_player_melee(edict_t* self, const vec3_t& start, const vec3_t& aim, int reach, int damage, int kick, mod_t mod);
+void fire_tesla(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed);
+void fire_blaster2(edict_t* self, const vec3_t& start, const vec3_t& aimdir, int damage, int speed, effects_t effect,
+	bool hyper);
+void fire_heatbeam(edict_t* self, const vec3_t& start, const vec3_t& aimdir, const vec3_t& offset, int damage, int kick,
+	bool monster);
+void fire_tracker(edict_t* self, const vec3_t& start, const vec3_t& dir, int damage, int speed, edict_t* enemy);
 
 //
 // g_newai.c
 //
-bool	 blocked_checkplat(edict_t *self, float dist);
+bool	 blocked_checkplat(edict_t* self, float dist);
 
 enum class blocked_jump_result_t
 {
@@ -2574,84 +2574,84 @@ enum class blocked_jump_result_t
 	JUMP_JUMP_DOWN
 };
 
-blocked_jump_result_t blocked_checkjump(edict_t *self, float dist);
-bool	 monsterlost_checkhint(edict_t *self);
-bool	 inback(edict_t *self, edict_t *other);
-float	 realrange(edict_t *self, edict_t *other);
-edict_t *SpawnBadArea(const vec3_t &mins, const vec3_t &maxs, gtime_t lifespan, edict_t *owner);
-edict_t *CheckForBadArea(edict_t *ent);
-bool	 MarkTeslaArea(edict_t *self, edict_t *tesla);
+blocked_jump_result_t blocked_checkjump(edict_t* self, float dist);
+bool	 monsterlost_checkhint(edict_t* self);
+bool	 inback(edict_t* self, edict_t* other);
+float	 realrange(edict_t* self, edict_t* other);
+edict_t* SpawnBadArea(const vec3_t& mins, const vec3_t& maxs, gtime_t lifespan, edict_t* owner);
+edict_t* CheckForBadArea(edict_t* ent);
+bool	 MarkTeslaArea(edict_t* self, edict_t* tesla);
 void	 InitHintPaths();
-void PredictAim(edict_t *self, edict_t *target, const vec3_t &start, float bolt_speed, bool eye_height, float offset, vec3_t *aimdir,
-				vec3_t *aimpoint);
-bool M_CalculatePitchToFire(edict_t *self, const vec3_t &target, const vec3_t &start, vec3_t &aim, float speed, float time_remaining, bool mortar, bool destroy_on_touch = false);
-bool below(edict_t *self, edict_t *other);
-void drawbbox(edict_t *self);
-void M_MonsterDodge(edict_t *self, edict_t *attacker, gtime_t eta, trace_t *tr, bool gravity);
-void monster_duck_down(edict_t *self);
-void monster_duck_hold(edict_t *self);
-void monster_duck_up(edict_t *self);
-bool has_valid_enemy(edict_t *self);
-void TargetTesla(edict_t *self, edict_t *tesla);
-void hintpath_stop(edict_t *self);
-edict_t *PickCoopTarget(edict_t *self);
+void PredictAim(edict_t* self, edict_t* target, const vec3_t& start, float bolt_speed, bool eye_height, float offset, vec3_t* aimdir,
+	vec3_t* aimpoint);
+bool M_CalculatePitchToFire(edict_t* self, const vec3_t& target, const vec3_t& start, vec3_t& aim, float speed, float time_remaining, bool mortar, bool destroy_on_touch = false);
+bool below(edict_t* self, edict_t* other);
+void drawbbox(edict_t* self);
+void M_MonsterDodge(edict_t* self, edict_t* attacker, gtime_t eta, trace_t* tr, bool gravity);
+void monster_duck_down(edict_t* self);
+void monster_duck_hold(edict_t* self);
+void monster_duck_up(edict_t* self);
+bool has_valid_enemy(edict_t* self);
+void TargetTesla(edict_t* self, edict_t* tesla);
+void hintpath_stop(edict_t* self);
+edict_t* PickCoopTarget(edict_t* self);
 int		 CountPlayers();
-bool	 monster_jump_finished(edict_t *self);
-void BossExplode(edict_t *self);
+bool	 monster_jump_finished(edict_t* self);
+void BossExplode(edict_t* self);
 
 // g_rogue_func
-void plat2_spawn_danger_area(edict_t *ent);
-void plat2_kill_danger_area(edict_t *ent);
+void plat2_spawn_danger_area(edict_t* ent);
+void plat2_kill_danger_area(edict_t* ent);
 
 // g_rogue_spawn
-edict_t *CreateMonster(const vec3_t &origin, const vec3_t &angles, const char *classname);
-edict_t *CreateFlyMonster(const vec3_t &origin, const vec3_t &angles, const vec3_t &mins, const vec3_t &maxs,
-						  const char *classname);
-edict_t *CreateGroundMonster(const vec3_t &origin, const vec3_t &angles, const vec3_t &mins, const vec3_t &maxs,
-							 const char *classname, float height);
-bool	 FindSpawnPoint(const vec3_t &startpoint, const vec3_t &mins, const vec3_t &maxs, vec3_t &spawnpoint,
-						float maxMoveUp, bool drop = true);
-bool	 CheckSpawnPoint(const vec3_t &origin, const vec3_t &mins, const vec3_t &maxs);
-bool	 CheckGroundSpawnPoint(const vec3_t &origin, const vec3_t &entMins, const vec3_t &entMaxs, float height,
-							   float gravity);
-void	 SpawnGrow_Spawn(const vec3_t &startpos, float start_size, float end_size);
-void	 Widowlegs_Spawn(const vec3_t &startpos, const vec3_t &angles);
+edict_t* CreateMonster(const vec3_t& origin, const vec3_t& angles, const char* classname);
+edict_t* CreateFlyMonster(const vec3_t& origin, const vec3_t& angles, const vec3_t& mins, const vec3_t& maxs,
+	const char* classname);
+edict_t* CreateGroundMonster(const vec3_t& origin, const vec3_t& angles, const vec3_t& mins, const vec3_t& maxs,
+	const char* classname, float height);
+bool	 FindSpawnPoint(const vec3_t& startpoint, const vec3_t& mins, const vec3_t& maxs, vec3_t& spawnpoint,
+	float maxMoveUp, bool drop = true);
+bool	 CheckSpawnPoint(const vec3_t& origin, const vec3_t& mins, const vec3_t& maxs);
+bool	 CheckGroundSpawnPoint(const vec3_t& origin, const vec3_t& entMins, const vec3_t& entMaxs, float height,
+	float gravity);
+void	 SpawnGrow_Spawn(const vec3_t& startpos, float start_size, float end_size);
+void	 Widowlegs_Spawn(const vec3_t& startpos, const vec3_t& angles);
 
 // g_rogue_items
-bool Pickup_Nuke(edict_t *ent, edict_t *other);
-void Use_IR(edict_t *ent, gitem_t *item);
-void Use_Double(edict_t *ent, gitem_t *item);
-void Use_Nuke(edict_t *ent, gitem_t *item);
-void Use_Doppleganger(edict_t *ent, gitem_t *item);
-bool Pickup_Doppleganger(edict_t *ent, edict_t *other);
-bool Pickup_Sphere(edict_t *ent, edict_t *other);
-void Use_Defender(edict_t *ent, gitem_t *item);
-void Use_Hunter(edict_t *ent, gitem_t *item);
-void Use_Vengeance(edict_t *ent, gitem_t *item);
-void Item_TriggeredSpawn(edict_t *self, edict_t *other, edict_t *activator);
-void SetTriggeredSpawn(edict_t *ent);
+bool Pickup_Nuke(edict_t* ent, edict_t* other);
+void Use_IR(edict_t* ent, gitem_t* item);
+void Use_Double(edict_t* ent, gitem_t* item);
+void Use_Nuke(edict_t* ent, gitem_t* item);
+void Use_Doppleganger(edict_t* ent, gitem_t* item);
+bool Pickup_Doppleganger(edict_t* ent, edict_t* other);
+bool Pickup_Sphere(edict_t* ent, edict_t* other);
+void Use_Defender(edict_t* ent, gitem_t* item);
+void Use_Hunter(edict_t* ent, gitem_t* item);
+void Use_Vengeance(edict_t* ent, gitem_t* item);
+void Item_TriggeredSpawn(edict_t* self, edict_t* other, edict_t* activator);
+void SetTriggeredSpawn(edict_t* ent);
 
 //
 // g_sphere.c
 //
-void Defender_Launch(edict_t *self);
-void Vengeance_Launch(edict_t *self);
-void Hunter_Launch(edict_t *self);
+void Defender_Launch(edict_t* self);
+void Vengeance_Launch(edict_t* self);
+void Hunter_Launch(edict_t* self);
 
 //
 // g_newdm.c
 //
 void	 InitGameRules();
-item_id_t DoRandomRespawn(edict_t *ent);
+item_id_t DoRandomRespawn(edict_t* ent);
 void	 PrecacheForRandomRespawn();
-bool	 Tag_PickupToken(edict_t *ent, edict_t *other);
-void	 Tag_DropToken(edict_t *ent, gitem_t *item);
-void	 fire_doppleganger(edict_t *ent, const vec3_t &start, const vec3_t &aimdir);
+bool	 Tag_PickupToken(edict_t* ent, edict_t* other);
+void	 Tag_DropToken(edict_t* ent, gitem_t* item);
+void	 fire_doppleganger(edict_t* ent, const vec3_t& start, const vec3_t& aimdir);
 
 //
 // p_client.c
 //
-void RemoveAttackingPainDaemons(edict_t *self);
+void RemoveAttackingPainDaemons(edict_t* self);
 bool G_ShouldPlayersCollide(bool weaponry);
 bool P_UseCoopInstancedItems();
 
@@ -2670,10 +2670,6 @@ constexpr spawnflags_t SPAWNFLAG_LANDMARK_KEEP_Z = 1_spawnflag;
 	return G_PowerUpExpiringRelative(time - level.time);
 }
 
-// ZOID
-//#include "ctf/g_ctf.h"
-//#include "ctf/p_ctf_menu.h"
-// ZOID
 //============================================================================
 
 // client_t->anim_priority
@@ -2687,7 +2683,7 @@ enum anim_priority_t
 	ANIM_DEATH,
 
 	// flags
-	ANIM_REVERSED	= bit_v<8>
+	ANIM_REVERSED = bit_v<8>
 };
 
 MAKE_ENUM_BITFLAGS(anim_priority_t);
@@ -2701,7 +2697,7 @@ struct height_fog_t
 	float falloff;
 	float density;
 
-	inline bool operator==(const height_fog_t &o) const
+	inline bool operator==(const height_fog_t& o) const
 	{
 		return start == o.start && end == o.end && falloff == o.falloff && density == o.density;
 	}
@@ -2754,9 +2750,9 @@ struct client_persistant_t
 	int32_t autoshield; // see AUTO_SHIELD_*
 
 	bool connected, spawned; // a loadgame will leave valid entities that
-					// just don't have a connection yet
+	// just don't have a connection yet
 
-	// values saved and restored from edicts when changing levels
+// values saved and restored from edicts when changing levels
 	int32_t		health;
 	int32_t		max_health;
 	ent_flags_t savedFlags;
@@ -2768,15 +2764,15 @@ struct client_persistant_t
 	// ammo capacities
 	std::array<int16_t, AMMO_MAX> max_ammo;
 
-	gitem_t *weapon;
-	gitem_t *lastweapon;
+	gitem_t* weapon;
+	gitem_t* lastweapon;
 
 	int32_t power_cubes; // used for tracking the cubes in coop games
 	int32_t score;		 // for calculating total unit score in coop games
 
 	int32_t game_help1changed, game_help2changed;
 	int32_t helpchanged; // flash F1 icon if non 0, play sound
-						 // and increment only if 1, 2, or 3
+	// and increment only if 1, 2, or 3
 	gtime_t help_time;
 
 	bool spectator; // client wants to be a spectator
@@ -2804,8 +2800,6 @@ struct client_respawn_t
 	bool spectator; // client is a spectator
 
 	// ZOID
-	//ctfteam_t ctf_team; // CTF team
-	int32_t ctf_team;
 	int32_t	 ctf_state;
 	gtime_t	 ctf_lasthurtcarrier;
 	gtime_t	 ctf_lastreturnedflag;
@@ -2816,8 +2810,7 @@ struct client_respawn_t
 	bool	 voted; // for elections
 	bool	 ready;
 	bool	 admin;
-	char ghost_t[80]; //ghost_t *ghost; // for ghost codes
-					// ZOID
+	// ZOID
 };
 
 // [Paril-KEX] seconds until we are fully invisible after
@@ -2875,7 +2868,7 @@ struct gclient_t
 	bool weapon_fire_buffered;
 	bool weapon_thunk;
 
-	gitem_t *newweapon;
+	gitem_t* newweapon;
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
@@ -2908,7 +2901,7 @@ struct gclient_t
 	float		  bobtime;			  // so off-ground doesn't change it
 	vec3_t		  oldviewangles;
 	vec3_t		  oldvelocity;
-	edict_t		  *oldgroundentity; // [Paril-KEX]
+	edict_t* oldgroundentity; // [Paril-KEX]
 	gtime_t		  flash_time; // [Paril-KEX] for high tickrate
 
 	gtime_t		  next_drown_time;
@@ -2947,7 +2940,7 @@ struct gclient_t
 
 	gtime_t respawn_time; // can respawn when time > this
 
-	edict_t *chase_target; // player we are chasing
+	edict_t* chase_target; // player we are chasing
 	bool	 update_chase; // need to update chase info?
 
 	//=======
@@ -2957,18 +2950,17 @@ struct gclient_t
 	gtime_t nuke_time;
 	gtime_t tracker_pain_time;
 
-	edict_t *owned_sphere; // this points to the player's sphere
-						   // ROGUE
-	//=======
+	edict_t* owned_sphere; // this points to the player's sphere
+	// ROGUE
+//=======
 
 	gtime_t empty_click_sound;
 
 	// ZOID
 	bool		inmenu;	  // in menu
-	void* menu;
 	gtime_t		menutime; // time to update menu
 	bool		menudirty;
-	edict_t		*ctf_grapple;			// entity of grapple
+	edict_t* ctf_grapple;			// entity of grapple
 	int32_t		ctf_grapplestate;		// true if pulling
 	gtime_t		ctf_grapplereleasetime; // time of grapple release
 	gtime_t		ctf_regentime;			// regen tech
@@ -2977,7 +2969,7 @@ struct gclient_t
 	// ZOID
 
 	// used for player trails.
-	edict_t *trail_head, *trail_tail;
+	edict_t* trail_head, * trail_tail;
 	// whether to use weapon chains
 	bool no_weapon_chains;
 
@@ -2996,11 +2988,11 @@ struct gclient_t
 	gtime_t last_damage_time;
 
 	// [Paril-KEX] these are now per-player, to work better in coop
-	edict_t *sight_entity;
+	edict_t* sight_entity;
 	gtime_t	 sight_entity_time;
-	edict_t *sound_entity;
+	edict_t* sound_entity;
 	gtime_t	 sound_entity_time;
-	edict_t *sound2_entity;
+	edict_t* sound2_entity;
 	gtime_t  sound2_entity_time;
 	// saved positions for lag compensation
 	uint8_t	 num_lag_origins; // 0 to MAX_LAG_ORIGINS, how many we can go back
@@ -3050,15 +3042,15 @@ MAKE_ENUM_BITFLAGS(plat2flags_t);
 struct edict_t
 {
 	edict_t() = delete;
-	edict_t(const edict_t &) = delete;
-	edict_t(edict_t &&) = delete;
+	edict_t(const edict_t&) = delete;
+	edict_t(edict_t&&) = delete;
 
 	// shared with server; do not touch members until the "private" section
 	entity_state_t s;
-	gclient_t	  *client; // nullptr if not a player
-						   // the server expects the first part
-						   // of gclient_t to be a player_state_t
-						   // but the rest of it is opaque
+	gclient_t* client; // nullptr if not a player
+	// the server expects the first part
+	// of gclient_t to be a player_state_t
+	// but the rest of it is opaque
 
 	sv_entity_t sv;	       // read only info about this entity for the server
 
@@ -3074,7 +3066,7 @@ struct edict_t
 	vec3_t	   absmin, absmax, size;
 	solid_t	   solid;
 	contents_t clipmask;
-	edict_t	   *owner;
+	edict_t* owner;
 
 	//================================
 
@@ -3083,29 +3075,29 @@ struct edict_t
 	movetype_t	movetype;
 	ent_flags_t flags;
 
-	const char *model;
+	const char* model;
 	gtime_t		freetime; // sv.time when the object was freed
 
 	//
 	// only used locally in game, not by server
 	//
-	const char		*message;
-	const char		*classname;
+	const char* message;
+	const char* classname;
 	spawnflags_t	spawnflags;
 
 	gtime_t timestamp;
 
 	float		angle; // set in qe3, -1 = up, -2 = down
-	const char *target;
-	const char *targetname;
-	const char *killtarget;
-	const char *team;
-	const char *pathtarget;
-	const char *deathtarget;
-	const char *healthtarget;
-	const char *itemtarget; // [Paril-KEX]
-	const char *combattarget;
-	edict_t	*target_ent;
+	const char* target;
+	const char* targetname;
+	const char* killtarget;
+	const char* team;
+	const char* pathtarget;
+	const char* deathtarget;
+	const char* healthtarget;
+	const char* itemtarget; // [Paril-KEX]
+	const char* combattarget;
+	edict_t* target_ent;
 
 	float  speed, accel, decel;
 	vec3_t movedir;
@@ -3116,10 +3108,10 @@ struct edict_t
 	int32_t mass;
 	gtime_t air_finished;
 	float	gravity; // per entity gravity multiplier (1.0 is normal)
-					 // use for lowgrav artifact, flares
+	// use for lowgrav artifact, flares
 
-	edict_t *goalentity;
-	edict_t *movetarget;
+	edict_t* goalentity;
+	edict_t* movetarget;
 	float	 yaw_speed;
 	float	 ideal_yaw;
 
@@ -3145,7 +3137,7 @@ struct edict_t
 
 	gtime_t powerarmor_time;
 
-	const char *map; // target_changelevel
+	const char* map; // target_changelevel
 
 	int32_t viewheight; // height above origin where eyesight is determined
 	bool	deadflag;
@@ -3156,17 +3148,17 @@ struct edict_t
 	int32_t sounds; // make this a spawntemp var?
 	int32_t count;
 
-	edict_t *chain;
-	edict_t *enemy;
-	edict_t *oldenemy;
-	edict_t *activator;
-	edict_t *groundentity;
+	edict_t* chain;
+	edict_t* enemy;
+	edict_t* oldenemy;
+	edict_t* activator;
+	edict_t* groundentity;
 	int32_t	 groundentity_linkcount;
-	edict_t *teamchain;
-	edict_t *teammaster;
+	edict_t* teamchain;
+	edict_t* teammaster;
 
-	edict_t *mynoise; // can go in client only
-	edict_t *mynoise2;
+	edict_t* mynoise; // can go in client only
+	edict_t* mynoise2;
 
 	int32_t noise_index;
 	int32_t noise_index2;
@@ -3188,7 +3180,7 @@ struct edict_t
 
 	int32_t style; // also used as areaportal number
 
-	gitem_t *item; // for bonus items
+	gitem_t* item; // for bonus items
 
 	// common data blocks
 	moveinfo_t	  moveinfo;
@@ -3199,10 +3191,10 @@ struct edict_t
 	plat2flags_t plat2flags;
 	vec3_t		 offset;
 	vec3_t		 gravityVector;
-	edict_t		*bad_area;
-	edict_t		*hint_chain;
-	edict_t		*monster_hint_chain;
-	edict_t		*target_hint_chain;
+	edict_t* bad_area;
+	edict_t* hint_chain;
+	edict_t* monster_hint_chain;
+	edict_t* target_hint_chain;
 	int32_t		 hint_chain_id;
 	// ROGUE
 	//=========
@@ -3212,11 +3204,11 @@ struct edict_t
 	// Paril: we died on this frame, apply knockback even if we're dead
 	gtime_t dead_time;
 	// used for dabeam monsters
-	edict_t *beam, *beam2;
+	edict_t* beam, * beam2;
 	// proboscus for Parasite
-	edict_t *proboscus;
+	edict_t* proboscus;
 	// for vooping things
-	edict_t *disintegrator;
+	edict_t* disintegrator;
 	gtime_t disintegrator_time;
 	int32_t hackflags; // n64
 
@@ -3255,7 +3247,7 @@ struct edict_t
 	bmodel_anim_t bmodel_anim;
 
 	mod_t	lastMOD;
-	const char	*style_on, *style_off;
+	const char* style_on, * style_off;
 	uint32_t crosslevel_flags;
 	gtime_t no_gravity_time;
 	float vision_cone; // TODO: migrate vision_cone on old loads to -2.0f
@@ -3286,15 +3278,15 @@ struct dm_game_rt
 {
 	void (*GameInit)();
 	void (*PostInitSetup)();
-	void (*ClientBegin)(edict_t *ent);
-	bool (*SelectSpawnPoint)(edict_t *ent, vec3_t &origin, vec3_t &angles, bool force_spawn);
-	void (*PlayerDeath)(edict_t *targ, edict_t *inflictor, edict_t *attacker);
-	void (*Score)(edict_t *attacker, edict_t *victim, int scoreChange, const mod_t &mod);
-	void (*PlayerEffects)(edict_t *ent);
-	void (*DogTag)(edict_t *ent, edict_t *killer, const char **pic);
-	void (*PlayerDisconnect)(edict_t *ent);
-	int (*ChangeDamage)(edict_t *targ, edict_t *attacker, int damage, mod_t mod);
-	int (*ChangeKnockback)(edict_t *targ, edict_t *attacker, int knockback, mod_t mod);
+	void (*ClientBegin)(edict_t* ent);
+	bool (*SelectSpawnPoint)(edict_t* ent, vec3_t& origin, vec3_t& angles, bool force_spawn);
+	void (*PlayerDeath)(edict_t* targ, edict_t* inflictor, edict_t* attacker);
+	void (*Score)(edict_t* attacker, edict_t* victim, int scoreChange, const mod_t& mod);
+	void (*PlayerEffects)(edict_t* ent);
+	void (*DogTag)(edict_t* ent, edict_t* killer, const char** pic);
+	void (*PlayerDisconnect)(edict_t* ent);
+	int (*ChangeDamage)(edict_t* targ, edict_t* attacker, int damage, mod_t mod);
+	int (*ChangeKnockback)(edict_t* targ, edict_t* attacker, int knockback, mod_t mod);
 	int (*CheckDMRules)();
 };
 
@@ -3305,7 +3297,7 @@ extern dm_game_rt DMGame;
 
 
 // [Paril-KEX]
-inline void monster_footstep(edict_t *self)
+inline void monster_footstep(edict_t* self)
 {
 	if (self->groundentity)
 		self->s.event = EV_OTHER_FOOTSTEP;
@@ -3318,11 +3310,11 @@ inline void monster_footstep(edict_t *self)
 template<typename TFilter>
 struct entity_iterator_t
 {
-    using iterator_category = std::random_access_iterator_tag;
-    using value_type        = edict_t *;
-    using reference         = edict_t *;
-    using pointer           = edict_t *;
-    using difference_type   = ptrdiff_t;
+	using iterator_category = std::random_access_iterator_tag;
+	using value_type = edict_t*;
+	using reference = edict_t*;
+	using pointer = edict_t*;
+	using difference_type = ptrdiff_t;
 
 private:
 	uint32_t index;
@@ -3358,32 +3350,32 @@ private:
 public:
 	// note: index is not affected by filter. it is up to
 	// the caller to ensure this index is filtered.
-	constexpr entity_iterator_t(uint32_t i, uint32_t end_index = -1) : index(i), end_index((end_index >= globals.num_edicts) ? globals.num_edicts : end_index) { }
-	
+	constexpr entity_iterator_t(uint32_t i, uint32_t end_index = -1) : index(i), end_index((end_index >= globals.num_edicts) ? globals.num_edicts : end_index) {}
+
 	inline reference operator*() { throw_if_out_of_range(); return &g_edicts[index]; }
 	inline pointer operator->() { throw_if_out_of_range(); return &g_edicts[index]; }
-	
-	inline entity_iterator_t &operator++()
+
+	inline entity_iterator_t& operator++()
 	{
 		throw_if_out_of_range();
 		return *this = *this + 1;
 	}
 
-	inline entity_iterator_t &operator--()
+	inline entity_iterator_t& operator--()
 	{
 		throw_if_out_of_range();
 		return *this = *this - 1;
 	}
 
-	inline difference_type operator-(const entity_iterator_t &it) const
+	inline difference_type operator-(const entity_iterator_t& it) const
 	{
 		return clamped_index() - it.clamped_index();
 	}
 
-	inline entity_iterator_t operator+(const difference_type &offset) const
+	inline entity_iterator_t operator+(const difference_type& offset) const
 	{
 		entity_iterator_t it(index + offset, end_index);
-		
+
 		// move in the specified direction, only stopping if we
 		// run out of range or find a filtered entity
 		while (!is_out_of_range(it.index) && !filter(*it))
@@ -3393,19 +3385,19 @@ public:
 	}
 
 	// + -1 and - 1 are the same (and - -1 & + 1)
-	inline entity_iterator_t operator-(const difference_type &offset) const { return *this + (-offset); }
-	
+	inline entity_iterator_t operator-(const difference_type& offset) const { return *this + (-offset); }
+
 	// comparison. hopefully this won't break anything, but == and != use the
 	// clamped index (so -1 and num_edicts will be equal technically since they
 	// are the same "invalid" entity) but <= and >= will affect them properly.
-	inline bool operator==(const entity_iterator_t &it) const { return clamped_index() == it.clamped_index(); }
-	inline bool operator!=(const entity_iterator_t &it) const { return clamped_index() != it.clamped_index(); }
-	inline bool operator<(const entity_iterator_t &it) const { return index < it.index; }
-	inline bool operator>(const entity_iterator_t &it) const { return index > it.index; }
-	inline bool operator<=(const entity_iterator_t &it) const { return index <= it.index; }
-	inline bool operator>=(const entity_iterator_t &it) const { return index >= it.index; }
+	inline bool operator==(const entity_iterator_t& it) const { return clamped_index() == it.clamped_index(); }
+	inline bool operator!=(const entity_iterator_t& it) const { return clamped_index() != it.clamped_index(); }
+	inline bool operator<(const entity_iterator_t& it) const { return index < it.index; }
+	inline bool operator>(const entity_iterator_t& it) const { return index > it.index; }
+	inline bool operator<=(const entity_iterator_t& it) const { return index <= it.index; }
+	inline bool operator>=(const entity_iterator_t& it) const { return index >= it.index; }
 
-	inline edict_t *operator[](const difference_type &offset) const { return *(*this + offset); }
+	inline edict_t* operator[](const difference_type& offset) const { return *(*this + offset); }
 };
 
 // iterate over range of entities, with the specified filter.
@@ -3431,10 +3423,10 @@ private:
 public:
 	// iterate all allocated entities that match the filter,
 	// including ones allocated after this iterator is constructed
-	inline entity_iterable_t<TFilter>() : begin_index(find_matched_index(0, 1)), end_index(game.maxentities) { }
+	inline entity_iterable_t<TFilter>() : begin_index(find_matched_index(0, 1)), end_index(game.maxentities) {}
 	// iterate all allocated entities that match the filter from the specified begin offset
 	// including ones allocated after this iterator is constructed
-	inline entity_iterable_t<TFilter>(uint32_t start) : begin_index(find_matched_index(start, 1)), end_index(game.maxentities) { }
+	inline entity_iterable_t<TFilter>(uint32_t start) : begin_index(find_matched_index(start, 1)), end_index(game.maxentities) {}
 	// iterate all allocated entities that match the filter from the specified begin offset
 	// to the specified INCLUSIVE end offset (or the first entity that matches before it),
 	// including end itself but not ones that may appear after this iterator is done
@@ -3451,7 +3443,7 @@ public:
 // inuse players that are connected; may not be spawned yet, however
 struct active_players_filter_t
 {
-	inline bool operator()(edict_t *ent) const
+	inline bool operator()(edict_t* ent) const
 	{
 		return (ent->inuse && ent->client && ent->client->pers.connected);
 	}
@@ -3465,12 +3457,12 @@ inline entity_iterable_t<active_players_filter_t> active_players()
 struct gib_def_t
 {
 	size_t count;
-	const char *gibname;
+	const char* gibname;
 	float scale;
 	gib_type_t type;
 	int framenum = 0;
 
-	constexpr gib_def_t(size_t count, const char *gibname) :
+	constexpr gib_def_t(size_t count, const char* gibname) :
 		count(count),
 		gibname(gibname),
 		scale(1.0f),
@@ -3478,7 +3470,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(size_t count, const char *gibname, gib_type_t type) :
+	constexpr gib_def_t(size_t count, const char* gibname, gib_type_t type) :
 		count(count),
 		gibname(gibname),
 		scale(1.0f),
@@ -3486,7 +3478,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(size_t count, const char *gibname, float scale) :
+	constexpr gib_def_t(size_t count, const char* gibname, float scale) :
 		count(count),
 		gibname(gibname),
 		scale(scale),
@@ -3494,7 +3486,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(size_t count, const char *gibname, float scale, gib_type_t type) :
+	constexpr gib_def_t(size_t count, const char* gibname, float scale, gib_type_t type) :
 		count(count),
 		gibname(gibname),
 		scale(scale),
@@ -3502,7 +3494,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(const char *gibname, float scale, gib_type_t type) :
+	constexpr gib_def_t(const char* gibname, float scale, gib_type_t type) :
 		count(1),
 		gibname(gibname),
 		scale(scale),
@@ -3510,7 +3502,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(const char *gibname, float scale) :
+	constexpr gib_def_t(const char* gibname, float scale) :
 		count(1),
 		gibname(gibname),
 		scale(scale),
@@ -3518,7 +3510,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(const char *gibname, gib_type_t type) :
+	constexpr gib_def_t(const char* gibname, gib_type_t type) :
 		count(1),
 		gibname(gibname),
 		scale(1.0f),
@@ -3526,7 +3518,7 @@ struct gib_def_t
 	{
 	}
 
-	constexpr gib_def_t(const char *gibname) :
+	constexpr gib_def_t(const char* gibname) :
 		count(1),
 		gibname(gibname),
 		scale(1.0f),
@@ -3534,7 +3526,7 @@ struct gib_def_t
 	{
 	}
 
-	inline gib_def_t &frame(int f)
+	inline gib_def_t& frame(int f)
 	{
 		framenum = f;
 		return *this;
@@ -3544,14 +3536,14 @@ struct gib_def_t
 // convenience function to throw different gib types
 // NOTE: always throw the head gib *last* since self's size is used
 // to position the gibs!
-inline void ThrowGibs(edict_t *self, int32_t damage, std::initializer_list<gib_def_t> gibs)
+inline void ThrowGibs(edict_t* self, int32_t damage, std::initializer_list<gib_def_t> gibs)
 {
-	for (auto &gib : gibs)
+	for (auto& gib : gibs)
 		for (size_t i = 0; i < gib.count; i++)
 			ThrowGib(self, gib.gibname, damage, gib.type, gib.scale * (self->s.scale ? self->s.scale : 1), gib.framenum);
 }
 
-inline bool M_CheckGib(edict_t *self, const mod_t &mod)
+inline bool M_CheckGib(edict_t* self, const mod_t& mod)
 {
 	if (self->deadflag)
 	{
@@ -3567,17 +3559,17 @@ template<>
 struct fmt::formatter<edict_t>
 {
 	template<typename ParseContext>
-	constexpr auto parse(ParseContext &ctx)
+	constexpr auto parse(ParseContext& ctx)
 	{
 		return ctx.begin();
 	}
 
-    template<typename FormatContext>
-    auto format(const edict_t &p, FormatContext &ctx) const
-    {
+	template<typename FormatContext>
+	auto format(const edict_t& p, FormatContext& ctx) const
+	{
 		vec3_t pos = p.linked ? ((p.absmax + p.absmin) * 0.5f) : p.s.origin;
 		return fmt::format_to(ctx.out(), FMT_STRING("{} @ {}"), p.classname, pos);
-    }
+	}
 };
 
 // POI tags used by this mod
@@ -3591,7 +3583,7 @@ enum pois_t : uint16_t
 };
 
 // implementation of pierce stuff
-inline bool pierce_args_t::mark(edict_t *ent)
+inline bool pierce_args_t::mark(edict_t* ent)
 {
 	// ran out of pierces
 	if (num_pierced == MAX_PIERCE)
@@ -3612,7 +3604,7 @@ inline void pierce_args_t::restore()
 {
 	for (size_t i = 0; i < num_pierced; i++)
 	{
-		auto &ent = pierced[i];
+		auto& ent = pierced[i];
 		ent->solid = pierce_solidities[i];
 		gi.linkentity(ent);
 	}
@@ -3625,11 +3617,11 @@ inline void pierce_args_t::restore()
 template<auto T>
 struct cached_assetindex
 {
-	static cached_assetindex<T> *head;
+	static cached_assetindex<T>* head;
 
-	const char				*name;
+	const char* name;
 	int32_t					index = 0;
-	cached_assetindex		*next = nullptr;
+	cached_assetindex* next = nullptr;
 
 	inline cached_assetindex()
 	{
@@ -3639,7 +3631,7 @@ struct cached_assetindex
 	constexpr operator int32_t() const { return index; }
 
 	// assigned from spawn functions
-	inline void assign(const char *name) { this->name = name; index = (gi.*T)(name); }
+	inline void assign(const char* name) { this->name = name; index = (gi.*T)(name); }
 	// cleared before SpawnEntities
 	constexpr void clear() { index = 0; }
 	// re-find the index for the given cached entry, if we were cached
@@ -3673,9 +3665,9 @@ using cached_soundindex = cached_assetindex<&local_game_import_t::soundindex>;
 using cached_modelindex = cached_assetindex<&local_game_import_t::modelindex>;
 using cached_imageindex = cached_assetindex<&local_game_import_t::imageindex>;
 
-template<> cached_soundindex *cached_soundindex::head;
-template<> cached_modelindex *cached_modelindex::head;
-template<> cached_imageindex *cached_imageindex::head;
+template<> cached_soundindex* cached_soundindex::head;
+template<> cached_modelindex* cached_modelindex::head;
+template<> cached_imageindex* cached_imageindex::head;
 
 extern cached_modelindex sm_meat_index;
 extern cached_soundindex snd_fry;

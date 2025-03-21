@@ -261,6 +261,7 @@
     <ClCompile Include="as\thirdparty\angelscript\source\as_variablescope.cpp">
       <Filter>as\thirdparty\anglescript\source</Filter>
     </ClCompile>
+    <ClCompile Include="q_std.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
@@ -555,6 +556,8 @@
     <ClInclude Include="as\thirdparty\angelscript\source\as_variablescope.h">
       <Filter>as\thirdparty\anglescript\source</Filter>
     </ClInclude>
+    <ClInclude Include="q_std.h" />
+    <ClInclude Include="q_vec3.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="as">

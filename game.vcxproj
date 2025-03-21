@@ -187,6 +187,7 @@
     <ClCompile Include="as\yyjson.c" />
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="g_main.cpp" />
+    <ClCompile Include="q_std.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="as\ctrack.hpp" />
@@ -289,6 +290,8 @@
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
+    <ClInclude Include="q_std.h" />
+    <ClInclude Include="q_vec3.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="as\thirdparty\jsoncpp\src\lib_json\json_valueiterator.inl" />
