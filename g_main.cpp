@@ -417,53 +417,15 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
 {
 	gi = *import;
 
-	FRAME_TIME_S = FRAME_TIME_MS = gtime_t::from_ms(gi.frame_time_ms);
-
-	globals.apiversion = GAME_API_VERSION;
-	globals.PreInit = PreInitGame;
-	globals.Init = InitGame;
-	globals.Shutdown = ShutdownGame;
-	globals.SpawnEntities = SpawnEntities;
-
-	globals.WriteGameJson = WriteGameJson;
-	globals.ReadGameJson = ReadGameJson;
-	globals.WriteLevelJson = WriteLevelJson;
-	globals.ReadLevelJson = ReadLevelJson;
-	globals.CanSave = G_CanSave;
-
-	globals.Pmove = Pmove;
-
-	globals.GetExtension = G_GetExtension;
-
-	globals.ClientChooseSlot = ClientChooseSlot;
-	globals.ClientThink = ClientThink;
-	globals.ClientConnect = ClientConnect;
-	globals.ClientUserinfoChanged = ClientUserinfoChanged;
-	globals.ClientDisconnect = ClientDisconnect;
-	globals.ClientBegin = ClientBegin;
-	globals.ClientCommand = ClientCommand;
-
-	globals.RunFrame = G_RunFrame;
-	globals.PrepFrame = G_PrepFrame;
-
-	globals.ServerCommand = ServerCommand;
-	globals.Bot_SetWeapon = Bot_SetWeapon;
-	globals.Bot_TriggerEdict = Bot_TriggerEdict;
-	globals.Bot_GetItemID = Bot_GetItemID;
-	globals.Bot_UseItem = Bot_UseItem;
-	globals.Edict_ForceLookAtPoint = Edict_ForceLookAtPoint;
-	globals.Bot_PickedUpItem = Bot_PickedUpItem;
-
-	globals.Entity_IsVisibleToPlayer = Entity_IsVisibleToPlayer;
-	globals.GetShadowLightData = GetShadowLightData;
-
-	globals.edict_size = sizeof(edict_t);
-
 	// see if Q2AS needs to be initialized
 	if (auto api = Q2AS_GetGameAPI())
+	{
 		return api;
+	}
 
-	return &globals;
+	import->Com_Error("Failed to load AngleScript game API\n");
+
+	return NULL;
 }
 
 //======================================================================

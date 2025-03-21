@@ -98,32 +98,13 @@ Q2GAME_API cgame_export_t *GetCGameAPI(cgame_import_t *import)
 {
 	cgi = *import;
 
-	cglobals.apiversion = CGAME_API_VERSION;
-	cglobals.Init = InitCGame;
-	cglobals.Shutdown = ShutdownCGame;
-
-	cglobals.Pmove = Pmove;
-	cglobals.DrawHUD = CG_DrawHUD;
-	cglobals.LayoutFlags = CG_LayoutFlags;
-	cglobals.TouchPics = CG_TouchPics;
-	
-	cglobals.GetActiveWeaponWheelWeapon = CG_GetActiveWeaponWheelWeapon;
-	cglobals.GetOwnedWeaponWheelWeapons = CG_GetOwnedWeaponWheelWeapons;
-	cglobals.GetWeaponWheelAmmoCount = CG_GetWeaponWheelAmmoCount;
-	cglobals.GetPowerupWheelCount = CG_GetPowerupWheelCount;
-	cglobals.GetHitMarkerDamage = CG_GetHitMarkerDamage;
-	cglobals.ParseConfigString = CG_ParseConfigString;
-	cglobals.ParseCenterPrint = CG_ParseCenterPrint;
-	cglobals.ClearNotify = CG_ClearNotify;
-	cglobals.ClearCenterprint = CG_ClearCenterprint;
-	cglobals.NotifyMessage = CG_NotifyMessage;
-	cglobals.GetMonsterFlashOffset = CG_GetMonsterFlashOffset;
-
-	cglobals.GetExtension = CG_GetExtension;
-
 	// see if Q2AS needs to be initialized
 	if (auto api = Q2AS_GetCGameAPI())
+	{
 		return api;
+	}
 
-	return &cglobals;
+	import->Com_Error("Failed to load AngelScript CGame API\n");
+
+	return NULL;
 }
