@@ -307,7 +307,7 @@ static const std::initializer_list<spawn_t> spawns = {
 	{ "info_world_text", SP_info_world_text },
 	{ "path_corner", SP_path_corner },
 	{ "point_combat", SP_point_combat },
-	{ "info_nav_lock", SP_info_nav_lock },
+	{ "info_nav_lock", NULL },
 
 	{ "misc_explobox", SP_misc_explobox },
 	{ "misc_banner", SP_misc_banner },

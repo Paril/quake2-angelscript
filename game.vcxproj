@@ -185,10 +185,6 @@
     <ClCompile Include="as\thirdparty\scriptstdstring\scriptstdstring_utils.cpp" />
     <ClCompile Include="as\thirdparty\weakref\weakref.cpp" />
     <ClCompile Include="as\yyjson.c" />
-    <ClCompile Include="bots\bot_debug.cpp" />
-    <ClCompile Include="bots\bot_exports.cpp" />
-    <ClCompile Include="bots\bot_think.cpp" />
-    <ClCompile Include="bots\bot_utils.cpp" />
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="cg_screen.cpp" />
     <ClCompile Include="ctf\g_ctf.cpp" />
@@ -376,11 +372,6 @@
     <ClInclude Include="as\thirdparty\weakref\weakref.h" />
     <ClInclude Include="as\yyjson.h" />
     <ClInclude Include="bg_local.h" />
-    <ClInclude Include="bots\bot_debug.h" />
-    <ClInclude Include="bots\bot_exports.h" />
-    <ClInclude Include="bots\bot_includes.h" />
-    <ClInclude Include="bots\bot_think.h" />
-    <ClInclude Include="bots\bot_utils.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="ctf\g_ctf.h" />
     <ClInclude Include="ctf\p_ctf_menu.h" />

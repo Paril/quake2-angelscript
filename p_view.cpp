@@ -3,7 +3,6 @@
 
 #include "g_local.h"
 #include "m_player.h"
-#include "bots/bot_includes.h"
 
 /*
 ===============
@@ -1523,7 +1522,7 @@ void ClientEndServerFrame(edict_t *ent)
 	}
 
 	if ( ( ent->svflags & SVF_BOT ) != 0 ) {
-		Bot_EndFrame( ent );
+		//Bot_EndFrame( ent );
 	}
 
 	P_AssignClientSkinnum(ent);

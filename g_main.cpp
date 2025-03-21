@@ -2,7 +2,6 @@
 // Licensed under the GNU General Public License 2.0.
 
 #include "g_local.h"
-#include "bots/bot_includes.h"
 #include "as/q2as_main.h"
 
 CHECK_GCLIENT_INTEGRITY;
@@ -795,7 +794,7 @@ inline void G_RunFrame_(bool main_loop)
 {
 	G_CheckCvars();
 
-	Bot_UpdateDebug();
+	//Bot_UpdateDebug();
 
 	level.time += FRAME_TIME_MS;
 
@@ -903,7 +902,7 @@ inline void G_RunFrame_(bool main_loop)
 			}
 		}
 
-		Entity_UpdateState( ent );
+		//Entity_UpdateState( ent );
 
 		if (i > 0 && i <= game.maxclients)
 		{

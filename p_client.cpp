@@ -2,7 +2,6 @@
 // Licensed under the GNU General Public License 2.0.
 #include "g_local.h"
 #include "m_player.h"
-#include "bots/bot_includes.h"
 
 void SP_misc_teleporter_dest(edict_t *ent);
 
@@ -3842,7 +3841,7 @@ void ClientBeginServerFrame(edict_t *ent)
 	}
 
 	if ( ( ent->svflags & SVF_BOT ) != 0 ) {
-		Bot_BeginFrame( ent );
+		//Bot_BeginFrame( ent );
 	}
 
 	if (deathmatch->integer && !G_TeamplayEnabled() &&

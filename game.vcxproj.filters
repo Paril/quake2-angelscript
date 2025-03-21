@@ -54,18 +54,6 @@
     <ClCompile Include="p_view.cpp" />
     <ClCompile Include="p_weapon.cpp" />
     <ClCompile Include="q_std.cpp" />
-    <ClCompile Include="bots\bot_debug.cpp">
-      <Filter>bots</Filter>
-    </ClCompile>
-    <ClCompile Include="bots\bot_exports.cpp">
-      <Filter>bots</Filter>
-    </ClCompile>
-    <ClCompile Include="bots\bot_think.cpp">
-      <Filter>bots</Filter>
-    </ClCompile>
-    <ClCompile Include="bots\bot_utils.cpp">
-      <Filter>bots</Filter>
-    </ClCompile>
     <ClCompile Include="ctf\g_ctf.cpp">
       <Filter>ctf</Filter>
     </ClCompile>
@@ -463,21 +451,6 @@
     <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-    <ClInclude Include="bots\bot_debug.h">
-      <Filter>bots</Filter>
-    </ClInclude>
-    <ClInclude Include="bots\bot_exports.h">
-      <Filter>bots</Filter>
-    </ClInclude>
-    <ClInclude Include="bots\bot_includes.h">
-      <Filter>bots</Filter>
-    </ClInclude>
-    <ClInclude Include="bots\bot_think.h">
-      <Filter>bots</Filter>
-    </ClInclude>
-    <ClInclude Include="bots\bot_utils.h">
-      <Filter>bots</Filter>
-    </ClInclude>
     <ClInclude Include="ctf\g_ctf.h">
       <Filter>ctf</Filter>
     </ClInclude>
@@ -795,9 +768,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="bots">
-      <UniqueIdentifier>{3419b1db-b3e7-48f4-9081-1ffe831c4ca9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ctf">
       <UniqueIdentifier>{ebe979ff-5860-4448-89ce-0a0f74b39c69}</UniqueIdentifier>
     </Filter>
