@@ -61,8 +61,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4267;4244</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)as\thirdparty\angelscript\include;$(ProjectDir)as\thirdparty\jsoncpp\include;$(ProjectDir)as\thirdparty\fmt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -87,8 +86,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4267;4244</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatSpecificWarningsAsErrors>4533;4700;4703;4146;4308;4532</TreatSpecificWarningsAsErrors>
       <AdditionalIncludeDirectories>$(ProjectDir)as\thirdparty\angelscript\include;$(ProjectDir)as\thirdparty\jsoncpp\include;$(ProjectDir)as\thirdparty\fmt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
