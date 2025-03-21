@@ -176,15 +176,15 @@ void PreInitGame()
 	maxclients = gi.cvar("maxclients", G_Fmt("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 	deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
 	coop = gi.cvar("coop", "0", CVAR_LATCH);
-	teamplay = gi.cvar("teamplay", "0", CVAR_LATCH);
+	//teamplay = gi.cvar("teamplay", "0", CVAR_LATCH);
 
 	// ZOID
-	CTFInit();
+	//CTFInit();
 	// ZOID
 
 	// ZOID
 	// This gamemode only supports deathmatch
-	if (ctf->integer)
+	if (false)
 	{
 		if (!deathmatch->integer)
 		{
@@ -195,10 +195,10 @@ void PreInitGame()
 		if (coop->integer)
 			gi.cvar_set("coop", "0");
 		// force tdm off
-		if (teamplay->integer)
+		if (false)
 			gi.cvar_set("teamplay", "0");
 	}
-	if (teamplay->integer)
+	if (false)
 	{
 		if (!deathmatch->integer)
 		{
@@ -258,8 +258,8 @@ void InitGame()
 	g_coop_num_lives = gi.cvar("g_coop_num_lives", "2", CVAR_LATCH);
 	g_coop_instanced_items = gi.cvar("g_coop_instanced_items", "1", CVAR_LATCH);
 	g_allow_grapple = gi.cvar("g_allow_grapple", "auto", CVAR_NOFLAGS);
-	g_grapple_fly_speed = gi.cvar("g_grapple_fly_speed", G_Fmt("{}", CTF_DEFAULT_GRAPPLE_SPEED).data(), CVAR_NOFLAGS);
-	g_grapple_pull_speed = gi.cvar("g_grapple_pull_speed", G_Fmt("{}", CTF_DEFAULT_GRAPPLE_PULL_SPEED).data(), CVAR_NOFLAGS);
+	/*g_grapple_fly_speed = gi.cvar("g_grapple_fly_speed", G_Fmt("{}", CTF_DEFAULT_GRAPPLE_SPEED).data(), CVAR_NOFLAGS);
+	g_grapple_pull_speed = gi.cvar("g_grapple_pull_speed", G_Fmt("{}", CTF_DEFAULT_GRAPPLE_PULL_SPEED).data(), CVAR_NOFLAGS);*/
 	g_grapple_damage = gi.cvar("g_grapple_damage", "10", CVAR_NOFLAGS);
 
 	g_debug_monster_paths = gi.cvar("g_debug_monster_paths", "0", CVAR_NOFLAGS);
@@ -349,7 +349,7 @@ void InitGame()
 	g_dm_no_stack_double = gi.cvar("g_dm_no_stack_double", "0", CVAR_NOFLAGS);
 	g_no_nukes = gi.cvar("g_no_nukes", "0", CVAR_NOFLAGS);
 	g_no_spheres = gi.cvar("g_no_spheres", "0", CVAR_NOFLAGS);
-	g_teamplay_force_join = gi.cvar("g_teamplay_force_join", "0", CVAR_NOFLAGS);
+	//g_teamplay_force_join = gi.cvar("g_teamplay_force_join", "0", CVAR_NOFLAGS);
 	g_teamplay_armor_protect = gi.cvar("g_teamplay_armor_protect", "0", CVAR_NOFLAGS);
 	g_allow_techs = gi.cvar("g_allow_techs", "auto", CVAR_NOFLAGS);
 
@@ -632,12 +632,12 @@ void CheckDMRules()
 		return;
 
 	// ZOID
-	if (ctf->integer && CTFCheckRules())
+	if (false)
 	{
 		EndDMLevel();
 		return;
 	}
-	if (CTFInMatch())
+	if (false)
 		return; // no checking in match mode
 				// ZOID
 
@@ -664,9 +664,9 @@ void CheckDMRules()
 	if (fraglimit->integer)
 	{
 		// [Paril-KEX]
-		if (teamplay->integer)
+		if (false)
 		{
-			CheckEndTDMLevel();
+			//CheckEndTDMLevel();
 			return;
 		}
 
@@ -737,7 +737,7 @@ void ExitLevel()
 				player->client->pers.lives = g_coop_num_lives->integer + 1;
 	}
 
-	if (CTFNextMap())
+	if (false)
 		return;
 
 	if (level.changemap == nullptr)

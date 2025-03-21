@@ -2671,8 +2671,8 @@ constexpr spawnflags_t SPAWNFLAG_LANDMARK_KEEP_Z = 1_spawnflag;
 }
 
 // ZOID
-#include "ctf/g_ctf.h"
-#include "ctf/p_ctf_menu.h"
+//#include "ctf/g_ctf.h"
+//#include "ctf/p_ctf_menu.h"
 // ZOID
 //============================================================================
 
@@ -2804,7 +2804,8 @@ struct client_respawn_t
 	bool spectator; // client is a spectator
 
 	// ZOID
-	ctfteam_t ctf_team; // CTF team
+	//ctfteam_t ctf_team; // CTF team
+	int32_t ctf_team;
 	int32_t	 ctf_state;
 	gtime_t	 ctf_lasthurtcarrier;
 	gtime_t	 ctf_lastreturnedflag;
@@ -2815,7 +2816,7 @@ struct client_respawn_t
 	bool	 voted; // for elections
 	bool	 ready;
 	bool	 admin;
-	ghost_t *ghost; // for ghost codes
+	char ghost_t[80]; //ghost_t *ghost; // for ghost codes
 					// ZOID
 };
 
@@ -2964,7 +2965,7 @@ struct gclient_t
 
 	// ZOID
 	bool		inmenu;	  // in menu
-	pmenuhnd_t *menu;	  // current menu
+	void* menu;
 	gtime_t		menutime; // time to update menu
 	bool		menudirty;
 	edict_t		*ctf_grapple;			// entity of grapple

@@ -187,8 +187,6 @@
     <ClCompile Include="as\yyjson.c" />
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="cg_screen.cpp" />
-    <ClCompile Include="ctf\g_ctf.cpp" />
-    <ClCompile Include="ctf\p_ctf_menu.cpp" />
     <ClCompile Include="g_ai.cpp" />
     <ClCompile Include="g_chase.cpp" />
     <ClCompile Include="g_cmds.cpp" />
@@ -373,8 +371,6 @@
     <ClInclude Include="as\yyjson.h" />
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="cg_local.h" />
-    <ClInclude Include="ctf\g_ctf.h" />
-    <ClInclude Include="ctf\p_ctf_menu.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="g_statusbar.h" />

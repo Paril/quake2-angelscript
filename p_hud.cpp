@@ -190,42 +190,42 @@ void G_ReportMatchDetails(bool is_end)
 	player_ranks = {};
 
 	// CTF/TDM is simple
-	if (ctf->integer || teamplay->integer)
-	{
-		CTFCalcRankings(player_ranks);
+	//if (ctf->integer || teamplay->integer)
+	//{
+	//	CTFCalcRankings(player_ranks);
 
-		gi.WriteByte(2);
-		gi.WriteString("RED TEAM"); // team 0
-		gi.WriteString("BLUE TEAM"); // team 1
-	}
-	else
-	{
-		// sort players by score, then match everybody to
-		// the current highest score downwards until we run out of players.
-		static std::array<edict_t *, MAX_CLIENTS> sorted_players;
-		size_t num_active_players = 0;
+	//	gi.WriteByte(2);
+	//	gi.WriteString("RED TEAM"); // team 0
+	//	gi.WriteString("BLUE TEAM"); // team 1
+	//}
+	//else
+	//{
+	//	// sort players by score, then match everybody to
+	//	// the current highest score downwards until we run out of players.
+	//	static std::array<edict_t *, MAX_CLIENTS> sorted_players;
+	//	size_t num_active_players = 0;
 
-		for (auto player : active_players())
-			sorted_players[num_active_players++] = player;
+	//	for (auto player : active_players())
+	//		sorted_players[num_active_players++] = player;
 
-		std::sort(sorted_players.begin(), sorted_players.begin() + num_active_players, [](const edict_t *a, const edict_t *b) { return b->client->resp.score < a->client->resp.score; });
+	//	std::sort(sorted_players.begin(), sorted_players.begin() + num_active_players, [](const edict_t *a, const edict_t *b) { return b->client->resp.score < a->client->resp.score; });
 
-		int32_t current_score = INT_MIN;
-		int32_t current_rank = 0;
+	//	int32_t current_score = INT_MIN;
+	//	int32_t current_rank = 0;
 
-		for (size_t i = 0; i < num_active_players; i++)
-		{
-			if (!current_rank || sorted_players[i]->client->resp.score != current_score)
-			{
-				current_rank++;
-				current_score = sorted_players[i]->client->resp.score;
-			}
+	//	for (size_t i = 0; i < num_active_players; i++)
+	//	{
+	//		if (!current_rank || sorted_players[i]->client->resp.score != current_score)
+	//		{
+	//			current_rank++;
+	//			current_score = sorted_players[i]->client->resp.score;
+	//		}
 
-			player_ranks[sorted_players[i]->s.number - 1] = current_rank;
-		}
+	//		player_ranks[sorted_players[i]->s.number - 1] = current_rank;
+	//	}
 
-		gi.WriteByte(0);
-	}
+	//	gi.WriteByte(0);
+	//}
 
 	uint8_t num_players = 0;
 
@@ -235,8 +235,8 @@ void G_ReportMatchDetails(bool is_end)
 		if (player->client->pers.spawned && !player->client->resp.spectator)
 		{
 			// just in case...
-			if (G_TeamplayEnabled() && player->client->resp.ctf_team == CTF_NOTEAM)
-				continue;
+			//if (G_TeamplayEnabled() && player->client->resp.ctf_team == CTF_NOTEAM)
+			//	continue;
 
 			num_players++;
 		}
@@ -244,23 +244,23 @@ void G_ReportMatchDetails(bool is_end)
 
 	gi.WriteByte(num_players);
 
-	for (auto player : active_players())
-	{
-		// leave spectators out of this data, they don't need to be seen.
-		if (player->client->pers.spawned && !player->client->resp.spectator)
-		{
-			// just in case...
-			if (G_TeamplayEnabled() && player->client->resp.ctf_team == CTF_NOTEAM)
-				continue;
+	//for (auto player : active_players())
+	//{
+	//	// leave spectators out of this data, they don't need to be seen.
+	//	if (player->client->pers.spawned && !player->client->resp.spectator)
+	//	{
+	//		// just in case...
+	//		if (G_TeamplayEnabled() && player->client->resp.ctf_team == CTF_NOTEAM)
+	//			continue;
 
-			gi.WriteByte(player->s.number - 1);
-			gi.WriteLong(player->client->resp.score);
-			gi.WriteByte(player_ranks[player->s.number - 1]);
+	//		gi.WriteByte(player->s.number - 1);
+	//		gi.WriteLong(player->client->resp.score);
+	//		gi.WriteByte(player_ranks[player->s.number - 1]);
 
-			if (G_TeamplayEnabled())
-				gi.WriteByte(player->client->resp.ctf_team == CTF_TEAM1 ? 0 : 1);
-		}
-	}
+	//		if (G_TeamplayEnabled())
+	//			gi.WriteByte(player->client->resp.ctf_team == CTF_TEAM1 ? 0 : 1);
+	//	}
+	//}
 
 	gi.ReportMatchDetails_Multicast(is_end);
 }
@@ -272,9 +272,9 @@ void BeginIntermission(edict_t *targ)
 	if (level.intermissiontime)
 		return; // already activated
 
-	// ZOID
-	if (ctf->integer)
-		CTFCalcScores();
+	//// ZOID
+	//if (ctf->integer)
+	//	CTFCalcScores();
 	// ZOID
 
 	game.autosaved = false;
@@ -417,12 +417,12 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 	const char *tag;
 
 	// ZOID
-	if (G_TeamplayEnabled())
-	{
-		CTFScoreboardMessage(ent, killer);
-		return;
-	}
-	// ZOID
+	//if (G_TeamplayEnabled())
+	//{
+	//	CTFScoreboardMessage(ent, killer);
+	//	return;
+	//}
+	//// ZOID
 
 	entry.clear();
 	string.clear();
@@ -561,7 +561,7 @@ void Cmd_Score_f(edict_t *ent)
 
 	// ZOID
 	if (ent->client->menu)
-		PMenu_Close(ent);
+		//PMenu_Close(ent);
 	// ZOID
 
 	if (!deathmatch->integer && !coop->integer)
@@ -1096,7 +1096,7 @@ void G_SetStats(edict_t *ent)
 	}
 
 	// ZOID
-	SetCTFStats(ent);
+	//SetCTFStats(ent);
 	// ZOID
 }
 

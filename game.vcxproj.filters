@@ -54,12 +54,6 @@
     <ClCompile Include="p_view.cpp" />
     <ClCompile Include="p_weapon.cpp" />
     <ClCompile Include="q_std.cpp" />
-    <ClCompile Include="ctf\g_ctf.cpp">
-      <Filter>ctf</Filter>
-    </ClCompile>
-    <ClCompile Include="ctf\p_ctf_menu.cpp">
-      <Filter>ctf</Filter>
-    </ClCompile>
     <ClCompile Include="xatrix\g_xatrix_func.cpp">
       <Filter>xatrix</Filter>
     </ClCompile>
@@ -451,12 +445,6 @@
     <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-    <ClInclude Include="ctf\g_ctf.h">
-      <Filter>ctf</Filter>
-    </ClInclude>
-    <ClInclude Include="ctf\p_ctf_menu.h">
-      <Filter>ctf</Filter>
-    </ClInclude>
     <ClInclude Include="xatrix\m_xatrix_fixbot.h">
       <Filter>xatrix</Filter>
     </ClInclude>
@@ -768,9 +756,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="ctf">
-      <UniqueIdentifier>{ebe979ff-5860-4448-89ce-0a0f74b39c69}</UniqueIdentifier>
-    </Filter>
     <Filter Include="rogue">
       <UniqueIdentifier>{3b58fe82-b357-4476-9722-c8ffd92fbb25}</UniqueIdentifier>
     </Filter>

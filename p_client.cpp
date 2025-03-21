@@ -197,8 +197,8 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 		{
 			self->client->resp.score--;
 
-			if (teamplay->integer)
-				G_AdjustTeamScore(self->client->resp.ctf_team, -1);
+			//if (teamplay->integer)
+			//	G_AdjustTeamScore(self->client->resp.ctf_team, -1);
 		}
 		self->enemy = nullptr;
 		return;
@@ -334,19 +334,19 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 
 		gi.LocBroadcast_Print(PRINT_MEDIUM, base, self->client->pers.netname, attacker->client->pers.netname);
 
-		if (G_TeamplayEnabled())
-		{
-			// ZOID
-			//  if at start and same team, clear.
-			// [Paril-KEX] moved here so it's not an outlier in player_die.
-			if (mod.id == MOD_TELEFRAG_SPAWN &&
-				self->client->resp.ctf_state < 2 &&
-				self->client->resp.ctf_team == attacker->client->resp.ctf_team)
-			{
-				self->client->resp.ctf_state = 0;
-				return;
-			}
-		}
+		//if (G_TeamplayEnabled())
+		//{
+		//	// ZOID
+		//	//  if at start and same team, clear.
+		//	// [Paril-KEX] moved here so it's not an outlier in player_die.
+		//	if (mod.id == MOD_TELEFRAG_SPAWN &&
+		//		self->client->resp.ctf_state < 2 &&
+		//		self->client->resp.ctf_team == attacker->client->resp.ctf_team)
+		//	{
+		//		self->client->resp.ctf_state = 0;
+		//		return;
+		//	}
+		//}
 
 		// ROGUE
 		if (gamerules->integer)
@@ -373,16 +373,16 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 				{
 					attacker->client->resp.score--;
 
-					if (teamplay->integer)
-						G_AdjustTeamScore(attacker->client->resp.ctf_team, -1);
+					//if (teamplay->integer)
+					//	G_AdjustTeamScore(attacker->client->resp.ctf_team, -1);
 				}
 			}
 			else
 			{
 				attacker->client->resp.score++;
 
-				if (teamplay->integer)
-					G_AdjustTeamScore(attacker->client->resp.ctf_team, 1);
+				//if (teamplay->integer)
+				//	G_AdjustTeamScore(attacker->client->resp.ctf_team, 1);
 			}
 		}
 		else if (!coop->integer)
@@ -407,8 +407,8 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 		{
 			self->client->resp.score--;
 
-			if (teamplay->integer)
-				G_AdjustTeamScore(attacker->client->resp.ctf_team, -1);
+			//if (teamplay->integer)
+			//	G_AdjustTeamScore(attacker->client->resp.ctf_team, -1);
 		}
 	}
 	// ROGUE
@@ -571,13 +571,13 @@ DIE(player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		self->client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary(self, inflictor, attacker, mod);
 
-		CTFFragBonuses(self, inflictor, attacker);
+		//CTFFragBonuses(self, inflictor, attacker);
 		// ZOID
 		TossClientWeapon(self);
 		// ZOID
-		CTFPlayerResetGrapple(self);
+		/*CTFPlayerResetGrapple(self);
 		CTFDeadDropFlag(self);
-		CTFDeadDropTech(self);
+		CTFDeadDropTech(self);*/
 		// ZOID
 		if (deathmatch->integer && !self->client->showscores)
 			Cmd_Help_f(self); // show scores
@@ -609,9 +609,9 @@ DIE(player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->client->invisible_time = 0_ms;
 	self->flags &= ~FL_POWER_ARMOR;
 
-	// clear inventory
-	if (G_TeamplayEnabled())
-		self->client->pers.inventory.fill(0);
+	//// clear inventory
+	//if (G_TeamplayEnabled())
+	//	self->client->pers.inventory.fill(0);
 
 	// RAFAEL
 	self->client->quadfire_time = 0_ms;
@@ -821,8 +821,8 @@ void InitClientPersistant(edict_t *ent, gclient_t *client)
 	client->pers.max_health = 100;
 
 	// don't give us weapons if we shouldn't have any
-	if ((G_TeamplayEnabled() && client->resp.ctf_team != CTF_NOTEAM) ||
-		(!G_TeamplayEnabled() && !client->resp.spectator))
+	if ((client->resp.ctf_team) ||
+		(!client->resp.spectator))
 	{
 		// in coop, if there's already a player in the game and we're new,
 		// steal their loadout. this would fix a potential softlock where a new
@@ -886,7 +886,7 @@ void InitClientPersistant(edict_t *ent, gclient_t *client)
 
 			// ZOID
 			bool give_grapple = (!strcmp(g_allow_grapple->string, "auto")) ?
-				(ctf->integer ? !level.no_grapple : 0) :
+				(0 ? !level.no_grapple : 0) :
 				g_allow_grapple->integer;
 
 			if (give_grapple)
@@ -918,14 +918,14 @@ void InitClientPersistant(edict_t *ent, gclient_t *client)
 void InitClientResp(gclient_t *client)
 {
 	// ZOID
-	ctfteam_t ctf_team = client->resp.ctf_team;
+	//ctfteam_t ctf_team = client->resp.ctf_team;
 	bool id_state = client->resp.id_state;
 	// ZOID
 
 	memset(&client->resp, 0, sizeof(client->resp));
 
 	// ZOID
-	client->resp.ctf_team = ctf_team;
+	//client->resp.ctf_team = ctf_team;
 	client->resp.id_state = id_state;
 	// ZOID
 
@@ -1446,8 +1446,12 @@ bool SelectSpawnPoint(edict_t *ent, vec3_t &origin, vec3_t &angles, bool force_s
 	// DM spots are simple
 	if (deathmatch->integer)
 	{
-		if (G_TeamplayEnabled())
-			spot = SelectCTFSpawnPoint(ent, force_spawn);
+		//if (G_TeamplayEnabled())
+		//	spot = SelectCTFSpawnPoint(ent, force_spawn);
+		if (false)
+		{
+
+		}
 		else
 		{
 			select_spawn_result_t result = SelectDeathmatchSpawnPoint(g_dm_spawn_farthest->integer, force_spawn, true);
@@ -1710,7 +1714,7 @@ void spectator_respawn(edict_t *ent)
 	ent->client->resp.score = ent->client->pers.score = 0;
 
 	// move us to no team
-	ent->client->resp.ctf_team = CTF_NOTEAM;
+	//ent->client->resp.ctf_team = CTF_NOTEAM;
 
 	// change spectator mode
 	ent->client->resp.spectator = ent->client->pers.spectator;
@@ -1761,7 +1765,7 @@ void P_AssignClientSkinnum(edict_t *ent)
 	
 	if (coop->integer)
 		packed.team_index = 1; // all players are teamed in coop
-	else if (G_TeamplayEnabled())
+	else if (false)
 		packed.team_index = ent->client->resp.ctf_team;
 	else
 		packed.team_index = 0;
@@ -2234,8 +2238,8 @@ void PutClientInServer(edict_t *ent)
 	P_ForceFogTransition(ent, true);
 
 	// ZOID
-	if (CTFStartClient(ent))
-		return;
+	//if (CTFStartClient(ent))
+	//	return;
 	// ZOID
 
 	// spawn a spectator
@@ -2326,8 +2330,8 @@ void ClientBeginDeathmatch(edict_t *ent)
 	InitClientResp(ent->client);
 
 	// ZOID
-	if (G_TeamplayEnabled() && ent->client->resp.ctf_team < CTF_TEAM1)
-		CTFAssignTeam(ent->client);
+	//if (G_TeamplayEnabled() && ent->client->resp.ctf_team < CTF_TEAM1)
+	//	CTFAssignTeam(ent->client);
 	// ZOID
 
 	// PGM
@@ -2591,7 +2595,7 @@ void ClientUserinfoChanged(edict_t *ent, const char *userinfo)
 	gi.Info_ValueForKey(userinfo, "spectator", val, sizeof(val));
 
 	// spectators are only supported in deathmatch
-	if (deathmatch->integer && !G_TeamplayEnabled() && *val && strcmp(val, "0"))
+	if (deathmatch->integer && !false && *val && strcmp(val, "0"))
 		ent->client->pers.spectator = true;
 	else
 		ent->client->pers.spectator = false;
@@ -2604,8 +2608,11 @@ void ClientUserinfoChanged(edict_t *ent, const char *userinfo)
 
 	// combine name and skin into a configstring
 	// ZOID
-	if (G_TeamplayEnabled())
-		CTFAssignSkin(ent, val);
+	if (false)
+	{
+
+		//CTFAssignSkin(ent, val);
+	}
 	else
 	{
 		// set dogtag
@@ -2899,7 +2906,7 @@ bool ClientConnect(edict_t *ent, char *userinfo, const char *social_id, bool isB
 	{
 		// clear the respawning variables
 		// ZOID -- force team join
-		ent->client->resp.ctf_team = CTF_NOTEAM;
+		//ent->client->resp.ctf_team = CTF_NOTEAM;
 		ent->client->resp.id_state = true;
 		// ZOID
 		InitClientResp(ent->client);
@@ -2943,8 +2950,8 @@ void ClientDisconnect(edict_t *ent)
 		return;
 
 	// ZOID
-	CTFDeadDropFlag(ent);
-	CTFDeadDropTech(ent);
+	//CTFDeadDropFlag(ent);
+	//CTFDeadDropTech(ent);
 	// ZOID
 
 	PlayerTrail_Destroy(ent);
@@ -3051,7 +3058,7 @@ void P_FallingDamage(edict_t *ent, const pmove_t &pm)
 	//  never take damage if just release grapple or on grapple
 	if (ent->client->ctf_grapplereleasetime >= level.time ||
 		(ent->client->ctf_grapple &&
-		 ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY))
+		 ent->client->ctf_grapplestate > 0))
 		return;
 	// ZOID
 
@@ -3132,19 +3139,19 @@ bool HandleMenuMovement(edict_t *ent, usercmd_t *ucmd)
 
 		if (menu_sign > 0)
 		{
-			PMenu_Prev(ent);
+			//PMenu_Prev(ent);
 			return true;
 		}
 		else if (menu_sign < 0)
 		{
-			PMenu_Next(ent);
+			//PMenu_Next(ent);
 			return true;
 		}
 	}
 
 	if (ent->client->latched_buttons & (BUTTON_ATTACK | BUTTON_JUMP))
 	{
-		PMenu_Select(ent);
+		//PMenu_Select(ent);
 		return true;
 	}
 
@@ -3236,7 +3243,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 			}
 			else if (ent->client->awaiting_respawn)
 				client->ps.pmove.pm_type = PM_FREEZE;
-			else if (ent->client->resp.spectator || (G_TeamplayEnabled() && ent->client->resp.ctf_team == CTF_NOTEAM))
+			else if (ent->client->resp.spectator || (false && ent->client->resp.ctf_team == 0))
 				client->ps.pmove.pm_type = PM_SPECTATOR;
 			else
 				client->ps.pmove.pm_type = PM_NOCLIP;
@@ -3245,7 +3252,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 			client->ps.pmove.pm_type = PM_GIB;
 		else if (ent->deadflag)
 			client->ps.pmove.pm_type = PM_DEAD;
-		else if (ent->client->ctf_grapplestate >= CTF_GRAPPLE_STATE_PULL)
+		else if (ent->client->ctf_grapplestate >= 0)
 			client->ps.pmove.pm_type = PM_GRAPPLE;
 		else
 			client->ps.pmove.pm_type = PM_NORMAL;
@@ -3410,8 +3417,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		}
 
 		// ZOID
-		if (client->ctf_grapple)
-			CTFGrapplePull(client->ctf_grapple);
+		//if (client->ctf_grapple)
+		//	CTFGrapplePull(client->ctf_grapple);
 		// ZOID
 
 		gi.linkentity(ent);
@@ -3844,13 +3851,13 @@ void ClientBeginServerFrame(edict_t *ent)
 		//Bot_BeginFrame( ent );
 	}
 
-	if (deathmatch->integer && !G_TeamplayEnabled() &&
-		client->pers.spectator != client->resp.spectator &&
-		(level.time - client->respawn_time) >= 5_sec)
-	{
-		spectator_respawn(ent);
-		return;
-	}
+	//if (deathmatch->integer && !G_TeamplayEnabled() &&
+	//	client->pers.spectator != client->resp.spectator &&
+	//	(level.time - client->respawn_time) >= 5_sec)
+	//{
+	//	spectator_respawn(ent);
+	//	return;
+	//}
 
 	// run weapon animations if it hasn't been done by a ucmd_t
 	if (!client->weapon_thunk && !client->resp.spectator)

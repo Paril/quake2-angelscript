@@ -2019,7 +2019,7 @@ TOUCH(teleporter_touch) (edict_t *self, edict_t *other, const trace_t &tr, bool 
 	}
 
 	// ZOID
-	CTFPlayerResetGrapple(other);
+	//CTFPlayerResetGrapple(other);
 	// ZOID
 
 	// unlink to make sure it can't possibly interfere with KillBox

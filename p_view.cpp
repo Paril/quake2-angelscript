@@ -14,11 +14,11 @@ inline bool SkipViewModifiers(gclient_t *client) {
 		return true;
 	}
 	// don't do bobbing, etc on grapple
-	if (client->ctf_grapple && client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY) {
+	if (client->ctf_grapple && client->ctf_grapplestate) {
 		return true;
 	}
 	// spectator mode
-	if (client->resp.spectator || (G_TeamplayEnabled() && client->resp.ctf_team == CTF_NOTEAM)) {
+	if (client->resp.spectator || (client->resp.ctf_team == 0)) {
 		return true;
 	}
 	return false;
@@ -904,32 +904,32 @@ static void G_SetClientEffects(edict_t *ent)
 	}
 
 	// ZOID
-	CTFEffects(ent);
+	//CTFEffects(ent);
 	// ZOID
 
 	if (ent->client->quad_time > level.time)
 	{
-		if (G_PowerUpExpiring(ent->client->quad_time))
-			CTFSetPowerUpEffect(ent, EF_QUAD);
+		/*if (G_PowerUpExpiring(ent->client->quad_time))
+			CTFSetPowerUpEffect(ent, EF_QUAD);*/
 	}
 
 	// RAFAEL
 	if (ent->client->quadfire_time > level.time)
 	{;
-		if (G_PowerUpExpiring(ent->client->quadfire_time))
-			CTFSetPowerUpEffect(ent, EF_DUALFIRE);
+		//if (G_PowerUpExpiring(ent->client->quadfire_time))
+		//	CTFSetPowerUpEffect(ent, EF_DUALFIRE);
 	}
 	// RAFAEL
 	//=======
 	// ROGUE
 	if (ent->client->double_time > level.time)
 	{
-		if (G_PowerUpExpiring(ent->client->double_time))
-			CTFSetPowerUpEffect(ent, EF_DOUBLE);
+		/*if (G_PowerUpExpiring(ent->client->double_time))
+			CTFSetPowerUpEffect(ent, EF_DOUBLE);*/
 	}
 	if ((ent->client->owned_sphere) && (ent->client->owned_sphere->spawnflags == SPHERE_DEFENDER))
 	{
-		CTFSetPowerUpEffect(ent, EF_HALF_DAMAGE);
+		//CTFSetPowerUpEffect(ent, EF_HALF_DAMAGE);
 	}
 	if (ent->client->tracker_pain_time > level.time)
 	{
@@ -950,8 +950,8 @@ static void G_SetClientEffects(edict_t *ent)
 
 	if (ent->client->invincible_time > level.time)
 	{
-		if (G_PowerUpExpiring(ent->client->invincible_time))
-			CTFSetPowerUpEffect(ent, EF_PENT);
+		//if (G_PowerUpExpiring(ent->client->invincible_time))
+		//	CTFSetPowerUpEffect(ent, EF_PENT);
 	}
 
 	// show cheaters!!!
@@ -1068,11 +1068,11 @@ static void G_SetClientSound(edict_t *ent)
 	// [Paril-KEX] if no other sound is playing, play appropriate grapple sounds
 	if (!ent->s.sound && ent->client->ctf_grapple)
 	{
-		if (ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_PULL)
+		if (ent->client->ctf_grapplestate == 0)
 			ent->s.sound = gi.soundindex("weapons/grapple/grpull.wav");
-		else if (ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_FLY)
+		else if (ent->client->ctf_grapplestate == 0)
 			ent->s.sound = gi.soundindex("weapons/grapple/grfly.wav");
-		else if (ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG)
+		else if (ent->client->ctf_grapplestate == 0)
 			ent->s.sound = gi.soundindex("weapons/grapple/grhang.wav");
 	}
 
@@ -1402,7 +1402,7 @@ void ClientEndServerFrame(edict_t *ent)
 
 	// ZOID
 	// regen tech
-	CTFApplyRegeneration(ent);
+	//CTFApplyRegeneration(ent);
 	// ZOID
 
 	vec3_t forward, right, up;
@@ -1497,7 +1497,7 @@ void ClientEndServerFrame(edict_t *ent)
 	{
 		if (ent->client->menu)
 		{
-			PMenu_Do_Update(ent);
+			//PMenu_Do_Update(ent);
 			gi.unicast(ent, true);
 		}
 		ent->client->menutime = level.time;
@@ -1511,7 +1511,7 @@ void ClientEndServerFrame(edict_t *ent)
 		// ZOID
 		if (ent->client->menu)
 		{
-			PMenu_Do_Update(ent);
+			//PMenu_Do_Update(ent);
 			ent->client->menudirty = false;
 		}
 		else

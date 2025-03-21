@@ -131,7 +131,7 @@ THINK(DoRespawn) (edict_t *ent) -> void
 		// ZOID
 		// in ctf, when we are weapons stay, only the master of a team of weapons
 		// is spawned
-		if (ctf->integer && g_dm_weapons_stay->integer && master->item && (master->item->flags & IF_WEAPON))
+		if (0 && g_dm_weapons_stay->integer && master->item && (master->item->flags & IF_WEAPON))
 			ent = master;
 		else
 		{
@@ -645,7 +645,7 @@ THINK(MegaHealth_think) (edict_t *self) -> void
 {
 	if (self->owner->health > self->owner->max_health
 		//ZOID
-		&& !CTFHasRegeneration(self->owner)
+		//&& !CTFHasRegeneration(self->owner)
 		//ZOID
 		)
 	{
@@ -678,7 +678,7 @@ bool Pickup_Health(edict_t *ent, edict_t *other)
 	other->health += count;
 
 	//ZOID
-	if (ctf->integer && other->health > 250 && count > 25)
+	if (false && other->health > 250 && count > 25)
 		other->health = 250;
 	//ZOID
 
@@ -690,7 +690,7 @@ bool Pickup_Health(edict_t *ent, edict_t *other)
 
 	if ((ent->item->tag & HEALTH_TIMED)
 		//ZOID
-		&& !CTFHasRegeneration(other)
+		//&& !CTFHasRegeneration(other)
 		//ZOID
 		)
 	{
@@ -923,10 +923,10 @@ TOUCH(Touch_Item) (edict_t *ent, edict_t *other, const trace_t &tr, bool other_t
 			return;
 	}
 
-	// ZOID
-	if (CTFMatchSetup())
-		return; // can't pick stuff up right now
-				// ZOID
+	//// ZOID
+	//if (CTFMatchSetup())
+	//	return; // can't pick stuff up right now
+	//			// ZOID
 
 	taken = ent->item->pickup(ent, other);
 
@@ -1435,7 +1435,7 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 
 	// ZOID
 	// Don't spawn the flags unless enabled
-	if (!ctf->integer && (item->id == IT_FLAG1 || item->id == IT_FLAG2))
+	if (!false && (item->id == IT_FLAG1 || item->id == IT_FLAG2))
 	{
 		G_FreeEdict(ent);
 		return;
@@ -1478,7 +1478,7 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 	// flags are server animated and have special handling
 	if (item->id == IT_FLAG1 || item->id == IT_FLAG2)
 	{
-		ent->think = CTFFlagSetup;
+		//ent->think = CTFFlagSetup;
 	}
 	// ZOID
 }
@@ -1806,7 +1806,7 @@ always owned, never in the world
 		/* pickup */ nullptr,
 		/* use */ Use_Weapon,
 		/* drop */ nullptr,
-		/* weaponthink */ CTFWeapon_Grapple,
+		/* weaponthink */ nullptr,
 		/* pickup_sound */ nullptr,
 		/* world_model */ nullptr,
 		/* world_model_flags */ EF_NONE,
@@ -3698,9 +3698,9 @@ model="models/items/mega_h/tris.md2"
 	{
 		/* id */ IT_FLAG1,
 		/* classname */ "item_flag_team1",
-		/* pickup */ CTFPickup_Flag,
+		/* pickup */ nullptr,
 		/* use */ nullptr,
-		/* drop */ CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
+		/* drop */ nullptr, //Should this be null if we don't want players to drop it manually?
 		/* weaponthink */ nullptr,
 		/* pickup_sound */ "ctf/flagtk.wav",
 		/* world_model */ "players/male/flag1.md2",
@@ -3725,9 +3725,9 @@ model="models/items/mega_h/tris.md2"
 	{
 		/* id */ IT_FLAG2,
 		/* classname */ "item_flag_team2",
-		/* pickup */ CTFPickup_Flag,
+		/* pickup */ nullptr,
 		/* use */ nullptr,
-		/* drop */ CTFDrop_Flag,
+		/* drop */ nullptr,
 		/* weaponthink */ nullptr,
 		/* pickup_sound */ "ctf/flagtk.wav",
 		/* world_model */ "players/male/flag2.md2",
@@ -3751,9 +3751,9 @@ model="models/items/mega_h/tris.md2"
 	{
 		/* id */ IT_TECH_RESISTANCE,
 		/* classname */ "item_tech1",
-		/* pickup */ CTFPickup_Tech,
+		/* pickup */ nullptr,
 		/* use */ nullptr,
-		/* drop */ CTFDrop_Tech,
+		/* drop */ nullptr,
 		/* weaponthink */ nullptr,
 		/* pickup_sound */ "items/pkup.wav",
 		/* world_model */ "models/ctf/resistance/tris.md2",
@@ -3777,9 +3777,9 @@ model="models/items/mega_h/tris.md2"
 	{
 		/* id */ IT_TECH_STRENGTH,
 		/* classname */ "item_tech2",
-		/* pickup */ CTFPickup_Tech,
+		/* pickup */ nullptr,
 		/* use */ nullptr,
-		/* drop */ CTFDrop_Tech,
+		/* drop */ nullptr,
 		/* weaponthink */ nullptr,
 		/* pickup_sound */ "items/pkup.wav",
 		/* world_model */ "models/ctf/strength/tris.md2",
@@ -3803,9 +3803,9 @@ model="models/items/mega_h/tris.md2"
 	{
 		/* id */ IT_TECH_HASTE,
 		/* classname */ "item_tech3",
-		/* pickup */ CTFPickup_Tech,
+		/* pickup */ nullptr,
 		/* use */ nullptr,
-		/* drop */ CTFDrop_Tech,
+		/* drop */ nullptr,
 		/* weaponthink */ nullptr,
 		/* pickup_sound */ "items/pkup.wav",
 		/* world_model */ "models/ctf/haste/tris.md2",
@@ -3829,9 +3829,9 @@ model="models/items/mega_h/tris.md2"
 	{
 		/* id */ IT_TECH_REGENERATION,
 		/* classname */ "item_tech4",
-		/* pickup */ CTFPickup_Tech,
+		/* pickup */ nullptr,
 		/* use */ nullptr,
-		/* drop */ CTFDrop_Tech,
+		/* drop */ nullptr,
 		/* weaponthink */ nullptr,
 		/* pickup_sound */ "items/pkup.wav",
 		/* world_model */ "models/ctf/regeneration/tris.md2",

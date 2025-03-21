@@ -12,9 +12,9 @@ void SelectNextItem(edict_t *ent, item_flags_t itflags, bool menu = true)
 	cl = ent->client;
 
 	// ZOID
-	if (menu && cl->menu)
+	if (false)
 	{
-		PMenu_Next(ent);
+		//PMenu_Next(ent);
 		return;
 	}
 	else if (menu && cl->chase_target)
@@ -54,9 +54,9 @@ void SelectPrevItem(edict_t *ent, item_flags_t itflags)
 	cl = ent->client;
 
 	// ZOID
-	if (cl->menu)
+	if (false)
 	{
-		PMenu_Prev(ent);
+		//PMenu_Prev(ent);
 		return;
 	}
 	else if (cl->chase_target)
@@ -228,7 +228,7 @@ void Cmd_Give_f(edict_t *ent)
 			// ROGUE
 			if (it->flags & (IF_ARMOR | IF_WEAPON | IF_AMMO | IF_NOT_GIVEABLE | IF_TECH))
 				continue;
-			else if (it->pickup == CTFPickup_Flag)
+			else if (false)
 				continue;
 			else if ((it->flags & IF_HEALTH) && !it->use)
 				continue;
@@ -674,7 +674,7 @@ void Cmd_Drop_f(edict_t *ent)
 	// ZOID--special case for tech powerups
 	if (Q_strcasecmp(gi.args(), "tech") == 0)
 	{
-		it = CTFWhat_Tech(ent);
+		//it = CTFWhat_Tech(ent);
 
 		if (it)
 		{
@@ -741,7 +741,7 @@ void Cmd_Inven_f(edict_t *ent)
 	// ZOID
 	if (ent->client->menu)
 	{
-		PMenu_Close(ent);
+		//PMenu_Close(ent);
 		ent->client->update_chase = true;
 		return;
 	}
@@ -754,9 +754,9 @@ void Cmd_Inven_f(edict_t *ent)
 	}
 
 	// ZOID
-	if (G_TeamplayEnabled() && cl->resp.ctf_team == CTF_NOTEAM)
+	if (false)
 	{
-		CTFOpenJoinMenu(ent);
+		//CTFOpenJoinMenu(ent);
 		return;
 	}
 	// ZOID
@@ -783,7 +783,7 @@ void Cmd_InvUse_f(edict_t *ent)
 	// ZOID
 	if (ent->client->menu)
 	{
-		PMenu_Select(ent);
+		//PMenu_Select(ent);
 		return;
 	}
 	// ZOID
@@ -997,7 +997,7 @@ void Cmd_Kill_f(edict_t *ent)
 	// ROGUE
 
 	// [Paril-KEX] don't allow kill to take points away in TDM
-	player_die(ent, ent, ent, 100000, vec3_origin, { MOD_SUICIDE, !!teamplay->integer });
+	player_die(ent, ent, ent, 100000, vec3_origin, { MOD_SUICIDE, !!false});
 }
 
 /*
@@ -1099,7 +1099,9 @@ void Cmd_PutAway_f(edict_t *ent)
 
 	// ZOID
 	if (ent->client->menu)
-		PMenu_Close(ent);
+	{
+		//PMenu_Close(ent);
+	}
 	ent->client->update_chase = true;
 	// ZOID
 }
@@ -1479,16 +1481,16 @@ void Cmd_PlayerList_f(edict_t *ent)
 
 void Cmd_Switchteam_f(edict_t* ent)
 {
-	if (!G_TeamplayEnabled())
+	if (!false)
 		return;
 
 	// [Paril-KEX] in force-join, just do a regular team join.
-	if (g_teamplay_force_join->integer)
+	if (false)
 	{
 		// check if we should even switch teams
 		edict_t *player;
 		uint32_t team1count = 0, team2count = 0;
-		ctfteam_t best_team;
+		//ctfteam_t best_team;
 
 		for (uint32_t i = 1; i <= game.maxclients; i++)
 		{
@@ -1499,7 +1501,7 @@ void Cmd_Switchteam_f(edict_t* ent)
 			if (!player->inuse)
 				continue;
 
-			switch (player->client->resp.ctf_team)
+			/*switch (player->client->resp.ctf_team)
 			{
 			case CTF_TEAM1:
 				team1count++;
@@ -1509,27 +1511,27 @@ void Cmd_Switchteam_f(edict_t* ent)
 				break;
 			default:
 				break;
-			}
+			}*/
 		}
 
-		if (team1count < team2count)
-			best_team = CTF_TEAM1;
-		else
-			best_team = CTF_TEAM2;
+		//if (team1count < team2count)
+		//	best_team = CTF_TEAM1;
+		//else
+		//	best_team = CTF_TEAM2;
 
-		if (ent->client->resp.ctf_team != best_team)
+		if (ent->client->resp.ctf_team != 0)
 		{
 			////
 			ent->svflags = SVF_NONE;
 			ent->flags &= ~FL_GODMODE;
-			ent->client->resp.ctf_team = best_team;
+			ent->client->resp.ctf_team = 0;
 			ent->client->resp.ctf_state = 0;
 			char value[MAX_INFO_VALUE] = { 0 };
 			gi.Info_ValueForKey(ent->client->pers.userinfo, "skin", value, sizeof(value));
-			CTFAssignSkin(ent, value);
+			//CTFAssignSkin(ent, value);
 
 			// if anybody has a menu open, update it immediately
-			CTFDirtyTeamMenu();
+			//CTFDirtyTeamMenu();
 
 			if (ent->solid == SOLID_NOT)
 			{
@@ -1538,8 +1540,8 @@ void Cmd_Switchteam_f(edict_t* ent)
 
 				G_PostRespawn(ent);
 
-				gi.LocBroadcast_Print(PRINT_HIGH, "$g_joined_team",
-					ent->client->pers.netname, CTFTeamName(best_team));
+				//gi.LocBroadcast_Print(PRINT_HIGH, "$g_joined_team",
+				//	ent->client->pers.netname, CTFTeamName(best_team));
 				return;
 			}
 
@@ -1552,18 +1554,18 @@ void Cmd_Switchteam_f(edict_t* ent)
 
 			ent->client->resp.score = 0;
 
-			gi.LocBroadcast_Print(PRINT_HIGH, "$g_changed_team",
-				ent->client->pers.netname, CTFTeamName(best_team));
+			//gi.LocBroadcast_Print(PRINT_HIGH, "$g_changed_team",
+			//	ent->client->pers.netname, CTFTeamName(best_team));
 		}
 
 		return;
 	}
 
-	if (ent->client->resp.ctf_team != CTF_NOTEAM)
-		CTFObserver(ent);
+	//if (ent->client->resp.ctf_team != CTF_NOTEAM)
+	//	CTFObserver(ent);
 
-	if (!ent->client->menu)
-		CTFOpenJoinMenu(ent);
+	//if (!ent->client->menu)
+	//	CTFOpenJoinMenu(ent);
 }
 
 static void Cmd_ListMonsters_f(edict_t *ent)
@@ -1713,31 +1715,57 @@ void ClientCommand(edict_t *ent)
 		Cmd_PlayerList_f(ent);
 	// ZOID
 	else if (Q_strcasecmp(cmd, "team") == 0)
-		CTFTeam_f(ent);
+	{
+		//CTFTeam_f(ent);
+	}
 	else if (Q_strcasecmp(cmd, "id") == 0)
-		CTFID_f(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "yes") == 0)
-		CTFVoteYes(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "no") == 0)
-		CTFVoteNo(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "ready") == 0)
-		CTFReady(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "notready") == 0)
-		CTFNotReady(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "ghost") == 0)
-		CTFGhost(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "admin") == 0)
-		CTFAdmin(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "stats") == 0)
-		CTFStats(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "warp") == 0)
-		CTFWarp(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "boot") == 0)
-		CTFBoot(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "playerlist") == 0)
-		CTFPlayerList(ent);
+	{
+
+	}
 	else if (Q_strcasecmp(cmd, "observer") == 0)
-		CTFObserver(ent);
+	{
+
+	}
 	// ZOID
 	else if (Q_strcasecmp(cmd, "switchteam") == 0)
 		Cmd_Switchteam_f(ent);

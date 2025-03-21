@@ -212,8 +212,8 @@ void SP_misc_nuke_core(edict_t *self);
 // ROGUE
 //===========
 //  ZOID
-void SP_trigger_ctf_teleport(edict_t *self);
-void SP_info_ctf_teleport_destination(edict_t *self);
+//void SP_trigger_ctf_teleport(edict_t *self);
+//void SP_info_ctf_teleport_destination(edict_t *self);
 // ZOID
 
 void SP_monster_shambler(edict_t* self);
@@ -427,12 +427,12 @@ static const std::initializer_list<spawn_t> spawns = {
 	// ROGUE
 	//==============
 	// ZOID
-	{ "trigger_ctf_teleport", SP_trigger_ctf_teleport },
-	{ "info_ctf_teleport_destination", SP_info_ctf_teleport_destination },
-	{ "misc_ctf_banner", SP_misc_ctf_banner },
-	{ "misc_ctf_small_banner", SP_misc_ctf_small_banner },
-	{ "info_player_team1", SP_info_player_team1 },
-	{ "info_player_team2", SP_info_player_team2 },
+	{ "trigger_ctf_teleport", NULL },
+	{ "info_ctf_teleport_destination", NULL},
+	{ "misc_ctf_banner", NULL },
+	{ "misc_ctf_small_banner", NULL },
+	{ "info_player_team1", NULL },
+	{ "info_player_team2", NULL },
 	// ZOID
 
 	{ "monster_shambler", SP_monster_shambler }
@@ -1297,7 +1297,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 	G_FindTeams();
 
 	// ZOID
-	CTFSpawn();
+	//CTFSpawn();
 	// ZOID
 
 	// ROGUE
@@ -1447,9 +1447,9 @@ static void G_InitStatusbar()
 
 		sb.ifstat(STAT_HEALTH_BARS).yt(24).health_bars().endifstat();
 	}
-	else if (G_TeamplayEnabled())
+	else if (false)
 	{
-		CTFPrecache();
+		//CTFPrecache();
 
 		// ctf/tdm
 		// red team
@@ -1462,7 +1462,7 @@ static void G_InitStatusbar()
 		// joined overlay
 		sb.ifstat(STAT_CTF_JOINED_TEAM2_PIC).yb(-85).xr(-28).pic(STAT_CTF_JOINED_TEAM2_PIC).endifstat();
 
-		if (ctf->integer)
+		if (false)
 		{
 			// have flag graph
 			sb.ifstat(STAT_CTF_FLAG_PIC).yt(26).xr(-24).pic(STAT_CTF_FLAG_PIC).endifstat();
@@ -1474,7 +1474,7 @@ static void G_InitStatusbar()
 		// id view color
 		sb.ifstat(STAT_CTF_ID_VIEW_COLOR).xv(96).yb(-58).pic(STAT_CTF_ID_VIEW_COLOR).endifstat();
 
-		if (ctf->integer)
+		if (false)
 		{
 			// match
 			sb.ifstat(STAT_CTF_MATCH).xl(0).yb(-78).stat_string(STAT_CTF_MATCH).endifstat();
@@ -1600,7 +1600,7 @@ void SP_worldspawn(edict_t *ent)
 	// [Paril-KEX]
 	if (!deathmatch->integer)
 		gi.configstring(CS_GAME_STYLE, G_Fmt("{}", (int32_t) game_style_t::GAME_STYLE_PVE).data());
-	else if (teamplay->integer || ctf->integer)
+	else if (false)
 		gi.configstring(CS_GAME_STYLE, G_Fmt("{}", (int32_t) game_style_t::GAME_STYLE_TDM).data());
 	else
 		gi.configstring(CS_GAME_STYLE, G_Fmt("{}", (int32_t) game_style_t::GAME_STYLE_FFA).data());

@@ -474,8 +474,8 @@ inline gtime_t Weapon_AnimationTime(edict_t *ent)
 	{
 		if (is_quadfire)
 			ent->client->ps.gunrate *= 2;
-		if (CTFApplyHaste(ent))
-			ent->client->ps.gunrate *= 2;
+		//if (CTFApplyHaste(ent))
+		//	ent->client->ps.gunrate *= 2;
 	}
 
 	// network optimization...
@@ -663,23 +663,23 @@ void Drop_Weapon(edict_t *ent, gitem_t *item)
 
 void Weapon_PowerupSound(edict_t *ent)
 {
-	if (!CTFApplyStrengthSound(ent))
-	{
-		if (ent->client->quad_time > level.time && ent->client->double_time > level.time)
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("ctf/tech2x.wav"), 1, ATTN_NORM, 0);
-		else if (ent->client->quad_time > level.time)
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
-		else if (ent->client->double_time > level.time)
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/ddamage3.wav"), 1, ATTN_NORM, 0);
-		else if (ent->client->quadfire_time > level.time
-			&& ent->client->ctf_techsndtime < level.time)
-		{
-			ent->client->ctf_techsndtime = level.time + 1_sec;
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("ctf/tech3.wav"), 1, ATTN_NORM, 0);
-		}
-	}
+	//if (!CTFApplyStrengthSound(ent))
+	//{
+	//	if (ent->client->quad_time > level.time && ent->client->double_time > level.time)
+	//		gi.sound(ent, CHAN_ITEM, gi.soundindex("ctf/tech2x.wav"), 1, ATTN_NORM, 0);
+	//	else if (ent->client->quad_time > level.time)
+	//		gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
+	//	else if (ent->client->double_time > level.time)
+	//		gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/ddamage3.wav"), 1, ATTN_NORM, 0);
+	//	else if (ent->client->quadfire_time > level.time
+	//		&& ent->client->ctf_techsndtime < level.time)
+	//	{
+	//		ent->client->ctf_techsndtime = level.time + 1_sec;
+	//		gi.sound(ent, CHAN_ITEM, gi.soundindex("ctf/tech3.wav"), 1, ATTN_NORM, 0);
+	//	}
+	//}
 
-	CTFApplyHasteSound(ent);
+	//CTFApplyHasteSound(ent);
 }
 
 inline bool Weapon_CanAnimate(edict_t *ent)
@@ -1116,8 +1116,8 @@ void Throw_Generic(edict_t *ent, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int F
 			// [Paril-KEX] dualfire/time accel
 			gtime_t grenade_wait_time = 1_sec;
 
-			if (CTFApplyHaste(ent))
-				grenade_wait_time *= 0.5f;
+			//if (CTFApplyHaste(ent))
+			//	grenade_wait_time *= 0.5f;
 			if (is_quadfire)
 				grenade_wait_time *= 0.5f;
 

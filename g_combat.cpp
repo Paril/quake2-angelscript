@@ -211,7 +211,7 @@ static int CheckPowerArmor(edict_t *ent, const vec3_t &point, const vec3_t &norm
 	}
 	else
 	{
-		if (ctf->integer)
+		if (false)
 			damagePerCell = 1; // power armor is weaker in CTF
 		else
 			damagePerCell = 2;
@@ -503,7 +503,7 @@ bool OnSameTeam(edict_t *ent1, edict_t *ent2)
 	if (coop->integer)
 		return ent1->client && ent2->client;
 	// ZOID
-	else if (G_TeamplayEnabled() && ent1->client && ent2->client)
+	else if (ent1->client && ent2->client)
 	{
 		if (ent1->client->resp.ctf_team == ent2->client->resp.ctf_team)
 			return true;
@@ -615,7 +615,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 
 	// ZOID
 	// strength tech
-	damage = CTFApplyStrength(attacker, damage);
+	//damage = CTFApplyStrength(attacker, damage);
 	// ZOID
 
 	if ((targ->flags & FL_NO_KNOCKBACK) ||
@@ -675,7 +675,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 
 	// ZOID
 	// team armor protect
-	if (G_TeamplayEnabled() && targ->client && attacker->client &&
+	if (targ->client && attacker->client &&
 		targ->client->resp.ctf_team == attacker->client->resp.ctf_team && targ != attacker &&
 		g_teamplay_armor_protect->integer)
 	{
@@ -696,11 +696,11 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 
 	// ZOID
 	// resistance tech
-	take = CTFApplyResistance(targ, take);
+	//take = CTFApplyResistance(targ, take);
 	// ZOID
 
 	// ZOID
-	CTFCheckHurtCarrier(targ, attacker);
+	//CTFCheckHurtCarrier(targ, attacker);
 	// ZOID
 
 	// ROGUE - this option will do damage both to the armor and person. originally for DPU rounds
@@ -744,7 +744,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 				SpawnDamage(te_sparks, point, normal, take);
 		}
 
-		if (!CTFMatchSetup())
+		if (!false)
 			targ->health = targ->health - take;
 
 		if ((targ->flags & FL_IMMORTAL) && targ->health <= 0)
