@@ -2059,33 +2059,33 @@ model="models/weapons/g_shotg/tris.md2"
 // RAFAEL
 /*QUAKED ammo_trap (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-	{
-		/* id */ IT_AMMO_TRAP,
-		/* classname */ "ammo_trap",
-		/* pickup */ Pickup_Ammo,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Ammo,
-		/* weaponthink */ Weapon_Trap,
-		/* pickup_sound */ "misc/am_pkup.wav",
-		/* world_model */ "models/weapons/g_trap/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_trap/tris.md2",
-		/* icon */ "a_trap",
-		/* use_name */  "Trap",
-		/* pickup_name */  "$item_trap",
-		/* pickup_name_definite */ "$item_trap_def",
-		/* quantity */ 1,
-		/* ammo */ IT_AMMO_TRAP,
-		/* chain */ IT_AMMO_GRENADES,
-		/* flags */ IF_AMMO | IF_WEAPON | IF_NO_INFINITE_AMMO,
-		/* vwep_model */ "#a_trap.md2",
-		/* armor_info */ nullptr,
-		/* tag */ AMMO_TRAP,
-		/* precaches */ "misc/fhit3.wav weapons/trapcock.wav weapons/traploop.wav weapons/trapsuck.wav weapons/trapdown.wav items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav models/weapons/z_trap/tris.md2",
-		/* sort_id */ 0,
-		/* quantity_warn */ 1
-	},
-// RAFAEL
+//	{
+//		/* id */ IT_AMMO_TRAP,
+//		/* classname */ "ammo_trap",
+//		/* pickup */ Pickup_Ammo,
+//		/* use */ Use_Weapon,
+//		/* drop */ Drop_Ammo,
+//		/* weaponthink */ Weapon_Trap,
+//		/* pickup_sound */ "misc/am_pkup.wav",
+//		/* world_model */ "models/weapons/g_trap/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ "models/weapons/v_trap/tris.md2",
+//		/* icon */ "a_trap",
+//		/* use_name */  "Trap",
+//		/* pickup_name */  "$item_trap",
+//		/* pickup_name_definite */ "$item_trap_def",
+//		/* quantity */ 1,
+//		/* ammo */ IT_AMMO_TRAP,
+//		/* chain */ IT_AMMO_GRENADES,
+//		/* flags */ IF_AMMO | IF_WEAPON | IF_NO_INFINITE_AMMO,
+//		/* vwep_model */ "#a_trap.md2",
+//		/* armor_info */ nullptr,
+//		/* tag */ AMMO_TRAP,
+//		/* precaches */ "misc/fhit3.wav weapons/trapcock.wav weapons/traploop.wav weapons/trapsuck.wav weapons/trapdown.wav items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav models/weapons/z_trap/tris.md2",
+//		/* sort_id */ 0,
+//		/* quantity_warn */ 1
+//	},
+//// RAFAEL
 
 /*QUAKED ammo_tesla (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
@@ -2233,32 +2233,32 @@ model="models/weapons/g_launch/tris.md2"
 // RAFAEL
 /*QUAKED weapon_boomer (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-	{
-		/* id */ IT_WEAPON_IONRIPPER,
-		/* classname */ "weapon_boomer",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_Ionripper,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_boom/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_boomer/tris.md2",
-		/* icon */ "w_ripper",
-		/* use_name */  "Ionripper",
-		/* pickup_name */  "$item_ionripper",
-		/* pickup_name_definite */ "$item_ionripper_def",
-		/* quantity */ 2,
-		/* ammo */ IT_AMMO_CELLS,
-		/* chain */ IT_WEAPON_HYPERBLASTER,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_ripper.md2",
-		/* armor_info */ nullptr,
-		/* tag */ 0,
-		/* precaches */ "weapons/rippfire.wav models/objects/boomrang/tris.md2 misc/lasfly.wav",
-		/* sort_id */ 0,
-		/* quantity_warn */ 30
-	},
+	//{
+	//	/* id */ IT_WEAPON_IONRIPPER,
+	//	/* classname */ "weapon_boomer",
+	//	/* pickup */ Pickup_Weapon,
+	//	/* use */ Use_Weapon,
+	//	/* drop */ Drop_Weapon,
+	//	/* weaponthink */ Weapon_Ionripper,
+	//	/* pickup_sound */ "misc/w_pkup.wav",
+	//	/* world_model */ "models/weapons/g_boom/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ "models/weapons/v_boomer/tris.md2",
+	//	/* icon */ "w_ripper",
+	//	/* use_name */  "Ionripper",
+	//	/* pickup_name */  "$item_ionripper",
+	//	/* pickup_name_definite */ "$item_ionripper_def",
+	//	/* quantity */ 2,
+	//	/* ammo */ IT_AMMO_CELLS,
+	//	/* chain */ IT_WEAPON_HYPERBLASTER,
+	//	/* flags */ IF_WEAPON | IF_STAY_COOP,
+	//	/* vwep_model */ "#w_ripper.md2",
+	//	/* armor_info */ nullptr,
+	//	/* tag */ 0,
+	//	/* precaches */ "weapons/rippfire.wav models/objects/boomrang/tris.md2 misc/lasfly.wav",
+	//	/* sort_id */ 0,
+	//	/* quantity_warn */ 30
+	//},
 // RAFAEL
 
 // ROGUE
@@ -2319,33 +2319,33 @@ model="models/weapons/g_launch/tris.md2"
 		/* precaches */ "weapons/rg_hum.wav"
 	},
 
-// RAFAEL 14-APR-98
-/*QUAKED weapon_phalanx (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-	{
-		/* id */ IT_WEAPON_PHALANX,
-		/* classname */ "weapon_phalanx",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_Phalanx,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_shotx/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_shotx/tris.md2",
-		/* icon */ "w_phallanx",
-		/* use_name */  "Phalanx",
-		/* pickup_name */  "$item_phalanx",
-		/* pickup_name_definite */ "$item_phalanx_def",
-		/* quantity */ 1,
-		/* ammo */ IT_AMMO_MAGSLUG,
-		/* chain */ IT_WEAPON_RAILGUN,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_phalanx.md2",
-		/* armor_info */ nullptr,
-		/* tag */ 0,
-		/* precaches */ "weapons/plasshot.wav sprites/s_photon.sp2 weapons/rockfly.wav"
-	},
+//// RAFAEL 14-APR-98
+///*QUAKED weapon_phalanx (.3 .3 1) (-16 -16 -16) (16 16 16)
+//*/
+//	{
+//		/* id */ IT_WEAPON_PHALANX,
+//		/* classname */ "weapon_phalanx",
+//		/* pickup */ Pickup_Weapon,
+//		/* use */ Use_Weapon,
+//		/* drop */ Drop_Weapon,
+//		/* weaponthink */ Weapon_Phalanx,
+//		/* pickup_sound */ "misc/w_pkup.wav",
+//		/* world_model */ "models/weapons/g_shotx/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ "models/weapons/v_shotx/tris.md2",
+//		/* icon */ "w_phallanx",
+//		/* use_name */  "Phalanx",
+//		/* pickup_name */  "$item_phalanx",
+//		/* pickup_name_definite */ "$item_phalanx_def",
+//		/* quantity */ 1,
+//		/* ammo */ IT_AMMO_MAGSLUG,
+//		/* chain */ IT_WEAPON_RAILGUN,
+//		/* flags */ IF_WEAPON | IF_STAY_COOP,
+//		/* vwep_model */ "#w_phalanx.md2",
+//		/* armor_info */ nullptr,
+//		/* tag */ 0,
+//		/* precaches */ "weapons/plasshot.wav sprites/s_photon.sp2 weapons/rockfly.wav"
+//	},
 // RAFAEL
 
 /*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16)

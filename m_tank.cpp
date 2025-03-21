@@ -482,7 +482,10 @@ void TankRocket(edict_t *self)
 		if (M_AdjustBlindfireTarget(self, start, vec, right, dir))
 		{
 			if (self->spawnflags.has(SPAWNFLAG_TANK_COMMANDER_HEAT_SEEKING))
-				monster_fire_heat(self, start, dir, 50, rocketSpeed, flash_number, self->accel);
+			{
+
+				//monster_fire_heat(self, start, dir, 50, rocketSpeed, flash_number, self->accel);
+			}
 			else
 				monster_fire_rocket(self, start, dir, 50, rocketSpeed, flash_number);
 		}
@@ -494,7 +497,10 @@ void TankRocket(edict_t *self)
 		if (trace.fraction > 0.5f || trace.ent->solid != SOLID_BSP)
 		{
 			if (self->spawnflags.has(SPAWNFLAG_TANK_COMMANDER_HEAT_SEEKING))
-				monster_fire_heat(self, start, dir, 50, rocketSpeed, flash_number, self->accel);
+			{
+
+				//monster_fire_heat(self, start, dir, 50, rocketSpeed, flash_number, self->accel);
+			}
 			else
 				monster_fire_rocket(self, start, dir, 50, rocketSpeed, flash_number);
 		}

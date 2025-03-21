@@ -477,7 +477,7 @@ void supertankRocket(edict_t *self)
 		vec[2] += self->enemy->viewheight;
 		dir = vec - start;
 		dir.normalize();
-		monster_fire_heat(self, start, dir, 40, 500, flash_number, 0.075f);
+		//monster_fire_heat(self, start, dir, 40, 500, flash_number, 0.075f);
 	}
 	else
 	{

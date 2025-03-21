@@ -372,31 +372,31 @@ constexpr vec3_t laser_positions[] = {
 
 PRETHINK(guardian_fire_update) (edict_t *laser) -> void
 {
-	if (!laser->spawnflags.has(SPAWNFLAG_DABEAM_SPAWNED))
-	{
-		edict_t *self = laser->owner;
+	//if (!laser->spawnflags.has(SPAWNFLAG_DABEAM_SPAWNED))
+	//{
+	//	edict_t *self = laser->owner;
 
-		vec3_t forward, right, target;
-		vec3_t start;
+	//	vec3_t forward, right, target;
+	//	vec3_t start;
 
-		AngleVectors(self->s.angles, forward, right, nullptr);
-		start = M_ProjectFlashSource(self, laser_positions[laser->spawnflags.has(SPAWNFLAG_DABEAM_SECONDARY) ? 1 : 0], forward, right);
-		PredictAim(self, self->enemy, start, 0, false, 0.3f, &forward, &target);
+	//	AngleVectors(self->s.angles, forward, right, nullptr);
+	//	start = M_ProjectFlashSource(self, laser_positions[laser->spawnflags.has(SPAWNFLAG_DABEAM_SECONDARY) ? 1 : 0], forward, right);
+	//	PredictAim(self, self->enemy, start, 0, false, 0.3f, &forward, &target);
 
-		laser->s.origin = start;
-		forward[0] += crandom() * 0.02f;
-		forward[1] += crandom() * 0.02f;
-		forward.normalize();
-		laser->movedir = forward;
-		gi.linkentity(laser);
-	}
-	dabeam_update(laser, false);
+	//	laser->s.origin = start;
+	//	forward[0] += crandom() * 0.02f;
+	//	forward[1] += crandom() * 0.02f;
+	//	forward.normalize();
+	//	laser->movedir = forward;
+	//	gi.linkentity(laser);
+	//}
+	//dabeam_update(laser, false);
 }
 
 void guardian_laser_fire(edict_t *self)
 {
-	gi.sound(self, CHAN_WEAPON, sound_laser, 1.f, ATTN_NORM, 0.f);
-	monster_fire_dabeam(self, 15, self->s.frame & 1, guardian_fire_update);
+	//gi.sound(self, CHAN_WEAPON, sound_laser, 1.f, ATTN_NORM, 0.f);
+	//monster_fire_dabeam(self, 15, self->s.frame & 1, guardian_fire_update);
 }
 
 mframe_t guardian_frames_atk2_fire[] = {

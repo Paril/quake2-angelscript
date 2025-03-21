@@ -515,16 +515,16 @@ PRETHINK(brain_left_eye_laser_update) (edict_t *laser) -> void
 	laser->s.origin = start;
 	laser->movedir = dir;
 	gi.linkentity(laser);
-	dabeam_update(laser, false);
+	//dabeam_update(laser, false);
 }
 
 void brain_laserbeam(edict_t *self)
 {
 	// dis is my right eye
-	monster_fire_dabeam(self, 1, false, brain_right_eye_laser_update);
+	//monster_fire_dabeam(self, 1, false, brain_right_eye_laser_update);
 
 	// dis is me left eye
-	monster_fire_dabeam(self, 1, true, brain_left_eye_laser_update);
+	//monster_fire_dabeam(self, 1, true, brain_left_eye_laser_update);
 }
 
 void brain_laserbeam_reattack(edict_t *self)

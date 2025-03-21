@@ -484,7 +484,10 @@ void ChickRocket(edict_t *self)
 		{
 			// RAFAEL
 			if (self->s.skinnum > 1)
-				monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.075f);
+			{
+				//monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.075f);
+
+			}
 			else
 				// RAFAEL
 				monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
@@ -502,11 +505,11 @@ void ChickRocket(edict_t *self)
 			if (!(trace.startsolid || trace.allsolid || (trace.fraction < 0.5f)))
 			{
 				// RAFAEL
-				if (self->s.skinnum > 1)
-					monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.075f);
-				else
-					// RAFAEL
-					monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
+				//if (self->s.skinnum > 1)
+				//	monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.075f);
+				//else
+				//	// RAFAEL
+				//	monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
 			}
 			else
 			{
@@ -519,11 +522,11 @@ void ChickRocket(edict_t *self)
 				if (!(trace.startsolid || trace.allsolid || (trace.fraction < 0.5f)))
 				{
 					// RAFAEL
-					if (self->s.skinnum > 1)
-						monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.075f);
-					else
-						// RAFAEL
-						monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
+					//if (self->s.skinnum > 1)
+					//	monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.075f);
+					//else
+					//	// RAFAEL
+					//	monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
 				}
 			}
 		}
@@ -533,11 +536,11 @@ void ChickRocket(edict_t *self)
 		if (trace.fraction > 0.5f || trace.ent->solid != SOLID_BSP)
 		{
 			// RAFAEL
-			if (self->s.skinnum > 1)
-				monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.15f);
-			else
-				// RAFAEL
-				monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
+			//if (self->s.skinnum > 1)
+			//	monster_fire_heat(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1, 0.15f);
+			//else
+			//	// RAFAEL
+			//	monster_fire_rocket(self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
 		}
 	}
 }

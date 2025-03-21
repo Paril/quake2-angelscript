@@ -158,21 +158,21 @@ void SP_turret_base(edict_t *self);
 void SP_turret_driver(edict_t *self);
 
 // RAFAEL 14-APR-98
-void SP_monster_soldier_hypergun(edict_t *self);
-void SP_monster_soldier_lasergun(edict_t *self);
-void SP_monster_soldier_ripper(edict_t *self);
-void SP_monster_fixbot(edict_t *self);
-void SP_monster_gekk(edict_t *self);
-void SP_monster_chick_heat(edict_t *self);
-void SP_monster_gladb(edict_t *self);
-void SP_monster_boss5(edict_t *self);
-void SP_rotating_light(edict_t *self);
-void SP_object_repair(edict_t *self);
-void SP_misc_crashviper(edict_t *ent);
-void SP_misc_viper_missile(edict_t *self);
-void SP_misc_amb4(edict_t *ent);
-void SP_target_mal_laser(edict_t *ent);
-void SP_misc_transport(edict_t *ent);
+//void SP_monster_soldier_hypergun(edict_t *self);
+//void SP_monster_soldier_lasergun(edict_t *self);
+//void SP_monster_soldier_ripper(edict_t *self);
+//void SP_monster_fixbot(edict_t *self);
+//void SP_monster_gekk(edict_t *self);
+//void SP_monster_chick_heat(edict_t *self);
+//void SP_monster_gladb(edict_t *self);
+//void SP_monster_boss5(edict_t *self);
+//void SP_rotating_light(edict_t *self);
+////void SP_object_repair(edict_t *self);
+//void SP_misc_crashviper(edict_t *ent);
+//void SP_misc_viper_missile(edict_t *self);
+//void SP_misc_amb4(edict_t *ent);
+//void SP_target_mal_laser(edict_t *ent);
+//void SP_misc_transport(edict_t *ent);
 // END 14-APR-98
 
 void SP_misc_nuke(edict_t *ent);
@@ -372,22 +372,22 @@ static const std::initializer_list<spawn_t> spawns = {
 	{ "turret_driver", SP_turret_driver },
 
 	// RAFAEL
-	{ "func_object_repair", SP_object_repair },
-	{ "rotating_light", SP_rotating_light },
-	{ "target_mal_laser", SP_target_mal_laser },
-	{ "misc_crashviper", SP_misc_crashviper },
-	{ "misc_viper_missile", SP_misc_viper_missile },
-	{ "misc_amb4", SP_misc_amb4 },
-	{ "misc_transport", SP_misc_transport },
-	{ "misc_nuke", SP_misc_nuke },
-	{ "monster_soldier_hypergun", SP_monster_soldier_hypergun },
-	{ "monster_soldier_lasergun", SP_monster_soldier_lasergun },
-	{ "monster_soldier_ripper", SP_monster_soldier_ripper },
-	{ "monster_fixbot", SP_monster_fixbot },
-	{ "monster_gekk", SP_monster_gekk },
-	{ "monster_chick_heat", SP_monster_chick_heat },
-	{ "monster_gladb", SP_monster_gladb },
-	{ "monster_boss5", SP_monster_boss5 },
+	{ "func_object_repair", nullptr },
+	{ "rotating_light", nullptr },
+	{ "target_mal_laser", nullptr },
+	{ "misc_crashviper", nullptr },
+	{ "misc_viper_missile", nullptr },
+	{ "misc_amb4", nullptr },
+	{ "misc_transport", nullptr },
+	{ "misc_nuke", nullptr },
+	{ "monster_soldier_hypergun", nullptr },
+	{ "monster_soldier_lasergun", nullptr },
+	{ "monster_soldier_ripper", nullptr },
+	{ "monster_fixbot", nullptr },
+	{ "monster_gekk", nullptr },
+	{ "monster_chick_heat", nullptr },
+	{ "monster_gladb", nullptr },
+	{ "monster_boss5", nullptr },
 	// RAFAEL
 
 	//==============

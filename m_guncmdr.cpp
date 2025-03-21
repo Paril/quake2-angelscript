@@ -981,8 +981,8 @@ void GunnerCmdrGrenade(edict_t *self)
 	{
 		constexpr float inner_spread = 0.125f;
 
-		for (int32_t i = 0; i < 3; i++)
-			fire_ionripper(self, start, aim + (right * (-(inner_spread * 2) + (inner_spread * (i + 1)))), 15, 800, EF_IONRIPPER);
+		//for (int32_t i = 0; i < 3; i++)
+		//	fire_ionripper(self, start, aim + (right * (-(inner_spread * 2) + (inner_spread * (i + 1)))), 15, 800, EF_IONRIPPER);
 
 		monster_muzzleflash(self, start, flash_number);
 	}

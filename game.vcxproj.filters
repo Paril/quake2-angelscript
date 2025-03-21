@@ -54,33 +54,6 @@
     <ClCompile Include="p_view.cpp" />
     <ClCompile Include="p_weapon.cpp" />
     <ClCompile Include="q_std.cpp" />
-    <ClCompile Include="xatrix\g_xatrix_func.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_items.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_misc.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_monster.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_target.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_weapon.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\m_xatrix_fixbot.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\m_xatrix_gekk.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
-    <ClCompile Include="xatrix\p_xatrix_weapon.cpp">
-      <Filter>xatrix</Filter>
-    </ClCompile>
     <ClCompile Include="rogue\g_rogue_combat.cpp">
       <Filter>rogue</Filter>
     </ClCompile>
@@ -445,12 +418,6 @@
     <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-    <ClInclude Include="xatrix\m_xatrix_fixbot.h">
-      <Filter>xatrix</Filter>
-    </ClInclude>
-    <ClInclude Include="xatrix\m_xatrix_gekk.h">
-      <Filter>xatrix</Filter>
-    </ClInclude>
     <ClInclude Include="rogue\m_rogue_carrier.h">
       <Filter>rogue</Filter>
     </ClInclude>
@@ -758,9 +725,6 @@
   <ItemGroup>
     <Filter Include="rogue">
       <UniqueIdentifier>{3b58fe82-b357-4476-9722-c8ffd92fbb25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="xatrix">
-      <UniqueIdentifier>{a41a0994-5b7d-4489-a98a-647f00470ace}</UniqueIdentifier>
     </Filter>
     <Filter Include="as">
       <UniqueIdentifier>{5d37c2d0-f433-4a8c-b621-360e4ca9d4ce}</UniqueIdentifier>

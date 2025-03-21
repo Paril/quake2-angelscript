@@ -536,14 +536,14 @@ PRETHINK(soldierh_laser_update) (edict_t *laser) -> void
 	laser->s.origin = start;
 	laser->movedir = forward;
 	gi.linkentity(laser);
-	dabeam_update(laser, false);
+	//dabeam_update(laser, false);
 }
 
 // RAFAEL
 void soldierh_laserbeam(edict_t *self, int flash_index)
 {
-	self->radius_dmg = flash_index;
-	monster_fire_dabeam(self, 1, false, soldierh_laser_update);
+	//self->radius_dmg = flash_index;
+	//monster_fire_dabeam(self, 1, false, soldierh_laser_update);
 }
 
 constexpr monster_muzzleflash_id_t ripper_flash[] = { MZ2_SOLDIER_RIPPER_1, MZ2_SOLDIER_RIPPER_2, MZ2_SOLDIER_RIPPER_3, MZ2_SOLDIER_RIPPER_4, MZ2_SOLDIER_RIPPER_5, MZ2_SOLDIER_RIPPER_6, MZ2_SOLDIER_RIPPER_7, MZ2_SOLDIER_RIPPER_8, MZ2_SOLDIER_RIPPER_9 };
@@ -652,11 +652,11 @@ void soldier_fire(edict_t *self, int flash_number, bool angle_limited)
 	{
 		// RAFAEL 24-APR-98
 		// droped the damage from 15 to 5
-		monster_fire_ionripper(self, start, aim, 5, 600, flash_index, EF_IONRIPPER);
+	/*	monster_fire_ionripper(self, start, aim, 5, 600, flash_index, EF_IONRIPPER);*/
 	}
 	else if (style.has_bluehyper())
 	{
-		monster_fire_blueblaster(self, start, aim, 1, 600, flash_index, EF_BLUEHYPERBLASTER);
+		//monster_fire_blueblaster(self, start, aim, 1, 600, flash_index, EF_BLUEHYPERBLASTER);
 	}
 	else if (style.has_blaster())
 	{
