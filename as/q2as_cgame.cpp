@@ -65,6 +65,17 @@ void q2as_cg_state_t::LoadFunctions()
     CG_DrawHUD = mainModule->GetFunctionByDecl("void CG_DrawHUD (int32, const cg_server_data_t &, const vrect_t &in, const vrect_t &in, int32, int32, const player_state_t &in)");
     CG_ClearNotify = mainModule->GetFunctionByDecl("void CG_ClearNotify(int32)");
     CG_ClearCenterprint = mainModule->GetFunctionByDecl("void CG_ClearCenterprint(int32)");
+    CG_Pmove = mainModule->GetFunctionByDecl("void Pmove(pmove_t @pmove)");
+    
+	pmove_inst = reinterpret_cast<as_pmove_t *>(Alloc(sizeof(as_pmove_t)));
+	new(pmove_inst) as_pmove_t();
+    pmove_inst->trace_f = engine->GetGlobalFunctionByDecl("trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)");
+    pmove_inst->clip_f = engine->GetGlobalFunctionByDecl("trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)");
+    pmove_inst->pointcontents_f = engine->GetGlobalFunctionByDecl("contents_t _cg_pointcontents(const vec3_t &in)");
+
+    pmove_inst->trace_f->AddRef();
+    pmove_inst->clip_f->AddRef();
+    pmove_inst->pointcontents_f->AddRef();
 }
 
 q2as_cg_state_t cgas;
@@ -186,6 +197,30 @@ static std::string q2as_CG_CL_GetClientDogtag(int index)
 static std::string q2as_CG_CL_GetClientName(int index)
 {
     return cgi.CL_GetClientName(index);
+}
+
+static trace_t Q2AS_CG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, edict_t *passent, contents_t contentmask)
+{
+    return cgas.pmove_inst->pm.trace(start, &mins, &maxs, end, passent, contentmask);
+}
+
+static trace_t Q2AS_CG_Clip(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, contents_t contentmask)
+{
+    return cgas.pmove_inst->pm.clip(start, &mins, &maxs, end, contentmask);
+}
+
+static contents_t Q2AS_CG_Pointcontents(const vec3_t &p)
+{
+    return cgas.pmove_inst->pm.pointcontents(p);
+}
+
+static bool Q2AS_RegisterCGamePmove(asIScriptEngine *engine)
+{
+    EnsureRegisteredGlobalFunction("trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)", asFUNCTION(Q2AS_CG_Trace), asCALL_CDECL);
+    EnsureRegisteredGlobalFunction("trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)", asFUNCTION(Q2AS_CG_Clip), asCALL_CDECL);
+    EnsureRegisteredGlobalFunction("contents_t _cg_pointcontents(const vec3_t &in)", asFUNCTION(Q2AS_CG_Pointcontents), asCALL_CDECL);
+
+    return true;
 }
 
 static bool Q2AS_RegisterCGame(asIScriptEngine *engine)
@@ -499,6 +534,8 @@ static void Q2AS_CG_Shutdown()
     	ctx.Execute();
     }
 
+    Q2AS_ReleaseObj<as_pmove_t, q2as_cg_state_t>(cgas.pmove_inst);
+
     cgas.Destroy();
 }
 
@@ -510,6 +547,21 @@ static void Q2AS_CG_TouchPics()
     auto ctx = cgas.RequestContext();
 	ctx->Prepare(cgas.CG_TouchPics);
 	ctx.Execute();
+}
+
+static void Q2AS_CG_Pmove(pmove_t *pm)
+{
+    if (q2as_state_t::CheckExceptionState())
+        return;
+
+    cgas.pmove_inst->pm = *pm;
+
+    auto ctx = cgas.RequestContext();
+	ctx->Prepare(cgas.CG_Pmove);
+    ctx->SetArgObject(0, cgas.pmove_inst);
+	ctx.Execute();
+
+    *pm = cgas.pmove_inst->pm;
 }
 
 #include "q2as_predefined.h"
@@ -545,6 +597,7 @@ cgame_export_t *Q2AS_GetCGameAPI()
         Q2AS_RegisterTrace,
         Q2AS_RegisterPmove,
         Q2AS_RegisterPmoveFactory<q2as_cg_state_t>,
+        Q2AS_RegisterCGamePmove,
         Q2AS_RegisterImportTypes,
         Q2AS_RegisterTokenizer,
 		Q2AS_RegisterCGame
@@ -585,6 +638,7 @@ cgame_export_t *Q2AS_GetCGameAPI()
     cglobals.ParseCenterPrint = Q2AS_CG_ParseCenterPrint;
     cglobals.Shutdown = Q2AS_CG_Shutdown;
     cglobals.TouchPics = Q2AS_CG_TouchPics;
+    cglobals.Pmove = Q2AS_CG_Pmove;
 
     return &cglobals;
 }

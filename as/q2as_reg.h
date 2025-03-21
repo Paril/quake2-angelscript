@@ -132,20 +132,35 @@ void Q2AS_Factory(asIScriptGeneric *gen)
 	new(ptr) T();
 }
 
+template<typename T>
+void Q2AS_AddRefObject(T *object)
+{
+	object->refs++;
+}
+
 template<typename T, typename A>
 void Q2AS_AddRef(asIScriptGeneric *gen)
 {
 	T *object = (T *)gen->GetObject();
-	object->refs++;
+	Q2AS_AddRefObject(object);
+}
+
+template<typename T, typename A>
+bool Q2AS_ReleaseObj(T *object)
+{
+	if (!(--object->refs))
+	{
+		object->~T();
+		A::FreeStatic(object);
+		return true;
+	}
+
+	return false;
 }
 
 template<typename T, typename A>
 void Q2AS_Release(asIScriptGeneric *gen)
 {
 	T *object = (T *)gen->GetObject();
-	if (!(--object->refs))
-	{
-		object->~T();
-		A::FreeStatic(object);
-	}
+	Q2AS_ReleaseObj<T, A>(object);
 }

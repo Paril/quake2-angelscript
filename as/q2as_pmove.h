@@ -22,50 +22,24 @@ public:
             pointcontents_f->Release();
 	}
 
-    // state (in / out)
-    pmove_state_t s;
+    // for quick memcpy's
+    pmove_t pm {};
+    
+    // new stuff
+	asIScriptFunction *trace_f = nullptr;
+	asIScriptFunction *clip_f = nullptr;
+	asIScriptFunction *pointcontents_f = nullptr;
 
-    // command (in)
-    usercmd_t cmd;
-    bool      snapinitial; // if s has been changed outside pmove
-
-    // results (out)
-    //touch_list_t touch;
-	//CScriptArray *touch_o;
-	std::vector<trace_t> touch_l;
-
-    vec3_t viewangles; // clamped
-
-    vec3_t mins, maxs; // bounding box size
-
-    q2as_edict_t *groundentity;
-    cplane_t      groundplane;
-    contents_t    watertype;
-    water_level_t waterlevel;
-
-    q2as_edict_t *player; // opaque handle
-
-    // clip against world & entities
-	asIScriptFunction *trace_f;
-    // [Paril-KEX] clip against world only
-	asIScriptFunction *clip_f;
-
-	asIScriptFunction *pointcontents_f;
-
-    // [KEX] variables (in)
-    vec3_t viewoffset; // last viewoffset (for accurate calculation of blending)
-
-    // [KEX] results (out)
-    gvec4_t screen_blend;
-    refdef_flags_t rdflags; // merged with rdflags from server
-    bool jump_sound; // play jump sound
-    bool step_clip; // we clipped on top of an object from below
-    float impact_delta; // impact delta, for falling damage
-
-    uint32_t touch_length() const { return touch_l.size(); }
-    void touch_push_back(const trace_t &v) { touch_l.push_back(v); }
-    const trace_t &touch_get(uint32_t i) { return touch_l[i]; }
-    void touch_clear() { return touch_l.clear(); }
+    uint32_t touch_length() const { return pm.touch.num; }
+    void touch_push_back(const trace_t &v)
+    {
+        if (pm.touch.num == pm.touch.traces.size())
+            return;
+        
+        pm.touch.traces[pm.touch.num++] = v;
+    }
+    const trace_t &touch_get(uint32_t i) { return pm.touch.traces[i]; }
+    void touch_clear() { pm.touch.num = 0; }
 };
 
 #include "q2as_reg.h"
