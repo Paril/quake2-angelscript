@@ -19,6 +19,8 @@ Q2GAME_API cgame_export_t *GetCGameAPI(cgame_import_t *import)
 {
 	cgi = *import;
 
+	cglobals.apiversion = CGAME_API_VERSION;
+
 	// see if Q2AS needs to be initialized
 	if (auto api = Q2AS_GetCGameAPI())
 	{

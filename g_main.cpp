@@ -5,7 +5,7 @@
 #include "as/q2as_main.h"
 
 CHECK_GCLIENT_INTEGRITY;
-//CHECK_EDICT_INTEGRITY;
+CHECK_EDICT_INTEGRITY;
 
 std::mt19937 mt_rand;
 
@@ -20,9 +20,6 @@ local_game_import_t  gi;
 /*static*/ std::array<const char*, MAX_LOCALIZATION_ARGS> local_game_import_t::buffer_ptrs;
 
 game_export_t  globals;
-
-cached_modelindex		sm_meat_index;
-cached_soundindex		snd_fry;
 
 edict_t *g_edicts;
 
@@ -175,6 +172,8 @@ and global variables
 Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
 {
 	gi = *import;
+
+	globals.apiversion = GAME_API_VERSION;
 
 	// see if Q2AS needs to be initialized
 	if (auto api = Q2AS_GetGameAPI())

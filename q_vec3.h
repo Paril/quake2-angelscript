@@ -13,7 +13,7 @@ struct vec3_t
 {
 	float x, y, z;
 
-	[[nodiscard]] constexpr const float& operator[](size_t i) const
+	[[nodiscard]] constexpr const float& operator[](int i) const
 	{
 		if (i == 0)
 			return x;
@@ -24,7 +24,7 @@ struct vec3_t
 		throw std::out_of_range("i");
 	}
 
-	[[nodiscard]] constexpr float& operator[](size_t i)
+	[[nodiscard]] constexpr float& operator[](int i)
 	{
 		if (i == 0)
 			return x;
@@ -514,10 +514,19 @@ constexpr float STOP_EPSILON = 0.1f;
 	float dot = from.dot(to);
 	float aFactor;
 	float bFactor;
-	if (fabsf(dot) > 0.9995f)
+	if (dot >= 0.9995f)
 	{
 		aFactor = 1.0f - t;
 		bFactor = t;
+	}
+	else if (dot <= -0.9995f)
+	{
+		vec3_t c = vec3_t{ 1.0f, 0.0f, 0.0f }.cross(to);
+
+		if (t <= 0.5f)
+			return lerp(from, c, t * 2);
+		else
+			return lerp(c, to, (t - 0.5f) * 2);
 	}
 	else
 	{
@@ -536,7 +545,7 @@ template<>
 struct fmt::formatter<vec3_t> : fmt::formatter<float>
 {
 	template<typename FormatContext>
-	auto format(const vec3_t& p, FormatContext& ctx) -> decltype(ctx.out())
+	auto format(const vec3_t& p, FormatContext& ctx) const
 	{
 		auto out = fmt::formatter<float>::format(p.x, ctx);
 		out = fmt::format_to(out, " ");
