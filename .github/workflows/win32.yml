@@ -37,6 +37,8 @@ jobs:
         script: core.exportVariable('GITHUB_SHA_SHORT', context.sha.substring(0, 7))
 
     - name: Update release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh release edit nightly -t "Nightly" -n "Latest nightly build" --latest
         gh release upload nightly x64Build.zip --clobber
