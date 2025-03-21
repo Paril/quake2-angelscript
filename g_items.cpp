@@ -23,13 +23,13 @@ void Weapon_Phalanx(edict_t *ent);
 void Weapon_Trap(edict_t *ent);
 // RAFAEL
 // ROGUE
-void Weapon_ChainFist(edict_t *ent);
-void Weapon_Disintegrator(edict_t *ent);
-void Weapon_ETF_Rifle(edict_t *ent);
-void Weapon_Heatbeam(edict_t *ent);
-void Weapon_Prox(edict_t *ent);
-void Weapon_Tesla(edict_t *ent);
-void Weapon_ProxLauncher(edict_t *ent);
+//void Weapon_ChainFist(edict_t *ent);
+//void Weapon_Disintegrator(edict_t *ent);
+//void Weapon_ETF_Rifle(edict_t *ent);
+//void Weapon_Heatbeam(edict_t *ent);
+//void Weapon_Prox(edict_t *ent);
+//void Weapon_Tesla(edict_t *ent);
+//void Weapon_ProxLauncher(edict_t *ent);
 // ROGUE
 void Weapon_Beta_Disintegrator(edict_t *ent);
 
@@ -160,18 +160,18 @@ THINK(DoRespawn) (edict_t *ent) -> void
 	// ROGUE
 	if (g_dm_random_items->integer)
 	{
-		item_id_t new_item = DoRandomRespawn(ent);
+		//item_id_t new_item = 0;// DoRandomRespawn(ent);
 
 		// if we've changed entities, then do some sleight of hand.
 		// otherwise, the old entity will respawn
-		if (new_item)
+		/*if (new_item)
 		{
 			ent->item = GetItemByIndex(new_item);
 
 			ent->classname = ent->item->classname;
 			ent->s.effects = ent->item->world_model_flags;
 			gi.setmodel(ent, ent->item->world_model);
-		}
+		}*/
 	}
 	// ROGUE
 }
@@ -1312,15 +1312,15 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 		// [Kex] In instagib, spawn no pickups!
 		if (g_instagib->value)
 		{
-			if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor ||
-				item->pickup == Pickup_Powerup || item->pickup == Pickup_Sphere || item->pickup == Pickup_Doppleganger ||
-				(item->flags & IF_HEALTH) || (item->flags & IF_AMMO) || item->pickup == Pickup_Weapon || item->pickup == Pickup_Pack ||
-				item->id == IT_ITEM_BANDOLIER || item->id == IT_ITEM_PACK ||
-				item->id == IT_AMMO_NUKE)
-			{
-				G_FreeEdict(ent);
-				return;
-			}
+			//if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor ||
+			//	item->pickup == Pickup_Powerup || item->pickup == Pickup_Sphere || item->pickup == Pickup_Doppleganger ||
+			//	(item->flags & IF_HEALTH) || (item->flags & IF_AMMO) || item->pickup == Pickup_Weapon || item->pickup == Pickup_Pack ||
+			//	item->id == IT_ITEM_BANDOLIER || item->id == IT_ITEM_PACK ||
+			//	item->id == IT_AMMO_NUKE)
+			//{
+			//	G_FreeEdict(ent);
+			//	return;
+			//}
 		}
 
 		if (g_no_armor->integer)
@@ -1339,19 +1339,19 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 				return;
 			}
 			//=====
-			// ROGUE
-			if (item->pickup == Pickup_Sphere)
-			{
-				G_FreeEdict(ent);
-				return;
-			}
-			if (item->pickup == Pickup_Doppleganger)
-			{
-				G_FreeEdict(ent);
-				return;
-			}
-			// ROGUE
-			//=====
+			//// ROGUE
+			//if (item->pickup == Pickup_Sphere)
+			//{
+			//	G_FreeEdict(ent);
+			//	return;
+			//}
+			//if (item->pickup == Pickup_Doppleganger)
+			//{
+			//	G_FreeEdict(ent);
+			//	return;
+			//}
+			//// ROGUE
+			////=====
 		}
 		if (g_no_health->integer)
 		{
@@ -1395,11 +1395,11 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 		}
 		if (g_no_spheres->integer)
 		{
-			if (item->pickup == Pickup_Sphere)
-			{
-				G_FreeEdict(ent);
-				return;
-			}
+			//if (item->pickup == Pickup_Sphere)
+			//{
+			//	G_FreeEdict(ent);
+			//	return;
+			//}
 		}
 		// ROGUE
 		//==========
@@ -1410,18 +1410,18 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 	// DM only items
 	if (!deathmatch->integer)
 	{
-		if (item->pickup == Pickup_Doppleganger || item->pickup == Pickup_Nuke)
-		{
-			gi.Com_PrintFmt("{} spawned in non-DM; freeing...\n", *ent);
-			G_FreeEdict(ent);
-			return;
-		}
-		if ((item->use == Use_Vengeance) || (item->use == Use_Hunter))
-		{
-			gi.Com_PrintFmt("{} spawned in non-DM; freeing...\n", *ent);
-			G_FreeEdict(ent);
-			return;
-		}
+		//if (item->pickup == Pickup_Doppleganger || item->pickup == Pickup_Nuke)
+		//{
+		//	gi.Com_PrintFmt("{} spawned in non-DM; freeing...\n", *ent);
+		//	G_FreeEdict(ent);
+		//	return;
+		//}
+		//if ((item->use == Use_Vengeance) || (item->use == Use_Hunter))
+		//{
+		//	gi.Com_PrintFmt("{} spawned in non-DM; freeing...\n", *ent);
+		//	G_FreeEdict(ent);
+		//	return;
+		//}
 	}
 	// ROGUE
 	//==========
@@ -1471,8 +1471,8 @@ void SpawnItem(edict_t *ent, gitem_t *item, const spawn_temp_t &st)
 	if (ent->model)
 		gi.modelindex(ent->model);
 
-	if (ent->spawnflags.has(SPAWNFLAG_ITEM_TRIGGER_SPAWN))
-		SetTriggeredSpawn(ent);
+	//if (ent->spawnflags.has(SPAWNFLAG_ITEM_TRIGGER_SPAWN))
+	//	SetTriggeredSpawn(ent);
 
 	// ZOID
 	// flags are server animated and have special handling
@@ -1854,31 +1854,31 @@ always owned, never in the world
 	},
 
 	/*QUAKED weapon_chainfist (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-	*/
-	{
-		/* id */ IT_WEAPON_CHAINFIST,
-		/* classname */ "weapon_chainfist",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_ChainFist,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_chainf/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_chainf/tris.md2",
-		/* icon */ "w_chainfist",
-		/* use_name */  "Chainfist",
-		/* pickup_name */  "$item_chainfist",
-		/* pickup_name_definite */ "$item_chainfist_def",
-		/* quantity */ 0,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_WEAPON_BLASTER,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_chainfist.md2",
-		/* armor_info */ nullptr,
-		/* tag */ 0,
-		/* precaches */ "weapons/sawidle.wav weapons/sawhit.wav weapons/sawslice.wav",
-	},
+	//*/
+	//{
+	//	/* id */ IT_WEAPON_CHAINFIST,
+	//	/* classname */ "weapon_chainfist",
+	//	/* pickup */ Pickup_Weapon,
+	//	/* use */ Use_Weapon,
+	//	/* drop */ Drop_Weapon,
+	//	/* weaponthink */ Weapon_ChainFist,
+	//	/* pickup_sound */ "misc/w_pkup.wav",
+	//	/* world_model */ "models/weapons/g_chainf/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ "models/weapons/v_chainf/tris.md2",
+	//	/* icon */ "w_chainfist",
+	//	/* use_name */  "Chainfist",
+	//	/* pickup_name */  "$item_chainfist",
+	//	/* pickup_name_definite */ "$item_chainfist_def",
+	//	/* quantity */ 0,
+	//	/* ammo */ IT_NULL,
+	//	/* chain */ IT_WEAPON_BLASTER,
+	//	/* flags */ IF_WEAPON | IF_STAY_COOP,
+	//	/* vwep_model */ "#w_chainfist.md2",
+	//	/* armor_info */ nullptr,
+	//	/* tag */ 0,
+	//	/* precaches */ "weapons/sawidle.wav weapons/sawhit.wav weapons/sawslice.wav",
+	//},
 
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -1967,36 +1967,36 @@ model="models/weapons/g_shotg/tris.md2"
 		/* quantity_warn */ 30
 	},
 
-	// ROGUE
-/*QUAKED weapon_etf_rifle (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-*/
-	{
-		/* id */ IT_WEAPON_ETF_RIFLE,
-		/* classname */ "weapon_etf_rifle",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_ETF_Rifle,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_etf_rifle/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_etf_rifle/tris.md2",
-		/* icon */ "w_etf_rifle",
-		/* use_name */  "ETF Rifle",
-		/* pickup_name */  "$item_etf_rifle",
-		/* pickup_name_definite */ "$item_etf_rifle_def",
-		/* quantity */ 1,
-		/* ammo */ IT_AMMO_FLECHETTES,
-		/* chain */ IT_WEAPON_MACHINEGUN,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_etfrifle.md2",
-		/* armor_info */ nullptr,
-		/* tag */ 0,
-		/* precaches */ "weapons/nail1.wav models/proj/flechette/tris.md2",
-		/* sort_id */ 0,
-		/* quantity_warn */ 30
-	},
-	// ROGUE
+//	// ROGUE
+///*QUAKED weapon_etf_rifle (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+//*/
+//	{
+//		/* id */ IT_WEAPON_ETF_RIFLE,
+//		/* classname */ "weapon_etf_rifle",
+//		/* pickup */ Pickup_Weapon,
+//		/* use */ Use_Weapon,
+//		/* drop */ Drop_Weapon,
+//		/* weaponthink */ Weapon_ETF_Rifle,
+//		/* pickup_sound */ "misc/w_pkup.wav",
+//		/* world_model */ "models/weapons/g_etf_rifle/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ "models/weapons/v_etf_rifle/tris.md2",
+//		/* icon */ "w_etf_rifle",
+//		/* use_name */  "ETF Rifle",
+//		/* pickup_name */  "$item_etf_rifle",
+//		/* pickup_name_definite */ "$item_etf_rifle_def",
+//		/* quantity */ 1,
+//		/* ammo */ IT_AMMO_FLECHETTES,
+//		/* chain */ IT_WEAPON_MACHINEGUN,
+//		/* flags */ IF_WEAPON | IF_STAY_COOP,
+//		/* vwep_model */ "#w_etfrifle.md2",
+//		/* armor_info */ nullptr,
+//		/* tag */ 0,
+//		/* precaches */ "weapons/nail1.wav models/proj/flechette/tris.md2",
+//		/* sort_id */ 0,
+//		/* quantity_warn */ 30
+//	},
+//	// ROGUE
 
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
@@ -2089,32 +2089,32 @@ model="models/weapons/g_shotg/tris.md2"
 
 /*QUAKED ammo_tesla (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
-	{
-		/* id */ IT_AMMO_TESLA,
-		/* classname */ "ammo_tesla",
-		/* pickup */ Pickup_Ammo,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Ammo,
-		/* weaponthink */ Weapon_Tesla,
-		/* pickup_sound */ "misc/am_pkup.wav",
-		/* world_model */ "models/ammo/am_tesl/tris.md2",
-		/* world_model_flags */ EF_NONE,
-		/* view_model */ "models/weapons/v_tesla/tris.md2",
-		/* icon */ "a_tesla",
-		/* use_name */  "Tesla",
-		/* pickup_name */  "$item_tesla",
-		/* pickup_name_definite */ "$item_tesla_def",
-		/* quantity */ 3,
-		/* ammo */ IT_AMMO_TESLA,
-		/* chain */ IT_AMMO_GRENADES,
-		/* flags */ IF_AMMO | IF_WEAPON | IF_NO_INFINITE_AMMO,
-		/* vwep_model */ "#a_tesla.md2",
-		/* armor_info */ nullptr,
-		/* tag */ AMMO_TESLA,
-		/* precaches */ "weapons/teslaopen.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav models/weapons/g_tesla/tris.md2",
-		/* sort_id */ 0,
-		/* quantity_warn */ 1
-	},
+	//{
+	//	/* id */ IT_AMMO_TESLA,
+	//	/* classname */ "ammo_tesla",
+	//	/* pickup */ Pickup_Ammo,
+	//	/* use */ Use_Weapon,
+	//	/* drop */ Drop_Ammo,
+	//	/* weaponthink */ Weapon_Tesla,
+	//	/* pickup_sound */ "misc/am_pkup.wav",
+	//	/* world_model */ "models/ammo/am_tesl/tris.md2",
+	//	/* world_model_flags */ EF_NONE,
+	//	/* view_model */ "models/weapons/v_tesla/tris.md2",
+	//	/* icon */ "a_tesla",
+	//	/* use_name */  "Tesla",
+	//	/* pickup_name */  "$item_tesla",
+	//	/* pickup_name_definite */ "$item_tesla_def",
+	//	/* quantity */ 3,
+	//	/* ammo */ IT_AMMO_TESLA,
+	//	/* chain */ IT_AMMO_GRENADES,
+	//	/* flags */ IF_AMMO | IF_WEAPON | IF_NO_INFINITE_AMMO,
+	//	/* vwep_model */ "#a_tesla.md2",
+	//	/* armor_info */ nullptr,
+	//	/* tag */ AMMO_TESLA,
+	//	/* precaches */ "weapons/teslaopen.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav models/weapons/g_tesla/tris.md2",
+	//	/* sort_id */ 0,
+	//	/* quantity_warn */ 1
+	//},
 
 /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -2146,33 +2146,33 @@ model="models/weapons/g_launch/tris.md2"
 	},
 
 	// ROGUE
-/*QUAKED weapon_proxlauncher (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-*/
-	{
-		/* id */ IT_WEAPON_PROXLAUNCHER,
-		/* classname */ "weapon_proxlauncher",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_ProxLauncher,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_plaunch/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_plaunch/tris.md2",
-		/* icon */ "w_proxlaunch",
-		/* use_name */  "Prox Launcher",
-		/* pickup_name */  "$item_prox_launcher",
-		/* pickup_name_definite */ "$item_prox_launcher_def",
-		/* quantity */ 1,
-		/* ammo */ IT_AMMO_PROX,
-		/* chain */ IT_WEAPON_GLAUNCHER,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_plauncher.md2",
-		/* armor_info */ nullptr,
-		/* tag */ AMMO_PROX,
-		/* precaches */ "weapons/grenlf1a.wav weapons/grenlr1b.wav weapons/grenlb1b.wav weapons/proxwarn.wav weapons/proxopen.wav",
-	},
-	// ROGUE
+///*QUAKED weapon_proxlauncher (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+//*/
+//	{
+//		/* id */ IT_WEAPON_PROXLAUNCHER,
+//		/* classname */ "weapon_proxlauncher",
+//		/* pickup */ Pickup_Weapon,
+//		/* use */ Use_Weapon,
+//		/* drop */ Drop_Weapon,
+//		/* weaponthink */ Weapon_ProxLauncher,
+//		/* pickup_sound */ "misc/w_pkup.wav",
+//		/* world_model */ "models/weapons/g_plaunch/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ "models/weapons/v_plaunch/tris.md2",
+//		/* icon */ "w_proxlaunch",
+//		/* use_name */  "Prox Launcher",
+//		/* pickup_name */  "$item_prox_launcher",
+//		/* pickup_name_definite */ "$item_prox_launcher_def",
+//		/* quantity */ 1,
+//		/* ammo */ IT_AMMO_PROX,
+//		/* chain */ IT_WEAPON_GLAUNCHER,
+//		/* flags */ IF_WEAPON | IF_STAY_COOP,
+//		/* vwep_model */ "#w_plauncher.md2",
+//		/* armor_info */ nullptr,
+//		/* tag */ AMMO_PROX,
+//		/* precaches */ "weapons/grenlf1a.wav weapons/grenlr1b.wav weapons/grenlb1b.wav weapons/proxwarn.wav weapons/proxopen.wav",
+//	},
+//	// ROGUE
 
 /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
@@ -2262,35 +2262,35 @@ model="models/weapons/g_launch/tris.md2"
 // RAFAEL
 
 // ROGUE
-	/*QUAKED weapon_plasmabeam (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-	*/ 
-	{
-		/* id */ IT_WEAPON_PLASMABEAM,
-		/* classname */ "weapon_plasmabeam",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_Heatbeam,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_beamer/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_beamer/tris.md2",
-		/* icon */ "w_heatbeam",
-		/* use_name */  "Plasma Beam",
-		/* pickup_name */  "$item_plasma_beam",
-		/* pickup_name_definite */ "$item_plasma_beam_def",
-		/* quantity */ 2,
-		/* ammo */ IT_AMMO_CELLS,
-		/* chain */ IT_WEAPON_HYPERBLASTER,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_plasma.md2",
-		/* armor_info */ nullptr,
-		/* tag */ 0,
-		/* precaches */ "weapons/bfg__l1a.wav",
-		/* sort_id */ 0,
-		/* quantity_warn */ 50
-	},
-//rogue
+//	/*QUAKED weapon_plasmabeam (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+//	*/ 
+//	{
+//		/* id */ IT_WEAPON_PLASMABEAM,
+//		/* classname */ "weapon_plasmabeam",
+//		/* pickup */ Pickup_Weapon,
+//		/* use */ Use_Weapon,
+//		/* drop */ Drop_Weapon,
+//		/* weaponthink */ Weapon_Heatbeam,
+//		/* pickup_sound */ "misc/w_pkup.wav",
+//		/* world_model */ "models/weapons/g_beamer/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ "models/weapons/v_beamer/tris.md2",
+//		/* icon */ "w_heatbeam",
+//		/* use_name */  "Plasma Beam",
+//		/* pickup_name */  "$item_plasma_beam",
+//		/* pickup_name_definite */ "$item_plasma_beam_def",
+//		/* quantity */ 2,
+//		/* ammo */ IT_AMMO_CELLS,
+//		/* chain */ IT_WEAPON_HYPERBLASTER,
+//		/* flags */ IF_WEAPON | IF_STAY_COOP,
+//		/* vwep_model */ "#w_plasma.md2",
+//		/* armor_info */ nullptr,
+//		/* tag */ 0,
+//		/* precaches */ "weapons/bfg__l1a.wav",
+//		/* sort_id */ 0,
+//		/* quantity_warn */ 50
+//	},
+////rogue
 
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
@@ -2377,34 +2377,34 @@ model="models/weapons/g_launch/tris.md2"
 		/* quantity_warn */ 50
 	},
 
-	// =========================
-	// ROGUE WEAPONS
-	/*QUAKED weapon_disintegrator (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-	*/
-	{
-		/* id */ IT_WEAPON_DISRUPTOR,
-		/* classname */ "weapon_disintegrator",
-		/* pickup */ Pickup_Weapon,
-		/* use */ Use_Weapon,
-		/* drop */ Drop_Weapon,
-		/* weaponthink */ Weapon_Disintegrator,
-		/* pickup_sound */ "misc/w_pkup.wav",
-		/* world_model */ "models/weapons/g_dist/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ "models/weapons/v_dist/tris.md2",
-		/* icon */ "w_disintegrator",
-		/* use_name */  "Disruptor",
-		/* pickup_name */  "$item_disruptor",
-		/* pickup_name_definite */ "$item_disruptor_def",
-		/* quantity */ 1,
-		/* ammo */ IT_AMMO_ROUNDS,
-		/* chain */ IT_WEAPON_BFG,
-		/* flags */ IF_WEAPON | IF_STAY_COOP,
-		/* vwep_model */ "#w_disrupt.md2",
-		/* armor_info */ nullptr,
-		/* tag */ 0,
-		/* precaches */ "models/proj/disintegrator/tris.md2 weapons/disrupt.wav weapons/disint2.wav weapons/disrupthit.wav",
-	},
+	//// =========================
+	//// ROGUE WEAPONS
+	///*QUAKED weapon_disintegrator (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+	//*/
+	//{
+	//	/* id */ IT_WEAPON_DISRUPTOR,
+	//	/* classname */ "weapon_disintegrator",
+	//	/* pickup */ Pickup_Weapon,
+	//	/* use */ Use_Weapon,
+	//	/* drop */ Drop_Weapon,
+	//	/* weaponthink */ Weapon_Disintegrator,
+	//	/* pickup_sound */ "misc/w_pkup.wav",
+	//	/* world_model */ "models/weapons/g_dist/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ "models/weapons/v_dist/tris.md2",
+	//	/* icon */ "w_disintegrator",
+	//	/* use_name */  "Disruptor",
+	//	/* pickup_name */  "$item_disruptor",
+	//	/* pickup_name_definite */ "$item_disruptor_def",
+	//	/* quantity */ 1,
+	//	/* ammo */ IT_AMMO_ROUNDS,
+	//	/* chain */ IT_WEAPON_BFG,
+	//	/* flags */ IF_WEAPON | IF_STAY_COOP,
+	//	/* vwep_model */ "#w_disrupt.md2",
+	//	/* armor_info */ nullptr,
+	//	/* tag */ 0,
+	//	/* precaches */ "models/proj/disintegrator/tris.md2 weapons/disrupt.wav weapons/disint2.wav weapons/disrupthit.wav",
+	//},
 
 	// ROGUE WEAPONS
 	// =========================
@@ -2656,31 +2656,31 @@ model="models/items/ammo/rockets/medium/tris.md2"
 	},
 
 /*QUAKED ammo_nuke (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-*/
-	{
-		/* id */ IT_AMMO_NUKE,
-		/* classname */ "ammo_nuke",
-		/* pickup */ Pickup_Nuke,
-		/* use */ Use_Nuke,
-		/* drop */ Drop_Ammo,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "misc/am_pkup.wav",
-		/* world_model */ "models/weapons/g_nuke/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_nuke",
-		/* use_name */  "A-M Bomb",
-		/* pickup_name */  "$item_am_bomb",
-		/* pickup_name_definite */ "$item_am_bomb_def",
-		/* quantity */ 300,
-		/* ammo */ IT_AMMO_NUKE,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_AM_BOMB,
-		/* precaches */ "weapons/nukewarn2.wav world/rumble.wav"
-	},
+//*/
+//	{
+//		/* id */ IT_AMMO_NUKE,
+//		/* classname */ "ammo_nuke",
+//		/* pickup */ Pickup_Nuke,
+//		/* use */ Use_Nuke,
+//		/* drop */ Drop_Ammo,
+//		/* weaponthink */ nullptr,
+//		/* pickup_sound */ "misc/am_pkup.wav",
+//		/* world_model */ "models/weapons/g_nuke/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ nullptr,
+//		/* icon */ "p_nuke",
+//		/* use_name */  "A-M Bomb",
+//		/* pickup_name */  "$item_am_bomb",
+//		/* pickup_name_definite */ "$item_am_bomb_def",
+//		/* quantity */ 300,
+//		/* ammo */ IT_AMMO_NUKE,
+//		/* chain */ IT_NULL,
+//		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+//		/* vwep_model */ nullptr,
+//		/* armor_info */ nullptr,
+//		/* tag */ POWERUP_AM_BOMB,
+//		/* precaches */ "weapons/nukewarn2.wav world/rumble.wav"
+//	},
 
 /*QUAKED ammo_disruptor (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
@@ -3034,186 +3034,186 @@ gives +1 to maximum health
 /*QUAKED item_ir_goggles (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 gives +1 to maximum health
 */
-	{
-		/* id */ IT_ITEM_IR_GOGGLES,
-		/* classname */ "item_ir_goggles",
-		/* pickup */ Pickup_Powerup,
-		/* use */ Use_IR,
-		/* drop */ Drop_General,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/goggles/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_ir",
-		/* use_name */  "IR Goggles",
-		/* pickup_name */  "$item_ir_goggles",
-		/* pickup_name_definite */ "$item_ir_goggles_def",
-		/* quantity */ 60,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_IR_GOGGLES,
-		/* precaches */ "misc/ir_start.wav"
-	},
+	//{
+	//	/* id */ IT_ITEM_IR_GOGGLES,
+	//	/* classname */ "item_ir_goggles",
+	//	/* pickup */ Pickup_Powerup,
+	//	/* use */ Use_IR,
+	//	/* drop */ Drop_General,
+	//	/* weaponthink */ nullptr,
+	//	/* pickup_sound */ "items/pkup.wav",
+	//	/* world_model */ "models/items/goggles/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ nullptr,
+	//	/* icon */ "p_ir",
+	//	/* use_name */  "IR Goggles",
+	//	/* pickup_name */  "$item_ir_goggles",
+	//	/* pickup_name_definite */ "$item_ir_goggles_def",
+	//	/* quantity */ 60,
+	//	/* ammo */ IT_NULL,
+	//	/* chain */ IT_NULL,
+	//	/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+	//	/* vwep_model */ nullptr,
+	//	/* armor_info */ nullptr,
+	//	/* tag */ POWERUP_IR_GOGGLES,
+	//	/* precaches */ "misc/ir_start.wav"
+	//},
 
 /*QUAKED item_double (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
-	{
-		/* id */ IT_ITEM_DOUBLE,
-		/* classname */ "item_double", 
-		/* pickup */ Pickup_Powerup,
-		/* use */ Use_Double,
-		/* drop */ Drop_General,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/ddamage/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_double",
-		/* use_name */  "Double Damage",
-		/* pickup_name */  "$item_double_damage",
-		/* pickup_name_definite */ "$item_double_damage_def",
-		/* quantity */ 60,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_DOUBLE,
-		/* precaches */ "misc/ddamage1.wav misc/ddamage2.wav misc/ddamage3.wav ctf/tech2x.wav"
-	},
+	//{
+	//	/* id */ IT_ITEM_DOUBLE,
+	//	/* classname */ "item_double", 
+	//	/* pickup */ Pickup_Powerup,
+	//	/* use */ Use_Double,
+	//	/* drop */ Drop_General,
+	//	/* weaponthink */ nullptr,
+	//	/* pickup_sound */ "items/pkup.wav",
+	//	/* world_model */ "models/items/ddamage/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ nullptr,
+	//	/* icon */ "p_double",
+	//	/* use_name */  "Double Damage",
+	//	/* pickup_name */  "$item_double_damage",
+	//	/* pickup_name_definite */ "$item_double_damage_def",
+	//	/* quantity */ 60,
+	//	/* ammo */ IT_NULL,
+	//	/* chain */ IT_NULL,
+	//	/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+	//	/* vwep_model */ nullptr,
+	//	/* armor_info */ nullptr,
+	//	/* tag */ POWERUP_DOUBLE,
+	//	/* precaches */ "misc/ddamage1.wav misc/ddamage2.wav misc/ddamage3.wav ctf/tech2x.wav"
+	//},
 
 /*QUAKED item_sphere_vengeance (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
-	{
-		/* id */ IT_ITEM_SPHERE_VENGEANCE,
-		/* classname */ "item_sphere_vengeance", 
-		/* pickup */ Pickup_Sphere,
-		/* use */ Use_Vengeance,
-		/* drop */ nullptr,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/vengnce/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_vengeance",
-		/* use_name */  "vengeance sphere",
-		/* pickup_name */  "$item_vengeance_sphere",
-		/* pickup_name_definite */ "$item_vengeance_sphere_def",
-		/* quantity */ 60,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_SPHERE_VENGEANCE,
-		/* precaches */ "spheres/v_idle.wav"
-	},
+	//{
+	//	/* id */ IT_ITEM_SPHERE_VENGEANCE,
+	//	/* classname */ "item_sphere_vengeance", 
+	//	/* pickup */ Pickup_Sphere,
+	//	/* use */ Use_Vengeance,
+	//	/* drop */ nullptr,
+	//	/* weaponthink */ nullptr,
+	//	/* pickup_sound */ "items/pkup.wav",
+	//	/* world_model */ "models/items/vengnce/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ nullptr,
+	//	/* icon */ "p_vengeance",
+	//	/* use_name */  "vengeance sphere",
+	//	/* pickup_name */  "$item_vengeance_sphere",
+	//	/* pickup_name_definite */ "$item_vengeance_sphere_def",
+	//	/* quantity */ 60,
+	//	/* ammo */ IT_NULL,
+	//	/* chain */ IT_NULL,
+	//	/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+	//	/* vwep_model */ nullptr,
+	//	/* armor_info */ nullptr,
+	//	/* tag */ POWERUP_SPHERE_VENGEANCE,
+	//	/* precaches */ "spheres/v_idle.wav"
+	//},
 
 /*QUAKED item_sphere_hunter (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
-	{
-		/* id */ IT_ITEM_SPHERE_HUNTER,
-		/* classname */ "item_sphere_hunter", 
-		/* pickup */ Pickup_Sphere,
-		/* use */ Use_Hunter,
-		/* drop */ nullptr,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/hunter/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_hunter",
-		/* use_name */  "hunter sphere",
-		/* pickup_name */  "$item_hunter_sphere",
-		/* pickup_name_definite */ "$item_hunter_sphere_def",
-		/* quantity */ 120,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_SPHERE_HUNTER,
-		/* precaches */ "spheres/h_idle.wav spheres/h_active.wav spheres/h_lurk.wav"
-	},
+	//{
+	//	/* id */ IT_ITEM_SPHERE_HUNTER,
+	//	/* classname */ "item_sphere_hunter", 
+	//	/* pickup */ Pickup_Sphere,
+	//	/* use */ Use_Hunter,
+	//	/* drop */ nullptr,
+	//	/* weaponthink */ nullptr,
+	//	/* pickup_sound */ "items/pkup.wav",
+	//	/* world_model */ "models/items/hunter/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB,
+	//	/* view_model */ nullptr,
+	//	/* icon */ "p_hunter",
+	//	/* use_name */  "hunter sphere",
+	//	/* pickup_name */  "$item_hunter_sphere",
+	//	/* pickup_name_definite */ "$item_hunter_sphere_def",
+	//	/* quantity */ 120,
+	//	/* ammo */ IT_NULL,
+	//	/* chain */ IT_NULL,
+	//	/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+	//	/* vwep_model */ nullptr,
+	//	/* armor_info */ nullptr,
+	//	/* tag */ POWERUP_SPHERE_HUNTER,
+	//	/* precaches */ "spheres/h_idle.wav spheres/h_active.wav spheres/h_lurk.wav"
+	//},
 
 /*QUAKED item_sphere_defender (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-*/
-	{
-		/* id */ IT_ITEM_SPHERE_DEFENDER,
-		/* classname */ "item_sphere_defender", 
-		/* pickup */ Pickup_Sphere,
-		/* use */ Use_Defender,
-		/* drop */ nullptr,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/defender/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_defender",
-		/* use_name */  "defender sphere",
-		/* pickup_name */  "$item_defender_sphere",
-		/* pickup_name_definite */ "$item_defender_sphere_def",
-		/* quantity */ 60,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_SPHERE_DEFENDER,
-		/* precaches */ "models/objects/laser/tris.md2 models/items/shell/tris.md2 spheres/d_idle.wav"
-	},
+//*/
+//	{
+//		/* id */ IT_ITEM_SPHERE_DEFENDER,
+//		/* classname */ "item_sphere_defender", 
+//		/* pickup */ Pickup_Sphere,
+//		/* use */ Use_Defender,
+//		/* drop */ nullptr,
+//		/* weaponthink */ nullptr,
+//		/* pickup_sound */ "items/pkup.wav",
+//		/* world_model */ "models/items/defender/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ nullptr,
+//		/* icon */ "p_defender",
+//		/* use_name */  "defender sphere",
+//		/* pickup_name */  "$item_defender_sphere",
+//		/* pickup_name_definite */ "$item_defender_sphere_def",
+//		/* quantity */ 60,
+//		/* ammo */ IT_NULL,
+//		/* chain */ IT_NULL,
+//		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+//		/* vwep_model */ nullptr,
+//		/* armor_info */ nullptr,
+//		/* tag */ POWERUP_SPHERE_DEFENDER,
+//		/* precaches */ "models/objects/laser/tris.md2 models/items/shell/tris.md2 spheres/d_idle.wav"
+//	},
 
-/*QUAKED item_doppleganger (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-*/
-	{
-		/* id */ IT_ITEM_DOPPELGANGER,
-		/* classname */ "item_doppleganger",
-		/* pickup */ Pickup_Doppleganger,
-		/* use */ Use_Doppleganger,
-		/* drop */ Drop_General,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/dopple/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB,
-		/* view_model */ nullptr,
-		/* icon */ "p_doppleganger",
-		/* use_name */  "Doppelganger",
-		/* pickup_name */  "$item_doppleganger",
-		/* pickup_name_definite */ "$item_doppleganger_def",
-		/* quantity */ 90,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
-		/* vwep_model */ nullptr,
-		/* armor_info */ nullptr,
-		/* tag */ POWERUP_DOPPELGANGER,
-		/* precaches */ "models/objects/dopplebase/tris.md2 models/items/spawngro3/tris.md2 medic_commander/monsterspawn1.wav models/items/hunter/tris.md2 models/items/vengnce/tris.md2",
-	},
+///*QUAKED item_doppleganger (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+//*/
+//	{
+//		/* id */ IT_ITEM_DOPPELGANGER,
+//		/* classname */ "item_doppleganger",
+//		/* pickup */ Pickup_Doppleganger,
+//		/* use */ Use_Doppleganger,
+//		/* drop */ Drop_General,
+//		/* weaponthink */ nullptr,
+//		/* pickup_sound */ "items/pkup.wav",
+//		/* world_model */ "models/items/dopple/tris.md2",
+//		/* world_model_flags */ EF_ROTATE | EF_BOB,
+//		/* view_model */ nullptr,
+//		/* icon */ "p_doppleganger",
+//		/* use_name */  "Doppelganger",
+//		/* pickup_name */  "$item_doppleganger",
+//		/* pickup_name_definite */ "$item_doppleganger_def",
+//		/* quantity */ 90,
+//		/* ammo */ IT_NULL,
+//		/* chain */ IT_NULL,
+//		/* flags */ IF_POWERUP | IF_POWERUP_WHEEL,
+//		/* vwep_model */ nullptr,
+//		/* armor_info */ nullptr,
+//		/* tag */ POWERUP_DOPPELGANGER,
+//		/* precaches */ "models/objects/dopplebase/tris.md2 models/items/spawngro3/tris.md2 medic_commander/monsterspawn1.wav models/items/hunter/tris.md2 models/items/vengnce/tris.md2",
+//	},
 
-	{
-		/* id */ IT_ITEM_TAG_TOKEN,
-		/* classname */ nullptr,
-		/* pickup */ Tag_PickupToken,
-		/* use */ nullptr,
-		/* drop */ nullptr,
-		/* weaponthink */ nullptr,
-		/* pickup_sound */ "items/pkup.wav",
-		/* world_model */ "models/items/tagtoken/tris.md2",
-		/* world_model_flags */ EF_ROTATE | EF_BOB | EF_TAGTRAIL,
-		/* view_model */ nullptr,
-		/* icon */ "i_tagtoken",
-		/* use_name */  "Tag Token",
-		/* pickup_name */  "$item_tag_token",
-		/* pickup_name_definite */ "$item_tag_token_def",
-		/* quantity */ 0,
-		/* ammo */ IT_NULL,
-		/* chain */ IT_NULL,
-		/* flags */ IF_POWERUP | IF_NOT_GIVEABLE
-	},
+	//{
+	//	/* id */ IT_ITEM_TAG_TOKEN,
+	//	/* classname */ nullptr,
+	//	/* pickup */ Tag_PickupToken,
+	//	/* use */ nullptr,
+	//	/* drop */ nullptr,
+	//	/* weaponthink */ nullptr,
+	//	/* pickup_sound */ "items/pkup.wav",
+	//	/* world_model */ "models/items/tagtoken/tris.md2",
+	//	/* world_model_flags */ EF_ROTATE | EF_BOB | EF_TAGTRAIL,
+	//	/* view_model */ nullptr,
+	//	/* icon */ "i_tagtoken",
+	//	/* use_name */  "Tag Token",
+	//	/* pickup_name */  "$item_tag_token",
+	//	/* pickup_name_definite */ "$item_tag_token_def",
+	//	/* quantity */ 0,
+	//	/* ammo */ IT_NULL,
+	//	/* chain */ IT_NULL,
+	//	/* flags */ IF_POWERUP | IF_NOT_GIVEABLE
+	//},
 
 // PGM
 // ======================================

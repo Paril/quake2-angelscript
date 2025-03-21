@@ -283,12 +283,12 @@ static void supertankGrenade(edict_t *self)
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
 
 	vec3_t aim_point;
-	PredictAim(self, self->enemy, start, 0, false, crandom_open() * 0.1f, &forward, &aim_point);
+	// PredictAim(self, self->enemy, start, 0, false, crandom_open() * 0.1f, &forward, &aim_point);
 
 	for (float speed = 500.f; speed < 1000.f; speed += 100.f)
 	{
-		if (!M_CalculatePitchToFire(self, aim_point, start, forward, speed, 2.5f, true))
-			continue;
+		// if (!M_CalculatePitchToFire(self, aim_point, start, forward, speed, 2.5f, true))
+		// 	continue;
 
 		monster_fire_grenade(self, start, forward, 50, speed, flash_number, 0.f, 0.f);
 		break;
@@ -296,7 +296,7 @@ static void supertankGrenade(edict_t *self)
 }
 
 mframe_t supertank_frames_death1[] = {
-	{ ai_move, 0, BossExplode },
+	{ ai_move, 0 },
 	{ ai_move },
 	{ ai_move },
 	{ ai_move },
@@ -481,7 +481,7 @@ void supertankRocket(edict_t *self)
 	}
 	else
 	{
-		PredictAim(self, self->enemy, start, 750, false, 0.f, &forward, nullptr);
+		// PredictAim(self, self->enemy, start, 750, false, 0.f, &forward, nullptr);
 		monster_fire_rocket(self, start, forward, 50, 750, flash_number);
 	}
 }
@@ -504,7 +504,7 @@ void supertankMachineGun(edict_t *self)
 
 	AngleVectors(dir, forward, right, nullptr);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
-	PredictAim(self, self->enemy, start, 0, true, -0.1f, &forward, nullptr);
+	// PredictAim(self, self->enemy, start, 0, true, -0.1f, &forward, nullptr);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD * 3, DEFAULT_BULLET_VSPREAD * 3, flash_number);
 }
 
@@ -617,8 +617,8 @@ DIE(supertank_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 // PGM
 MONSTERINFO_BLOCKED(supertank_blocked) (edict_t *self, float dist) -> bool
 {
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }

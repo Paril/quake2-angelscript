@@ -886,10 +886,10 @@ bool FindTarget(edict_t *self)
     // got one
     //
     // ROGUE - if we got an enemy, we need to bail out of hint paths, so take over here
-    if (self->monsterinfo.aiflags & AI_HINT_PATH)
-        hintpath_stop(self);  // this calls foundtarget for us
-    else
-        FoundTarget(self);
+    //if (self->monsterinfo.aiflags & AI_HINT_PATH)
+    //    hintpath_stop(self);  // this calls foundtarget for us
+    //else
+    //    FoundTarget(self);
 
     // ROGUE
     if (!(self->monsterinfo.aiflags & AI_SOUND_TARGET) && (self->monsterinfo.sight) &&
@@ -1196,7 +1196,7 @@ void ai_run_slide(edict_t *self, float distance)
     // PMM - if we're dodging, give up on it and go straight
     if (self->monsterinfo.aiflags & AI_DODGING)
     {
-        monster_done_dodge(self);
+        //monster_done_dodge(self);
         // by setting as_straight, caller will know to try straight move
         self->monsterinfo.attack_state = AS_STRAIGHT;
         return;
@@ -1207,7 +1207,7 @@ void ai_run_slide(edict_t *self, float distance)
         return;
     // PMM - if we're dodging, give up on it and go straight
     if (self->monsterinfo.aiflags & AI_DODGING)
-        monster_done_dodge(self);
+        //monster_done_dodge(self);
 
     // PMM - the move failed, so signal the caller (ai_run) to try going straight
     self->monsterinfo.attack_state = AS_STRAIGHT;
@@ -1492,20 +1492,20 @@ void ai_run(edict_t *self, float dist)
                 else // uh oh, can't figure out enemy, bail
                 {
                     self->enemy = nullptr;
-                    hintpath_stop(self);
+                    //hintpath_stop(self);
                     return;
                 }
             }
             else
             {
                 self->enemy = nullptr;
-                hintpath_stop(self);
+                //hintpath_stop(self);
                 return;
             }
         }
         else
         {
-            hintpath_stop(self);
+            //hintpath_stop(self);
             return;
         }
 
@@ -1524,9 +1524,9 @@ void ai_run(edict_t *self, float dist)
         }
 
         // if we see the player, stop following hintpaths.
-        if (gotcha)
-            // disconnect from hintpaths and start looking normally for players.
-            hintpath_stop(self);
+        //if (gotcha)
+        //    // disconnect from hintpaths and start looking normally for players.
+        //    hintpath_stop(self);
 
         return;
     }
@@ -1671,8 +1671,8 @@ void ai_run(edict_t *self, float dist)
         {
             // check for hint_paths.
             self->monsterinfo.last_hint_time = level.time;
-            if (monsterlost_checkhint(self))
-                return;
+            //if (monsterlost_checkhint(self))
+            //    return;
         }
     }
     // PGM

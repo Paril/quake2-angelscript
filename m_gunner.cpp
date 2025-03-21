@@ -167,7 +167,7 @@ mframe_t gunner_frames_run[] = {
 	{ ai_run, 26 },
 	{ ai_run, 9, monster_footstep },
 	{ ai_run, 9 },
-	{ ai_run, 9, monster_done_dodge },
+	{ ai_run, 9 },
 	{ ai_run, 15 },
 	{ ai_run, 10, monster_footstep },
 	{ ai_run, 13 },
@@ -178,7 +178,7 @@ MMOVE_T(gunner_move_run) = { FRAME_run01, FRAME_run08, gunner_frames_run, nullpt
 
 MONSTERINFO_RUN(gunner_run) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		M_SetAnimation(self, &gunner_move_stand);
 	else
@@ -249,7 +249,7 @@ extern const mmove_t gunner_move_jump2;
 
 PAIN(gunner_pain) (edict_t *self, edict_t *other, float kick, int damage, const mod_t &mod) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 	
 	if (self->monsterinfo.active_move == &gunner_move_jump || 
 		self->monsterinfo.active_move == &gunner_move_jump2)
@@ -278,8 +278,8 @@ PAIN(gunner_pain) (edict_t *self, edict_t *other, float kick, int damage, const 
 	self->monsterinfo.aiflags &= ~AI_MANUAL_STEERING;
 
 	// PMM - clear duck flag
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+	//if (self->monsterinfo.aiflags & AI_DUCKED)
+	//	monster_duck_up(self);
 }
 
 MONSTERINFO_SETSKIN(gunner_setskin) (edict_t *self) -> void
@@ -355,13 +355,13 @@ DIE(gunner_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 // PMM - changed to duck code for new dodge
 
 mframe_t gunner_frames_duck[] = {
-	{ ai_move, 1, monster_duck_down },
 	{ ai_move, 1 },
-	{ ai_move, 1, monster_duck_hold },
+	{ ai_move, 1 },
+	{ ai_move, 1 },
 	{ ai_move },
 	{ ai_move, -1 },
 	{ ai_move, -1 },
-	{ ai_move, 0, monster_duck_up },
+	{ ai_move, 0 },
 	{ ai_move, -1 }
 };
 MMOVE_T(gunner_move_duck) = { FRAME_duck01, FRAME_duck08, gunner_frames_duck, gunner_run };
@@ -387,7 +387,7 @@ void GunnerFire(edict_t *self)
 
 	AngleVectors(self->s.angles, forward, right, nullptr);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
-	PredictAim(self, self->enemy, start, 0, true, -0.2f, &aim, nullptr);
+	//PredictAim(self, self->enemy, start, 0, true, -0.2f, &aim, nullptr);
 	monster_fire_bullet(self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
 }
 
@@ -420,7 +420,7 @@ bool gunner_grenade_check(edict_t *self)
 	// check to see that we can trace to the player before we start
 	// tossing grenades around.
 	vec3_t aim = dir.normalized();
-	return M_CalculatePitchToFire(self, target, start, aim, 600, 2.5f, false);
+	return false;
 }
 
 void GunnerGrenade(edict_t *self)
@@ -511,11 +511,11 @@ void GunnerGrenade(edict_t *self)
 	aim += (up * pitch);
 
 	// try search for best pitch
-	if (M_CalculatePitchToFire(self, target, start, aim, 600, 2.5f, false))
-		monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), frandom() * 10.f);
-	else
-		// normal shot
-		monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), 200.f + (crandom_open() * 10.0f));
+	// if (M_CalculatePitchToFire(self, target, start, aim, 600, 2.5f, false))
+	// 	monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), frandom() * 10.f);
+	// else
+	// 	// normal shot
+	// 	monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), 200.f + (crandom_open() * 10.0f));
 }
 
 mframe_t gunner_frames_attack_chain[] = {
@@ -621,7 +621,7 @@ MONSTERINFO_ATTACK(gunner_attack) (edict_t *self) -> void
 {
 	float chance, r;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	// PMM
 	if (self->monsterinfo.attack_state == AS_BLIND)
@@ -730,8 +730,8 @@ void gunner_jump_wait_land(edict_t *self)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if (monster_jump_finished(self))
-			self->monsterinfo.nextframe = self->s.frame + 1;
+		// if (monster_jump_finished(self))
+		// 	self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else
 		self->monsterinfo.nextframe = self->s.frame + 1;
@@ -770,7 +770,7 @@ void gunner_jump(edict_t *self, blocked_jump_result_t result)
 	if (!self->enemy)
 		return;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (result == blocked_jump_result_t::JUMP_JUMP_UP)
 		M_SetAnimation(self, &gunner_move_jump2);
@@ -782,15 +782,15 @@ void gunner_jump(edict_t *self, blocked_jump_result_t result)
 // PGM
 MONSTERINFO_BLOCKED(gunner_blocked) (edict_t *self, float dist) -> bool
 {
-	if (blocked_checkplat(self, dist))
-		return true;
-	
-	if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
-	{
-		if (result != blocked_jump_result_t::JUMP_TURN)
-			gunner_jump(self, result);
-		return true;
-	}
+	//if (blocked_checkplat(self, dist))
+	//	return true;
+	//
+	//if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
+	//{
+	//	if (result != blocked_jump_result_t::JUMP_TURN)
+	//		gunner_jump(self, result);
+	//	return true;
+	//}
 
 	return false;
 }
@@ -895,11 +895,11 @@ void SP_monster_gunner(edict_t *self)
 	self->monsterinfo.walk = gunner_walk;
 	self->monsterinfo.run = gunner_run;
 	// pmm
-	self->monsterinfo.dodge = M_MonsterDodge;
-	self->monsterinfo.duck = gunner_duck;
-	self->monsterinfo.unduck = monster_duck_up;
-	self->monsterinfo.sidestep = gunner_sidestep;
-	self->monsterinfo.blocked = gunner_blocked; // PGM
+	//self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.duck = gunner_duck;
+	//self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.sidestep = gunner_sidestep;
+	//self->monsterinfo.blocked = gunner_blocked; // PGM
 	// pmm
 	self->monsterinfo.attack = gunner_attack;
 	self->monsterinfo.melee = nullptr;

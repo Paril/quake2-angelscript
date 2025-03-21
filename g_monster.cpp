@@ -47,7 +47,7 @@ edict_t *monster_fire_blaster(edict_t *self, const vec3_t &start, const vec3_t &
 void monster_fire_flechette(edict_t *self, const vec3_t &start, const vec3_t &dir, int damage, int speed,
 						    monster_muzzleflash_id_t flashtype)
 {
-	fire_flechette(self, start, dir, damage, speed, damage / 2);
+	//fire_flechette(self, start, dir, damage, speed, damage / 2);
 	monster_muzzleflash(self, start, flashtype);
 }
 
@@ -648,16 +648,16 @@ void M_ProcessPain(edict_t *e)
 	if (e->health <= 0)
 	{
 		// ROGUE
-		if (e->monsterinfo.aiflags & AI_MEDIC)
-		{
-			if (e->enemy && e->enemy->inuse && (e->enemy->svflags & SVF_MONSTER)) // god, I hope so
-			{
-				cleanupHealTarget(e->enemy);
-			}
+		//if (e->monsterinfo.aiflags & AI_MEDIC)
+		//{
+		//	if (e->enemy && e->enemy->inuse && (e->enemy->svflags & SVF_MONSTER)) // god, I hope so
+		//	{
+		//		//cleanupHealTarget(e->enemy);
+		//	}
 
-			// clean up self
-			e->monsterinfo.aiflags &= ~AI_MEDIC;
-		}
+		//	// clean up self
+		//	e->monsterinfo.aiflags &= ~AI_MEDIC;
+		//}
 		// ROGUE
 
 		bool dead_commander_check = false;

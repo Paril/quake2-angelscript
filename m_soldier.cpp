@@ -338,17 +338,17 @@ MMOVE_T(soldier_move_start_run) = { FRAME_run01, FRAME_run02, soldier_frames_sta
 
 mframe_t soldier_frames_run[] = {
 	{ ai_run, 10 },
-	{ ai_run, 11, [](edict_t *self) { monster_done_dodge(self); monster_footstep(self); } },
+	{ ai_run, 11, [](edict_t *self) { monster_footstep(self); } },
 	{ ai_run, 11 },
 	{ ai_run, 16 },
 	{ ai_run, 10, monster_footstep },
-	{ ai_run, 15, monster_done_dodge }
+	{ ai_run, 15 }
 };
 MMOVE_T(soldier_move_run) = { FRAME_run03, FRAME_run08, soldier_frames_run, nullptr };
 
 MONSTERINFO_RUN(soldier_run) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 	soldierh_hyper_sound_end(self);
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
@@ -441,7 +441,7 @@ PAIN(soldier_pain) (edict_t *self, edict_t *other, float kick, int damage, const
 {
 	float r;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 	soldier_stop_charge(self);
 
 	// if we're blind firing, this needs to be turned off here
@@ -452,8 +452,8 @@ PAIN(soldier_pain) (edict_t *self, edict_t *other, float kick, int damage, const
 		if ((self->velocity[2] > 100) && ((self->monsterinfo.active_move == &soldier_move_pain1) || (self->monsterinfo.active_move == &soldier_move_pain2) || (self->monsterinfo.active_move == &soldier_move_pain3)))
 		{
 			// PMM - clear duck flag
-			if (self->monsterinfo.aiflags & AI_DUCKED)
-				monster_duck_up(self);
+			//if (self->monsterinfo.aiflags & AI_DUCKED)
+			//	monster_duck_up(self);
 			M_SetAnimation(self, &soldier_move_pain4);
 			soldierh_hyper_sound_end(self);
 		}
@@ -474,8 +474,8 @@ PAIN(soldier_pain) (edict_t *self, edict_t *other, float kick, int damage, const
 	if (self->velocity[2] > 100)
 	{
 		// PMM - clear duck flag
-		if (self->monsterinfo.aiflags & AI_DUCKED)
-			monster_duck_up(self);
+		//if (self->monsterinfo.aiflags & AI_DUCKED)
+		//	monster_duck_up(self);
 		M_SetAnimation(self, &soldier_move_pain4);
 		soldierh_hyper_sound_end(self);
 		return;
@@ -494,8 +494,8 @@ PAIN(soldier_pain) (edict_t *self, edict_t *other, float kick, int damage, const
 		M_SetAnimation(self, &soldier_move_pain3);
 
 	// PMM - clear duck flag
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+	//if (self->monsterinfo.aiflags & AI_DUCKED)
+	//	monster_duck_up(self);
 	soldierh_hyper_sound_end(self);
 }
 
@@ -530,8 +530,8 @@ PRETHINK(soldierh_laser_update) (edict_t *laser) -> void
 	start += (right * tempvec[1]);
 	start += (up * (tempvec[2] + 6));
 
-	if (!self->deadflag)
-		PredictAim(self, self->enemy, start, 0, false, frandom(0.1f, 0.2f), &forward, nullptr);
+	// if (!self->deadflag)
+	// 	PredictAim(self, self->enemy, start, 0, false, frandom(0.1f, 0.2f), &forward, nullptr);
 	
 	laser->s.origin = start;
 	laser->movedir = forward;
@@ -965,20 +965,20 @@ void soldierh_hyperripper3(edict_t *self)
 
 void soldier_attack3_refire(edict_t *self)
 {
-	if (self->dmg)
-		monster_duck_hold(self);
-	else if ((level.time + 400_ms) < self->monsterinfo.duck_wait_time)
-		self->monsterinfo.nextframe = FRAME_attak303;
+	//if (self->dmg)
+	//	monster_duck_hold(self);
+	//else if ((level.time + 400_ms) < self->monsterinfo.duck_wait_time)
+	//	self->monsterinfo.nextframe = FRAME_attak303;
 }
 
 mframe_t soldier_frames_attack3[] = {
-	{ ai_charge, 0, monster_duck_down },
+	{ ai_charge, 0 },
 	{ ai_charge, 0, soldierh_hyper_sound_start },
 	{ ai_charge, 0, soldier_fire3 },
 	{ ai_charge, 0, soldierh_hyperripper3 },
 	{ ai_charge, 0, soldierh_hyperripper3 },
 	{ ai_charge, 0, soldier_attack3_refire },
-	{ ai_charge, 0, monster_duck_up },
+	{ ai_charge, 0 },
 	{ ai_charge, 0, soldierh_hyper_sound_end },
 	{ ai_charge }
 };
@@ -1011,7 +1011,7 @@ void soldier_fire8(edict_t *self)
 void soldier_attack6_refire1(edict_t *self)
 {
 	// PMM - make sure dodge & charge bits are cleared
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 	soldier_stop_charge(self);
 
 	if (!self->enemy)
@@ -1039,7 +1039,7 @@ void soldier_attack6_refire1(edict_t *self)
 void soldier_attack6_refire2(edict_t *self)
 {
 	// PMM - make sure dodge & charge bits are cleared
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 	soldier_stop_charge(self);
 	
 	soldier_style_t style(self);
@@ -1097,7 +1097,7 @@ mframe_t soldier_frames_attack6[] = {
 	{ ai_run, 4, soldier_attack6_shotgun_check },
 	{ ai_run, 12, soldierh_hyper_sound_start },
 	{ ai_run, 11, [](edict_t *self) { soldier_fire8(self); monster_footstep(self); } },
-	{ ai_run, 13, [](edict_t *self ) { soldierh_hyperripper8(self); monster_done_dodge(self); } },
+	{ ai_run, 13, [](edict_t *self ) { soldierh_hyperripper8(self); } },
 	{ ai_run, 18, soldierh_hyperripper8 },
 	{ ai_run, 15, monster_footstep },
 	{ ai_run, 14, soldier_attack6_refire1 },
@@ -1114,7 +1114,7 @@ MONSTERINFO_ATTACK(soldier_attack) (edict_t *self) -> void
 {
 	float r, chance;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	soldier_style_t style(self);
 
@@ -1244,10 +1244,10 @@ MONSTERINFO_SIGHT(soldier_sight) (edict_t *self, edict_t *other) -> void
 // DUCK
 //
 mframe_t soldier_frames_duck[] = {
-	{ ai_move, 5, monster_duck_down },
-	{ ai_move, -1, monster_duck_hold },
+	{ ai_move, 5 },
+	{ ai_move, -1 },
 	{ ai_move, 1 },
-	{ ai_move, 0, monster_duck_up },
+	{ ai_move, 0 },
 	{ ai_move, 5 }
 };
 MMOVE_T(soldier_move_duck) = { FRAME_duck01, FRAME_duck05, soldier_frames_duck, soldier_run };
@@ -1306,7 +1306,7 @@ void soldierh_hyperripper5(edict_t *self)
 }
 
 mframe_t soldier_frames_attack5[] = {
-	{ ai_move, 18, monster_duck_down },
+	{ ai_move, 18 },
 	{ ai_move, 11, monster_footstep },
 	{ ai_move, 0, monster_footstep },
 	{ ai_soldier_move },
@@ -1335,7 +1335,7 @@ static void monster_check_prone(edict_t *self)
 mframe_t soldier_frames_trip[] = {
 	{ ai_move, 10 },
 	{ ai_move, 2, monster_check_prone },
-	{ ai_move, 18, monster_duck_down },
+	{ ai_move, 18 },
 	{ ai_move, 11, monster_footstep },
 	{ ai_move, 9 },
 	{ ai_move, -11, monster_footstep },
@@ -1346,7 +1346,7 @@ mframe_t soldier_frames_trip[] = {
 	{ ai_move, 0 },
 	{ ai_move, 1 },
 	{ ai_move, 0, monster_footstep },
-	{ ai_move, 0, monster_duck_up },
+	{ ai_move, 0 },
 	{ ai_move, 3 },
 	{ ai_move, 2, monster_footstep },
 	{ ai_move, -1 },
@@ -1363,7 +1363,7 @@ MONSTERINFO_BLOCKED(soldier_blocked) (edict_t *self, float dist) -> bool
 	if ((self->monsterinfo.aiflags & AI_DODGING) || (self->monsterinfo.aiflags & AI_DUCKED))
 		return false;
 
-	return blocked_checkplat(self, dist);
+	return false;
 }
 
 //
@@ -1867,7 +1867,7 @@ void SP_monster_soldier_x(edict_t *self)
 	self->monsterinfo.stand = soldier_stand;
 	self->monsterinfo.walk = soldier_walk;
 	self->monsterinfo.run = soldier_run;
-	self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.dodge = M_MonsterDodge;
 	self->monsterinfo.attack = soldier_attack;
 	self->monsterinfo.melee = nullptr;
 	self->monsterinfo.sight = soldier_sight;
@@ -1875,13 +1875,13 @@ void SP_monster_soldier_x(edict_t *self)
 
 	//=====
 	// ROGUE
-	self->monsterinfo.blocked = soldier_blocked;
-	self->monsterinfo.duck = soldier_duck;
-	self->monsterinfo.unduck = monster_duck_up;
-	self->monsterinfo.sidestep = soldier_sidestep;
+	//self->monsterinfo.blocked = soldier_blocked;
+	//self->monsterinfo.duck = soldier_duck;
+	//self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.sidestep = soldier_sidestep;
 
-	if (self->spawnflags.has(SPAWNFLAG_SOLDIER_BLIND)) // blind
-		self->monsterinfo.stand = soldier_blind;
+	//if (self->spawnflags.has(SPAWNFLAG_SOLDIER_BLIND)) // blind
+	//	self->monsterinfo.stand = soldier_blind;
 	// ROGUE
 	//=====
 

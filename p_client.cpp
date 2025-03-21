@@ -349,20 +349,20 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 		//}
 
 		// ROGUE
-		if (gamerules->integer)
-		{
-			if (DMGame.Score)
-			{
-				if (mod.friendly_fire)
-				{
-					if (!mod.no_point_loss)
-						DMGame.Score(attacker, self, -1, mod);
-				}
-				else
-					DMGame.Score(attacker, self, 1, mod);
-			}
-			return;
-		}
+		//if (gamerules->integer)
+		//{
+		//	if (DMGame.Score)
+		//	{
+		//		if (mod.friendly_fire)
+		//		{
+		//			if (!mod.no_point_loss)
+		//				DMGame.Score(attacker, self, -1, mod);
+		//		}
+		//		else
+		//			DMGame.Score(attacker, self, 1, mod);
+		//	}
+		//	return;
+		//}
 		// ROGUE
 
 		if (deathmatch->integer)
@@ -397,10 +397,10 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 	{
 		if (gamerules->integer)
 		{
-			if (DMGame.Score)
-			{
-				DMGame.Score(self, self, -1, mod);
-			}
+			//if (DMGame.Score)
+			//{
+			//	DMGame.Score(self, self, -1, mod);
+			//}
 			return;
 		}
 		else
@@ -597,8 +597,8 @@ DIE(player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	if (gamerules->integer) // if we're in a dm game, alert the game
 	{
-		if (DMGame.PlayerDeath)
-			DMGame.PlayerDeath(self, inflictor, attacker);
+		//if (DMGame.PlayerDeath)
+		//	DMGame.PlayerDeath(self, inflictor, attacker);
 	}
 
 	// remove powerups
@@ -2014,16 +2014,16 @@ void PutClientInServer(edict_t *ent)
 	bool force_spawn = client->awaiting_respawn && level.time > client->respawn_timeout;
 	bool is_landmark = false;
 
-	if (use_squad_respawn)
-	{
-		spawn_origin = squad_respawn_position;
-		spawn_angles = squad_respawn_angles;
-		valid_spawn = true;
-	}
-	else if (gamerules->integer && DMGame.SelectSpawnPoint) // PGM
-		valid_spawn = DMGame.SelectSpawnPoint(ent, spawn_origin, spawn_angles, force_spawn); // PGM
-	else										  // PGM
-		valid_spawn = SelectSpawnPoint(ent, spawn_origin, spawn_angles, force_spawn, is_landmark);
+	//if (use_squad_respawn)
+	//{
+	//	spawn_origin = squad_respawn_position;
+	//	spawn_angles = squad_respawn_angles;
+	//	valid_spawn = true;
+	//}
+	//else if (gamerules->integer && DMGame.SelectSpawnPoint) // PGM
+	//	valid_spawn = DMGame.SelectSpawnPoint(ent, spawn_origin, spawn_angles, force_spawn); // PGM
+	//else										  // PGM
+	//	valid_spawn = SelectSpawnPoint(ent, spawn_origin, spawn_angles, force_spawn, is_landmark);
 
 	// [Paril-KEX] if we didn't get a valid spawn, hold us in
 	// limbo for a while until we do get one
@@ -2335,10 +2335,10 @@ void ClientBeginDeathmatch(edict_t *ent)
 	// ZOID
 
 	// PGM
-	if (gamerules->integer && DMGame.ClientBegin)
-	{
-		DMGame.ClientBegin(ent);
-	}
+	//if (gamerules->integer && DMGame.ClientBegin)
+	//{
+	//	DMGame.ClientBegin(ent);
+	//}
 	// PGM
 
 	// locate ent at a spawn point
@@ -2969,11 +2969,11 @@ void ClientDisconnect(edict_t *ent)
 		ent->client->owned_sphere = nullptr;
 	}
 
-	if (gamerules->integer)
-	{
-		if (DMGame.PlayerDisconnect)
-			DMGame.PlayerDisconnect(ent);
-	}
+	//if (gamerules->integer)
+	//{
+	//	if (DMGame.PlayerDisconnect)
+	//		DMGame.PlayerDisconnect(ent);
+	//}
 	// ROGUE
 	//============
 

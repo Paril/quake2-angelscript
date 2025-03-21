@@ -380,8 +380,8 @@ DIE(gladiator_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 // PGM
 MONSTERINFO_BLOCKED(gladiator_blocked) (edict_t *self, float dist) -> bool
 {
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }

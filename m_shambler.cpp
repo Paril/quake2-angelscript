@@ -298,7 +298,7 @@ void ShamblerCastLightning(edict_t* self)
 	start = M_ProjectFlashSource(self, offset, forward, right);
 
 	// calc direction to where we targted
-	PredictAim(self, self->enemy, start, 0, false, self->spawnflags.has(SPAWNFLAG_SHAMBLER_PRECISE) ? 0.f : 0.1f, &dir, nullptr);
+	// PredictAim(self, self->enemy, start, 0, false, self->spawnflags.has(SPAWNFLAG_SHAMBLER_PRECISE) ? 0.f : 0.1f, &dir, nullptr);
 
 	vec3_t end = start + (dir * 8192);
 	trace_t tr = gi.traceline(start, end, self, MASK_PROJECTILE | CONTENTS_SLIME | CONTENTS_LAVA);

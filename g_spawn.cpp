@@ -179,36 +179,36 @@ void SP_misc_nuke(edict_t *ent);
 
 //===========
 // ROGUE
-void SP_func_plat2(edict_t *ent);
-void SP_func_door_secret2(edict_t *ent);
-void SP_func_force_wall(edict_t *ent);
-void SP_info_player_coop_lava(edict_t *self);
-void SP_info_teleport_destination(edict_t *self);
-void SP_trigger_teleport(edict_t *self);
-void SP_trigger_disguise(edict_t *self);
-void SP_monster_stalker(edict_t *self);
-void SP_monster_turret(edict_t *self);
-void SP_target_steam(edict_t *self);
-void SP_target_anger(edict_t *self);
-void SP_target_killplayers(edict_t *self);
-// PMM - still experimental!
-void SP_target_blacklight(edict_t *self);
-void SP_target_orb(edict_t *self);
-// pmm
-void SP_hint_path(edict_t *self);
-void SP_monster_carrier(edict_t *self);
-void SP_monster_widow(edict_t *self);
-void SP_monster_widow2(edict_t *self);
-void SP_dm_tag_token(edict_t *self);
-void SP_dm_dball_goal(edict_t *self);
-void SP_dm_dball_ball(edict_t *self);
-void SP_dm_dball_team1_start(edict_t *self);
-void SP_dm_dball_team2_start(edict_t *self);
-void SP_dm_dball_ball_start(edict_t *self);
-void SP_dm_dball_speed_change(edict_t *self);
-void SP_monster_kamikaze(edict_t *self);
-void SP_turret_invisible_brain(edict_t *self);
-void SP_misc_nuke_core(edict_t *self);
+//void SP_func_plat2(edict_t *ent);
+//void SP_func_door_secret2(edict_t *ent);
+//void SP_func_force_wall(edict_t *ent);
+//void SP_info_player_coop_lava(edict_t *self);
+//void SP_info_teleport_destination(edict_t *self);
+//void SP_trigger_teleport(edict_t *self);
+//void SP_trigger_disguise(edict_t *self);
+//void SP_monster_stalker(edict_t *self);
+//void SP_monster_turret(edict_t *self);
+//void SP_target_steam(edict_t *self);
+//void SP_target_anger(edict_t *self);
+//void SP_target_killplayers(edict_t *self);
+//// PMM - still experimental!
+//void SP_target_blacklight(edict_t *self);
+//void SP_target_orb(edict_t *self);
+//// pmm
+//void SP_hint_path(edict_t *self);
+//void SP_monster_carrier(edict_t *self);
+//void SP_monster_widow(edict_t *self);
+//void SP_monster_widow2(edict_t *self);
+//void SP_dm_tag_token(edict_t *self);
+//void SP_dm_dball_goal(edict_t *self);
+//void SP_dm_dball_ball(edict_t *self);
+//void SP_dm_dball_team1_start(edict_t *self);
+//void SP_dm_dball_team2_start(edict_t *self);
+//void SP_dm_dball_ball_start(edict_t *self);
+//void SP_dm_dball_speed_change(edict_t *self);
+//void SP_monster_kamikaze(edict_t *self);
+//void SP_turret_invisible_brain(edict_t *self);
+//void SP_misc_nuke_core(edict_t *self);
 // ROGUE
 //===========
 //  ZOID
@@ -392,38 +392,38 @@ static const std::initializer_list<spawn_t> spawns = {
 
 	//==============
 	// ROGUE
-	{ "func_plat2", SP_func_plat2 },
-	{ "func_door_secret2", SP_func_door_secret2 },
-	{ "func_force_wall", SP_func_force_wall },
-	{ "trigger_teleport", SP_trigger_teleport },
-	{ "trigger_disguise", SP_trigger_disguise },
-	{ "info_teleport_destination", SP_info_teleport_destination },
-	{ "info_player_coop_lava", SP_info_player_coop_lava },
-	{ "monster_stalker", SP_monster_stalker },
-	{ "monster_turret", SP_monster_turret },
-	{ "target_steam", SP_target_steam },
-	{ "target_anger", SP_target_anger },
-	{ "target_killplayers", SP_target_killplayers },
+	{ "func_plat2", nullptr },
+	{ "func_door_secret2", nullptr },
+	{ "func_force_wall", nullptr },
+	{ "trigger_teleport", nullptr },
+	{ "trigger_disguise", nullptr },
+	{ "info_teleport_destination", nullptr },
+	{ "info_player_coop_lava", nullptr },
+	{ "monster_stalker", nullptr },
+	{ "monster_turret", nullptr },
+	{ "target_steam", nullptr },
+	{ "target_anger", nullptr },
+	{ "target_killplayers", nullptr },
 	// PMM - experiment
-	{ "target_blacklight", SP_target_blacklight },
-	{ "target_orb", SP_target_orb },
+	{ "target_blacklight", nullptr },
+	{ "target_orb", nullptr },
 	// pmm
 	{ "monster_daedalus", SP_monster_hover },
-	{ "hint_path", SP_hint_path },
-	{ "monster_carrier", SP_monster_carrier },
-	{ "monster_widow", SP_monster_widow },
-	{ "monster_widow2", SP_monster_widow2 },
+	{ "hint_path", nullptr },
+	{ "monster_carrier", nullptr },
+	{ "monster_widow", nullptr },
+	{ "monster_widow2", nullptr },
 	{ "monster_medic_commander", SP_monster_medic },
-	{ "dm_tag_token", SP_dm_tag_token },
-	{ "dm_dball_goal", SP_dm_dball_goal },
-	{ "dm_dball_ball", SP_dm_dball_ball },
-	{ "dm_dball_team1_start", SP_dm_dball_team1_start },
-	{ "dm_dball_team2_start", SP_dm_dball_team2_start },
-	{ "dm_dball_ball_start", SP_dm_dball_ball_start },
-	{ "dm_dball_speed_change", SP_dm_dball_speed_change },
-	{ "monster_kamikaze", SP_monster_kamikaze },
-	{ "turret_invisible_brain", SP_turret_invisible_brain },
-	{ "misc_nuke_core", SP_misc_nuke_core },
+	{ "dm_tag_token", nullptr },
+	{ "dm_dball_goal", nullptr },
+	{ "dm_dball_ball", nullptr },
+	{ "dm_dball_team1_start", nullptr },
+	{ "dm_dball_team2_start", nullptr },
+	{ "dm_dball_ball_start", nullptr },
+	{ "dm_dball_speed_change", nullptr },
+	{ "monster_kamikaze", nullptr },
+	{ "turret_invisible_brain", nullptr },
+	{ "misc_nuke_core", nullptr },
 	// ROGUE
 	//==============
 	// ZOID
@@ -502,14 +502,14 @@ void ED_CallSpawn(edict_t *ent, const spawn_temp_t &spawntemp)
 			// before spawning, pick random item replacement
 			if (g_dm_random_items->integer)
 			{
-				ent->item = item;
-				item_id_t new_item = DoRandomRespawn(ent);
+				//ent->item = item;
+				//item_id_t new_item = DoRandomRespawn(ent);
 
-				if (new_item)
-				{
-					item = GetItemByIndex(new_item);
-					ent->classname = item->classname;
-				}
+				//if (new_item)
+				//{
+				//	item = GetItemByIndex(new_item);
+				//	ent->classname = item->classname;
+				//}
 			}
 
 			SpawnItem(ent, item, spawntemp);
@@ -1301,23 +1301,23 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 	// ZOID
 
 	// ROGUE
-	if (deathmatch->integer)
-	{
-		if (g_dm_random_items->integer)
-			PrecacheForRandomRespawn();
-	}
-	else
-	{
-		InitHintPaths(); // if there aren't hintpaths on this map, enable quick aborts
-	}
+	//if (deathmatch->integer)
+	//{
+	//	if (g_dm_random_items->integer)
+	//		PrecacheForRandomRespawn();
+	//}
+	//else
+	//{
+	//	InitHintPaths(); // if there aren't hintpaths on this map, enable quick aborts
+	//}
 	// ROGUE
 
 	// ROGUE	-- allow dm games to do init stuff right before game starts.
-	if (deathmatch->integer && gamerules->integer)
-	{
-		if (DMGame.PostInitSetup)
-			DMGame.PostInitSetup();
-	}
+	//if (deathmatch->integer && gamerules->integer)
+	//{
+	//	if (DMGame.PostInitSetup)
+	//		DMGame.PostInitSetup();
+	//}
 	// ROGUE
 
 	setup_shadow_lights();

@@ -165,7 +165,7 @@ static void arachnid_charge_rail(edict_t *self, monster_muzzleflash_id_t mz)
 	AngleVectors(self->s.angles, forward, right, nullptr);
 	start = M_ProjectFlashSource(self, monster_flash_offset[mz], forward, right);
 
-	PredictAim(self, self->enemy, start, 0, false, 0.0f, nullptr, &self->pos1);
+	//PredictAim(self, self->enemy, start, 0, false, 0.0f, nullptr, &self->pos1);
 }
 
 static void arachnid_charge_rail_left(edict_t *self)
@@ -222,7 +222,7 @@ void arachnid_rail_real(edict_t *self, monster_muzzleflash_id_t id)
 		{
 			edict_t *chosen = players_scanned[irandom(num_players)];
 
-			PredictAim(self, chosen, start, 0, false, 0.0f, nullptr, &self->pos1);
+			//PredictAim(self, chosen, start, 0, false, 0.0f, nullptr, &self->pos1);
 
 			dir = (chosen->s.origin - self->s.origin).normalized();
 
@@ -449,35 +449,35 @@ static void arachnid_spawn(edict_t *self)
 
 		auto &reinforcement = self->monsterinfo.reinforcements.reinforcements[self->monsterinfo.chosen_reinforcements[count]];
 
-		if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
-		{
-			if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
-			{
-				edict_t *ent = CreateGroundMonster(spawnpoint, self->s.angles, reinforcement.mins, reinforcement.maxs, reinforcement.classname, 256);
+		/*if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
+		{*/
+			//if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
+			//{
+			//	edict_t *ent = CreateGroundMonster(spawnpoint, self->s.angles, reinforcement.mins, reinforcement.maxs, reinforcement.classname, 256);
 
-				if (!ent)
-					return;
+			//	if (!ent)
+			//		return;
 
-				ent->nextthink = level.time;
-				ent->think(ent);
+			//	ent->nextthink = level.time;
+			//	ent->think(ent);
 
-				ent->monsterinfo.aiflags |= AI_SPAWNED_COMMANDER | AI_DO_NOT_COUNT | AI_IGNORE_SHOTS;
-				ent->monsterinfo.commander = self;
-				ent->monsterinfo.slots_from_commander = reinforcement.strength;
-				self->monsterinfo.monster_used += reinforcement.strength;
+			//	ent->monsterinfo.aiflags |= AI_SPAWNED_COMMANDER | AI_DO_NOT_COUNT | AI_IGNORE_SHOTS;
+			//	ent->monsterinfo.commander = self;
+			//	ent->monsterinfo.slots_from_commander = reinforcement.strength;
+			//	self->monsterinfo.monster_used += reinforcement.strength;
 
-				gi.sound(ent, CHAN_BODY, sound_spawn, 1, ATTN_NONE, 0);
+			//	gi.sound(ent, CHAN_BODY, sound_spawn, 1, ATTN_NONE, 0);
 
-				if ((self->enemy->inuse) && (self->enemy->health > 0))
-				{
-					ent->enemy = self->enemy;
-					FoundTarget(ent);
-				}
+			//	if ((self->enemy->inuse) && (self->enemy->health > 0))
+			//	{
+			//		ent->enemy = self->enemy;
+			//		FoundTarget(ent);
+			//	}
 
-				float radius = (reinforcement.maxs - reinforcement.mins).length() * 0.5f;
-				SpawnGrow_Spawn(spawnpoint + (reinforcement.mins + reinforcement.maxs), radius, radius * 2.f);
-			}
-		}
+			//	float radius = (reinforcement.maxs - reinforcement.mins).length() * 0.5f;
+			//	SpawnGrow_Spawn(spawnpoint + (reinforcement.mins + reinforcement.maxs), radius, radius * 2.f);
+			//}
+		//}
 	}
 }
 

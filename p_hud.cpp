@@ -471,8 +471,8 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 		// allow new DM games to override the tag picture
 		if (gamerules->integer)
 		{
-			if (DMGame.DogTag)
-				DMGame.DogTag(cl_ent, killer, &tag);
+			//if (DMGame.DogTag)
+			//	DMGame.DogTag(cl_ent, killer, &tag);
 		}
 		// ROGUE
 		//===============

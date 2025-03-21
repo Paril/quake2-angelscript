@@ -91,7 +91,7 @@ void Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, co
 	{
 		if (targ->enemy && targ->enemy->inuse && (targ->enemy->svflags & SVF_MONSTER)) // god, I hope so
 		{
-			cleanupHealTarget(targ->enemy);
+			//cleanupHealTarget(targ->enemy);
 		}
 
 		// clean up self
@@ -334,9 +334,9 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	// also, target the tesla if it's a "new" tesla
 	if ((inflictor) && (!strcmp(inflictor->classname, "tesla_mine")))
 	{
-		new_tesla = MarkTeslaArea(targ, inflictor);
-		if ((new_tesla || brandom()) && (!targ->enemy || !targ->enemy->classname || strcmp(targ->enemy->classname, "tesla_mine")))
-			TargetTesla(targ, inflictor);
+		//new_tesla = MarkTeslaArea(targ, inflictor);
+		//if ((new_tesla || brandom()) && (!targ->enemy || !targ->enemy->classname || strcmp(targ->enemy->classname, "tesla_mine")))
+		//	TargetTesla(targ, inflictor);
 		return;
 	}
 	// ROGUE
@@ -389,7 +389,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker, edict_t *inflictor)
 			return;
 
 		// remove the medic flag
-		cleanupHealTarget(targ->enemy);
+		//cleanupHealTarget(targ->enemy);
 		targ->monsterinfo.aiflags &= ~AI_MEDIC;
 	}
 	// PMM
@@ -421,7 +421,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker, edict_t *inflictor)
 			{
 				if (targ->enemy && targ->enemy->inuse && (targ->enemy->svflags & SVF_MONSTER)) // god, I hope so
 				{
-					cleanupHealTarget(targ->enemy);
+					//cleanupHealTarget(targ->enemy);
 				}
 
 				// clean up self
@@ -449,7 +449,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker, edict_t *inflictor)
 			{
 				if (targ->enemy && targ->enemy->inuse && (targ->enemy->svflags & SVF_MONSTER)) // god, I hope so
 				{
-					cleanupHealTarget(targ->enemy);
+					//cleanupHealTarget(targ->enemy);
 				}
 
 				// clean up self
@@ -473,7 +473,7 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker, edict_t *inflictor)
 			{
 				if (targ->enemy && targ->enemy->inuse && (targ->enemy->svflags & SVF_MONSTER)) // god, I hope so
 				{
-					cleanupHealTarget(targ->enemy);
+					//cleanupHealTarget(targ->enemy);
 				}
 
 				// clean up self
@@ -566,10 +566,10 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 	//  allow the deathmatch game to change values
 	if (deathmatch->integer && gamerules->integer)
 	{
-		if (DMGame.ChangeDamage)
-			damage = DMGame.ChangeDamage(targ, attacker, damage, mod);
-		if (DMGame.ChangeKnockback)
-			knockback = DMGame.ChangeKnockback(targ, attacker, knockback, mod);
+		//if (DMGame.ChangeDamage)
+		//	damage = DMGame.ChangeDamage(targ, attacker, damage, mod);
+		//if (DMGame.ChangeKnockback)
+		//	knockback = DMGame.ChangeKnockback(targ, attacker, knockback, mod);
 
 		if (!damage)
 			return;

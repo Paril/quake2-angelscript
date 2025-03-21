@@ -143,7 +143,7 @@ mframe_t chick_frames_run[] = {
 	{ ai_run, 6 },
 	{ ai_run, 8, monster_footstep },
 	{ ai_run, 13 },
-	{ ai_run, 5, monster_done_dodge }, // make sure to clear dodge bit
+	{ ai_run, 5 }, // make sure to clear dodge bit
 	{ ai_run, 7 },
 	{ ai_run, 4 },
 	{ ai_run, 11, monster_footstep },
@@ -176,7 +176,7 @@ MONSTERINFO_WALK(chick_walk) (edict_t *self) -> void
 
 MONSTERINFO_RUN(chick_run) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
@@ -242,7 +242,7 @@ PAIN(chick_pain) (edict_t *self, edict_t *other, float kick, int damage, const m
 {
 	float r;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (level.time < self->pain_debounce_time)
 		return;
@@ -271,8 +271,8 @@ PAIN(chick_pain) (edict_t *self, edict_t *other, float kick, int damage, const m
 		M_SetAnimation(self, &chick_move_pain3);
 
 	// PMM - clear duck flag
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+	//if (self->monsterinfo.aiflags & AI_DUCKED)
+	//	monster_duck_up(self);
 }
 
 MONSTERINFO_SETSKIN(chick_setpain) (edict_t *self) -> void
@@ -389,11 +389,11 @@ DIE(chick_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 // PMM - changes to duck code for new dodge
 
 mframe_t chick_frames_duck[] = {
-	{ ai_move, 0, monster_duck_down },
+	{ ai_move, 0 },
 	{ ai_move, 1 },
-	{ ai_move, 4, monster_duck_hold },
+	{ ai_move, 4 },
 	{ ai_move, -4 },
-	{ ai_move, -5, monster_duck_up },
+	{ ai_move, -5 },
 	{ ai_move, 3 },
 	{ ai_move, 1 }
 };
@@ -467,8 +467,8 @@ void ChickRocket(edict_t *self)
 	//======
 	// PMM - lead target  (not when blindfiring)
 	// 20, 35, 50, 65 chance of leading
-	if ((!blindfire) && (frandom() < 0.35f))
-		PredictAim(self, self->enemy, start, rocketSpeed, false, 0.f, &dir, &vec);
+	//if ((!blindfire) && (frandom() < 0.35f))
+	//	PredictAim(self, self->enemy, start, rocketSpeed, false, 0.f, &dir, &vec);
 	// PMM - lead target
 	//======
 
@@ -704,7 +704,7 @@ MONSTERINFO_ATTACK(chick_attack) (edict_t *self) -> void
 
 	float r, chance;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	// PMM
 	if (self->monsterinfo.attack_state == AS_BLIND)
@@ -750,8 +750,8 @@ MONSTERINFO_SIGHT(chick_sight) (edict_t *self, edict_t *other) -> void
 // PGM
 MONSTERINFO_BLOCKED(chick_blocked) (edict_t *self, float dist) -> bool
 {
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }
@@ -840,11 +840,11 @@ void SP_monster_chick(edict_t *self)
 	self->monsterinfo.walk = chick_walk;
 	self->monsterinfo.run = chick_run;
 	// pmm
-	self->monsterinfo.dodge = M_MonsterDodge;
-	self->monsterinfo.duck = chick_duck;
-	self->monsterinfo.unduck = monster_duck_up;
-	self->monsterinfo.sidestep = chick_sidestep;
-	self->monsterinfo.blocked = chick_blocked; // PGM
+	//self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.duck = chick_duck;
+	//self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.sidestep = chick_sidestep;
+	//self->monsterinfo.blocked = chick_blocked; // PGM
 	// pmm
 	self->monsterinfo.attack = chick_attack;
 	self->monsterinfo.melee = chick_melee;

@@ -301,7 +301,7 @@ void guardian_fire_blaster(edict_t *self)
 
 	AngleVectors(self->s.angles, forward, right, up);
 	start = M_ProjectFlashSource(self, monster_flash_offset[id], forward, right);
-	PredictAim(self, self->enemy, start, 1000, false, crandom() * 0.1f, &forward, nullptr);
+	//PredictAim(self, self->enemy, start, 1000, false, crandom() * 0.1f, &forward, nullptr);
 	forward += right * crandom() * 0.02f;
 	forward += up * crandom() * 0.02f;
 	forward.normalize();
@@ -813,7 +813,7 @@ void guardian_dead(edict_t *self)
 }
 
 mframe_t guardian_frames_death1[FRAME_death26 - FRAME_death1 + 1] = {
-	{ ai_move, 0, BossExplode },
+	{ ai_move },
 	{ ai_move },
 	{ ai_move },
 	{ ai_move },

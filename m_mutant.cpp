@@ -333,7 +333,7 @@ void mutant_jump_takeoff(edict_t *self)
 
 void mutant_check_landing(edict_t *self)
 {
-	monster_jump_finished(self);
+	// monster_jump_finished(self);
 
 	if (self->groundentity)
 	{
@@ -608,10 +608,10 @@ void mutant_jump_up(edict_t *self)
 
 void mutant_jump_wait_land(edict_t *self)
 {
-	if (!monster_jump_finished(self) && self->groundentity == nullptr)
-		self->monsterinfo.nextframe = self->s.frame;
-	else
-		self->monsterinfo.nextframe = self->s.frame + 1;
+	//if (!monster_jump_finished(self) && self->groundentity == nullptr)
+	//	self->monsterinfo.nextframe = self->s.frame;
+	//else
+	//	self->monsterinfo.nextframe = self->s.frame + 1;
 }
 
 mframe_t mutant_frames_jump_up[] = {
@@ -650,15 +650,15 @@ Blocked
 */
 MONSTERINFO_BLOCKED(mutant_blocked) (edict_t *self, float dist) -> bool
 {
-	if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
-	{
-		if (result != blocked_jump_result_t::JUMP_TURN)
-			mutant_jump_updown(self, result);
-		return true;
-	}
+	//if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
+	//{
+	//	if (result != blocked_jump_result_t::JUMP_TURN)
+	//		mutant_jump_updown(self, result);
+	//	return true;
+	//}
 
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }

@@ -376,8 +376,8 @@ void InitGame()
 
 	//======
 	// ROGUE
-	if (gamerules->integer)
-		InitGameRules(); // if there are game rules to set up, do so now.
+	//if (gamerules->integer)
+	//	InitGameRules(); // if there are game rules to set up, do so now.
 	// ROGUE
 	//======
 	
@@ -643,11 +643,11 @@ void CheckDMRules()
 
 	//=======
 	// ROGUE
-	if (gamerules->integer && DMGame.CheckDMRules)
-	{
-		if (DMGame.CheckDMRules())
-			return;
-	}
+	//if (gamerules->integer && DMGame.CheckDMRules)
+	//{
+	//	if (DMGame.CheckDMRules())
+	//		return;
+	//}
 	// ROGUE
 	//=======
 

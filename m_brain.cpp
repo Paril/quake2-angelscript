@@ -219,10 +219,10 @@ MMOVE_T(brain_move_pain1) = { FRAME_pain101, FRAME_pain121, brain_frames_pain1, 
 
 mframe_t brain_frames_duck[] = {
 	{ ai_move },
-	{ ai_move, -2, [](edict_t *self) { monster_duck_down(self); monster_footstep(self); } },
-	{ ai_move, 17, monster_duck_hold },
+	{ ai_move, -2, [](edict_t *self) { monster_footstep(self); } },
+	{ ai_move, 17 },
 	{ ai_move, -3 },
-	{ ai_move, -1, monster_duck_up },
+	{ ai_move, -1 },
 	{ ai_move, -5 },
 	{ ai_move, -6 },
 	{ ai_move, -6, monster_footstep }
@@ -489,10 +489,10 @@ PRETHINK(brain_right_eye_laser_update) (edict_t *laser) -> void
 	start += forward * brain_reye[self->s.frame - FRAME_walk101].y;
 	start += up * brain_reye[self->s.frame - FRAME_walk101].z;
 
-	PredictAim(self, self->enemy, start, 0, false, frandom(0.1f, 0.2f), &dir, nullptr);
+	//PredictAim(self, self->enemy, start, 0, false, frandom(0.1f, 0.2f), &dir, nullptr);
 
 	laser->s.origin = start;
-	laser->movedir = dir;
+	//laser->movedir = dir;
 	gi.linkentity(laser);
 }
 
@@ -510,10 +510,10 @@ PRETHINK(brain_left_eye_laser_update) (edict_t *laser) -> void
 	start += forward * brain_leye[self->s.frame - FRAME_walk101].y;
 	start += up * brain_leye[self->s.frame - FRAME_walk101].z;
 
-	PredictAim(self, self->enemy, start, 0, false, frandom(0.1f, 0.2f), &dir, nullptr);
+	//PredictAim(self, self->enemy, start, 0, false, frandom(0.1f, 0.2f), &dir, nullptr);
 
 	laser->s.origin = start;
-	laser->movedir = dir;
+	//laser->movedir = dir;
 	gi.linkentity(laser);
 	//dabeam_update(laser, false);
 }
@@ -644,8 +644,8 @@ PAIN(brain_pain) (edict_t *self, edict_t *other, float kick, int damage, const m
 		M_SetAnimation(self, &brain_move_pain3);
 
 	// PMM - clear duck flag
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+	//if (self->monsterinfo.aiflags & AI_DUCKED)
+	//	monster_duck_up(self);
 }
 
 MONSTERINFO_SETSKIN(brain_setskin) (edict_t *self) -> void
@@ -771,9 +771,9 @@ void SP_monster_brain(edict_t *self)
 	self->monsterinfo.walk = brain_walk;
 	self->monsterinfo.run = brain_run;
 	// PMM
-	self->monsterinfo.dodge = M_MonsterDodge;
-	self->monsterinfo.duck = brain_duck;
-	self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.duck = brain_duck;
+	//self->monsterinfo.unduck = monster_duck_up;
 	// pmm
 	// RAFAEL
 	self->monsterinfo.attack = brain_attack;

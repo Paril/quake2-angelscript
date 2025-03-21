@@ -148,7 +148,7 @@ mframe_t infantry_frames_run[] = {
 	{ ai_run, 10 },
 	{ ai_run, 15, monster_footstep },
 	{ ai_run, 5 },
-	{ ai_run, 7, monster_done_dodge },
+	{ ai_run, 7 },
 	{ ai_run, 18 },
 	{ ai_run, 20, monster_footstep },
 	{ ai_run, 2 },
@@ -158,7 +158,7 @@ MMOVE_T(infantry_move_run) = { FRAME_run01, FRAME_run08, infantry_frames_run, nu
 
 MONSTERINFO_RUN(infantry_run) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		M_SetAnimation(self, &infantry_move_stand);
@@ -206,7 +206,7 @@ PAIN(infantry_pain) (edict_t *self, edict_t *other, float kick, int damage, cons
 		self->monsterinfo.active_move == &infantry_move_jump2) && self->think == monster_think)
 		return;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (level.time < self->pain_debounce_time)
 	{
@@ -242,8 +242,8 @@ PAIN(infantry_pain) (edict_t *self, edict_t *other, float kick, int damage, cons
 		M_SetAnimation(self, &infantry_move_pain2);
 
 	// PMM - clear duck flag
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+	//if (self->monsterinfo.aiflags & AI_DUCKED)
+	//	monster_duck_up(self);
 }
 
 MONSTERINFO_SETSKIN(infantry_setskin) (edict_t *self) -> void
@@ -293,7 +293,10 @@ void InfantryMachineGun(edict_t *self)
 		start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
 
 		if (self->enemy)
-			PredictAim(self, self->enemy, start, 0, true, -0.2f, &forward, nullptr);
+		{
+
+			// PredictAim(self, self->enemy, start, 0, true, -0.2f, &forward, nullptr);
+		}
 		else
 		{
 			AngleVectors(self->s.angles, forward, right, nullptr);
@@ -473,10 +476,10 @@ DIE(infantry_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 }
 
 mframe_t infantry_frames_duck[] = {
-	{ ai_move, -2, monster_duck_down },
-	{ ai_move, -5, monster_duck_hold },
+	{ ai_move, -2 },
+	{ ai_move, -5 },
 	{ ai_move, 3 },
-	{ ai_move, 4, monster_duck_up },
+	{ ai_move, 4 },
 	{ ai_move }
 };
 MMOVE_T(infantry_move_duck) = { FRAME_duck01, FRAME_duck05, infantry_frames_duck, infantry_run };
@@ -592,7 +595,7 @@ void infantry_fire(edict_t *self)
 	{
 		if (level.time >= self->monsterinfo.fire_wait)
 		{
-			monster_done_dodge(self);
+			//monster_done_dodge(self);
 			M_SetAnimation(self, &infantry_move_attack1, false);
 			self->monsterinfo.nextframe = FRAME_attak114;
 		}
@@ -601,7 +604,7 @@ void infantry_fire(edict_t *self)
 		{
 			M_SetAnimation(self, &infantry_move_attack1, false);
 			self->monsterinfo.nextframe = FRAME_attak103;
-			monster_done_dodge(self);
+			//monster_done_dodge(self);
 			self->monsterinfo.attack_state = AS_STRAIGHT;
 		}
 	}
@@ -654,7 +657,7 @@ void infantry_attack4_refire(edict_t *self)
 	// ran out of firing time
 	if (level.time >= self->monsterinfo.fire_wait)
 	{
-		monster_done_dodge(self);
+		//monster_done_dodge(self);
 		M_SetAnimation(self, &infantry_move_attack1, false);
 		self->monsterinfo.nextframe = FRAME_attak114;
 	}
@@ -663,7 +666,7 @@ void infantry_attack4_refire(edict_t *self)
 	{
 		M_SetAnimation(self, &infantry_move_attack1, false);
 		self->monsterinfo.nextframe = FRAME_attak103;
-		monster_done_dodge(self);
+		//monster_done_dodge(self);
 		self->monsterinfo.attack_state = AS_STRAIGHT;
 	}
 	else
@@ -686,7 +689,7 @@ MMOVE_T(infantry_move_attack4) = { FRAME_run201, FRAME_run208, infantry_frames_a
 
 MONSTERINFO_ATTACK(infantry_attack) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	float r = range_to(self, self->enemy);
 
@@ -730,8 +733,8 @@ void infantry_jump_wait_land(edict_t *self)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if (monster_jump_finished(self))
-			self->monsterinfo.nextframe = self->s.frame + 1;
+		// if (monster_jump_finished(self))
+		// 	self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else
 		self->monsterinfo.nextframe = self->s.frame + 1;
@@ -770,7 +773,7 @@ void infantry_jump(edict_t *self, blocked_jump_result_t result)
 	if (!self->enemy)
 		return;
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (result == blocked_jump_result_t::JUMP_JUMP_UP)
 		M_SetAnimation(self, &infantry_move_jump2);
@@ -780,15 +783,15 @@ void infantry_jump(edict_t *self, blocked_jump_result_t result)
 
 MONSTERINFO_BLOCKED(infantry_blocked) (edict_t *self, float dist) -> bool
 {
-	if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
-	{
-		if (result != blocked_jump_result_t::JUMP_TURN)
-			infantry_jump(self, result);
-		return true;
-	}
+	//if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
+	//{
+	//	if (result != blocked_jump_result_t::JUMP_TURN)
+	//		infantry_jump(self, result);
+	//	return true;
+	//}
 
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }
@@ -905,13 +908,13 @@ void SP_monster_infantry(edict_t *self)
 	self->monsterinfo.stand = infantry_stand;
 	self->monsterinfo.walk = infantry_walk;
 	self->monsterinfo.run = infantry_run;
-	// pmm
-	self->monsterinfo.dodge = M_MonsterDodge;
-	self->monsterinfo.duck = infantry_duck;
-	self->monsterinfo.unduck = monster_duck_up;
-	self->monsterinfo.sidestep = infantry_sidestep;
-	self->monsterinfo.blocked = infantry_blocked;
-	// pmm
+	//// pmm
+	//self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.duck = infantry_duck;
+	//self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.sidestep = infantry_sidestep;
+	//self->monsterinfo.blocked = infantry_blocked;
+	//// pmm
 	self->monsterinfo.attack = infantry_attack;
 	self->monsterinfo.melee = nullptr;
 	self->monsterinfo.sight = infantry_sight;

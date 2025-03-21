@@ -685,7 +685,7 @@ void SP_misc_insane(edict_t *self)
 	if (self->spawnflags.has(SPAWNFLAG_INSANE_CRUCIFIED)) // Crucified ?
 	{
 		self->flags |= FL_NO_KNOCKBACK | FL_STATIONARY;
-		stationarymonster_start(self, st);
+		//stationarymonster_start(self, st);
 	}
 	else
 		walkmonster_start(self);

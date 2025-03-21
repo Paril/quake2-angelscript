@@ -883,8 +883,8 @@ static void G_SetClientEffects(edict_t *ent)
 
 	if (gamerules->integer)
 	{
-		if (DMGame.PlayerEffects)
-			DMGame.PlayerEffects(ent);
+		//if (DMGame.PlayerEffects)
+		//	DMGame.PlayerEffects(ent);
 	}
 	// PGM
 	//=========

@@ -187,7 +187,7 @@ void cleanupHeal(edict_t *self)
 {
 	// clean up target, if we have one and it's legit
 	if (self->enemy && self->enemy->inuse && !self->enemy->client && (self->monsterinfo.aiflags & AI_MEDIC))
-		cleanupHealTarget(self->enemy);
+		//cleanupHealTarget(self->enemy);
 
 	fixHealerEnemy(self);
 }
@@ -199,7 +199,7 @@ void abortHeal(edict_t *self, bool gib, bool mark)
 
 	if (self->enemy && self->enemy->inuse && !self->enemy->client && (self->monsterinfo.aiflags & AI_MEDIC))
 	{
-		cleanupHealTarget(self->enemy);
+		//cleanupHealTarget(self->enemy);
 
 		// gib em!
 		if (mark)
@@ -382,8 +382,8 @@ edict_t *healFindMonster(edict_t *self, float radius)
 			continue;
 		// FIXME - there's got to be a better way ..
 		// make sure we don't spawn people right on top of us
-		if (realrange(self, ent) <= MEDIC_MIN_DISTANCE)
-			continue;
+		//if (realrange(self, ent) <= MEDIC_MIN_DISTANCE)
+		//	continue;
 		if (!best)
 		{
 			best = ent;
@@ -597,7 +597,7 @@ MONSTERINFO_WALK(medic_walk) (edict_t *self) -> void
 mframe_t medic_frames_run[] = {
 	{ ai_run, 18 },
 	{ ai_run, 22.5f, monster_footstep },
-	{ ai_run, 25.4f, monster_done_dodge },
+	{ ai_run, 25.4f },
 	{ ai_run, 23.4f, monster_footstep },
 	{ ai_run, 24 },
 	{ ai_run, 35.6f }
@@ -606,7 +606,7 @@ MMOVE_T(medic_move_run) = { FRAME_run1, FRAME_run6, medic_frames_run, nullptr };
 
 MONSTERINFO_RUN(medic_run) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (!(self->monsterinfo.aiflags & AI_MEDIC))
 	{
@@ -657,7 +657,7 @@ MMOVE_T(medic_move_pain2) = { FRAME_painb2, FRAME_painb13, medic_frames_pain2, m
 
 PAIN(medic_pain) (edict_t *self, edict_t *other, float kick, int damage, const mod_t &mod) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (level.time < self->pain_debounce_time)
 		return;
@@ -706,8 +706,8 @@ PAIN(medic_pain) (edict_t *self, edict_t *other, float kick, int damage, const m
 		M_SetAnimation(self, &medic_move_pain2);
 
 	// PMM - clear duck flag
-	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+	//if (self->monsterinfo.aiflags & AI_DUCKED)
+	//	monster_duck_up(self);
 
 	abortHeal(self, false, false);
 }
@@ -760,7 +760,9 @@ void medic_fire_blaster(edict_t *self)
 
 	// medic commander shoots blaster2
 	if (self->mass > 400)
-		monster_fire_blaster2(self, start, dir, damage, 1000, mz, effect);
+	{
+		//monster_fire_blaster2(self, start, dir, damage, 1000, mz, effect);
+	}
 	else
 		monster_fire_blaster(self, start, dir, damage, 1000, mz, effect);
 }
@@ -856,8 +858,8 @@ DIE(medic_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 mframe_t medic_frames_duck[] = {
 	{ ai_move, -1 },
-	{ ai_move, -1, monster_duck_down },
-	{ ai_move, -1, monster_duck_hold },
+	{ ai_move, -1 },
+	{ ai_move, -1 },
 	{ ai_move, -1 },
 	{ ai_move, -1 },
 	{ ai_move, -1 }, // PMM - duck up used to be here
@@ -867,7 +869,7 @@ mframe_t medic_frames_duck[] = {
 	{ ai_move, -1 },
 	{ ai_move, -1 },
 	{ ai_move, -1 },
-	{ ai_move, -1, monster_duck_up }
+	{ ai_move, -1 }
 };
 MMOVE_T(medic_move_duck) = { FRAME_duck2, FRAME_duck14, medic_frames_duck, medic_run };
 
@@ -1129,15 +1131,15 @@ void medic_determine_spawn(edict_t *self)
 
 		auto &reinforcement = self->monsterinfo.reinforcements.reinforcements[self->monsterinfo.chosen_reinforcements[count]];
 
-		if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
-		{
-			if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
-			{
-				num_success++;
-				// we found a spot, we're done here
-				count = num_summoned;
-			}
-		}
+		//if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
+		//{
+		//	if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
+		//	{
+		//		num_success++;
+		//		// we found a spot, we're done here
+		//		count = num_summoned;
+		//	}
+		//}
 	}
 
 	// see if we have any success by spinning around
@@ -1159,15 +1161,15 @@ void medic_determine_spawn(edict_t *self)
 
 			auto &reinforcement = self->monsterinfo.reinforcements.reinforcements[self->monsterinfo.chosen_reinforcements[count]];
 
-			if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
-			{
-				if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
-				{
-					num_success++;
-					// we found a spot, we're done here
-					count = num_summoned;
-				}
-			}
+			//if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
+			//{
+			//	if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
+			//	{
+			//		num_success++;
+			//		// we found a spot, we're done here
+			//		count = num_summoned;
+			//	}
+			//}
 		}
 
 		if (num_success)
@@ -1225,15 +1227,15 @@ void medic_spawngrows(edict_t *self)
 
 		auto &reinforcement = self->monsterinfo.reinforcements.reinforcements[self->monsterinfo.chosen_reinforcements[count]];
 
-		if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
-		{
-			if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
-			{
-				num_success++;
-				float radius = (reinforcement.maxs - reinforcement.mins).length() * 0.5f;
-				SpawnGrow_Spawn(spawnpoint + (reinforcement.mins + reinforcement.maxs), radius, radius * 2.f);
-			}
-		}
+		//if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
+		//{
+		//	if (CheckGroundSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs, 256, -1))
+		//	{
+		//		num_success++;
+		//		float radius = (reinforcement.maxs - reinforcement.mins).length() * 0.5f;
+		//		SpawnGrow_Spawn(spawnpoint + (reinforcement.mins + reinforcement.maxs), radius, radius * 2.f);
+		//	}
+		//}
 	}
 
 	if (num_success == 0)
@@ -1267,11 +1269,11 @@ void medic_finish_spawn(edict_t *self)
 		startpoint[2] += 10 * (self->s.scale ? self->s.scale : 1.0f);
 
 		ent = nullptr;
-		if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
-		{
-			if (CheckSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs))
-				ent = CreateGroundMonster(spawnpoint, self->s.angles, reinforcement.mins, reinforcement.maxs, reinforcement.classname, 256);
-		}
+		//if (FindSpawnPoint(startpoint, reinforcement.mins, reinforcement.maxs, spawnpoint, 32))
+		//{
+		//	if (CheckSpawnPoint(spawnpoint, reinforcement.mins, reinforcement.maxs))
+		//		ent = CreateGroundMonster(spawnpoint, self->s.angles, reinforcement.mins, reinforcement.maxs, reinforcement.classname, 256);
+		//}
 
 		if (!ent)
 			continue;
@@ -1294,19 +1296,19 @@ void medic_finish_spawn(edict_t *self)
 
 		if (coop->integer)
 		{
-			designated_enemy = PickCoopTarget(ent);
-			if (designated_enemy)
-			{
-				// try to avoid using my enemy
-				if (designated_enemy == self->enemy)
-				{
-					designated_enemy = PickCoopTarget(ent);
-					if (!designated_enemy)
-						designated_enemy = self->enemy;
-				}
-			}
-			else
-				designated_enemy = self->enemy;
+			//designated_enemy = PickCoopTarget(ent);
+			//if (designated_enemy)
+			//{
+			//	// try to avoid using my enemy
+			//	if (designated_enemy == self->enemy)
+			//	{
+			//		designated_enemy = PickCoopTarget(ent);
+			//		if (!designated_enemy)
+			//			designated_enemy = self->enemy;
+			//	}
+			//}
+			//else
+			//	designated_enemy = self->enemy;
 		}
 
 		if ((designated_enemy) && (designated_enemy->inuse) && (designated_enemy->health > 0))
@@ -1352,7 +1354,7 @@ MMOVE_T(medic_move_callReinforcements) = { FRAME_attack33, FRAME_attack55, medic
 
 MONSTERINFO_ATTACK(medic_attack) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	float enemy_range = range_to(self, self->enemy);
 
@@ -1366,10 +1368,10 @@ MONSTERINFO_ATTACK(medic_attack) (edict_t *self) -> void
 	float r = frandom();
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{
-		if ((self->mass > 400) && (r > 0.8f) && M_SlotsLeft(self))
-			M_SetAnimation(self, &medic_move_callReinforcements);
-		else
-			M_SetAnimation(self, &medic_move_attackCable);
+		//if ((self->mass > 400) && (r > 0.8f) && M_SlotsLeft(self))
+		//	M_SetAnimation(self, &medic_move_callReinforcements);
+		//else
+		//	M_SetAnimation(self, &medic_move_attackCable);
 	}
 	else
 	{
@@ -1378,10 +1380,10 @@ MONSTERINFO_ATTACK(medic_attack) (edict_t *self) -> void
 			M_SetAnimation(self, &medic_move_callReinforcements);
 			return;
 		}
-		if ((self->mass > 400) && (r > 0.2f) && (enemy_range > RANGE_MELEE) && M_SlotsLeft(self))
-			M_SetAnimation(self, &medic_move_callReinforcements);
-		else
-			M_SetAnimation(self, &medic_move_attackBlaster);
+		//if ((self->mass > 400) && (r > 0.2f) && (enemy_range > RANGE_MELEE) && M_SlotsLeft(self))
+		//	M_SetAnimation(self, &medic_move_callReinforcements);
+		//else
+		//	M_SetAnimation(self, &medic_move_attackBlaster);
 	}
 }
 
@@ -1406,32 +1408,32 @@ MONSTERINFO_CHECKATTACK(medic_checkattack) (edict_t *self) -> bool
 			return false;
 		}
 
-		if (realrange(self, self->enemy) < MEDIC_MAX_HEAL_DISTANCE + 10)
-		{
-			medic_attack(self);
-			return true;
-		}
-		else
-		{
-			self->monsterinfo.attack_state = AS_STRAIGHT;
-			return false;
-		}
+		//if (realrange(self, self->enemy) < MEDIC_MAX_HEAL_DISTANCE + 10)
+		//{
+		//	medic_attack(self);
+		//	return true;
+		//}
+		//else
+		//{
+		//	self->monsterinfo.attack_state = AS_STRAIGHT;
+		//	return false;
+		//}
 	}
 
-	if (self->enemy->client && !visible(self, self->enemy) && M_SlotsLeft(self))
-	{
-		self->monsterinfo.attack_state = AS_BLIND;
-		return true;
-	}
+	//if (self->enemy->client && !visible(self, self->enemy) && M_SlotsLeft(self))
+	//{
+	//	self->monsterinfo.attack_state = AS_BLIND;
+	//	return true;
+	//}
 
-	// give a LARGE bias to spawning things when we have room
-	// use AI_BLOCKED as a signal to attack to spawn
-	if (self->monsterinfo.monster_slots && (frandom() < 0.8f) && (M_SlotsLeft(self) > self->monsterinfo.monster_slots * 0.8f) && (realrange(self, self->enemy) > 150))
-	{
-		self->monsterinfo.aiflags |= AI_BLOCKED;
-		self->monsterinfo.attack_state = AS_MISSILE;
-		return true;
-	}
+	//// give a LARGE bias to spawning things when we have room
+	//// use AI_BLOCKED as a signal to attack to spawn
+	//if (self->monsterinfo.monster_slots && (frandom() < 0.8f) && (M_SlotsLeft(self) > self->monsterinfo.monster_slots * 0.8f) && (realrange(self, self->enemy) > 150))
+	//{
+	//	self->monsterinfo.aiflags |= AI_BLOCKED;
+	//	self->monsterinfo.attack_state = AS_MISSILE;
+	//	return true;
+	//}
 
 	// ROGUE
 	// since his idle animation looks kinda bad in combat, always attack
@@ -1492,8 +1494,8 @@ MONSTERINFO_SIDESTEP(medic_sidestep) (edict_t *self) -> bool
 // PGM
 MONSTERINFO_BLOCKED(medic_blocked) (edict_t *self, float dist) -> bool
 {
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }
@@ -1551,11 +1553,11 @@ void SP_monster_medic(edict_t *self)
 	self->monsterinfo.walk = medic_walk;
 	self->monsterinfo.run = medic_run;
 	// pmm
-	self->monsterinfo.dodge = M_MonsterDodge;
-	self->monsterinfo.duck = medic_duck;
-	self->monsterinfo.unduck = monster_duck_up;
-	self->monsterinfo.sidestep = medic_sidestep;
-	self->monsterinfo.blocked = medic_blocked;
+	//self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.duck = medic_duck;
+	//self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.sidestep = medic_sidestep;
+	//self->monsterinfo.blocked = medic_blocked;
 	// pmm
 	self->monsterinfo.attack = medic_attack;
 	self->monsterinfo.melee = nullptr;

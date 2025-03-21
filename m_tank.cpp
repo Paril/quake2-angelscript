@@ -380,15 +380,15 @@ void TankBlaster(edict_t *self)
 	vec3_t target;
 
 	// PMM
-	if (blindfire)
-	{
-		target = self->monsterinfo.blind_fire_target;
+	// if (blindfire)
+	// {
+	// 	target = self->monsterinfo.blind_fire_target;
 
-		if (!M_AdjustBlindfireTarget(self, start, target, right, dir))
-			return;
-	}
-	else
-		PredictAim(self, self->enemy, start, 0, false, 0.f, &dir, nullptr);
+	// 	if (!M_AdjustBlindfireTarget(self, start, target, right, dir))
+	// 		return;
+	// }
+	// else
+	// 	// PredictAim(self, self->enemy, start, 0, false, 0.f, &dir, nullptr);
 	// pmm
 
 	monster_fire_blaster(self, start, dir, 30, 800, flash_number, EF_BLASTER);
@@ -467,8 +467,8 @@ void TankRocket(edict_t *self)
 	//======
 	// PMM - lead target  (not when blindfiring)
 	// 20, 35, 50, 65 chance of leading
-	if ((!blindfire) && ((frandom() < (0.2f + ((3 - skill->integer) * 0.15f)))))
-		PredictAim(self, self->enemy, start, rocketSpeed, false, 0, &dir, &vec);
+	// if ((!blindfire) && ((frandom() < (0.2f + ((3 - skill->integer) * 0.15f)))))
+	// 	PredictAim(self, self->enemy, start, rocketSpeed, false, 0, &dir, &vec);
 	// PMM - lead target
 	//======
 
@@ -1013,8 +1013,8 @@ DIE(tank_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 // PGM
 MONSTERINFO_BLOCKED(tank_blocked) (edict_t *self, float dist) -> bool
 {
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }

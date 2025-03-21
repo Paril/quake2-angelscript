@@ -583,18 +583,18 @@ static bool SV_flystep(edict_t *ent, vec3_t move, bool relink, edict_t *current_
 			ent->s.origin = trace.endpos;
 			//=====
 			// PGM
-			if (!current_bad && CheckForBadArea(ent))
-				ent->s.origin = oldorg;
-			else
-			{
-				if (relink)
-				{
-					gi.linkentity(ent);
-					G_TouchTriggers(ent);
-				}
+			//if (!current_bad && CheckForBadArea(ent))
+			//	ent->s.origin = oldorg;
+			//else
+			//{
+			//	if (relink)
+			//	{
+			//		gi.linkentity(ent);
+			//		G_TouchTriggers(ent);
+			//	}
 
-				return true;
-			}
+			//	return true;
+			//}
 			// PGM
 			//=====
 		}
@@ -627,32 +627,32 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
 	edict_t *current_bad = nullptr;
 
 	// PMM - who cares about bad areas if you're dead?
-	if (ent->health > 0)
-	{
-		current_bad = CheckForBadArea(ent);
-		if (current_bad)
-		{
-			ent->bad_area = current_bad;
+	//if (ent->health > 0)
+	//{
+	//	current_bad = CheckForBadArea(ent);
+	//	if (current_bad)
+	//	{
+	//		ent->bad_area = current_bad;
 
-			if (ent->enemy && !strcmp(ent->enemy->classname, "tesla_mine"))
-			{
-				// if the tesla is in front of us, back up...
-				if (IsBadAhead(ent, current_bad, move))
-					move *= -1;
-			}
-		}
-		else if (ent->bad_area)
-		{
-			// if we're no longer in a bad area, get back to business.
-			ent->bad_area = nullptr;
-			if (ent->oldenemy) // && ent->bad_area->owner == ent->enemy)
-			{
-				ent->enemy = ent->oldenemy;
-				ent->goalentity = ent->oldenemy;
-				FoundTarget(ent);
-			}
-		}
-	}
+	//		if (ent->enemy && !strcmp(ent->enemy->classname, "tesla_mine"))
+	//		{
+	//			// if the tesla is in front of us, back up...
+	//			if (IsBadAhead(ent, current_bad, move))
+	//				move *= -1;
+	//		}
+	//	}
+	//	else if (ent->bad_area)
+	//	{
+	//		// if we're no longer in a bad area, get back to business.
+	//		ent->bad_area = nullptr;
+	//		if (ent->oldenemy) // && ent->bad_area->owner == ent->enemy)
+	//		{
+	//			ent->enemy = ent->oldenemy;
+	//			ent->goalentity = ent->oldenemy;
+	//			FoundTarget(ent);
+	//		}
+	//	}
+	//}
 	// PGM
 	//======
 
@@ -787,7 +787,7 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
 	if (ent->health > 0)
 	{
 		// use AI_BLOCKED to tell the calling layer that we're now mad at a tesla
-		new_bad = CheckForBadArea(ent);
+		//new_bad = CheckForBadArea(ent);
 		if (!current_bad && new_bad)
 		{
 			if (new_bad->owner)
@@ -796,7 +796,7 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
 				{
 					if ((!(ent->enemy)) || (!(ent->enemy->inuse)))
 					{
-						TargetTesla(ent, new_bad->owner);
+						//TargetTesla(ent, new_bad->owner);
 						ent->monsterinfo.aiflags |= AI_BLOCKED;
 					}
 					else if (!strcmp(ent->enemy->classname, "tesla_mine"))
@@ -806,13 +806,13 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
 					{
 						if (!visible(ent, ent->enemy))
 						{
-							TargetTesla(ent, new_bad->owner);
+							//TargetTesla(ent, new_bad->owner);
 							ent->monsterinfo.aiflags |= AI_BLOCKED;
 						}
 					}
 					else
 					{
-						TargetTesla(ent, new_bad->owner);
+						//TargetTesla(ent, new_bad->owner);
 						ent->monsterinfo.aiflags |= AI_BLOCKED;
 					}
 				}

@@ -271,7 +271,7 @@ mframe_t jorg_frames_pain1[] = {
 MMOVE_T(jorg_move_pain1) = { FRAME_pain101, FRAME_pain103, jorg_frames_pain1, jorg_run };
 
 mframe_t jorg_frames_death1[] = {
-	{ ai_move, 0, BossExplode },
+	{ ai_move },
 	{ ai_move },
 	{ ai_move },
 	{ ai_move },
@@ -489,7 +489,7 @@ void jorg_firebullet_right(edict_t *self)
 	vec3_t forward, right, start;
 	AngleVectors(self->s.angles, forward, right, nullptr);
 	start = M_ProjectFlashSource(self, monster_flash_offset[MZ2_JORG_MACHINEGUN_R1], forward, right);
-	PredictAim(self, self->enemy, start, 0, false, -0.2f, &forward, nullptr);
+	//PredictAim(self, self->enemy, start, 0, false, -0.2f, &forward, nullptr);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_JORG_MACHINEGUN_R1);
 }
 
@@ -498,7 +498,7 @@ void jorg_firebullet_left(edict_t *self)
 	vec3_t forward, right, start;
 	AngleVectors(self->s.angles, forward, right, nullptr);
 	start = M_ProjectFlashSource(self, monster_flash_offset[MZ2_JORG_MACHINEGUN_L1], forward, right);
-	PredictAim(self, self->enemy, start, 0, false, 0.2f, &forward, nullptr);
+	//PredictAim(self, self->enemy, start, 0, false, 0.2f, &forward, nullptr);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_JORG_MACHINEGUN_L1);
 }
 

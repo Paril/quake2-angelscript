@@ -626,9 +626,9 @@ static void parasite_fire_proboscis(edict_t *self)
 	vec3_t start = parasite_get_proboscis_start(self);
 
 	vec3_t dir;
-	PredictAim(self, self->enemy, start, g_athena_parasite_proboscis_speed, false, crandom_open() * g_athena_parasite_miss_chance, &dir, nullptr);
+	// PredictAim(self, self->enemy, start, g_athena_parasite_proboscis_speed, false, crandom_open() * g_athena_parasite_miss_chance, &dir, nullptr);
 
-	fire_proboscis(self, start, dir, g_athena_parasite_proboscis_speed);
+	//fire_proboscis(self, start, dir, g_athena_parasite_proboscis_speed);
 }
 
 static void parasite_proboscis_wait(edict_t *self)
@@ -718,8 +718,8 @@ void parasite_jump_wait_land(edict_t *self)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if (monster_jump_finished(self))
-			self->monsterinfo.nextframe = self->s.frame + 1;
+		// if (monster_jump_finished(self))
+		// 	self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else
 		self->monsterinfo.nextframe = self->s.frame + 1;
@@ -767,15 +767,15 @@ Blocked
 */
 MONSTERINFO_BLOCKED(parasite_blocked) (edict_t *self, float dist) -> bool
 {
-	if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
-	{
-		if (result != blocked_jump_result_t::JUMP_TURN)
-			parasite_jump(self, result);
-		return true;
-	}
+	//if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
+	//{
+	//	if (result != blocked_jump_result_t::JUMP_TURN)
+	//		parasite_jump(self, result);
+	//	return true;
+	//}
 
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }

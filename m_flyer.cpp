@@ -268,10 +268,10 @@ void flyer_kamikaze_check(edict_t *self)
 
 	self->goalentity = self->enemy;
 
-	dist = realrange(self, self->enemy);
+	//dist = realrange(self, self->enemy);
 
-	if (dist < 90)
-		flyer_kamikaze_explode(self);
+	//if (dist < 90)
+	//	flyer_kamikaze_explode(self);
 }
 
 #if 0

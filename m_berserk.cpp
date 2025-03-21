@@ -138,7 +138,7 @@ mframe_t berserk_frames_run1[] = {
 	{ ai_run, 21 },
 	{ ai_run, 11, monster_footstep },
 	{ ai_run, 21 },
-	{ ai_run, 25, monster_done_dodge },
+	{ ai_run, 25 },
 	{ ai_run, 18, monster_footstep },
 	{ ai_run, 19 }
 };
@@ -146,7 +146,7 @@ MMOVE_T(berserk_move_run1) = { FRAME_run1, FRAME_run6, berserk_frames_run1, null
 
 MONSTERINFO_RUN(berserk_run) (edict_t *self) -> void
 {
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		M_SetAnimation(self, &berserk_move_stand);
@@ -316,7 +316,7 @@ void berserk_jump_takeoff(edict_t *self)
 	float length = (self->s.origin - self->enemy->s.origin).length();
 	float fwd_speed = length * 1.95f;
 	vec3_t dir;
-	PredictAim(self, self->enemy, self->s.origin, fwd_speed, false, 0.f, &dir, nullptr);
+	//PredictAim(self, self->enemy, self->s.origin, fwd_speed, false, 0.f, &dir, nullptr);
 	self->s.angles[1] = vectoyaw(dir);
 	AngleVectors(self->s.angles, forward, nullptr, nullptr);
 	self->s.origin[2] += 1;
@@ -401,7 +401,7 @@ MONSTERINFO_MELEE(berserk_melee) (edict_t *self) -> void
 		return;
 	}
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if (brandom())
 		M_SetAnimation(self, &berserk_move_attack_spike);
@@ -414,7 +414,7 @@ static void berserk_run_attack_speed(edict_t *self)
 	if (self->enemy && range_to(self, self->enemy) < MELEE_DISTANCE)
 	{
 		self->monsterinfo.nextframe = self->s.frame + 6;
-		monster_done_dodge(self);
+		//monster_done_dodge(self);
 	}
 }
 
@@ -426,7 +426,7 @@ static void berserk_run_swing(edict_t *self)
 	if (self->monsterinfo.attack_state == AS_SLIDING)
 	{
 		self->monsterinfo.attack_state = AS_STRAIGHT;
-		monster_done_dodge(self);
+		//monster_done_dodge(self);
 	}
 }
 
@@ -434,7 +434,7 @@ mframe_t berserk_frames_run_attack1[] = {
 	{ ai_run, 21, berserk_run_attack_speed },
 	{ ai_run, 11, [](edict_t *self) { berserk_run_attack_speed(self); monster_footstep(self); } },
 	{ ai_run, 21, berserk_run_attack_speed },
-	{ ai_run, 25, [](edict_t *self) { berserk_run_attack_speed(self); monster_done_dodge(self); } },
+	{ ai_run, 25, [](edict_t *self) { berserk_run_attack_speed(self); } },
 	{ ai_run, 18, [](edict_t *self) { berserk_run_attack_speed(self); monster_footstep(self); } },
 	{ ai_run, 19, berserk_run_attack_speed },
 	{ ai_run, 21 },
@@ -525,7 +525,7 @@ PAIN(berserk_pain) (edict_t *self, edict_t *other, float kick, int damage, const
 	if (!M_ShouldReactToPain(self, mod))
 		return; // no pain anims in nightmare
 
-	monster_done_dodge(self);
+	//monster_done_dodge(self);
 
 	if ((damage <= 50) || (frandom() < 0.5f))
 		M_SetAnimation(self, &berserk_move_pain1);
@@ -644,8 +644,8 @@ void berserk_jump_wait_land(edict_t *self)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if (monster_jump_finished(self))
-			self->monsterinfo.nextframe = self->s.frame + 1;
+		//if (monster_jump_finished(self))
+		//	self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else
 		self->monsterinfo.nextframe = self->s.frame + 1;
@@ -690,16 +690,16 @@ void berserk_jump(edict_t *self, blocked_jump_result_t result)
 
 MONSTERINFO_BLOCKED(berserk_blocked) (edict_t *self, float dist) -> bool
 {
-	if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
-	{
-		if (result != blocked_jump_result_t::JUMP_TURN)
-			berserk_jump(self, result);
+	//if (auto result = blocked_checkjump(self, dist); result != blocked_jump_result_t::NO_JUMP)
+	//{
+	//	if (result != blocked_jump_result_t::JUMP_TURN)
+	//		berserk_jump(self, result);
 
-		return true;
-	}
+	//	return true;
+	//}
 
-	if (blocked_checkplat(self, dist))
-		return true;
+	//if (blocked_checkplat(self, dist))
+	//	return true;
 
 	return false;
 }
@@ -722,34 +722,34 @@ MONSTERINFO_SIDESTEP(berserk_sidestep) (edict_t *self) -> bool
 }
 
 mframe_t berserk_frames_duck[] = {
-	{ ai_move, 0, monster_duck_down },
 	{ ai_move },
 	{ ai_move },
 	{ ai_move },
-	{ ai_move, 0, monster_duck_hold },
 	{ ai_move },
 	{ ai_move },
-	{ ai_move, 0, monster_duck_up },
+	{ ai_move },
+	{ ai_move },
+	{ ai_move },
 	{ ai_move },
 	{ ai_move }
 };
 MMOVE_T(berserk_move_duck) = { FRAME_duck1, FRAME_duck10, berserk_frames_duck, berserk_run };
 
 mframe_t berserk_frames_duck2[] = {
-	{ ai_move, 21, monster_duck_down },
+	{ ai_move, 21 },
 	{ ai_move, 28 },
 	{ ai_move, 20 },
 	{ ai_move, 12, monster_footstep },
 	{ ai_move, 7 },
 	{ ai_move, 0, monster_footstep },
 	{ ai_move },
-	{ ai_move, 0, monster_duck_hold },
+	{ ai_move, 0 },
 	{ ai_move, 0 },
 	{ ai_move, 0 },
 	{ ai_move, 0 },
 	{ ai_move, 0 },
 	{ ai_move, 0, monster_footstep },
-	{ ai_move, 0, monster_duck_up },
+	{ ai_move, 0 },
 	{ ai_move },
 	{ ai_move },
 	{ ai_move, 0, monster_footstep },
@@ -822,11 +822,11 @@ void SP_monster_berserk(edict_t *self)
 	self->monsterinfo.walk = berserk_walk;
 	self->monsterinfo.run = berserk_run;
 	// pmm
-	self->monsterinfo.dodge = M_MonsterDodge;
-	self->monsterinfo.duck = berserk_duck;
-	self->monsterinfo.unduck = monster_duck_up;
-	self->monsterinfo.sidestep = berserk_sidestep;
-	self->monsterinfo.blocked = berserk_blocked; // PGM
+	//self->monsterinfo.dodge = M_MonsterDodge;
+	//self->monsterinfo.duck = berserk_duck;
+	////self->monsterinfo.unduck = monster_duck_up;
+	//self->monsterinfo.sidestep = berserk_sidestep;
+	//self->monsterinfo.blocked = berserk_blocked; // PGM
 	// pmm
 	self->monsterinfo.attack = berserk_attack;
 	self->monsterinfo.melee = berserk_melee;

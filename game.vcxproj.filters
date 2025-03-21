@@ -54,75 +54,6 @@
     <ClCompile Include="p_view.cpp" />
     <ClCompile Include="p_weapon.cpp" />
     <ClCompile Include="q_std.cpp" />
-    <ClCompile Include="rogue\g_rogue_combat.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_func.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_items.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_misc.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_monster.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newai.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newdm.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newfnc.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newtarg.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newtrig.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newweap.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_phys.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_spawn.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_sphere.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\g_rogue_utils.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\m_rogue_carrier.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\m_rogue_stalker.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\m_rogue_turret.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\m_rogue_widow.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\m_rogue_widow2.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\p_rogue_weapon.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\rogue_dm_ball.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
-    <ClCompile Include="rogue\rogue_dm_tag.cpp">
-      <Filter>rogue</Filter>
-    </ClCompile>
     <ClCompile Include="as\q2as_cgame.cpp">
       <Filter>as</Filter>
     </ClCompile>
@@ -418,21 +349,6 @@
     <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-    <ClInclude Include="rogue\m_rogue_carrier.h">
-      <Filter>rogue</Filter>
-    </ClInclude>
-    <ClInclude Include="rogue\m_rogue_stalker.h">
-      <Filter>rogue</Filter>
-    </ClInclude>
-    <ClInclude Include="rogue\m_rogue_turret.h">
-      <Filter>rogue</Filter>
-    </ClInclude>
-    <ClInclude Include="rogue\m_rogue_widow.h">
-      <Filter>rogue</Filter>
-    </ClInclude>
-    <ClInclude Include="rogue\m_rogue_widow2.h">
-      <Filter>rogue</Filter>
-    </ClInclude>
     <ClInclude Include="as\ctrack.hpp">
       <Filter>as</Filter>
     </ClInclude>
@@ -723,9 +639,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="rogue">
-      <UniqueIdentifier>{3b58fe82-b357-4476-9722-c8ffd92fbb25}</UniqueIdentifier>
-    </Filter>
     <Filter Include="as">
       <UniqueIdentifier>{5d37c2d0-f433-4a8c-b621-360e4ca9d4ce}</UniqueIdentifier>
     </Filter>
