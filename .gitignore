@@ -4,7 +4,6 @@ out
 bin
 
 vcpkg.json
-game.vcxproj.filters
 ..build
 
 *.user
