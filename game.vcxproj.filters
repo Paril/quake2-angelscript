@@ -157,9 +157,6 @@
     <ClCompile Include="thirdparty\datetime\datetime.cpp">
       <Filter>thirdparty\datetime</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\fmt\src\format.cc">
-      <Filter>thirdparty\fmt\src</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\fmt\src\os.cc">
       <Filter>thirdparty\fmt\src</Filter>
     </ClCompile>

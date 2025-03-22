@@ -176,7 +176,6 @@
     <ClCompile Include="thirdparty\angelscript\source\as_typeinfo.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_variablescope.cpp" />
     <ClCompile Include="thirdparty\datetime\datetime.cpp" />
-    <ClCompile Include="thirdparty\fmt\src\format.cc" />
     <ClCompile Include="thirdparty\fmt\src\os.cc" />
     <ClCompile Include="thirdparty\scriptany\scriptany.cpp" />
     <ClCompile Include="thirdparty\scriptarray\scriptarray.cpp" />
