@@ -13,7 +13,7 @@ struct vec3_t
 {
 	float x, y, z;
 
-	[[nodiscard]] constexpr const float &operator[](int i) const
+	[[nodiscard]] constexpr const float& operator[](int i) const
 	{
 		if (i == 0)
 			return x;
@@ -24,7 +24,7 @@ struct vec3_t
 		throw std::out_of_range("i");
 	}
 
-	[[nodiscard]] constexpr float &operator[](int i)
+	[[nodiscard]] constexpr float& operator[](int i)
 	{
 		if (i == 0)
 			return x;
@@ -36,19 +36,19 @@ struct vec3_t
 	}
 
 	// comparison
-	[[nodiscard]] constexpr bool equals(const vec3_t &v) const
+	[[nodiscard]] constexpr bool equals(const vec3_t& v) const
 	{
 		return x == v.x && y == v.y && z == v.z;
 	}
-	[[nodiscard]] inline bool equals(const vec3_t &v, const float &epsilon) const
+	[[nodiscard]] inline bool equals(const vec3_t& v, const float& epsilon) const
 	{
 		return fabsf(x - v.x) <= epsilon && fabsf(y - v.y) <= epsilon && fabsf(z - v.z) <= epsilon;
 	}
-	[[nodiscard]] constexpr bool operator==(const vec3_t &v) const
+	[[nodiscard]] constexpr bool operator==(const vec3_t& v) const
 	{
 		return equals(v);
 	}
-	[[nodiscard]] constexpr bool operator!=(const vec3_t &v) const
+	[[nodiscard]] constexpr bool operator!=(const vec3_t& v) const
 	{
 		return !(*this == v);
 	}
@@ -58,40 +58,40 @@ struct vec3_t
 	}
 
 	// dot
-	[[nodiscard]] constexpr float dot(const vec3_t &v) const
+	[[nodiscard]] constexpr float dot(const vec3_t& v) const
 	{
 		return (x * v.x) + (y * v.y) + (z * v.z);
 	}
-	[[nodiscard]] constexpr vec3_t scaled(const vec3_t &v) const
+	[[nodiscard]] constexpr vec3_t scaled(const vec3_t& v) const
 	{
 		return { x * v.x, y * v.y, z * v.z };
 	}
-	constexpr vec3_t &scale(const vec3_t &v)
+	constexpr vec3_t& scale(const vec3_t& v)
 	{
 		*this = this->scaled(v);
 		return *this;
 	}
 
 	// basic operators
-	[[nodiscard]] constexpr vec3_t operator-(const vec3_t &v) const
+	[[nodiscard]] constexpr vec3_t operator-(const vec3_t& v) const
 	{
 		return { x - v.x, y - v.y, z - v.z };
 	}
-	[[nodiscard]] constexpr vec3_t operator+(const vec3_t &v) const
+	[[nodiscard]] constexpr vec3_t operator+(const vec3_t& v) const
 	{
 		return { x + v.x, y + v.y, z + v.z };
 	}
-	[[nodiscard]] constexpr vec3_t operator/(const vec3_t &v) const
+	[[nodiscard]] constexpr vec3_t operator/(const vec3_t& v) const
 	{
 		return { x / v.x, y / v.y, z / v.z };
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	[[nodiscard]] constexpr vec3_t operator/(const T &v) const
+	[[nodiscard]] constexpr vec3_t operator/(const T& v) const
 	{
 		return { static_cast<float>(x / v), static_cast<float>(y / v), static_cast<float>(z / v) };
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	[[nodiscard]] constexpr vec3_t operator*(const T &v) const
+	[[nodiscard]] constexpr vec3_t operator*(const T& v) const
 	{
 		return { static_cast<float>(x * v), static_cast<float>(y * v), static_cast<float>(z * v) };
 	}
@@ -100,29 +100,29 @@ struct vec3_t
 		return { -x, -y, -z };
 	}
 
-	constexpr vec3_t &operator-=(const vec3_t &v)
+	constexpr vec3_t& operator-=(const vec3_t& v)
 	{
 		*this = *this - v;
 		return *this;
 	}
-	constexpr vec3_t &operator+=(const vec3_t &v)
+	constexpr vec3_t& operator+=(const vec3_t& v)
 	{
 		*this = *this + v;
 		return *this;
 	}
-	constexpr vec3_t &operator/=(const vec3_t &v)
+	constexpr vec3_t& operator/=(const vec3_t& v)
 	{
 		*this = *this / v;
 		return *this;
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	constexpr vec3_t &operator/=(const T &v)
+	constexpr vec3_t& operator/=(const T& v)
 	{
 		*this = *this / v;
 		return *this;
 	}
 	template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-	constexpr vec3_t &operator*=(const T &v)
+	constexpr vec3_t& operator*=(const T& v)
 	{
 		*this = *this * v;
 		return *this;
@@ -142,7 +142,7 @@ struct vec3_t
 		float len = length();
 		return len ? (*this * (1.f / len)) : *this;
 	}
-	[[nodiscard]] inline vec3_t normalized(float &len) const
+	[[nodiscard]] inline vec3_t normalized(float& len) const
 	{
 		len = length();
 		return len ? (*this * (1.f / len)) : *this;
@@ -156,7 +156,7 @@ struct vec3_t
 
 		return len;
 	}
-	[[nodiscard]] constexpr vec3_t cross(const vec3_t &v) const
+	[[nodiscard]] constexpr vec3_t cross(const vec3_t& v) const
 	{
 		return {
 			y * v.z - z * v.y,
@@ -168,7 +168,7 @@ struct vec3_t
 
 constexpr vec3_t vec3_origin{};
 
-inline void AngleVectors(const vec3_t &angles, vec3_t *forward, vec3_t *right, vec3_t *up)
+inline void AngleVectors(const vec3_t& angles, vec3_t* forward, vec3_t* right, vec3_t* up)
 {
 	float angle = angles[YAW] * (PIf * 2 / 360);
 	float sy = sinf(angle);
@@ -205,7 +205,7 @@ struct angle_vectors_t {
 };
 
 // for destructuring
-inline angle_vectors_t AngleVectors(const vec3_t &angles)
+inline angle_vectors_t AngleVectors(const vec3_t& angles)
 {
 	angle_vectors_t v;
 	AngleVectors(angles, &v.forward, &v.right, &v.up);
@@ -213,38 +213,38 @@ inline angle_vectors_t AngleVectors(const vec3_t &angles)
 }
 
 // silly wrappers to allow old C code to work
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, vec3_t &right, vec3_t &up)
+inline void AngleVectors(const vec3_t& angles, vec3_t& forward, vec3_t& right, vec3_t& up)
 {
 	AngleVectors(angles, &forward, &right, &up);
 }
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, vec3_t &right, nullptr_t)
+inline void AngleVectors(const vec3_t& angles, vec3_t& forward, vec3_t& right, nullptr_t)
 {
 	AngleVectors(angles, &forward, &right, nullptr);
 }
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, nullptr_t, vec3_t &up)
+inline void AngleVectors(const vec3_t& angles, vec3_t& forward, nullptr_t, vec3_t& up)
 {
 	AngleVectors(angles, &forward, nullptr, &up);
 }
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, nullptr_t, nullptr_t)
+inline void AngleVectors(const vec3_t& angles, vec3_t& forward, nullptr_t, nullptr_t)
 {
 	AngleVectors(angles, &forward, nullptr, nullptr);
 }
-inline void AngleVectors(const vec3_t &angles, nullptr_t, nullptr_t, vec3_t &up)
+inline void AngleVectors(const vec3_t& angles, nullptr_t, nullptr_t, vec3_t& up)
 {
 	AngleVectors(angles, nullptr, nullptr, &up);
 }
-inline void AngleVectors(const vec3_t &angles, nullptr_t, vec3_t &right, nullptr_t)
+inline void AngleVectors(const vec3_t& angles, nullptr_t, vec3_t& right, nullptr_t)
 {
 	AngleVectors(angles, nullptr, &right, nullptr);
 }
 
-inline void ClearBounds(vec3_t &mins, vec3_t &maxs)
+inline void ClearBounds(vec3_t& mins, vec3_t& maxs)
 {
 	mins[0] = mins[1] = mins[2] = std::numeric_limits<float>::infinity();
 	maxs[0] = maxs[1] = maxs[2] = -std::numeric_limits<float>::infinity();
 }
 
-inline void AddPointToBounds(const vec3_t &v, vec3_t &mins, vec3_t &maxs)
+inline void AddPointToBounds(const vec3_t& v, vec3_t& mins, vec3_t& maxs)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -256,7 +256,7 @@ inline void AddPointToBounds(const vec3_t &v, vec3_t &mins, vec3_t &maxs)
 	}
 }
 
-[[nodiscard]] constexpr vec3_t ProjectPointOnPlane(const vec3_t &p, const vec3_t &normal)
+[[nodiscard]] constexpr vec3_t ProjectPointOnPlane(const vec3_t& p, const vec3_t& normal)
 {
 	float inv_denom = 1.0f / normal.dot(normal);
 	float d = normal.dot(p) * inv_denom;
@@ -266,7 +266,7 @@ inline void AddPointToBounds(const vec3_t &v, vec3_t &mins, vec3_t &maxs)
 /*
 ** assumes "src" is normalized
 */
-[[nodiscard]] inline vec3_t PerpendicularVector(const vec3_t &src)
+[[nodiscard]] inline vec3_t PerpendicularVector(const vec3_t& src)
 {
 	int	   pos;
 	int	   i;
@@ -300,7 +300,7 @@ using mat3_t = std::array<std::array<float, 3>, 3>;
 R_ConcatRotations
 ================
 */
-[[nodiscard]] constexpr mat3_t R_ConcatRotations(const mat3_t &in1, const mat3_t &in2)
+[[nodiscard]] constexpr mat3_t R_ConcatRotations(const mat3_t& in1, const mat3_t& in2)
 {
 	return {
 		std::array<float, 3> {
@@ -321,7 +321,7 @@ R_ConcatRotations
 	};
 }
 
-[[nodiscard]] inline vec3_t RotatePointAroundVector(const vec3_t &dir, const vec3_t &point, float degrees)
+[[nodiscard]] inline vec3_t RotatePointAroundVector(const vec3_t& dir, const vec3_t& point, float degrees)
 {
 	mat3_t	m;
 	mat3_t  im;
@@ -372,44 +372,44 @@ R_ConcatRotations
 	};
 }
 
-[[nodiscard]] constexpr vec3_t closest_point_to_box(const vec3_t &from, const vec3_t &absmins, const vec3_t &absmaxs)
+[[nodiscard]] constexpr vec3_t closest_point_to_box(const vec3_t& from, const vec3_t& absmins, const vec3_t& absmaxs)
 {
-    return {
+	return {
 		(from[0] < absmins[0]) ? absmins[0] : (from[0] > absmaxs[0]) ? absmaxs[0] : from[0],
 		(from[1] < absmins[1]) ? absmins[1] : (from[1] > absmaxs[1]) ? absmaxs[1] : from[1],
 		(from[2] < absmins[2]) ? absmins[2] : (from[2] > absmaxs[2]) ? absmaxs[2] : from[2]
 	};
 }
 
-[[nodiscard]] inline float distance_between_boxes(const vec3_t &absminsa, const vec3_t &absmaxsa, const vec3_t &absminsb, const vec3_t &absmaxsb)
+[[nodiscard]] inline float distance_between_boxes(const vec3_t& absminsa, const vec3_t& absmaxsa, const vec3_t& absminsb, const vec3_t& absmaxsb)
 {
-    float len = 0;
+	float len = 0;
 
 	for (size_t i = 0; i < 3; i++)
-    {
-        if (absmaxsa[i] < absminsb[i])
-        {
-            float d = absmaxsa[i] - absminsb[i];
-            len += d * d;
-        }
-        else if (absminsa[i] > absmaxsb[i])
-        {
-            float d = absminsa[i] - absmaxsb[i];
-            len += d * d;
-        }
-    }
-    
-    return sqrt(len);
+	{
+		if (absmaxsa[i] < absminsb[i])
+		{
+			float d = absmaxsa[i] - absminsb[i];
+			len += d * d;
+		}
+		else if (absminsa[i] > absmaxsb[i])
+		{
+			float d = absminsa[i] - absmaxsb[i];
+			len += d * d;
+		}
+	}
+
+	return sqrt(len);
 }
 
-[[nodiscard]] constexpr bool boxes_intersect(const vec3_t &amins, const vec3_t &amaxs, const vec3_t &bmins, const vec3_t &bmaxs)
+[[nodiscard]] constexpr bool boxes_intersect(const vec3_t& amins, const vec3_t& amaxs, const vec3_t& bmins, const vec3_t& bmaxs)
 {
 	return amins.x <= bmaxs.x &&
-		   amaxs.x >= bmins.x &&
-		   amins.y <= bmaxs.y &&
-		   amaxs.y >= bmins.y &&
-		   amins.z <= bmaxs.z &&
-		   amaxs.z >= bmins.z;
+		amaxs.x >= bmins.x &&
+		amins.y <= bmaxs.y &&
+		amaxs.y >= bmins.y &&
+		amins.z <= bmaxs.z &&
+		amaxs.z >= bmins.z;
 }
 
 /*
@@ -421,7 +421,7 @@ Slide off of the impacting object
 */
 constexpr float STOP_EPSILON = 0.1f;
 
-[[nodiscard]] constexpr vec3_t ClipVelocity(const vec3_t &in, const vec3_t &normal, float overbounce)
+[[nodiscard]] constexpr vec3_t ClipVelocity(const vec3_t& in, const vec3_t& normal, float overbounce)
 {
 	float dot = in.dot(normal);
 	vec3_t out = in + (normal * (-2 * dot));
@@ -433,7 +433,7 @@ constexpr float STOP_EPSILON = 0.1f;
 	return out;
 }
 
-[[nodiscard]] constexpr vec3_t SlideClipVelocity(const vec3_t &in, const vec3_t &normal, float overbounce)
+[[nodiscard]] constexpr vec3_t SlideClipVelocity(const vec3_t& in, const vec3_t& normal, float overbounce)
 {
 	float backoff = in.dot(normal) * overbounce;
 	vec3_t out = in - (normal * backoff);
@@ -445,7 +445,7 @@ constexpr float STOP_EPSILON = 0.1f;
 	return out;
 }
 
-[[nodiscard]] inline float vectoyaw(const vec3_t &vec)
+[[nodiscard]] inline float vectoyaw(const vec3_t& vec)
 {
 	// PMM - fixed to correct for pitch of 0
 	if (vec[PITCH] == 0)
@@ -466,7 +466,7 @@ constexpr float STOP_EPSILON = 0.1f;
 	return yaw;
 }
 
-[[nodiscard]] inline vec3_t vectoangles(const vec3_t &vec)
+[[nodiscard]] inline vec3_t vectoangles(const vec3_t& vec)
 {
 	float forward;
 	float yaw, pitch;
@@ -499,60 +499,60 @@ constexpr float STOP_EPSILON = 0.1f;
 	return { -pitch, yaw, 0 };
 }
 
-[[nodiscard]] constexpr vec3_t G_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
+[[nodiscard]] constexpr vec3_t G_ProjectSource(const vec3_t& point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right)
 {
-	return point + (forward * distance[0]) + (right * distance[1]) + vec3_t{0.f, 0.f, distance[2]};
+	return point + (forward * distance[0]) + (right * distance[1]) + vec3_t{ 0.f, 0.f, distance[2] };
 }
 
-[[nodiscard]] constexpr vec3_t G_ProjectSource2(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right, const vec3_t &up)
+[[nodiscard]] constexpr vec3_t G_ProjectSource2(const vec3_t& point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right, const vec3_t& up)
 {
 	return point + (forward * distance[0]) + (right * distance[1]) + (up * distance[2]);
 }
 
-[[nodiscard]] inline vec3_t slerp(const vec3_t &from, const vec3_t &to, float t)
+[[nodiscard]] inline vec3_t slerp(const vec3_t& from, const vec3_t& to, float t)
 {
-    float dot = from.dot(to);
-    float aFactor;
-    float bFactor;
+	float dot = from.dot(to);
+	float aFactor;
+	float bFactor;
 	if (dot >= 0.9995f)
 	{
 		aFactor = 1.0f - t;
 		bFactor = t;
 	}
-    else if (dot <= -0.9995f)
-    {
-		vec3_t c = vec3_t { 1.0f, 0.0f, 0.0f }.cross(to);
+	else if (dot <= -0.9995f)
+	{
+		vec3_t c = vec3_t{ 1.0f, 0.0f, 0.0f }.cross(to);
 
 		if (t <= 0.5f)
 			return lerp(from, c, t * 2);
 		else
 			return lerp(c, to, (t - 0.5f) * 2);
-    }
-    else
-    {
-        float ang = acos(dot);
-        float sinOmega = sin(ang);
-        float sinAOmega = sin((1.0f - t) * ang);
-        float sinBOmega = sin(t * ang);
-        aFactor = sinAOmega / sinOmega;
-        bFactor = sinBOmega / sinOmega;
-    }
-    return from * aFactor + to * bFactor;
+	}
+	else
+	{
+		float ang = acos(dot);
+		float sinOmega = sin(ang);
+		float sinAOmega = sin((1.0f - t) * ang);
+		float sinBOmega = sin(t * ang);
+		aFactor = sinAOmega / sinOmega;
+		bFactor = sinBOmega / sinOmega;
+	}
+	return from * aFactor + to * bFactor;
 }
 
 // Fmt support
 template<>
 struct fmt::formatter<vec3_t> : fmt::formatter<float>
 {
-    template<typename FormatContext>
-    auto format(const vec3_t &p, FormatContext &ctx) const
-    {
+	template<typename FormatContext>
+	auto format(const vec3_t& p, FormatContext& ctx) const
+	{
 		auto out = fmt::formatter<float>::format(p.x, ctx);
-        out = fmt::format_to(out, " ");
+		out = fmt::format_to(out, " ");
 		ctx.advance_to(out);
 		out = fmt::formatter<float>::format(p.y, ctx);
-        out = fmt::format_to(out, " ");
+		out = fmt::format_to(out, " ");
 		ctx.advance_to(out);
 		return fmt::formatter<float>::format(p.z, ctx);
-    }
+	}
 };

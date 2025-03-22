@@ -2,886 +2,801 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
-    <ClCompile Include="cg_screen.cpp" />
-    <ClCompile Include="g_ai.cpp" />
-    <ClCompile Include="g_chase.cpp" />
-    <ClCompile Include="g_cmds.cpp" />
-    <ClCompile Include="g_combat.cpp" />
-    <ClCompile Include="g_func.cpp" />
-    <ClCompile Include="g_items.cpp" />
     <ClCompile Include="g_main.cpp" />
-    <ClCompile Include="g_misc.cpp" />
-    <ClCompile Include="g_monster.cpp" />
-    <ClCompile Include="g_phys.cpp" />
-    <ClCompile Include="g_save.cpp" />
-    <ClCompile Include="g_spawn.cpp" />
-    <ClCompile Include="g_svcmds.cpp" />
-    <ClCompile Include="g_target.cpp" />
-    <ClCompile Include="g_trigger.cpp" />
-    <ClCompile Include="g_turret.cpp" />
-    <ClCompile Include="g_utils.cpp" />
-    <ClCompile Include="g_weapon.cpp" />
-    <ClCompile Include="m_actor.cpp" />
-    <ClCompile Include="m_arachnid.cpp" />
-    <ClCompile Include="m_berserk.cpp" />
-    <ClCompile Include="m_boss2.cpp" />
-    <ClCompile Include="m_boss3.cpp" />
-    <ClCompile Include="m_boss31.cpp" />
-    <ClCompile Include="m_boss32.cpp" />
-    <ClCompile Include="m_brain.cpp" />
-    <ClCompile Include="m_chick.cpp" />
-    <ClCompile Include="m_flipper.cpp" />
-    <ClCompile Include="m_float.cpp" />
-    <ClCompile Include="m_flyer.cpp" />
-    <ClCompile Include="m_gladiator.cpp" />
-    <ClCompile Include="m_guardian.cpp" />
-    <ClCompile Include="m_guncmdr.cpp" />
-    <ClCompile Include="m_gunner.cpp" />
-    <ClCompile Include="m_hover.cpp" />
-    <ClCompile Include="m_infantry.cpp" />
-    <ClCompile Include="m_insane.cpp" />
-    <ClCompile Include="m_move.cpp" />
-    <ClCompile Include="m_mutant.cpp" />
-    <ClCompile Include="m_parasite.cpp" />
-    <ClCompile Include="m_shambler.cpp" />
-    <ClCompile Include="m_soldier.cpp" />
-    <ClCompile Include="m_supertank.cpp" />
-    <ClCompile Include="m_tank.cpp" />
-    <ClCompile Include="p_client.cpp" />
-    <ClCompile Include="p_hud.cpp" />
-    <ClCompile Include="p_move.cpp" />
-    <ClCompile Include="p_trail.cpp" />
-    <ClCompile Include="p_view.cpp" />
-    <ClCompile Include="p_weapon.cpp" />
     <ClCompile Include="q_std.cpp" />
-    <ClCompile Include="bots\bot_debug.cpp">
-      <Filter>bots</Filter>
+    <ClCompile Include="debugger\as_debugger.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="bots\bot_exports.cpp">
-      <Filter>bots</Filter>
+    <ClCompile Include="debugger\as_debugger_imgui.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="bots\bot_think.cpp">
-      <Filter>bots</Filter>
+    <ClCompile Include="debugger\imgui.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="bots\bot_utils.cpp">
-      <Filter>bots</Filter>
+    <ClCompile Include="debugger\imgui_demo.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="ctf\g_ctf.cpp">
-      <Filter>ctf</Filter>
+    <ClCompile Include="debugger\imgui_draw.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="ctf\p_ctf_menu.cpp">
-      <Filter>ctf</Filter>
+    <ClCompile Include="debugger\imgui_impl_dx9.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_func.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="debugger\imgui_impl_win32.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_items.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="debugger\imgui_tables.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_misc.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="debugger\imgui_widgets.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_monster.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="debugger\TextEditor.cpp">
+      <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_target.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_builder.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\g_xatrix_weapon.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_bytecode.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\m_xatrix_fixbot.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\m_xatrix_gekk.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_arm.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="xatrix\p_xatrix_weapon.cpp">
-      <Filter>xatrix</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_arm64.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_combat.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_mips.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_func.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_ppc.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_items.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_ppc_64.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_misc.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_riscv64.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_monster.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_sh4.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newai.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_x64_gcc.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newdm.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_x64_mingw.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newfnc.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_x64_msvc.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newtarg.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_x86.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newtrig.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_callfunc_xenon.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_newweap.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_compiler.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_phys.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_configgroup.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_spawn.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_context.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_sphere.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_datatype.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\g_rogue_utils.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_gc.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\m_rogue_carrier.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_generic.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\m_rogue_stalker.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_globalproperty.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\m_rogue_turret.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_memory.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\m_rogue_widow.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_module.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\m_rogue_widow2.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_objecttype.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\p_rogue_weapon.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_outputbuffer.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\rogue_dm_ball.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_parser.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="rogue\rogue_dm_tag.cpp">
-      <Filter>rogue</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_restore.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_cgame.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_scriptcode.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_cvar.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_scriptengine.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_debugging.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_scriptfunction.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_game.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_scriptnode.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_imports.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_scriptobject.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_json.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_string.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_limits.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_string_util.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_main.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_thread.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_math.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_tokenizer.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_playerstate.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_typeinfo.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_pmove.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_variablescope.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_predefined.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\angelscript\source\as_atomic.cpp">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_random.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\datetime\datetime.cpp">
+      <Filter>thirdparty\datetime</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_reflect.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\fmt\src\os.cc">
+      <Filter>thirdparty\fmt\src</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_state.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\scriptany\scriptany.cpp">
+      <Filter>thirdparty\scriptany</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_stringex.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\scriptarray\scriptarray.cpp">
+      <Filter>thirdparty\scriptarray</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_stringhashset.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\scriptdictionary\scriptdictionary.cpp">
+      <Filter>thirdparty\scriptdictionary</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_thirdparty.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\scripthelper\scripthelper.cpp">
+      <Filter>thirdparty\scripthelper</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_time.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\scriptstdstring\scriptstdstring_utils.cpp">
+      <Filter>thirdparty\scriptstdstring</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_tokenizer.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\scriptstdstring\scriptstdstring.cpp">
+      <Filter>thirdparty\scriptstdstring</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_trace.cpp">
-      <Filter>as</Filter>
+    <ClCompile Include="thirdparty\weakref\weakref.cpp">
+      <Filter>thirdparty\weakref</Filter>
     </ClCompile>
-    <ClCompile Include="as\q2as_util.cpp">
-      <Filter>as</Filter>
-    </ClCompile>
-    <ClCompile Include="as\q2as_vec3.cpp">
-      <Filter>as</Filter>
-    </ClCompile>
-    <ClCompile Include="as\yyjson.c">
-      <Filter>as</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\as_debugger.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\as_debugger_imgui.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui_demo.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui_draw.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui_impl_dx9.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui_impl_win32.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui_tables.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\imgui_widgets.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\debugger\TextEditor.cpp">
-      <Filter>as\debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\fmt\src\os.cc">
-      <Filter>as\thirdparty\fmt\src</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\scriptany\scriptany.cpp">
-      <Filter>as\thirdparty\scriptany</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\scriptarray\scriptarray.cpp">
-      <Filter>as\thirdparty\scriptarray</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\scriptdictionary\scriptdictionary.cpp">
-      <Filter>as\thirdparty\scriptdictionary</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\scripthelper\scripthelper.cpp">
-      <Filter>as\thirdparty\scripthelper</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\scriptstdstring\scriptstdstring.cpp">
-      <Filter>as\thirdparty\scriptstdstring</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\scriptstdstring\scriptstdstring_utils.cpp">
-      <Filter>as\thirdparty\scriptstdstring</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\weakref\weakref.cpp">
-      <Filter>as\thirdparty\weakref</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\datetime\datetime.cpp">
-      <Filter>as\thirdparty\datetime</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_reader.cpp">
-      <Filter>as\thirdparty\jsoncpp\src\lib_json</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_value.cpp">
-      <Filter>as\thirdparty\jsoncpp\src\lib_json</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_writer.cpp">
-      <Filter>as\thirdparty\jsoncpp\src\lib_json</Filter>
-    </ClCompile>
-    <ClCompile Include="m_medic.cpp" />
-    <ClCompile Include="as\thirdparty\angelscript\source\as_atomic.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_builder.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_bytecode.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_arm.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_arm64.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_mips.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_ppc.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_ppc_64.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_riscv64.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_sh4.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x64_gcc.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x64_mingw.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x64_msvc.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_x86.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_callfunc_xenon.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_compiler.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_configgroup.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_context.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_datatype.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_gc.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_generic.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_globalproperty.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_memory.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_module.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_objecttype.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_outputbuffer.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_parser.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_restore.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptcode.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptengine.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptfunction.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptnode.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_scriptobject.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_string.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_string_util.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_thread.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_tokenizer.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_typeinfo.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
-    <ClCompile Include="as\thirdparty\angelscript\source\as_variablescope.cpp">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClCompile>
+    <ClCompile Include="q2as_reflect.cpp" />
+    <ClCompile Include="q2as_state.cpp" />
+    <ClCompile Include="q2as_stringex.cpp" />
+    <ClCompile Include="q2as_stringhashset.cpp" />
+    <ClCompile Include="q2as_thirdparty.cpp" />
+    <ClCompile Include="q2as_time.cpp" />
+    <ClCompile Include="q2as_tokenizer.cpp" />
+    <ClCompile Include="q2as_trace.cpp" />
+    <ClCompile Include="q2as_util.cpp" />
+    <ClCompile Include="q2as_vec3.cpp" />
+    <ClCompile Include="yyjson.c" />
+    <ClCompile Include="q2as_cgame.cpp" />
+    <ClCompile Include="q2as_cvar.cpp" />
+    <ClCompile Include="q2as_debugging.cpp" />
+    <ClCompile Include="q2as_game.cpp" />
+    <ClCompile Include="q2as_imports.cpp" />
+    <ClCompile Include="q2as_json.cpp" />
+    <ClCompile Include="q2as_limits.cpp" />
+    <ClCompile Include="q2as_main.cpp" />
+    <ClCompile Include="q2as_math.cpp" />
+    <ClCompile Include="q2as_playerstate.cpp" />
+    <ClCompile Include="q2as_pmove.cpp" />
+    <ClCompile Include="q2as_predefined.cpp" />
+    <ClCompile Include="q2as_random.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="g_local.h" />
-    <ClInclude Include="g_statusbar.h" />
     <ClInclude Include="game.h" />
-    <ClInclude Include="m_actor.h" />
-    <ClInclude Include="m_arachnid.h" />
-    <ClInclude Include="m_berserk.h" />
-    <ClInclude Include="m_boss2.h" />
-    <ClInclude Include="m_boss31.h" />
-    <ClInclude Include="m_boss32.h" />
-    <ClInclude Include="m_brain.h" />
-    <ClInclude Include="m_chick.h" />
-    <ClInclude Include="m_flash.h" />
-    <ClInclude Include="m_flipper.h" />
-    <ClInclude Include="m_float.h" />
-    <ClInclude Include="m_flyer.h" />
-    <ClInclude Include="m_gladiator.h" />
-    <ClInclude Include="m_guardian.h" />
-    <ClInclude Include="m_gunner.h" />
-    <ClInclude Include="m_hover.h" />
-    <ClInclude Include="m_infantry.h" />
-    <ClInclude Include="m_insane.h" />
-    <ClInclude Include="m_medic.h" />
-    <ClInclude Include="m_mutant.h" />
-    <ClInclude Include="m_parasite.h" />
-    <ClInclude Include="m_player.h" />
-    <ClInclude Include="m_rider.h" />
-    <ClInclude Include="m_shambler.h" />
-    <ClInclude Include="m_soldier.h" />
-    <ClInclude Include="m_supertank.h" />
-    <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-    <ClInclude Include="bots\bot_debug.h">
-      <Filter>bots</Filter>
+    <ClInclude Include="debugger\as_debugger.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="bots\bot_exports.h">
-      <Filter>bots</Filter>
+    <ClInclude Include="debugger\as_debugger_imgui.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="bots\bot_includes.h">
-      <Filter>bots</Filter>
+    <ClInclude Include="debugger\imconfig.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="bots\bot_think.h">
-      <Filter>bots</Filter>
+    <ClInclude Include="debugger\imgui.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="bots\bot_utils.h">
-      <Filter>bots</Filter>
+    <ClInclude Include="debugger\imgui_impl_dx9.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="ctf\g_ctf.h">
-      <Filter>ctf</Filter>
+    <ClInclude Include="debugger\imgui_impl_win32.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="ctf\p_ctf_menu.h">
-      <Filter>ctf</Filter>
+    <ClInclude Include="debugger\imgui_internal.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="xatrix\m_xatrix_fixbot.h">
-      <Filter>xatrix</Filter>
+    <ClInclude Include="debugger\imstb_rectpack.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="xatrix\m_xatrix_gekk.h">
-      <Filter>xatrix</Filter>
+    <ClInclude Include="debugger\imstb_textedit.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="rogue\m_rogue_carrier.h">
-      <Filter>rogue</Filter>
+    <ClInclude Include="debugger\imstb_truetype.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="rogue\m_rogue_stalker.h">
-      <Filter>rogue</Filter>
+    <ClInclude Include="debugger\TextEditor.h">
+      <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="rogue\m_rogue_turret.h">
-      <Filter>rogue</Filter>
+    <ClInclude Include="thirdparty\angelscript\include\angelscript.h">
+      <Filter>thirdparty\angelscript\include</Filter>
     </ClInclude>
-    <ClInclude Include="rogue\m_rogue_widow.h">
-      <Filter>rogue</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_builder.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="rogue\m_rogue_widow2.h">
-      <Filter>rogue</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_bytecode.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\ctrack.hpp">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_callfunc.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\palinteer.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_compiler.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_cgame.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_config.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_fixedarray.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_configgroup.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_game.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_context.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_json.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_criticalsection.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_local.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_datatype.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_main.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_debug.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_modules.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_gc.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_pmove.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_generic.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_predefined.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_map.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_reg.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_memory.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\q2as_stringex.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_module.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\spall.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_namespace.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\yyjson.h">
-      <Filter>as</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_objecttype.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\as_debugger.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_outputbuffer.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\as_debugger_imgui.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_parser.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imconfig.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_property.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imgui.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_restore.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imgui_impl_dx9.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_scriptcode.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imgui_impl_win32.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_scriptengine.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imgui_internal.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_scriptfunction.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imstb_rectpack.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_scriptnode.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imstb_textedit.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_scriptobject.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\imstb_truetype.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_string.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\debugger\TextEditor.h">
-      <Filter>as\debugger</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_string_util.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\include\angelscript.h">
-      <Filter>as\thirdparty\anglescript\include</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_symboltable.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\args.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_texts.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\base.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_thread.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\chrono.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_tokendef.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\color.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_tokenizer.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\compile.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_typeinfo.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\core.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_variablescope.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\format.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_array.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\format-inl.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\angelscript\source\as_atomic.h">
+      <Filter>thirdparty\angelscript\source</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\os.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\autowrapper\aswrappedcall.h">
+      <Filter>thirdparty\autowrapper</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\ostream.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\datetime\datetime.h">
+      <Filter>thirdparty\datetime</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\printf.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\core.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\ranges.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\format.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\std.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\format-inl.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\fmt\include\fmt\xchar.h">
-      <Filter>as\thirdparty\fmt\include\fmt</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\os.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\scriptany\scriptany.h">
-      <Filter>as\thirdparty\scriptany</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\ostream.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\scriptarray\scriptarray.h">
-      <Filter>as\thirdparty\scriptarray</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\printf.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\scriptdictionary\scriptdictionary.h">
-      <Filter>as\thirdparty\scriptdictionary</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\ranges.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\scripthelper\scripthelper.h">
-      <Filter>as\thirdparty\scripthelper</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\std.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\scriptstdstring\scriptstdstring.h">
-      <Filter>as\thirdparty\scriptstdstring</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\xchar.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\weakref\weakref.h">
-      <Filter>as\thirdparty\weakref</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\args.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\datetime\datetime.h">
-      <Filter>as\thirdparty\datetime</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\base.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\allocator.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\chrono.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\assertions.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\color.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\config.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\fmt\include\fmt\compile.h">
+      <Filter>thirdparty\fmt\include\fmt</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\forwards.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\scriptany\scriptany.h">
+      <Filter>thirdparty\scriptany</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\json.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\scriptarray\scriptarray.h">
+      <Filter>thirdparty\scriptarray</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\json_features.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\scriptdictionary\scriptdictionary.h">
+      <Filter>thirdparty\scriptdictionary</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\reader.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\scripthelper\scripthelper.h">
+      <Filter>thirdparty\scripthelper</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\value.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\scriptstdstring\scriptstdstring.h">
+      <Filter>thirdparty\scriptstdstring</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\version.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
+    <ClInclude Include="thirdparty\weakref\weakref.h">
+      <Filter>thirdparty\weakref</Filter>
     </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\writer.h">
-      <Filter>as\thirdparty\jsoncpp\include\json</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\jsoncpp\src\lib_json\json_tool.h">
-      <Filter>as\thirdparty\jsoncpp\src\lib_json</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_array.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_atomic.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_builder.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_bytecode.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_callfunc.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_compiler.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_config.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_configgroup.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_context.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_criticalsection.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_datatype.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_debug.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_gc.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_generic.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_map.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_memory.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_module.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_namespace.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_objecttype.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_outputbuffer.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_parser.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_property.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_restore.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptcode.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptengine.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptfunction.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptnode.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_scriptobject.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_string.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_string_util.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_symboltable.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_texts.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_thread.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_tokendef.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_tokenizer.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_typeinfo.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
-    <ClInclude Include="as\thirdparty\angelscript\source\as_variablescope.h">
-      <Filter>as\thirdparty\anglescript\source</Filter>
-    </ClInclude>
+    <ClInclude Include="q2as_reg.h" />
+    <ClInclude Include="q2as_stringex.h" />
+    <ClInclude Include="spall.h" />
+    <ClInclude Include="yyjson.h" />
+    <ClInclude Include="ctrack.hpp" />
+    <ClInclude Include="palinteer.h" />
+    <ClInclude Include="q2as_cgame.h" />
+    <ClInclude Include="q2as_fixedarray.h" />
+    <ClInclude Include="q2as_game.h" />
+    <ClInclude Include="q2as_json.h" />
+    <ClInclude Include="q2as_local.h" />
+    <ClInclude Include="q2as_main.h" />
+    <ClInclude Include="q2as_modules.h" />
+    <ClInclude Include="q2as_pmove.h" />
+    <ClInclude Include="q2as_predefined.h" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="bots">
-      <UniqueIdentifier>{3419b1db-b3e7-48f4-9081-1ffe831c4ca9}</UniqueIdentifier>
+    <Filter Include="debugger">
+      <UniqueIdentifier>{bc9e0fa5-d3ff-418a-aa6e-d182d47be7cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ctf">
-      <UniqueIdentifier>{ebe979ff-5860-4448-89ce-0a0f74b39c69}</UniqueIdentifier>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{518fb652-ccb8-410e-a681-a719e899bf5a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="rogue">
-      <UniqueIdentifier>{3b58fe82-b357-4476-9722-c8ffd92fbb25}</UniqueIdentifier>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{e73a1487-6de0-4706-90f2-5ea3eb4b629a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="xatrix">
-      <UniqueIdentifier>{a41a0994-5b7d-4489-a98a-647f00470ace}</UniqueIdentifier>
+    <Filter Include="scripts\bgame">
+      <UniqueIdentifier>{4f5a2204-e131-461d-b283-9bc92a4d2c17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as">
-      <UniqueIdentifier>{5d37c2d0-f433-4a8c-b621-360e4ca9d4ce}</UniqueIdentifier>
+    <Filter Include="scripts\cgame">
+      <UniqueIdentifier>{6a0d9b36-d9ee-4b96-916c-8a03a94074c0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\debugger">
-      <UniqueIdentifier>{a9a1614f-bbf8-4da9-83db-95e9478918d7}</UniqueIdentifier>
+    <Filter Include="scripts\game">
+      <UniqueIdentifier>{638580bc-4a75-46f4-b30d-9d66aac92bb4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty">
-      <UniqueIdentifier>{5f4966f6-f6a8-4964-bba1-3869b1299e21}</UniqueIdentifier>
+    <Filter Include="thirdparty\angelscript">
+      <UniqueIdentifier>{fcab165c-0ab6-4809-bc81-d0fd618e903c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\anglescript">
-      <UniqueIdentifier>{862fa211-f23f-48a9-a600-f31cb949c6fd}</UniqueIdentifier>
+    <Filter Include="thirdparty\autowrapper">
+      <UniqueIdentifier>{c1cf6eab-18cb-49f3-98b4-a6eee731017f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\anglescript\source">
-      <UniqueIdentifier>{1240e0ce-1107-4d22-be28-7bcd2ba74f1a}</UniqueIdentifier>
+    <Filter Include="thirdparty\datetime">
+      <UniqueIdentifier>{a7fff070-b2c8-448d-9568-385efa20c346}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\anglescript\include">
-      <UniqueIdentifier>{d30caa26-f94b-46aa-9680-4dc2a3eed6ef}</UniqueIdentifier>
+    <Filter Include="thirdparty\fmt">
+      <UniqueIdentifier>{43bd72a3-eada-4663-9244-95c3c118a184}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\fmt">
-      <UniqueIdentifier>{f5fb2447-97a3-4334-9376-723e632b4f2e}</UniqueIdentifier>
+    <Filter Include="thirdparty\scriptany">
+      <UniqueIdentifier>{c164b3cb-4e21-4fd6-a774-e0519587b5cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\fmt\include">
-      <UniqueIdentifier>{483d9a9b-9d1e-4ddd-af3b-525845cc1804}</UniqueIdentifier>
+    <Filter Include="thirdparty\scriptarray">
+      <UniqueIdentifier>{fe52ed75-5dd3-468b-ada0-16fe841f3a54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\fmt\src">
-      <UniqueIdentifier>{83f857db-7850-41fb-a7da-364c795176e0}</UniqueIdentifier>
+    <Filter Include="thirdparty\scriptdictionary">
+      <UniqueIdentifier>{c4d6f6d1-3bd4-4537-8d99-c94501c1bdef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\fmt\include\fmt">
-      <UniqueIdentifier>{fc5b55c3-bfa1-4cce-b3d8-08f8930e235a}</UniqueIdentifier>
+    <Filter Include="thirdparty\scripthelper">
+      <UniqueIdentifier>{85e51a6b-38bb-44bd-b142-b66fa6747136}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\scriptany">
-      <UniqueIdentifier>{15896aa7-ae60-4af3-9af8-16eafc62f925}</UniqueIdentifier>
+    <Filter Include="thirdparty\scriptstdstring">
+      <UniqueIdentifier>{f9a4e010-3f4d-4737-aa43-3be1ecd7ebc5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\scriptarray">
-      <UniqueIdentifier>{5aa7f59d-d402-44f2-b25d-7749b05d0399}</UniqueIdentifier>
+    <Filter Include="thirdparty\weakref">
+      <UniqueIdentifier>{ab769863-bf12-4c96-b96f-7d463a0a1377}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\scriptdictionary">
-      <UniqueIdentifier>{4c1f26ab-294a-44df-9b56-50fa41472d67}</UniqueIdentifier>
+    <Filter Include="thirdparty\angelscript\include">
+      <UniqueIdentifier>{31a8b42d-f9dd-4eee-acb2-80c76149b179}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\scripthelper">
-      <UniqueIdentifier>{ee9d18a2-03b7-41dd-bbc8-fa13d77448a1}</UniqueIdentifier>
+    <Filter Include="thirdparty\angelscript\source">
+      <UniqueIdentifier>{9ecebc56-2bb5-4599-8f1e-839a6bfcd145}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\scriptstdstring">
-      <UniqueIdentifier>{f7fdd40c-92cb-42e1-b0bc-ff345252b79a}</UniqueIdentifier>
+    <Filter Include="thirdparty\fmt\include">
+      <UniqueIdentifier>{c3af67fb-42b6-4fb0-a0a6-a0f0fdb984f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\weakref">
-      <UniqueIdentifier>{2fd9879f-ff7d-4090-98dc-ca9450c40a7e}</UniqueIdentifier>
+    <Filter Include="thirdparty\fmt\src">
+      <UniqueIdentifier>{225b8ba6-d30d-4b1f-bd96-7b27df46ae6d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="as\thirdparty\datetime">
-      <UniqueIdentifier>{c054f512-7535-4c44-8789-f6bd0022de5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="as\thirdparty\jsoncpp">
-      <UniqueIdentifier>{13161863-b922-452a-8c84-286bdd8c2a28}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="as\thirdparty\jsoncpp\include">
-      <UniqueIdentifier>{d8ee03e0-b40a-45ec-8800-48ae4df17c74}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="as\thirdparty\jsoncpp\src">
-      <UniqueIdentifier>{1ed67d0f-02df-430d-9a1e-d0afaebe2c0c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="as\thirdparty\jsoncpp\include\json">
-      <UniqueIdentifier>{7bf8e5d5-f110-4611-8b7f-fbe953fef8b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="as\thirdparty\jsoncpp\src\lib_json">
-      <UniqueIdentifier>{2cc4ff8f-2082-46a2-8423-fb2192459879}</UniqueIdentifier>
+    <Filter Include="thirdparty\fmt\include\fmt">
+      <UniqueIdentifier>{4f21767d-5a1d-47be-96d8-aabc9ef44b46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="as\thirdparty\jsoncpp\src\lib_json\json_valueiterator.inl">
-      <Filter>as\thirdparty\jsoncpp\src\lib_json</Filter>
+    <None Include="scripts\as.predefined">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\bgame\engine.as">
+      <Filter>scripts\bgame</Filter>
+    </None>
+    <None Include="scripts\bgame\flash.as">
+      <Filter>scripts\bgame</Filter>
+    </None>
+    <None Include="scripts\bgame\init.as">
+      <Filter>scripts\bgame</Filter>
+    </None>
+    <None Include="scripts\bgame\pmove.as">
+      <Filter>scripts\bgame</Filter>
+    </None>
+    <None Include="scripts\bgame\vec3.as">
+      <Filter>scripts\bgame</Filter>
+    </None>
+    <None Include="scripts\bgame\bg.as">
+      <Filter>scripts\bgame</Filter>
+    </None>
+    <None Include="scripts\cgame\cg_main.as">
+      <Filter>scripts\cgame</Filter>
+    </None>
+    <None Include="scripts\cgame\cg_screen.as">
+      <Filter>scripts\cgame</Filter>
+    </None>
+    <None Include="scripts\game\boss32.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\bot_exports.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\bot_utils.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\brain.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\carrier.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\chase.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\chick.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\client.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\cmd.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\combat.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\ctf.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\edict.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\engine.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\fixbot.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\flipper.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\float.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\flyer.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\func.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\g_weapon.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\g_xatrix_weapon.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\game.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\gekk.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\gladiator.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\guardian.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\guncmdr.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\gunner.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\hover.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\hud.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\infantry.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\insane.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\items.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\level.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\main.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\medic.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\misc.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\monster.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\monster_convert.sh">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\move.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\mutant.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\p_ctf_menu.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\p_trail.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\p_weapon.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\parasite.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\phys.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_combat.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_dm.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_func.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_items.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_misc.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_monster.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_newai.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_newfunc.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_newtarg.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_newtrig.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_newweap.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_spawn.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_sphere.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_turret.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\rogue_weapons.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\save.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\shambler.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\soldier.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\spawn.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\stalker.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\statusbar.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\supertank.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\tank.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\target.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\trigger.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\turret.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\utils.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\view.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\widow.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\widow_misc.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\widow2.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\xatrix_func.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\xatrix_misc.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\xatrix_monster.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\xatrix_target.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\xatrix_weapon.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\ai.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\arachnid.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\berserk.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\boss2.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\boss3.as">
+      <Filter>scripts\game</Filter>
+    </None>
+    <None Include="scripts\game\boss31.as">
+      <Filter>scripts\game</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="as\thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm">
-      <Filter>as\thirdparty\anglescript\source</Filter>
+    <MASM Include="thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm">
+      <Filter>thirdparty\angelscript\source</Filter>
     </MASM>
   </ItemGroup>
 </Project>
