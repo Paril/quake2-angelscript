@@ -470,7 +470,7 @@ static void Q2AS_CG_Init()
 static layout_flags_t Q2AS_CG_LayoutFlags(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
-        return (layout_flags_t) ps->stats[STAT_LAYOUTS];
+        return LAYOUTS_NONE;
 
     auto ctx = cgas.RequestContext();
 	ctx->Prepare(cgas.CG_LayoutFlags);

@@ -174,9 +174,6 @@
     <ClCompile Include="as\thirdparty\angelscript\source\as_variablescope.cpp" />
     <ClCompile Include="as\thirdparty\datetime\datetime.cpp" />
     <ClCompile Include="as\thirdparty\fmt\src\os.cc" />
-    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_reader.cpp" />
-    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_value.cpp" />
-    <ClCompile Include="as\thirdparty\jsoncpp\src\lib_json\json_writer.cpp" />
     <ClCompile Include="as\thirdparty\scriptany\scriptany.cpp" />
     <ClCompile Include="as\thirdparty\scriptarray\scriptarray.cpp" />
     <ClCompile Include="as\thirdparty\scriptdictionary\scriptdictionary.cpp" />
@@ -268,17 +265,6 @@
     <ClInclude Include="as\thirdparty\fmt\include\fmt\ranges.h" />
     <ClInclude Include="as\thirdparty\fmt\include\fmt\std.h" />
     <ClInclude Include="as\thirdparty\fmt\include\fmt\xchar.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\allocator.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\assertions.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\config.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\forwards.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\json.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\json_features.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\reader.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\value.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\version.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\include\json\writer.h" />
-    <ClInclude Include="as\thirdparty\jsoncpp\src\lib_json\json_tool.h" />
     <ClInclude Include="as\thirdparty\scriptany\scriptany.h" />
     <ClInclude Include="as\thirdparty\scriptarray\scriptarray.h" />
     <ClInclude Include="as\thirdparty\scriptdictionary\scriptdictionary.h" />
@@ -292,9 +278,6 @@
     <ClInclude Include="g_local.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="as\thirdparty\jsoncpp\src\lib_json\json_valueiterator.inl" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="as\thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm" />

@@ -97,25 +97,23 @@ static void Q2AS_InitGame()
 	// seed RNG
 	mt_rand.seed((uint32_t) std::chrono::system_clock::now().time_since_epoch().count());
 
-	game = {};
-
 	// initialize all entities for this game
-	game.maxentities = maxentities->integer;
-	svas.edicts = (q2as_edict_t *) gi.TagMalloc(game.maxentities * sizeof(q2as_edict_t), TAG_GAME);
+	svas.maxentities = maxentities->integer;
+	svas.edicts = (q2as_edict_t *) gi.TagMalloc(svas.maxentities * sizeof(q2as_edict_t), TAG_GAME);
 
 	globals.edicts = (edict_t *) svas.edicts;
-	globals.max_edicts = game.maxentities;
+	globals.max_edicts = svas.maxentities;
 
 	// initialize all clients for this game
-	game.maxclients = maxclients->integer;
-	svas.clients = (gclient_shared_t *) gi.TagMalloc(game.maxclients * sizeof(gclient_shared_t), TAG_GAME);
-	globals.num_edicts = game.maxclients + 1;
+	svas.maxclients = maxclients->integer;
+	svas.clients = (gclient_t *) gi.TagMalloc(svas.maxclients * sizeof(gclient_t), TAG_GAME);
+	globals.num_edicts = svas.maxclients + 1;
 
-	for (uint32_t i = 0; i < game.maxentities; i++)
+	for (uint32_t i = 0; i < svas.maxentities; i++)
 	{
 		svas.edicts[i].s.number = i;
 
-		if (i >= 1 && i <= game.maxclients)
+		if (i >= 1 && i <= svas.maxclients)
 			svas.edicts[i].client = (gclient_t *) &svas.clients[i - 1];
 	}
 
@@ -143,7 +141,7 @@ static void Q2AS_ShutdownGame()
 #endif
 
         // disconnect all entities
-        for (q2as_edict_t *e = svas.edicts; e < svas.edicts + game.maxentities; e++)
+        for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
             if (e->as_obj)
                 e->as_obj->Release();
 
@@ -413,6 +411,9 @@ void Q2AS_RunFrame(bool main_loop)
 	ctx->SetArgByte(0, main_loop);
 	ctx.Execute();
 }
+
+// just for the exception state thing
+enum { STAT_LAYOUTS = 13 };
 
 static void Q2AS_PrepFrame()
 {
@@ -824,7 +825,7 @@ static q2as_edict_t *G_EdictForNum(uint32_t n)
 	return svas.edicts + n;
 }
 
-static gclient_shared_t *G_ClientForNum(uint32_t n)
+static gclient_t *G_ClientForNum(uint32_t n)
 {
 	return svas.clients + n;
 }
@@ -837,7 +838,7 @@ static void q2as_edict_t_reset(q2as_edict_t *ed)
 	memset(ed, 0, sizeof(*ed));
 	ed->s.number = ed - svas.edicts;
 
-	if (ed->s.number >= 1 && ed->s.number <= game.maxclients)
+	if (ed->s.number >= 1 && ed->s.number <= svas.maxclients)
 		ed->client = (gclient_t *) &svas.clients[ed->s.number - 1];
 }
 
@@ -1074,7 +1075,7 @@ static bool Q2AS_RegisterEntity(asIScriptEngine *engine)
 	// client handle; special handle, always active and allocated
 	// by the host, wrapped by AngelScript.
 
-	EnsureRegisteredTypeRaw("gclient_t", sizeof(gclient_shared_t), asOBJ_REF | asOBJ_NOCOUNT);
+	EnsureRegisteredTypeRaw("gclient_t", sizeof(gclient_t), asOBJ_REF | asOBJ_NOCOUNT);
 
 	EnsureRegisteredProperty("player_state_t", ps);
 
@@ -1883,7 +1884,7 @@ static bool Q2AS_RegisterGame(asIScriptEngine *engine)
 	// edict stuff
 	EnsureRegisteredGlobalProperty("const uint max_edicts", (void *) &globals.max_edicts);
 	EnsureRegisteredGlobalProperty("uint num_edicts", (void *) &globals.num_edicts);
-	EnsureRegisteredGlobalProperty("const uint max_clients", (void *) &game.maxclients);
+	EnsureRegisteredGlobalProperty("const uint max_clients", (void *) &svas.maxclients);
 	EnsureRegisteredGlobalProperty("server_flags_t server_flags", (void *) &globals.server_flags);
 
     // helpers

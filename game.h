@@ -8,7 +8,7 @@
 #include <limits.h>
 
 // compatibility with legacy float[3] stuff for engine
-#ifdef GAME_INCLUDE
+#ifdef USE_VEC3_TYPE
     using gvec3_t = vec3_t;
     using gvec3_ptr_t = vec3_t *;
     using gvec3_cptr_t = const vec3_t *;
