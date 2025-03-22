@@ -1,6 +1,6 @@
 #include "q2as_local.h"
 #include "q2as_reg.h"
-#include "../bg_local.h"
+#include "bg_local.h"
 
 bool Q2AS_RegisterTrace(asIScriptEngine *engine)
 {

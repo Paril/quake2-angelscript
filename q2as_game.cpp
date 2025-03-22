@@ -1,5 +1,5 @@
 #include "q2as_game.h"
-#include "../g_local.h"
+#include "g_local.h"
 #include <chrono>
 
 #include "q2as_reg.h"

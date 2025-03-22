@@ -2,7 +2,7 @@
 // Licensed under the GNU General Public License 2.0.
 
 #include "cg_local.h"
-#include "as/q2as_main.h"
+#include "q2as_main.h"
 
 cgame_import_t cgi;
 cgame_export_t cglobals;

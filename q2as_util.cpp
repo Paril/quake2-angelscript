@@ -1,7 +1,7 @@
 #include "q2as_local.h"
 #include "q2as_reg.h"
 #include "q2as_fixedarray.h"
-#include "../bg_local.h"
+#include "bg_local.h"
 
 static void Q2AS_rgba_t_init_construct_u8u8u8u8(const byte r, const byte g, const byte b, const byte a, rgba_t *v)
 {

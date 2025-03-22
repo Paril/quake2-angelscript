@@ -1,5 +1,5 @@
 #include "q2as_local.h"
-#include "../q_std.h"
+#include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
 
 //#define RUNFRAME_PROFILING
@@ -247,8 +247,8 @@ bool q2as_state_t::CreateEngine()
     return true;
 }
 
-#include "../cg_local.h"
-#include "../g_local.h"
+#include "cg_local.h"
+#include "g_local.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;

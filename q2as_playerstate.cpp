@@ -1,5 +1,5 @@
 #include "q2as_local.h"
-#include "../bg_local.h"
+#include "bg_local.h"
 #include "q2as_reg.h"
 #include "q2as_fixedarray.h"
 

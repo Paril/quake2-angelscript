@@ -1,7 +1,7 @@
 // Local stuff shared between different Q2AS module files
 #pragma once
 
-#include "../q_std.h"
+#include "q_std.h"
 #include "angelscript.h"
 #include <map>
 #include <memory>

@@ -2,7 +2,7 @@
 // Licensed under the GNU General Public License 2.0.
 
 #include "g_local.h"
-#include "as/q2as_main.h"
+#include "q2as_main.h"
 
 std::mt19937 mt_rand;
 
