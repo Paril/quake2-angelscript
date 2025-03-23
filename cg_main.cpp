@@ -3,8 +3,7 @@
 
 #include "cg_local.h"
 #include "q2as_main.h"
-#include <Windows.h>
-#include <filesystem>
+#include "q2as_platform.h"
 
 cgame_import_t cgi;
 cgame_export_t cglobals;
@@ -26,37 +25,14 @@ Q2GAME_API cgame_export_t *GetCGameAPI(cgame_import_t *import)
 	cglobals.apiversion = CGAME_API_VERSION;
 
 	// see if Q2AS needs to be initialized
-	//if (auto api = Q2AS_GetCGameAPI())
-	//{
-	//	return api;
-	//}
-
-	//import->Com_Error("Failed to load AngelScript CGame API\n");
-
+	if (auto api = Q2AS_GetCGameAPI())
 	{
-		const char* directory_name = "baseq2";
-		const char* game_name = "game_x64.dll";
-		HINSTANCE game_library;
-
-		auto path = (std::filesystem::current_path() / directory_name / game_name).string().c_str();
-		game_library = LoadLibrary(path);
-		if (game_library)
-		{
-			GetCGameAPIEXTERNAL external_cgame_api = NULL;
-			external_cgame_api = (GetCGameAPIEXTERNAL)GetProcAddress(game_library, "GetCGameAPI");
-			if (!external_cgame_api)
-			{
-				import->Com_Error("Failed to load GetCGameAPIP\n");
-				return NULL;
-			}
-
-			return external_cgame_api(import);
-		}
-		else
-		{
-			import->Com_Error("Failed to load baseq2 game API\n");
-		}
+		return api;
 	}
 
-	return NULL;
+	import->Com_Error("Failed to load AngelScript CGame API\n");
+
+	// Fall back to loading baseq2 cgame api.
+	GetCGameAPIEXTERNAL external_cgame_api = Q2AS_GetCGameAPI(import);
+	return external_cgame_api(import);
 }

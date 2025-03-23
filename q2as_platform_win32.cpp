@@ -70,6 +70,22 @@ HINSTANCE Q2AS_GetGameLibrary(game_import_t* import)
 	return game_library;
 }
 
+HINSTANCE Q2AS_GetGameLibrary(cgame_import_t* import)
+{
+	HINSTANCE game_library = Q2AS_GetGameAPIFromCurrentDirectory();
+	if (!game_library)
+	{
+		game_library = Q2AS_GetGameAPIFromModuleDirectory();
+		if (!game_library)
+		{
+			import->Com_Error("Failed to locate baseq2 game API\n");
+			return nullptr;
+		}
+	}
+
+	return game_library;
+}
+
 GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
 {
 	unique_hinstance game_library = { Q2AS_GetGameLibrary(import), {}};
@@ -90,7 +106,7 @@ GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
 	return external_game_api;
 }
 
-GetCGameAPIEXTERNAL Q2AS_GetCGameAPI(game_import_t* import)
+GetCGameAPIEXTERNAL Q2AS_GetCGameAPI(cgame_import_t* import)
 {
 	unique_hinstance game_library = { Q2AS_GetGameLibrary(import), {}};
 	if (!game_library)

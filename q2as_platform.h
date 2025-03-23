@@ -12,4 +12,4 @@ struct module_path_result_t
 
 module_path_result_t Q2AS_GetModulePath();
 GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import);
-GetCGameAPIEXTERNAL Q2AS_GetCGameAPI(game_import_t* import);
+GetCGameAPIEXTERNAL Q2AS_GetCGameAPI(cgame_import_t* import);
