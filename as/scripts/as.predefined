@@ -670,6 +670,7 @@ class array<T>
 	funcdef bool less(const T &in if_handle_then_const a, const T &in if_handle_then_const b);
 	// properties
 	// behaviors
+    array();
 	array(int&in type, int&in list) { repeat T };
 	// factories
 	array(int32 &in);
@@ -1235,6 +1236,8 @@ class tokenizer_t
 	void push_state();
 	void pop_state();
 	void reset();
+    // cgame only
+	string as_localized(int32);
 }
 // properties
 const float PIf;
