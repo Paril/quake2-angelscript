@@ -120,6 +120,7 @@
     <ClCompile Include="q2as_limits.cpp" />
     <ClCompile Include="q2as_main.cpp" />
     <ClCompile Include="q2as_math.cpp" />
+    <ClCompile Include="q2as_platform_win32.cpp" />
     <ClCompile Include="q2as_playerstate.cpp" />
     <ClCompile Include="q2as_pmove.cpp" />
     <ClCompile Include="q2as_predefined.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="q2as_local.h" />
     <ClInclude Include="q2as_main.h" />
     <ClInclude Include="q2as_modules.h" />
+    <ClInclude Include="q2as_platform.h" />
     <ClInclude Include="q2as_pmove.h" />
     <ClInclude Include="q2as_predefined.h" />
     <ClInclude Include="q2as_reg.h" />

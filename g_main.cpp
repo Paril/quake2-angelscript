@@ -3,6 +3,7 @@
 
 #include "g_local.h"
 #include "q2as_main.h"
+#include "q2as_platform.h"
 #include <Windows.h>
 #include <filesystem>
 
