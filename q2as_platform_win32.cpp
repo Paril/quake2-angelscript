@@ -4,13 +4,17 @@
 const char* directory_name = "baseq2";
 const char* game_name = "game_x64.dll";
 
+struct HInstanceDeleter {
+	void operator()(HINSTANCE h) const { if (h) FreeLibrary(h); }
+};
+using unique_hinstance = std::unique_ptr<std::remove_pointer<HINSTANCE>::type, HInstanceDeleter>;
+
 module_path_result_t Q2AS_GetModulePath()
 {
 	module_path_result_t result = {};
 	result.success = false;
 
-	char path[MAX_PATH];
-	HMODULE hm = NULL;
+	HMODULE hm = nullptr;
 
 	if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
 		GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -18,20 +22,23 @@ module_path_result_t Q2AS_GetModulePath()
 	{
 		return result;
 	}
-	if (GetModuleFileName(hm, path, sizeof(path)) == 0)
+
+	std::string buffer(MAX_PATH, '\0');
+	if (GetModuleFileName(hm, buffer.data(), buffer.size()) == 0)
 	{
 		return result;
 	}
 
 	result.success = true;
-	result.path = std::filesystem::path(path);
+	result.path = std::filesystem::path(buffer);
 	return result;
 }
 
 HINSTANCE Q2AS_GetGameAPIFromCurrentDirectory()
 {
-	auto path = (std::filesystem::current_path() / directory_name / game_name).string();
-	return LoadLibrary(path.c_str());
+	auto base_directory = std::filesystem::current_path();
+	auto path = base_directory / directory_name / game_name;
+	return LoadLibrary(path.string().c_str());
 }
 
 HINSTANCE Q2AS_GetGameAPIFromModuleDirectory()
@@ -39,11 +46,12 @@ HINSTANCE Q2AS_GetGameAPIFromModuleDirectory()
 	auto module_path_result = Q2AS_GetModulePath();
 	if (!module_path_result.success)
 	{
-		return NULL;
+		return nullptr;
 	}
 
-	auto path = (module_path_result.path.parent_path().parent_path() / directory_name / game_name).string();
-	return LoadLibrary(path.c_str());
+	auto base_directory = module_path_result.path.parent_path().parent_path();
+	auto path = base_directory / directory_name / game_name;
+	return LoadLibrary(path.string().c_str());
 }
 
 HINSTANCE Q2AS_GetGameLibrary(game_import_t* import)
@@ -55,7 +63,7 @@ HINSTANCE Q2AS_GetGameLibrary(game_import_t* import)
 		if (!game_library)
 		{
 			import->Com_Error("Failed to locate baseq2 game API\n");
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -64,28 +72,40 @@ HINSTANCE Q2AS_GetGameLibrary(game_import_t* import)
 
 GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
 {
-	HINSTANCE game_library = Q2AS_GetGameLibrary(import);
+	unique_hinstance game_library = { Q2AS_GetGameLibrary(import), {}};
+	if (!game_library)
+	{
+		return nullptr;
+	}
 
-	GetGameAPIEXTERNAL external_game_api = NULL; 
-	external_game_api = (GetGameAPIEXTERNAL)GetProcAddress(game_library, "GetGameAPI");
+	GetGameAPIEXTERNAL external_game_api = nullptr;
+	external_game_api = (GetGameAPIEXTERNAL)GetProcAddress(game_library.get(), "GetGameAPI");
 	if (!external_game_api)
 	{
 		import->Com_Error("Failed to load baseq2 game API\n");
+		return nullptr;
 	}
 
+	game_library.release();
 	return external_game_api;
 }
 
 GetCGameAPIEXTERNAL Q2AS_GetCGameAPI(game_import_t* import)
 {
-	HINSTANCE game_library = Q2AS_GetGameLibrary(import);
+	unique_hinstance game_library = { Q2AS_GetGameLibrary(import), {}};
+	if (!game_library)
+	{
+		return nullptr;
+	}
 
 	GetCGameAPIEXTERNAL external_cgame_api = NULL;
-	external_cgame_api = (GetCGameAPIEXTERNAL)GetProcAddress(game_library, "GetCGameAPI");
+	external_cgame_api = (GetCGameAPIEXTERNAL)GetProcAddress(game_library.get(), "GetCGameAPI");
 	if (!external_cgame_api)
 	{
 		import->Com_Error("Failed to load baseq2 game API\n");
+		return nullptr;
 	}
 
+	game_library.release();
 	return external_cgame_api;
 }
