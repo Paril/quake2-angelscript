@@ -45,9 +45,23 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
 		const char* directory_name = "baseq2";
 		const char* game_name = "game_x64.dll";
 		HINSTANCE game_library;
+		
+		char path[MAX_PATH];
+		HMODULE hm = NULL;
 
-		auto path = (std::filesystem::current_path() / directory_name / game_name).string().c_str();
-		game_library = LoadLibrary(path);
+		if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+			GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+			(LPCSTR)&GetGameAPI, &hm) == 0)
+		{
+			return NULL;
+		}
+		if (GetModuleFileName(hm, path, sizeof(path)) == 0)
+		{
+			return NULL;
+		}
+
+		auto dll_path = (std::filesystem::path(path).parent_path().parent_path() / directory_name / game_name).string();
+		game_library = LoadLibrary(dll_path.c_str());
 		if (game_library)
 		{
 			GetGameAPIEXTERNAL external_game_api = NULL;
@@ -55,6 +69,28 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
 			if (!external_game_api)
 			{
 				import->Com_Error("Failed to load GetGameAPIProxy\n");
+				return NULL;
+			}
+
+			return external_game_api(import);
+		}
+	}
+
+	{
+		const char* directory_name = "baseq2";
+		const char* game_name = "game_x64.dll";
+		HINSTANCE game_library;
+
+		auto path = (std::filesystem::current_path() / directory_name / game_name).string();
+		game_library = LoadLibrary(path.c_str());
+		if (game_library)
+		{
+			GetGameAPIEXTERNAL external_game_api = NULL;
+			external_game_api = (GetGameAPIEXTERNAL)GetProcAddress(game_library, "GetGameAPI");
+			if (!external_game_api)
+			{
+				import->Com_Error("Failed to load GetGameAPIProxy\n");
+				return NULL;
 			}
 
 			return external_game_api(import);

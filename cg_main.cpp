@@ -26,13 +26,12 @@ Q2GAME_API cgame_export_t *GetCGameAPI(cgame_import_t *import)
 	cglobals.apiversion = CGAME_API_VERSION;
 
 	// see if Q2AS needs to be initialized
-	/*if (auto api = Q2AS_GetCGameAPI())
-	{
-		return api;
-	}*/
+	//if (auto api = Q2AS_GetCGameAPI())
+	//{
+	//	return api;
+	//}
 
 	//import->Com_Error("Failed to load AngelScript CGame API\n");
-
 
 	{
 		const char* directory_name = "baseq2";
@@ -44,10 +43,11 @@ Q2GAME_API cgame_export_t *GetCGameAPI(cgame_import_t *import)
 		if (game_library)
 		{
 			GetCGameAPIEXTERNAL external_cgame_api = NULL;
-			external_cgame_api = (GetCGameAPIEXTERNAL)GetProcAddress(game_library, "GetGameAPI");
+			external_cgame_api = (GetCGameAPIEXTERNAL)GetProcAddress(game_library, "GetCGameAPI");
 			if (!external_cgame_api)
 			{
 				import->Com_Error("Failed to load GetCGameAPIP\n");
+				return NULL;
 			}
 
 			return external_cgame_api(import);
