@@ -51,16 +51,16 @@ extern g_fmt_data_t g_fmt_data;
 #define G_FmtTo_ G_FmtTo
 
 template<size_t N, typename... Args>
-inline size_t G_FmtTo(char (&buffer)[N], std::format_string<Args...> format_str, Args &&... args)
+inline size_t G_FmtTo(char(&buffer)[N], std::format_string<Args...> format_str, Args &&... args)
 #else
 #define G_FmtTo(buffer, str, ...) \
 	G_FmtTo_(buffer, FMT_STRING(str), __VA_ARGS__)
 
 template<size_t N, typename S, typename... Args>
-inline size_t G_FmtTo_(char (&buffer)[N], const S &format_str, Args &&... args)
+inline size_t G_FmtTo_(char(&buffer)[N], const S& format_str, Args &&... args)
 #endif
 {
-    auto end = fmt::format_to_n(buffer, N - 1, format_str, std::forward<Args>(args)...);
+	auto end = fmt::format_to_n(buffer, N - 1, format_str, std::forward<Args>(args)...);
 
 	*(end.out) = '\0';
 
@@ -78,7 +78,7 @@ template<typename... Args>
 	G_Fmt_(FMT_STRING(str), __VA_ARGS__)
 
 template<typename S, typename... Args>
-[[nodiscard]] inline std::string_view G_Fmt_(const S &format_str, Args &&... args)
+[[nodiscard]] inline std::string_view G_Fmt_(const S& format_str, Args &&... args)
 #endif
 {
 	g_fmt_data.istr ^= 1;
@@ -90,13 +90,13 @@ template<typename S, typename... Args>
 
 // fmt::join replacement
 template<typename T>
-std::string join_strings(const T &cont, const char *separator)
+std::string join_strings(const T& cont, const char* separator)
 {
 	if (cont.empty())
 		return "";
 
 	return std::accumulate(++cont.begin(), cont.end(), *cont.begin(),
-		[separator](auto &&a, auto &&b) -> auto & {
+		[separator](auto&& a, auto&& b) -> auto& {
 			a += separator;
 			a += b;
 			return a;
@@ -106,7 +106,7 @@ std::string join_strings(const T &cont, const char *separator)
 using byte = uint8_t;
 
 template<class T, std::size_t N>
-constexpr size_t q_countof(const T (&array)[N]) { return std::size<T, N>(array); }
+constexpr size_t q_countof(const T(&array)[N]) { return std::size<T, N>(array); }
 
 using std::max;
 using std::min;
@@ -152,7 +152,7 @@ constexpr float PIf = static_cast<float>(PI);
 G_AddBlend
 =============
 */
-inline void G_AddBlend(float r, float g, float b, float a, std::array<float, 4> &v_blend)
+inline void G_AddBlend(float r, float g, float b, float a, std::array<float, 4>& v_blend)
 {
 	if (a <= 0)
 		return;
@@ -197,21 +197,21 @@ LerpAngle
 
 //=============================================
 
-char *COM_ParseEx(const char **data_p, const char *seps, char *buffer = nullptr, size_t buffer_size = 0);
+char* COM_ParseEx(const char** data_p, const char* seps, char* buffer = nullptr, size_t buffer_size = 0);
 
 // data is an in/out parm, returns a parsed out token
-inline char *COM_Parse(const char **data_p, char *buffer = nullptr, size_t buffer_size = 0)
+inline char* COM_Parse(const char** data_p, char* buffer = nullptr, size_t buffer_size = 0)
 {
 	return COM_ParseEx(data_p, "\r\n\t ", buffer, buffer_size);
 }
 
-std::optional<std::string_view> COM_ParseView(std::string_view &data_p, const char *seps = "\r\n\t ");
+std::optional<std::string_view> COM_ParseView(std::string_view& data_p, const char* seps = "\r\n\t ");
 
 //=============================================
 
 // portable case insensitive compare
-[[nodiscard]] int Q_strcasecmp(const char *s1, const char *s2);
-[[nodiscard]] int Q_strncasecmp(const char *s1, const char *s2, size_t n);
+[[nodiscard]] int Q_strcasecmp(const char* s1, const char* s2);
+[[nodiscard]] int Q_strncasecmp(const char* s1, const char* s2, size_t n);
 
 // BSD string utils - haleyjd
 size_t Q_strlcpy(char* dst, const char* src, size_t siz);
