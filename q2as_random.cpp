@@ -1,6 +1,6 @@
 #include "q2as_local.h"
 #include "q2as_reg.h"
-#include "../g_local.h"
+#include "g_local.h"
 
 static gtime_t q2as_random_time_2(const gtime_t &a, const gtime_t &b)
 {

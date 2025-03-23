@@ -21,7 +21,7 @@
 #undef max
 #undef hyper
 
-#include "../g_local.h"
+#include "g_local.h"
 
 #include "q2as_game.h"
 #include "q2as_cgame.h"
@@ -497,7 +497,7 @@ void q2as_dbg_state_t::OptimizeSections()
         section.second = section.first.substr(i);
 }
 
-#include "../game.h"
+#include "game.h"
 #include <charconv>
 
 void q2as_dbg_state_t::CheckDebugger(asIScriptContext *ctx)

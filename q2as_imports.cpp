@@ -1,6 +1,6 @@
 #include "q2as_local.h"
 #include "q2as_reg.h"
-#include "../bg_local.h"
+#include "bg_local.h"
 
 // import-related stuff that doesn't belong anywhere else.
 bool Q2AS_RegisterImportTypes(asIScriptEngine *engine)

@@ -1,6 +1,6 @@
 #include "q2as_local.h"
 #include "q2as_reg.h"
-#include "../g_local.h"
+#include "g_local.h"
 #include <fmt/args.h>
 
 static std::string *q2as_string_append_char(uint8_t c, std::string *s)

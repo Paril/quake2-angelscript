@@ -1,9 +1,9 @@
 #include "q2as_json.h"
 #include "q2as_reg.h"
-#include "../bg_local.h"
-#include "../cg_local.h"
+#include "bg_local.h"
+#include "cg_local.h"
 #include "q2as_cgame.h"
-#include "../g_local.h"
+#include "g_local.h"
 #include "q2as_game.h"
 
 int Q_strcasecmp(const std::string_view s1, const std::string_view s2)

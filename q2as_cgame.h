@@ -1,7 +1,7 @@
 #pragma once
 
 #include "q2as_local.h"
-#include "../bg_local.h"
+#include "bg_local.h"
 #include "q2as_pmove.h"
 
 struct q2as_cg_state_t : q2as_state_t

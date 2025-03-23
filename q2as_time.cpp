@@ -1,6 +1,6 @@
 #include "q2as_local.h"
 #include "q2as_reg.h"
-#include "../g_local.h"
+#include "g_local.h"
 
 static void Q2AS_gtime_t_copy_construct(const gtime_t &t, gtime_t *o)
 {

@@ -86,8 +86,8 @@
 * - why is it required to have the default case be the last one in a switch? optimization?
 */
 
-#include "../g_local.h"
-#include "../cg_local.h"
+#include "g_local.h"
+#include "cg_local.h"
 #include "q2as_main.h"
 #include "q2as_local.h"
 

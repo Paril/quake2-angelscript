@@ -1,5 +1,5 @@
 #include "q2as_cgame.h"
-#include "../cg_local.h"
+#include "cg_local.h"
 #include "q2as_reg.h"
 #include "q2as_fixedarray.h"
 #include "q2as_stringex.h"
