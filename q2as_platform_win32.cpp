@@ -4,11 +4,6 @@
 const char* directory_name = "baseq2";
 const char* game_name = "game_x64.dll";
 
-//HINSTANCE Q2AS_GetGameLibrary(std::string path, )
-//{
-//
-//}
-
 module_path_result_t Q2AS_GetModulePath()
 {
 	module_path_result_t result = {};
@@ -47,7 +42,7 @@ HINSTANCE Q2AS_GetGameAPIFromModuleDirectory()
 		return NULL;
 	}
 
-	auto path = (std::filesystem::path(module_path_result.path).parent_path().parent_path() / directory_name / game_name).string();
+	auto path = (module_path_result.path.parent_path().parent_path() / directory_name / game_name).string();
 	return LoadLibrary(path.c_str());
 }
 
