@@ -1,6 +1,7 @@
 #include "q2as_local.h"
 #include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
+#include "q2as_platform.h"
 
 //#define RUNFRAME_PROFILING
 
@@ -277,21 +278,13 @@ static fs::path Q2AS_ScriptPath()
     if (*cv->string)
         return cv->string;
 
-    char path[MAX_PATH];
-    HMODULE hm = NULL;
-
-    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | 
-            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-            (LPCSTR) &Q2AS_ScriptPath, &hm) == 0)
-    {
-        return Q2AS_ScriptPathFromBaseDir();
-    }
-    if (GetModuleFileName(hm, path, sizeof(path)) == 0)
+    auto module_path = Q2AS_GetModulePath();
+    if (!module_path.success)
     {
         return Q2AS_ScriptPathFromBaseDir();
     }
 
-    fs::path alongside_dll(path);
+    fs::path alongside_dll = module_path.path;
     alongside_dll = alongside_dll.parent_path();
     alongside_dll /= "scripts";
 
