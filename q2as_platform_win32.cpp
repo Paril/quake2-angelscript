@@ -46,7 +46,7 @@ HINSTANCE Q2AS_GetGameAPIFromModuleDirectory()
 	return LoadLibrary(path.c_str());
 }
 
-GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
+HINSTANCE Q2AS_GetGameLibrary(game_import_t* import)
 {
 	HINSTANCE game_library = Q2AS_GetGameAPIFromCurrentDirectory();
 	if (!game_library)
@@ -59,6 +59,13 @@ GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
 		}
 	}
 
+	return game_library;
+}
+
+GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
+{
+	HINSTANCE game_library = Q2AS_GetGameLibrary(import);
+
 	GetGameAPIEXTERNAL external_game_api = NULL; 
 	external_game_api = (GetGameAPIEXTERNAL)GetProcAddress(game_library, "GetGameAPI");
 	if (!external_game_api)
@@ -69,7 +76,16 @@ GetGameAPIEXTERNAL Q2AS_GetGameAPI(game_import_t* import)
 	return external_game_api;
 }
 
-GetCGameAPIEXTERNAL Q2AS_GetCGameAPI()
+GetCGameAPIEXTERNAL Q2AS_GetCGameAPI(game_import_t* import)
 {
+	HINSTANCE game_library = Q2AS_GetGameLibrary(import);
 
+	GetCGameAPIEXTERNAL external_cgame_api = NULL;
+	external_cgame_api = (GetCGameAPIEXTERNAL)GetProcAddress(game_library, "GetCGameAPI");
+	if (!external_cgame_api)
+	{
+		import->Com_Error("Failed to load baseq2 game API\n");
+	}
+
+	return external_cgame_api;
 }
