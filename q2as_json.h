@@ -9,16 +9,79 @@
 
 #include <string_view>
 
-template<typename T, typename D>
-bool q2as_type_in_range(D value)
+template<typename TargetType, typename SourceType>
+bool q2as_type_in_range(SourceType value)
 {
-    auto max = std::numeric_limits<T>::max();
-    auto min = std::numeric_limits<T>::min();
-    if (value <= max && value >= min)
+    // Prevent bool as TargetType or SourceType to avoid edge cases
+    static_assert(!std::is_same_v<TargetType, bool>, "TargetType cannot be bool");
+    static_assert(!std::is_same_v<SourceType, bool>, "SourceType cannot be bool");
+
+    constexpr bool is_target_integer = std::numeric_limits<TargetType>::is_integer;
+    constexpr bool is_source_integer = std::numeric_limits<SourceType>::is_integer;
+    constexpr bool is_target_signed = std::numeric_limits<TargetType>::is_signed;
+    constexpr bool is_source_signed = std::numeric_limits<SourceType>::is_signed;
+
+    constexpr TargetType max = std::numeric_limits<TargetType>::max();
+    constexpr TargetType min = std::numeric_limits<TargetType>::min();
+
+    // Target and Source are integers
+    if (is_target_integer && is_source_integer)
     {
-        return true;
+        if (is_target_signed && is_source_signed)
+        {
+            return value <= max && value >= min;
+        }
+
+        if (!is_target_signed && !is_source_signed)
+        {
+            return value <= max;
+        }
+
+        if (is_target_signed && !is_source_signed)
+        {
+            return value <= static_cast<SourceType>(max);
+        }
+
+        if (!is_target_signed && is_source_signed)
+        {
+            return value >= 0 && static_cast<uint64_t>(value) <= static_cast<uint64_t>(max);
+        }
     }
 
+    // Both floating-point
+    if (!is_target_integer && !is_source_integer)
+    {
+        return value <= max && value >= min;
+    }
+
+    // Integer to floating point.
+    if (!is_target_integer && is_source_integer)
+    {
+        double d_value = static_cast<double>(value);
+        return d_value <= max && d_value >= min;
+    }
+
+    // Floating point to integer
+    if (is_target_integer && !is_source_integer)
+    {
+        // Don't allow decimals
+        if (std::floor(value) != value) 
+        {
+            return false;
+        }
+
+        if (is_target_signed)
+        {
+            double double_max = static_cast<double>(max);
+            double double_min = static_cast<double>(min);
+
+            return value <= double_max && value >= double_min;
+        }
+        
+        return value >= 0 && value <= static_cast<double>(max);    
+    }
+
+    // Should not hit this.
     return false;
 }
 
