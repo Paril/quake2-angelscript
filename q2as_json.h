@@ -349,19 +349,23 @@ struct q2as_yyjson_mut_doc : q2as_ref_t
     q2as_yyjson_mut_val mut_uint(uint64_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
     q2as_yyjson_mut_val mut_sint(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
     q2as_yyjson_mut_val mut_int(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_int(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(uint8_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(uint16_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(uint32_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(uint64_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(int8_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(int16_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(int32_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_num(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
     q2as_yyjson_mut_val mut_real(double v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
     q2as_yyjson_mut_val mut_strl(const std::string &v, size_t len) { return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), min(len, v.size())), this); }
     q2as_yyjson_mut_val mut_str(const std::string &v) { return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), v.size()), this); }
     q2as_yyjson_mut_val mut_obj() { return q2as_yyjson_mut_val(yyjson_mut_obj(doc.get()), this); }
     q2as_yyjson_mut_val mut_arr() { return q2as_yyjson_mut_val(yyjson_mut_arr(doc.get()), this); }
+
+    q2as_yyjson_mut_val val(bool v) { return q2as_yyjson_mut_val(yyjson_mut_bool(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint8_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint16_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint32_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint64_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int8_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int16_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int32_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(float v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(double v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
 };
 
 struct q2as_yyjson_val
@@ -439,6 +443,18 @@ struct q2as_yyjson_val
     double get_num() const { if (!get_valid()) return 0; return yyjson_get_num(val); }
     std::string get_str() const { if (!get_valid() || !is_str()) return ""; return std::string(yyjson_get_str(val), get_length()); }
     uint64_t get_length() const { if (!get_valid()) return 0; return yyjson_get_len(val); }
+
+    void get(bool &out) const { if (!get_valid()) out = false; out = yyjson_get_bool(val); }
+    void get(uint8_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val); }
+    void get(uint16_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val); }
+    void get(uint32_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val); }
+    void get(uint64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val); }
+    void get(int8_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val); }
+    void get(int16_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val); }
+    void get(int32_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val); }
+    void get(int64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
+    void get(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
+    void get(double& out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
 
     // "extended" integer api, because the original one is silly
 
