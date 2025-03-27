@@ -338,6 +338,7 @@ static bool Q2AS_RegisterImmutableJson(asIScriptEngine *engine)
     EnsureRegisteredMethodRaw("json_val", "void get(int64 &out) const", asMETHODPR(q2as_yyjson_val, get, (int64_t&) const, void), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "void get(float &out) const", asMETHODPR(q2as_yyjson_val, get, (float&) const, void), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "void get(double &out) const", asMETHODPR(q2as_yyjson_val, get, (double&) const, void), asCALL_THISCALL);
+    EnsureRegisteredMethodRaw("json_val", "void get(? &out) const", asMETHODPR(q2as_yyjson_val, get, (void *, int) const, void), asCALL_THISCALL);
 
     EnsureRegisteredMethodRaw("json_val", "uint64 get_uint_() const property", asMETHOD(q2as_yyjson_val,  get_uint), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "int64 get_sint() const property", asMETHOD(q2as_yyjson_val,    get_sint), asCALL_THISCALL);

@@ -455,6 +455,57 @@ struct q2as_yyjson_val
     void get(int64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
     void get(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
     void get(double& out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
+    void get(void* ref, int refTypeId) const 
+    { 
+        auto ctx = asGetActiveContext();
+        auto type = ctx->GetEngine()->GetTypeInfoById(refTypeId);
+
+        if (!(type->GetFlags() & asOBJ_ENUM))
+        {
+            ctx->SetException("Type is not an enum");
+            return;
+        }
+
+        switch (type->GetTypedefTypeId())
+        {
+            case asTYPEID_BOOL:
+                get(*(bool*)ref);
+                break;
+            case asTYPEID_INT8:
+                get(*(int8_t*)ref);
+                break;
+            case asTYPEID_UINT8:
+                get(*(uint8_t*)ref);
+                break;
+            case asTYPEID_INT16:
+                get(*(int16_t*)ref);
+                break;
+            case asTYPEID_UINT16:
+                get(*(uint16_t*)ref);
+                break;
+            case asTYPEID_INT32:
+                get(*(int32_t*)ref);
+                break;
+            case asTYPEID_UINT32:
+                get(*(uint32_t*)ref);
+                break;
+            case asTYPEID_INT64:
+                get(*(int64_t*)ref);
+                break;
+            case asTYPEID_UINT64:
+                get(*(uint64_t*)ref);
+                break;
+            case asTYPEID_FLOAT:
+                get(*(float*)ref);
+                break;
+            case asTYPEID_DOUBLE:
+                get(*(double*)ref);
+                break;
+            default:
+                ctx->SetException("Unsupported type");
+                return;
+        }
+    }
 
     // "extended" integer api, because the original one is silly
 
