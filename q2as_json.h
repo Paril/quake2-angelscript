@@ -468,9 +468,6 @@ struct q2as_yyjson_val
 
         switch (type->GetTypedefTypeId())
         {
-            case asTYPEID_BOOL:
-                get(*(bool*)ref);
-                break;
             case asTYPEID_INT8:
                 get(*(int8_t*)ref);
                 break;
@@ -494,12 +491,6 @@ struct q2as_yyjson_val
                 break;
             case asTYPEID_UINT64:
                 get(*(uint64_t*)ref);
-                break;
-            case asTYPEID_FLOAT:
-                get(*(float*)ref);
-                break;
-            case asTYPEID_DOUBLE:
-                get(*(double*)ref);
                 break;
             default:
                 ctx->SetException("Unsupported type");
