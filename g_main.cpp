@@ -31,12 +31,12 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
 	globals.apiversion = GAME_API_VERSION;
 
 	// see if Q2AS needs to be initialized
-	//if (auto api = Q2AS_GetGameAPI())
-	//{
-	//	return api;
-	//}
+	if (auto api = Q2AS_GetGameAPI())
+	{
+		return api;
+	}
 
-	import->Com_Print("Failed to load AngleScript game API\n");
+	import->Com_Print("Failed to load AngelScript game API\n");
 
 	// Fall back to loading baseq2 game api.
 	GetGameAPIEXTERNAL external_game_api = Q2AS_GetGameAPI(import);
