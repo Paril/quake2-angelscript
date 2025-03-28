@@ -16,53 +16,84 @@ bool q2as_type_in_range(SourceType value)
     static_assert(!std::is_same_v<TargetType, bool>, "TargetType cannot be bool");
     static_assert(!std::is_same_v<SourceType, bool>, "SourceType cannot be bool");
 
+    if (std::is_same_v<TargetType, SourceType>)
+    {
+        return true;
+    }
+
     constexpr bool is_target_integer = std::numeric_limits<TargetType>::is_integer;
     constexpr bool is_source_integer = std::numeric_limits<SourceType>::is_integer;
     constexpr bool is_target_signed = std::numeric_limits<TargetType>::is_signed;
     constexpr bool is_source_signed = std::numeric_limits<SourceType>::is_signed;
 
     constexpr TargetType max = std::numeric_limits<TargetType>::max();
-    constexpr TargetType min = std::numeric_limits<TargetType>::min();
+    constexpr TargetType min = std::numeric_limits<TargetType>::lowest();
 
     // Target and Source are integers
-    if (is_target_integer && is_source_integer)
+    if constexpr (is_target_integer && is_source_integer)
     {
-        if (is_target_signed && is_source_signed)
+        if constexpr (is_target_signed && is_source_signed)
         {
             return value <= max && value >= min;
         }
 
-        if (!is_target_signed && !is_source_signed)
+        if constexpr (!is_target_signed && !is_source_signed)
         {
             return value <= max;
         }
 
-        if (is_target_signed && !is_source_signed)
+        if constexpr (is_target_signed && !is_source_signed)
         {
             return value <= static_cast<SourceType>(max);
         }
 
-        if (!is_target_signed && is_source_signed)
+        if constexpr (!is_target_signed && is_source_signed)
         {
             return value >= 0 && static_cast<uint64_t>(value) <= static_cast<uint64_t>(max);
         }
     }
 
     // Both floating-point
-    if (!is_target_integer && !is_source_integer)
+    if constexpr (!is_target_integer && !is_source_integer)
     {
+        if constexpr (std::is_same_v<TargetType, float>)
+        {
+            float f_value = static_cast<float>(value);
+
+            // Check for loss of precision.
+            if (value != static_cast<double>(f_value))
+            {
+                return false;
+            }
+        }
+
         return value <= max && value >= min;
     }
 
     // Integer to floating point.
-    if (!is_target_integer && is_source_integer)
+    if constexpr (!is_target_integer && is_source_integer)
     {
-        double d_value = static_cast<double>(value);
-        return d_value <= max && d_value >= min;
+        if constexpr (std::is_same_v<TargetType, float>)
+        {
+            float f_value = static_cast<float>(value);
+            
+            // Check for loss of precision.
+            if (value != static_cast<double>(f_value))
+            {
+                return false;
+            }
+
+            return f_value <= max && f_value >= min;
+        }
+        else
+        {
+            double d_value = static_cast<double>(value);
+            return d_value <= max && d_value >= min;
+        }
     }
 
     // Floating point to integer
-    if (is_target_integer && !is_source_integer)
+    if constexpr (is_target_integer && !is_source_integer)
     {
         // Don't allow decimals
         if (std::trunc(value) != value) 
@@ -188,6 +219,7 @@ struct q2as_yyjson_mut_val
     bool is_int16() const { return get_valid() && q2as_type_can_be<int16_t>(val); }
     bool is_int32() const { return get_valid() && q2as_type_can_be<int32_t>(val); }
     bool is_int64() const { return get_valid() && q2as_type_can_be<int64_t>(val); }
+    bool is_float() const { return get_valid() && q2as_type_can_be<float>(val); }
     bool is_double() const { return get_valid() && q2as_type_can_be<double>(val); }
     bool is_int() const { return get_valid() && yyjson_mut_is_int(val); }
     bool is_sint() const { return get_valid() && yyjson_mut_is_sint(val); }
@@ -405,6 +437,7 @@ struct q2as_yyjson_val
     bool is_int16() const { return get_valid() && q2as_type_can_be<int16_t>(val); }
     bool is_int32() const { return get_valid() && q2as_type_can_be<int32_t>(val); }
     bool is_int64() const { return get_valid() && q2as_type_can_be<int64_t>(val); }
+    bool is_float() const { return get_valid() && q2as_type_can_be<float>(val); }
     bool is_double() const { return get_valid() && q2as_type_can_be<double>(val); }
     bool is_int() const { return get_valid() && yyjson_is_int(val); }
     bool is_sint() const { return get_valid() && yyjson_is_sint(val); }
@@ -426,6 +459,7 @@ struct q2as_yyjson_val
     int16_t get_int16() const   { if (!get_valid()) return 0; return q2as_get_value<int16_t>(val); }
     int32_t get_int32() const   { if (!get_valid()) return 0; return q2as_get_value<int32_t>(val); }
     int64_t get_int64() const   { if (!get_valid()) return 0; return q2as_get_value<int64_t>(val); }
+    float get_float() const { if (!get_valid()) return 0; return q2as_get_value<float>(val); }
     double get_double() const { if (!get_valid()) return 0; return q2as_get_value<double>(val); }
     void get_uint8(uint8_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val); }
     void get_uint16(uint16_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val); }
@@ -435,6 +469,7 @@ struct q2as_yyjson_val
     void get_int16(int16_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val); }
     void get_int32(int32_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val); }
     void get_int64(int64_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
+    void get_float(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
     void get_double(double &out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
     uint64_t get_uint() const { if (!get_valid()) return 0; return yyjson_get_uint(val); }
     int64_t get_sint() const { if (!get_valid()) return 0; return yyjson_get_sint(val); }

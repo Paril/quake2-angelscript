@@ -169,6 +169,7 @@ static bool Q2AS_RegisterMutableJson(asIScriptEngine *engine)
     EnsureRegisteredMethodRaw("json_mutval", "bool get_is_int16() const property", asMETHOD(q2as_yyjson_mut_val, is_int16), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_mutval", "bool get_is_int32() const property", asMETHOD(q2as_yyjson_mut_val, is_int32), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_mutval", "bool get_is_int64() const property", asMETHOD(q2as_yyjson_mut_val, is_int64), asCALL_THISCALL);
+    EnsureRegisteredMethodRaw("json_mutval", "bool get_is_float() const property", asMETHOD(q2as_yyjson_mut_val, is_float), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_mutval", "bool get_is_double() const property", asMETHOD(q2as_yyjson_mut_val, is_double), asCALL_THISCALL);
 
     EnsureRegisteredMethodRaw("json_mutval", "bool get_is_int() const property", asMETHOD(q2as_yyjson_mut_val,   is_int), asCALL_THISCALL);
@@ -289,6 +290,7 @@ static bool Q2AS_RegisterImmutableJson(asIScriptEngine *engine)
     EnsureRegisteredMethodRaw("json_val", "bool get_is_int16() const property", asMETHOD(q2as_yyjson_val, is_int16), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "bool get_is_int32() const property", asMETHOD(q2as_yyjson_val, is_int32), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "bool get_is_int64() const property", asMETHOD(q2as_yyjson_val, is_int64), asCALL_THISCALL);
+    EnsureRegisteredMethodRaw("json_val", "bool get_is_float() const property", asMETHOD(q2as_yyjson_val, is_float), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "bool get_is_double() const property", asMETHOD(q2as_yyjson_val, is_double), asCALL_THISCALL);
 
     EnsureRegisteredMethodRaw("json_val", "bool get_is_int() const property", asMETHOD(q2as_yyjson_val,   is_int), asCALL_THISCALL);
@@ -323,6 +325,9 @@ static bool Q2AS_RegisterImmutableJson(asIScriptEngine *engine)
 
     EnsureRegisteredMethodRaw("json_val", "int64 get_int64() const property", asMETHODPR(q2as_yyjson_val, get_int64, () const, int64_t), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "void get_int64(int64 &out) const", asMETHODPR(q2as_yyjson_val, get_int64, (int64_t&) const, void), asCALL_THISCALL);
+
+    EnsureRegisteredMethodRaw("json_val", "float get_float() const property", asMETHODPR(q2as_yyjson_val, get_float, () const, float), asCALL_THISCALL);
+    EnsureRegisteredMethodRaw("json_val", "void get_float(float &out) const", asMETHODPR(q2as_yyjson_val, get_float, (float&) const, void), asCALL_THISCALL);
 
     EnsureRegisteredMethodRaw("json_val", "double get_double() const property", asMETHODPR(q2as_yyjson_val, get_double, () const, double), asCALL_THISCALL);
     EnsureRegisteredMethodRaw("json_val", "void get_double(double &out) const", asMETHODPR(q2as_yyjson_val, get_double, (double&) const, void), asCALL_THISCALL);
