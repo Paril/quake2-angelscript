@@ -88,6 +88,13 @@ bool q2as_type_in_range(SourceType value)
         else
         {
             double d_value = static_cast<double>(value);
+            
+            // Check for loss of precision.
+            if (static_cast<SourceType>(static_cast<double>(value)) != value)
+            {
+                return false;
+            }
+
             return d_value <= max && d_value >= min;
         }
     }
