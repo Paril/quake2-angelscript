@@ -58,6 +58,11 @@ bool q2as_type_in_range(SourceType value)
     {
         if constexpr (std::is_same_v<TargetType, float>)
         {
+            if (std::isinf(value) || std::isnan(value))
+            {
+                return false;
+            }
+
             float f_value = static_cast<float>(value);
 
             // Check for loss of precision.
