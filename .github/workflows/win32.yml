@@ -27,7 +27,7 @@ jobs:
     - name: Copy scripts to build folder
       continue-on-error: true
       run: |
-        robocopy ./as/scripts ./build/scripts /E; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
+        robocopy ./scripts ./build/scripts /E; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
         Compress-Archive -Path build/* -Destination x64Build.zip
 
     - name: Setup variables
