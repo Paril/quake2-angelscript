@@ -9,6 +9,187 @@
 
 #include <string_view>
 
+template<typename TargetType, typename SourceType>
+bool q2as_type_in_range(SourceType value)
+{
+    // Prevent bool as TargetType or SourceType to avoid edge cases
+    static_assert(!std::is_same_v<TargetType, bool>, "TargetType cannot be bool");
+    static_assert(!std::is_same_v<SourceType, bool>, "SourceType cannot be bool");
+
+    if (std::is_same_v<TargetType, SourceType>)
+    {
+        return true;
+    }
+
+    constexpr bool is_target_integer = std::numeric_limits<TargetType>::is_integer;
+    constexpr bool is_source_integer = std::numeric_limits<SourceType>::is_integer;
+    constexpr bool is_target_signed = std::numeric_limits<TargetType>::is_signed;
+    constexpr bool is_source_signed = std::numeric_limits<SourceType>::is_signed;
+
+    constexpr TargetType max = std::numeric_limits<TargetType>::max();
+    constexpr TargetType min = std::numeric_limits<TargetType>::lowest();
+
+    // Target and Source are integers
+    if constexpr (is_target_integer && is_source_integer)
+    {
+        if constexpr (is_target_signed && is_source_signed)
+        {
+            return value <= max && value >= min;
+        }
+
+        if constexpr (!is_target_signed && !is_source_signed)
+        {
+            return value <= max;
+        }
+
+        if constexpr (is_target_signed && !is_source_signed)
+        {
+            return value <= static_cast<SourceType>(max);
+        }
+
+        if constexpr (!is_target_signed && is_source_signed)
+        {
+            return value >= 0 && static_cast<uint64_t>(value) <= static_cast<uint64_t>(max);
+        }
+    }
+
+    // Both floating-point
+    if constexpr (!is_target_integer && !is_source_integer)
+    {
+        if constexpr (std::is_same_v<TargetType, float>)
+        {
+            if (std::isinf(value) || std::isnan(value))
+            {
+                return false;
+            }
+
+            float f_value = static_cast<float>(value);
+
+            // Check for loss of precision.
+            if (value != static_cast<double>(f_value))
+            {
+                return false;
+            }
+        }
+
+        return value <= max && value >= min;
+    }
+
+    // Integer to floating point.
+    if constexpr (!is_target_integer && is_source_integer)
+    {
+        if constexpr (std::is_same_v<TargetType, float>)
+        {
+            float f_value = static_cast<float>(value);
+            
+            // Check for loss of precision.
+            if (value != static_cast<double>(f_value))
+            {
+                return false;
+            }
+
+            return f_value <= max && f_value >= min;
+        }
+        else
+        {
+            double d_value = static_cast<double>(value);
+            
+            // Check for loss of precision.
+            if (static_cast<SourceType>(static_cast<double>(value)) != value)
+            {
+                return false;
+            }
+
+            return d_value <= max && d_value >= min;
+        }
+    }
+
+    // Floating point to integer
+    if constexpr (is_target_integer && !is_source_integer)
+    {
+        if (std::isinf(value) || std::isnan(value))
+        {
+            return false;
+        }
+
+        // Don't allow decimals
+        if (std::trunc(value) != value) 
+        {
+            return false;
+        }
+
+        if (is_target_signed)
+        {
+            double double_max = static_cast<double>(max);
+            double double_min = static_cast<double>(min);
+
+            return value <= double_max && value >= double_min;
+        }
+        
+        return value >= 0 && value <= static_cast<double>(max);    
+    }
+
+    // Should not hit this.
+    return false;
+}
+
+template<typename T>
+bool q2as_type_can_be(yyjson_mut_val* val)
+{
+    if (yyjson_mut_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT))
+    {
+        return q2as_type_in_range<T, uint64_t>(val->uni.u64);
+    }
+    else if (yyjson_mut_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_SINT))
+    {
+        return q2as_type_in_range<T, int64_t>(val->uni.i64);
+    }
+    else if (yyjson_mut_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL))
+    {
+        return q2as_type_in_range<T, double>(val->uni.f64);
+    }
+
+    return false;
+}
+
+template<typename T>
+bool q2as_type_can_be(yyjson_val* val)
+{
+    if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT))
+    {
+        return q2as_type_in_range<T, uint64_t>(val->uni.u64);
+    }
+    else if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_SINT))
+    {
+        return q2as_type_in_range<T, int64_t>(val->uni.i64);
+    }
+    else if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL))
+    {
+        return q2as_type_in_range<T, double>(val->uni.f64);
+    }
+
+    return false;
+}
+
+template<typename T>
+T q2as_get_value(yyjson_val* val)
+{
+    if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT))
+    {
+        return (T)(val->uni.u64);
+    }
+    else if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_SINT))
+    {
+        return (T)(val->uni.i64);
+    }
+    else if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL))
+    {
+        return (T)(val->uni.f64);
+    }
+
+    return 0;
+}
+
 struct q2as_yyjson_mut_doc;
 struct q2as_yyjson_mut_val;
 struct q2as_yyjson_doc;
@@ -47,6 +228,16 @@ struct q2as_yyjson_mut_val
     bool is_false() const { return get_valid() && yyjson_mut_is_false(val); }
     bool is_bool() const { return get_valid() && yyjson_mut_is_bool(val); }
     bool is_str() const { return get_valid() && yyjson_mut_is_str(val); }
+    bool is_uint8() const { return get_valid() && q2as_type_can_be<uint8_t>(val); }
+    bool is_uint16() const { return get_valid() && q2as_type_can_be<uint16_t>(val);}
+    bool is_uint32() const { return get_valid() && q2as_type_can_be<uint32_t>(val); }
+    bool is_uint64() const { return get_valid() && q2as_type_can_be<uint64_t>(val); }
+    bool is_int8() const { return get_valid() && q2as_type_can_be<int8_t>(val); }
+    bool is_int16() const { return get_valid() && q2as_type_can_be<int16_t>(val); }
+    bool is_int32() const { return get_valid() && q2as_type_can_be<int32_t>(val); }
+    bool is_int64() const { return get_valid() && q2as_type_can_be<int64_t>(val); }
+    bool is_float() const { return get_valid() && q2as_type_can_be<float>(val); }
+    bool is_double() const { return get_valid() && q2as_type_can_be<double>(val); }
     bool is_int() const { return get_valid() && yyjson_mut_is_int(val); }
     bool is_sint() const { return get_valid() && yyjson_mut_is_sint(val); }
     bool is_uint() const { return get_valid() && yyjson_mut_is_uint(val); }
@@ -212,6 +403,18 @@ struct q2as_yyjson_mut_doc : q2as_ref_t
     q2as_yyjson_mut_val mut_str(const std::string &v) { return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), v.size()), this); }
     q2as_yyjson_mut_val mut_obj() { return q2as_yyjson_mut_val(yyjson_mut_obj(doc.get()), this); }
     q2as_yyjson_mut_val mut_arr() { return q2as_yyjson_mut_val(yyjson_mut_arr(doc.get()), this); }
+
+    q2as_yyjson_mut_val val(bool v) { return q2as_yyjson_mut_val(yyjson_mut_bool(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint8_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint16_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint32_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(uint64_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int8_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int16_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int32_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(float v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
+    q2as_yyjson_mut_val val(double v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
 };
 
 struct q2as_yyjson_val
@@ -243,6 +446,16 @@ struct q2as_yyjson_val
     bool is_false() const { return get_valid() && yyjson_is_false(val); }
     bool is_bool() const { return get_valid() && yyjson_is_bool(val); }
     bool is_str() const { return get_valid() && yyjson_is_str(val); }
+    bool is_uint8() const { return get_valid() && q2as_type_can_be<uint8_t>(val); }
+    bool is_uint16() const { return get_valid() && q2as_type_can_be<uint16_t>(val); }
+    bool is_uint32() const { return get_valid() && q2as_type_can_be<uint32_t>(val); }
+    bool is_uint64() const { return get_valid() && q2as_type_can_be<uint64_t>(val); }
+    bool is_int8() const { return get_valid() && q2as_type_can_be<int8_t>(val); }
+    bool is_int16() const { return get_valid() && q2as_type_can_be<int16_t>(val); }
+    bool is_int32() const { return get_valid() && q2as_type_can_be<int32_t>(val); }
+    bool is_int64() const { return get_valid() && q2as_type_can_be<int64_t>(val); }
+    bool is_float() const { return get_valid() && q2as_type_can_be<float>(val); }
+    bool is_double() const { return get_valid() && q2as_type_can_be<double>(val); }
     bool is_int() const { return get_valid() && yyjson_is_int(val); }
     bool is_sint() const { return get_valid() && yyjson_is_sint(val); }
     bool is_uint() const { return get_valid() && yyjson_is_uint(val); }
@@ -255,6 +468,26 @@ struct q2as_yyjson_val
 
     // value fetch
     bool get_bool() const { if (!get_valid()) return false; return yyjson_get_bool(val); }
+    uint8_t get_uint8() const   { if (!get_valid()) return 0; return q2as_get_value<uint8_t>(val); }
+    uint16_t get_uint16() const { if (!get_valid()) return 0; return q2as_get_value<uint16_t>(val); }
+    uint32_t get_uint32() const { if (!get_valid()) return 0; return q2as_get_value<uint32_t>(val); }
+    uint64_t get_uint64() const { if (!get_valid()) return 0; return q2as_get_value<uint64_t>(val); }
+    int8_t get_int8() const     { if (!get_valid()) return 0; return q2as_get_value<int8_t>(val); }
+    int16_t get_int16() const   { if (!get_valid()) return 0; return q2as_get_value<int16_t>(val); }
+    int32_t get_int32() const   { if (!get_valid()) return 0; return q2as_get_value<int32_t>(val); }
+    int64_t get_int64() const   { if (!get_valid()) return 0; return q2as_get_value<int64_t>(val); }
+    float get_float() const { if (!get_valid()) return 0; return q2as_get_value<float>(val); }
+    double get_double() const { if (!get_valid()) return 0; return q2as_get_value<double>(val); }
+    void get_uint8(uint8_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val); }
+    void get_uint16(uint16_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val); }
+    void get_uint32(uint32_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val); }
+    void get_uint64(uint64_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val); }
+    void get_int8(int8_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val); }
+    void get_int16(int16_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val); }
+    void get_int32(int32_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val); }
+    void get_int64(int64_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
+    void get_float(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
+    void get_double(double &out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
     uint64_t get_uint() const { if (!get_valid()) return 0; return yyjson_get_uint(val); }
     int64_t get_sint() const { if (!get_valid()) return 0; return yyjson_get_sint(val); }
     int32_t get_int() const { if (!get_valid()) return 0; return yyjson_get_int(val); }
@@ -262,6 +495,60 @@ struct q2as_yyjson_val
     double get_num() const { if (!get_valid()) return 0; return yyjson_get_num(val); }
     std::string get_str() const { if (!get_valid() || !is_str()) return ""; return std::string(yyjson_get_str(val), get_length()); }
     uint64_t get_length() const { if (!get_valid()) return 0; return yyjson_get_len(val); }
+
+    void get(bool &out) const { if (!get_valid()) out = false; out = yyjson_get_bool(val); }
+    void get(uint8_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val); }
+    void get(uint16_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val); }
+    void get(uint32_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val); }
+    void get(uint64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val); }
+    void get(int8_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val); }
+    void get(int16_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val); }
+    void get(int32_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val); }
+    void get(int64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
+    void get(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
+    void get(double& out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
+    void get(void* ref, int refTypeId) const 
+    { 
+        auto ctx = asGetActiveContext();
+        auto type = ctx->GetEngine()->GetTypeInfoById(refTypeId);
+
+        if (!(type->GetFlags() & asOBJ_ENUM))
+        {
+            ctx->SetException("Type is not an enum");
+            return;
+        }
+
+        switch (type->GetTypedefTypeId())
+        {
+            case asTYPEID_INT8:
+                get(*(int8_t*)ref);
+                break;
+            case asTYPEID_UINT8:
+                get(*(uint8_t*)ref);
+                break;
+            case asTYPEID_INT16:
+                get(*(int16_t*)ref);
+                break;
+            case asTYPEID_UINT16:
+                get(*(uint16_t*)ref);
+                break;
+            case asTYPEID_INT32:
+                get(*(int32_t*)ref);
+                break;
+            case asTYPEID_UINT32:
+                get(*(uint32_t*)ref);
+                break;
+            case asTYPEID_INT64:
+                get(*(int64_t*)ref);
+                break;
+            case asTYPEID_UINT64:
+                get(*(uint64_t*)ref);
+                break;
+            default:
+                ctx->SetException("Unsupported type");
+                return;
+        }
+    }
 
     // "extended" integer api, because the original one is silly
 
