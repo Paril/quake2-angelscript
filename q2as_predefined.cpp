@@ -168,9 +168,14 @@ static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *
 	return f;
 }
 
-static std::vector<std::string> EnumToLines(asITypeInfo *type)
+struct EnumInfo
 {
-	std::vector<std::string> lines;
+	std::string                 decl;
+	std::vector<std::string>	values;
+};
+
+static std::string EnumToDecl(asITypeInfo *type)
+{
 	const char *primType;
 
 	switch (type->GetTypedefTypeId())
@@ -185,30 +190,50 @@ static std::vector<std::string> EnumToLines(asITypeInfo *type)
 	case asTYPEID_UINT64: primType = "uint64"; break;
 	}
 
-	lines.insert(lines.end(), {
-		fmt::format("enum {} : {}", type->GetName(), primType),
-		"{"
-	});
+	return fmt::format("enum {} : {}", type->GetName(), primType);
+}
 
+static void GetEnumInfo(EnumInfo &enuminfo, asITypeInfo *type)
+{
 	for (asUINT v = 0; v < type->GetEnumValueCount(); v++)
 	{
 		// TODO: proper signedness
 		asINT64 ev;
 		const char *name = type->GetEnumValueByIndex(v, &ev);
+		std::string val = fmt::format("{} = {}", name, ev);
 
-		lines.insert(lines.end(), {
-			fmt::format("\t{} = {}{}", name, ev, v == type->GetEnumValueCount() - 1 ? "" : ",")
-		});
+		if (std::find(enuminfo.values.begin(), enuminfo.values.end(), val) == enuminfo.values.end())
+			enuminfo.values.push_back(val);
 	}
+}
 
-	lines.insert(lines.end(), "}");
+static std::vector<std::string> EnumToLines(const EnumInfo &enuminfo)
+{
+	std::vector<std::string> lines;
+
+	lines.push_back(enuminfo.decl);
+	lines.push_back("{");
+
+	for (size_t i = 0; i < enuminfo.values.size(); i++)
+		lines.push_back(fmt::format("\t{}{}", enuminfo.values[i], i == enuminfo.values.size() - 1 ? "" : ","));
+
+	lines.push_back("}");
 
 	return lines;
 }
 
-static std::vector<std::string> TypeToLines(asIScriptEngine *engine, asITypeInfo *type)
+struct ObjectInfo
 {
-	std::vector<std::string> lines;
+	std::string						decl;
+	std::vector<std::string>		funcdefs;
+	std::vector<std::string>		properties;
+	std::vector<std::string>		behaviors;
+	std::vector<std::string>		factories;
+	std::vector<std::string>		methods;
+};
+
+static std::string ObjectToDecl(asITypeInfo *type)
+{
 	std::string class_decl = fmt::format("class {}", type->GetName());
 
 	if (type->GetSubTypeCount())
@@ -226,23 +251,47 @@ static std::vector<std::string> TypeToLines(asIScriptEngine *engine, asITypeInfo
 		class_decl += ">";
 	}
 
-	lines.insert(lines.end(), {
-		class_decl,
-		"{"
-	});
-		
-	lines.insert(lines.end(), "\t// funcdefs");
+	return class_decl;
+}
 
+static void stream_line(std::ofstream &of, int depth, const std::string_view v)
+{
+	for (int i = 0; i < depth; i++)
+		of << '\t';
+
+	of << v;
+	of << '\n';
+}
+
+static void stream_block(std::ofstream &of, int depth, const std::string_view header, const std::vector<std::vector<std::string>> &lines)
+{
+	if (!header.empty())
+		stream_line(of, depth, fmt::format("// {}", header));
+
+	for (auto &ls : lines)
+		for (auto &l : ls)
+			stream_line(of, depth, l);
+}
+
+static void stream_block(std::ofstream &of, int depth, const std::string_view header, const std::vector<std::string> &lines)
+{
+	if (!header.empty())
+		stream_line(of, depth, fmt::format("// {}", header));
+
+	for (auto &l : lines)
+		stream_line(of, depth, l);
+}
+
+static void GetObjectInfo(ObjectInfo &obj, asIScriptEngine *engine, asITypeInfo *type)
+{
 	for (asUINT f = 0; f < type->GetChildFuncdefCount(); f++)
 	{
 		asITypeInfo *funcdef = type->GetChildFuncdef(f);
-
-		lines.insert(lines.end(), {
-			"\tfuncdef " + FunctionToString(engine, funcdef->GetFuncdefSignature(), funcdef)
-		});
-	}
+		std::string decl = "funcdef " + FunctionToString(engine, funcdef->GetFuncdefSignature(), funcdef);
 		
-	lines.insert(lines.end(), "\t// properties");
+		if (std::find(obj.funcdefs.begin(), obj.funcdefs.end(), decl) == obj.funcdefs.end())
+			obj.funcdefs.push_back(decl);
+	}
 
 	for (asUINT p = 0; p < type->GetPropertyCount(); p++)
 	{
@@ -259,13 +308,11 @@ static std::vector<std::string> TypeToLines(asIScriptEngine *engine, asITypeInfo
 		type->GetProperty(p, &propName, &propTypeId, &propIsPrivate, &propIsProtected, &propOffset, &propReference, &propAccessMask, &propCompositeOffset, &propIsCompositeIndirect, &propReadOnly);
 
 		std::string typeName = TypeToTypeName(engine, propTypeId, (asETypeModifiers) (propReference ? asTM_INOUTREF : 0), false, propName);
-			
-		lines.insert(lines.end(), {
-			fmt::format("\t{}{}{};", propIsPrivate ? "private " : propIsProtected ? "protected " : "", propReadOnly ? "const " : "", typeName)
-		});
+		std::string decl = fmt::format("{}{}{};", propIsPrivate ? "private " : propIsProtected ? "protected " : "", propReadOnly ? "const " : "", typeName);
+
+		if (std::find(obj.properties.begin(), obj.properties.end(), decl) == obj.properties.end())
+			obj.properties.push_back(decl);
 	}
-		
-	lines.insert(lines.end(), "\t// behaviors");
 
 	for (asUINT f = 0; f < type->GetBehaviourCount(); f++)
 	{
@@ -291,30 +338,89 @@ static std::vector<std::string> TypeToLines(asIScriptEngine *engine, asITypeInfo
 			beh == asEBehaviours::asBEHAVE_LIST_FACTORY)
 			decl = type->GetName() + decl.substr(decl.find("$list") + 5);
 
-		lines.insert(lines.end(), {
-			std::string("\t") + decl + ";"
-		});
-	}
+		if (type->GetSubTypeCount() != 0 && (beh == asEBehaviours::asBEHAVE_LIST_CONSTRUCT ||
+			beh == asEBehaviours::asBEHAVE_LIST_FACTORY ||
+			beh == asEBehaviours::asBEHAVE_FACTORY ||
+			beh == asEBehaviours::asBEHAVE_CONSTRUCT))
+		{
+			size_t s = decl.find_first_of('(');
+			size_t i = decl.find_first_of(",)");
+
+			if (i != std::string::npos)
+			{
+				if (decl[i] == ',')
+				{
+					decl.erase(s + 1, (i - s));
+
+					while ((s + 1) < decl.size() && decl[s + 1] == ' ')
+						decl.erase(s + 1, 1);
+				}
+				else
+					decl.erase(s + 1, (i - s) - 1);
+			}
+		}
+
+		decl = decl + ";";
 		
-	lines.insert(lines.end(), "\t// factories");
+		if (std::find(obj.behaviors.begin(), obj.behaviors.end(), decl) == obj.behaviors.end())
+			obj.behaviors.push_back(decl);
+	}
 
 	for (asUINT f = 0; f < type->GetFactoryCount(); f++)
 	{
-		lines.insert(lines.end(), {
-			"\t" + FunctionToString(engine, type->GetFactoryByIndex(f), type, true)
-		});
-	}
+		std::string str = FunctionToString(engine, type->GetFactoryByIndex(f), type, true);
 
-	lines.insert(lines.end(), "\t// methods");
+		if (type->GetSubTypeCount() != 0)
+		{
+			size_t s = str.find_first_of('(');
+			size_t i = str.find_first_of(",)");
+
+			if (i != std::string::npos)
+			{
+				if (str[i] == ',')
+				{
+					str.erase(s + 1, (i - s));
+
+					while ((s + 1) < str.size() && str[s + 1] == ' ')
+						str.erase(s + 1, 1);
+				}
+				else
+					str.erase(s + 1, (i - s) - 1);
+			}
+		}
+
+		if (std::find(obj.factories.begin(), obj.factories.end(), str) == obj.factories.end())
+			obj.factories.push_back(str);
+	}
 
 	for (asUINT f = 0; f < type->GetMethodCount(); f++)
 	{
-		lines.insert(lines.end(), {
-			"\t" + FunctionToString(engine, type->GetMethodByIndex(f, false))
-		});
-	}
+		std::string str = FunctionToString(engine, type->GetMethodByIndex(f, false));
 
-	lines.insert(lines.end(), "}");
+		if (std::find(obj.methods.begin(), obj.methods.end(), str) == obj.methods.end())
+			obj.methods.push_back(str);
+	}
+}
+
+static std::vector<std::string> ObjectToLines(std::ofstream &of, int depth, const ObjectInfo &obj)
+{
+	std::vector<std::string> lines;
+
+	stream_line(of, depth, obj.decl);
+	stream_line(of, depth, "{");
+	
+	if (!obj.funcdefs.empty())
+		stream_block(of, depth + 1, "funcdefs", obj.funcdefs);
+	if (!obj.properties.empty())
+		stream_block(of, depth + 1, "properties", obj.properties);
+	if (!obj.behaviors.empty())
+		stream_block(of, depth + 1, "behaviors", obj.behaviors);
+	if (!obj.factories.empty())
+		stream_block(of, depth + 1, "factories", obj.factories);
+	if (!obj.methods.empty())
+		stream_block(of, depth + 1, "methods", obj.methods);
+
+	stream_line(of, depth, "}");
 
 	return lines;
 }
@@ -322,126 +428,154 @@ static std::vector<std::string> TypeToLines(asIScriptEngine *engine, asITypeInfo
 struct NamespaceInfo
 {
 	std::vector<std::vector<std::string>> typedefs;
-	std::vector<std::vector<std::string>> enums;
-	std::vector<std::vector<std::string>> funcdefs;
-	std::vector<std::vector<std::string>> objects;
-	std::vector<std::vector<std::string>> properties;
-	std::vector<std::vector<std::string>> functions;
+	std::vector<EnumInfo> enums;
+	std::vector<std::string> funcdefs;
+	std::vector<ObjectInfo> objects;
+	std::vector<std::string> properties;
+	std::vector<std::string> functions;
 
-	void line(std::ofstream &of, int depth, const std::string_view v)
+	void block(std::ofstream &of, int depth, const std::string_view header, const decltype(enums) &enuminfos)
 	{
-		for (int i = 0; i < depth; i++)
-			of << '\t';
+		if (!header.empty())
+			stream_line(of, depth, fmt::format("// {}", header));
 
-		of << v;
-		of << '\n';
+		for (auto &i : enuminfos)
+			stream_block(of, depth, "", EnumToLines(i));
 	}
 
-	void block(std::ofstream &of, int depth, const std::string_view header, const decltype(typedefs) &lines)
+	void block(std::ofstream &of, int depth, const std::string_view header, const decltype(objects) &objectinfos)
 	{
-		line(of, depth, fmt::format("// {}", header));
+		if (!header.empty())
+			stream_line(of, depth, fmt::format("// {}", header));
 
-		for (auto &ls : lines)
-			for (auto &l : ls)
-				line(of, depth, l);
+		for (auto &i : objectinfos)
+			stream_block(of, depth, "", ObjectToLines(of, depth, i));
 	}
 
 	void write(std::ofstream &of, int depth)
 	{
 		if (!typedefs.empty())
-			block(of, depth, "typedefs", typedefs);
+			stream_block(of, depth, "typedefs", typedefs);
 		if (!enums.empty())
 			block(of, depth, "enums", enums);
 		if (!funcdefs.empty())
-			block(of, depth, "funcdefs", funcdefs);
+			stream_block(of, depth, "funcdefs", funcdefs);
 		if (!objects.empty())
 			block(of, depth, "objects", objects);
 		if (!properties.empty())
-			block(of, depth, "properties", properties);
+			stream_block(of, depth, "properties", properties);
 		if (!functions.empty())
-			block(of, depth, "functions", functions);
+			stream_block(of, depth, "functions", functions);
 	}
 };
 
-void WritePredefined(asIScriptEngine *engine, const char *filename)
+template<size_t N>
+static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, const char *filename)
 {
 	std::ofstream of(filename, std::ios_base::binary | std::ios_base::out);
 
 	std::map<std::string, NamespaceInfo> namespaces;
 
-	// TODO: no typedefs used
-	/*
-	for (asUINT i = 0; i < engine->GetTypedefCount(); i++)
+	for (auto &engine : engines)
 	{
-		asITypeInfo *type = engine->GetTypedefByIndex(i);
-	}
-	*/
-
-	for (asUINT i = 0; i < engine->GetEnumCount(); i++)
-	{
-		asITypeInfo *type = engine->GetEnumByIndex(i);
-		auto &ns = namespaces[type->GetNamespace()];
-		ns.enums.emplace_back(EnumToLines(type));
-	}
-
-	for (asUINT i = 0; i < engine->GetFuncdefCount(); i++)
-	{
-		asITypeInfo *funcdef = engine->GetFuncdefByIndex(i);
-
-		if (funcdef->GetParentType())
+		if (!engine)
 			continue;
+		// TODO: no typedefs used
+		/*
+		for (asUINT i = 0; i < engine->GetTypedefCount(); i++)
+		{
+			asITypeInfo *type = engine->GetTypedefByIndex(i);
+		}
+		*/
 
-		auto &ns = namespaces[funcdef->GetNamespace()];
+		for (asUINT i = 0; i < engine->GetEnumCount(); i++)
+		{
+			asITypeInfo *type = engine->GetEnumByIndex(i);
+			auto &ns = namespaces[type->GetNamespace()];
+			std::string decl = EnumToDecl(type);
+			EnumInfo *info = nullptr;
 
-		std::vector<std::string> lines;
+			for (auto &e : ns.enums)
+				if (e.decl == decl)
+				{
+					info = &e;
+					break;
+				}
 
-		lines.insert(lines.end(), {
-			"funcdef " + FunctionToString(engine, funcdef->GetFuncdefSignature(), funcdef)
-		});
+			if (!info)
+			{
+				info = &ns.enums.emplace_back();
+				info->decl = std::move(decl);
+			}
 
-		ns.funcdefs.emplace_back(std::move(lines));
-	}
+			GetEnumInfo(*info, type);
+		}
 
-	for (asUINT i = 0; i < engine->GetObjectTypeCount(); i++)
-	{
-		asITypeInfo *type = engine->GetObjectTypeByIndex(i);
-		auto &ns = namespaces[type->GetNamespace()];
-		ns.objects.emplace_back(TypeToLines(engine, type));
-	}
+		for (asUINT i = 0; i < engine->GetFuncdefCount(); i++)
+		{
+			asITypeInfo *funcdef = engine->GetFuncdefByIndex(i);
 
-	for (asUINT i = 0; i < engine->GetGlobalPropertyCount(); i++)
-	{
-		std::vector<std::string> lines;
-		const char *name;
-		const char *nameSpace;
-		int typeId;
-		bool isConst;
-		const char *configGroup;
-		void *pointer;
-		asDWORD accessMask;
-		engine->GetGlobalPropertyByIndex(i, &name, &nameSpace, &typeId, &isConst, &configGroup, &pointer, &accessMask);
+			if (funcdef->GetParentType())
+				continue;
+
+			auto &ns = namespaces[funcdef->GetNamespace()];
+
+			std::string line = "funcdef " + FunctionToString(engine, funcdef->GetFuncdefSignature(), funcdef);
+			
+			if (std::find(ns.funcdefs.begin(), ns.funcdefs.end(), line) == ns.funcdefs.end())
+				ns.funcdefs.emplace_back(line);
+		}
+
+		for (asUINT i = 0; i < engine->GetObjectTypeCount(); i++)
+		{
+			asITypeInfo *type = engine->GetObjectTypeByIndex(i);
+			auto &ns = namespaces[type->GetNamespace()];
+			std::string decl = ObjectToDecl(type);
+			ObjectInfo *info = nullptr;
+
+			for (auto &e : ns.objects)
+				if (e.decl == decl)
+				{
+					info = &e;
+					break;
+				}
+
+			if (!info)
+			{
+				info = &ns.objects.emplace_back();
+				info->decl = std::move(decl);
+			}
+
+			GetObjectInfo(*info, engine, type);
+		}
+
+		for (asUINT i = 0; i < engine->GetGlobalPropertyCount(); i++)
+		{
+			const char *name;
+			const char *nameSpace;
+			int typeId;
+			bool isConst;
+			const char *configGroup;
+			void *pointer;
+			asDWORD accessMask;
+			engine->GetGlobalPropertyByIndex(i, &name, &nameSpace, &typeId, &isConst, &configGroup, &pointer, &accessMask);
 		
-		auto &ns = namespaces[nameSpace];
-		std::string typeName = TypeToTypeName(engine, typeId, (asETypeModifiers) (isConst ? asTM_CONST : 0), false, name);
+			auto &ns = namespaces[nameSpace];
+			std::string typeName = TypeToTypeName(engine, typeId, (asETypeModifiers) (isConst ? asTM_CONST : 0), false, name) + ';';
+			
+			if (std::find(ns.properties.begin(), ns.properties.end(), typeName) == ns.properties.end())
+				ns.properties.emplace_back(typeName);
+		}
 
-		lines.insert(lines.end(), {
-			fmt::format("{};", typeName),
-		});
+		for (asUINT i = 0; i < engine->GetGlobalFunctionCount(); i++)
+		{
+			asIScriptFunction *func = engine->GetGlobalFunctionByIndex(i);
+			auto &ns = namespaces[func->GetNamespace()];
+			std::string line = FunctionToString(engine, engine->GetGlobalFunctionByIndex(i));
 
-		ns.properties.emplace_back(std::move(lines));
-	}
-
-	for (asUINT i = 0; i < engine->GetGlobalFunctionCount(); i++)
-	{
-		asIScriptFunction *func = engine->GetGlobalFunctionByIndex(i);
-		auto &ns = namespaces[func->GetNamespace()];
-		std::vector<std::string> lines;
-		
-		lines.insert(lines.end(), {
-			FunctionToString(engine, engine->GetGlobalFunctionByIndex(i))
-		});
-
-		ns.functions.emplace_back(std::move(lines));
+			if (std::find(ns.functions.begin(), ns.functions.end(), line) == ns.functions.end())
+				ns.functions.push_back(line);
+		}
 	}
 
 	for (auto &ns : namespaces)
@@ -455,4 +589,12 @@ void WritePredefined(asIScriptEngine *engine, const char *filename)
 	namespaces[""].write(of, 0);
 
 	of << '\n';
+}
+
+#include "q2as_game.h"
+#include "q2as_cgame.h"
+
+void WritePredefined()
+{
+	WritePredefinedEngines(std::array<asIScriptEngine *, 2>({ svas.engine, cgas.engine }), "as.predefined");
 }

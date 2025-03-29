@@ -135,7 +135,7 @@ void G_EndOfUnitMessage()
 	level_entry_t totals;
 	int num_rows = 0;
 
-	foreach (auto @entry : game.level_entries)
+	foreach (const level_entry_t @entry : game.level_entries)
 	{
 		if (entry.map_name.empty())
 			break;

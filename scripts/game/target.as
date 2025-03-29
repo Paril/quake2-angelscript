@@ -263,7 +263,7 @@ void G_PlayerNotifyGoal(ASEntity &player)
 
 			// find the end of this goal
             uint goal_end = level.goals.findFirstOf("\t", goal_start + 1);
-            game.helpmessage1 = level.goals.substr(goal_start + 1, goal_end != -1 ? (goal_end - 1) : -1);
+            game.helpmessage1 = level.goals.substr(uint(goal_start + 1), goal_end != -1 ? (goal_end - 1) : -1);
 
 			game.help2changed = game.help1changed;
 		}

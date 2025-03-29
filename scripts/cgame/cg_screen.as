@@ -117,6 +117,7 @@ void CG_ClearCenterprint(int32 isplit)
 
 void CG_ClearNotify(int32 isplit)
 {
+    // AS_TODO: mutable forEach?
     //foreach (cl_notify_t @msg : hud_data[isplit].notify)
     for (uint i = 0; i < MAX_NOTIFY; i++)
         hud_data[isplit].notify[i].is_active = false;
@@ -183,7 +184,7 @@ void CG_DrawNotify(int32 isplit, vrect_t hud_vrect, vrect_t hud_safe, int32 scal
 
     if (ui_acc_contrast.integer != 0)
     {
-        foreach (auto @msg : data.notify)
+        foreach (const cl_notify_t @msg : data.notify)
         {
             if (!msg.is_active || msg.message.empty())
                 break;
@@ -196,7 +197,7 @@ void CG_DrawNotify(int32 isplit, vrect_t hud_vrect, vrect_t hud_safe, int32 scal
     }
 
     y = (hud_vrect.y * scale) + hud_safe.y;
-    foreach (auto @msg : data.notify)
+    foreach (const cl_notify_t @msg : data.notify)
     {
         if (!msg.is_active)
             break;
@@ -551,7 +552,7 @@ void CG_DrawCenterString( const player_state_t &in ps, const vrect_t &in hud_vre
             y += lineHeight;
         }
 
-        foreach (auto @bind : center.binds)
+        foreach (const cl_bind_t @bind : center.binds)
         {
             y += lineHeight * 2;
             cgi_SCR_DrawBind(isplit, bind.bind, bind.purpose, (hud_vrect.x + (hud_vrect.width / 2)) * scale, y, scale);
@@ -1744,8 +1745,8 @@ CG_TouchPics
 */
 void CG_TouchPics()
 {
-    foreach (auto @nums : sb_nums)
-        foreach (auto str : nums)
+    foreach (const array<string> @nums : sb_nums)
+        foreach (string str : nums)
             cgi_Draw_RegisterPic(str);
 
     cgi_Draw_RegisterPic("inventory");

@@ -802,7 +802,7 @@ void fire_guardian_heat(ASEntity &self, const vec3_t &in start, const vec3_t &in
 	heat.e.s.angles = vectoangles(dir);
 	heat.velocity = dir * speed;
 	heat.movetype = movetype_t::FLYMISSILE;
-	heat.e.clipmask = MASK_PROJECTILE;
+	heat.e.clipmask = contents_t::MASK_PROJECTILE;
 	heat.flags = ent_flags_t(heat.flags | ent_flags_t::DAMAGEABLE);
 	heat.e.solid = solid_t::BBOX;
 	heat.e.s.effects = effects_t(heat.e.s.effects | effects_t::ROCKET);
@@ -1165,7 +1165,7 @@ void SP_monster_guardian(ASEntity &self)
 	guardian::sounds::pain2.precache();
 	guardian::sounds::death.precache();
 
-	foreach (auto gib : guardian::gibs)
+	foreach (string gib : guardian::gibs)
 		gi_modelindex(gib);
 
 	self.e.s.modelindex = gi_modelindex("models/monsters/guardian/tris.md2");

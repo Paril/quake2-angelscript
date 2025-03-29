@@ -1390,7 +1390,7 @@ bool PM_AboveWater()
 {
 	const vec3_t below = pml.origin - vec3_t(0, 0, 8);
 
-	bool solid_below = pm.trace(pml.origin, pm.mins, pm.maxs, below, pm.player, MASK_SOLID).fraction < 1.0f;
+	bool solid_below = pm.trace(pml.origin, pm.mins, pm.maxs, below, pm.player, contents_t::MASK_SOLID).fraction < 1.0f;
 
 	if (solid_below)
 		return false;

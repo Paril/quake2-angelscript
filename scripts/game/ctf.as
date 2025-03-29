@@ -391,7 +391,7 @@ ASEntity @SelectCTFSpawnPoint(ASEntity &ent, bool force_spawn)
 
     spawn_points.shuffle();
 
-	foreach (auto @point : spawn_points)
+	foreach (ASEntity @point : spawn_points)
 		if (SpawnPointClear(point))
 			return point;
 	

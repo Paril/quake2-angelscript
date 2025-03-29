@@ -11,6 +11,8 @@
 #include "q2as_modules.h"
 #include "q2as_pmove.h"
 
+#include "q2as_predefined.h"
+
 /*virtual*/ void q2as_sv_state_t::Print(const char *text) /*override*/
 {
     gi.Com_Print(text);
@@ -454,6 +456,9 @@ static void Q2AS_ServerCommand()
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+
+	if (!strcmp(gi.argv(1), "q2as_write_predefined"))
+		WritePredefined();
 }
 
 static void    Q2AS_Bot_SetWeapon(edict_t * botEdict, const int weaponIndex, const bool instantSwitch)
@@ -2121,8 +2126,6 @@ static void Q2AS_Pmove(pmove_t *pmove)
 {
 }
 
-#include "q2as_predefined.h"
-
 // Q2 AngelScript support entry point. If AngelScript
 // support is used, the regular C++ API is rerouted
 // to AngelScript instead.
@@ -2176,11 +2179,6 @@ game_export_t *Q2AS_GetGameAPI()
     if (!svas.LoadLibraries(libraries, std::extent_v<decltype(libraries)>))
         return nullptr;
 	
-	const cvar_t *q2as_developer = gi.cvar("q2as_developer", "0", CVAR_NOFLAGS);
-
-	if (q2as_developer->integer)
-		WritePredefined(svas.engine, "game.as.predefined");
-
     if (!svas.CreateMainModule())
         return nullptr;
 

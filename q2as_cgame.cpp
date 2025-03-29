@@ -561,8 +561,6 @@ static void Q2AS_CG_Pmove(pmove_t *pm)
     *pm = cgas.pmove_inst->pm;
 }
 
-#include "q2as_predefined.h"
-
 cgame_export_t *Q2AS_GetCGameAPI()
 {
 	const cvar_t *q2as_use = cgi.cvar("q2as_use_cgame", "1", CVAR_NOFLAGS);
@@ -602,11 +600,6 @@ cgame_export_t *Q2AS_GetCGameAPI()
 
     if (!cgas.LoadLibraries(libraries, std::extent_v<decltype(libraries)>))
         return nullptr;
-	
-	const cvar_t *q2as_developer = cgi.cvar("q2as_developer", "0", CVAR_NOFLAGS);
-
-	if (q2as_developer->integer)
-		WritePredefined(cgas.engine, "cgame.as.predefined");
 
     if (!cgas.CreateMainModule())
         return nullptr;

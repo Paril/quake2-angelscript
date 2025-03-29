@@ -453,7 +453,7 @@ void SP_turret_driver(ASEntity &self)
 	self.e.svflags = svflags_t(self.e.svflags | svflags_t::MONSTER);
 	self.takedamage = true;
 	@self.use = monster_use;
-	self.e.clipmask = MASK_MONSTERSOLID;
+	self.e.clipmask = contents_t::MASK_MONSTERSOLID;
 	self.e.s.old_origin = self.e.s.origin;
 	self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::STAND_GROUND);
 	@self.monsterinfo.setskin = infantry_setskin;

@@ -1426,7 +1426,7 @@ void ClientEndServerFrame(ASEntity &ent)
 	{
 		bool clipped_player = false;
 
-		foreach (auto @player : active_players)
+		foreach (ASEntity @player : active_players)
 		{
 			if (player is ent)
 				continue;

@@ -1353,7 +1353,7 @@ void InitClientPersistant(ASEntity &ent)
 
 		if (coop.integer != 0)
 		{
-			foreach (auto @player : active_players)
+			foreach (ASEntity @player : active_players)
 			{
 				if (player is ent || !player.client.pers.spawned ||
 					player.client.resp.spectator || player.movetype == movetype_t::NOCLIP)

@@ -1,5 +1,3 @@
-// shared stuff
-
 namespace double_limits
 {
 	// properties
@@ -250,6 +248,332 @@ enum water_level_t : uint8
 	FEET = 1,
 	WAIST = 2,
 	UNDER = 3
+}
+enum gesture_type_t : int32
+{
+	NONE = -1,
+	FLIP_OFF = 0,
+	SALUTE = 1,
+	TAUNT = 2,
+	WAVE = 3,
+	POINT = 4,
+	POINT_NO_PING = 5,
+	MAX = 6
+}
+enum print_type_t : int32
+{
+	LOW = 0,
+	MEDIUM = 1,
+	HIGH = 2,
+	CHAT = 3,
+	TYPEWRITER = 4,
+	CENTER = 5,
+	TTS = 6,
+	BROADCAST = 8,
+	NO_NOTIFY = 16
+}
+enum BoxEdictsResult_t : int32
+{
+	Keep = 0,
+	Skip = 1,
+	End = 64,
+	Flags = 64
+}
+enum multicast_t : int32
+{
+	ALL = 0,
+	PHS = 1,
+	PVS = 2
+}
+enum solidity_area_t : int32
+{
+	SOLID = 1,
+	TRIGGERS = 2
+}
+enum soundchan_t : uint8
+{
+	AUTO = 0,
+	WEAPON = 1,
+	VOICE = 2,
+	ITEM = 3,
+	BODY = 4,
+	AUX = 5,
+	FOOTSTEP = 6,
+	AUX3 = 7,
+	NO_PHS_ADD = 8,
+	RELIABLE = 16,
+	FORCE_POS = 32
+}
+enum svc_t : int32
+{
+	bad = 0,
+	muzzleflash = 1,
+	muzzleflash2 = 2,
+	temp_entity = 3,
+	layout = 4,
+	inventory = 5,
+	nop = 6,
+	disconnect = 7,
+	reconnect = 8,
+	sound = 9,
+	print = 10,
+	stufftext = 11,
+	serverdata = 12,
+	configstring = 13,
+	spawnbaseline = 14,
+	centerprint = 15,
+	download = 16,
+	playerinfo = 17,
+	packetentities = 18,
+	deltapacketentities = 19,
+	frame = 20,
+	configblast = 22,
+	spawnbaselineblast = 23,
+	level_restart = 24,
+	damage = 25,
+	locprint = 26,
+	fog = 27,
+	waitingforplayers = 28,
+	bot_chat = 29,
+	poi = 30,
+	help_path = 31,
+	muzzleflash3 = 32,
+	achievement = 33,
+	last = 34
+}
+enum player_muzzle_t : int32
+{
+	BLASTER = 0,
+	MACHINEGUN = 1,
+	SHOTGUN = 2,
+	CHAINGUN1 = 3,
+	CHAINGUN2 = 4,
+	CHAINGUN3 = 5,
+	RAILGUN = 6,
+	ROCKET = 7,
+	GRENADE = 8,
+	LOGIN = 9,
+	LOGOUT = 10,
+	RESPAWN = 11,
+	BFG = 12,
+	SSHOTGUN = 13,
+	HYPERBLASTER = 14,
+	ITEMRESPAWN = 15,
+	IONRIPPER = 16,
+	BLUEHYPERBLASTER = 17,
+	PHALANX = 18,
+	BFG2 = 19,
+	PHALANX2 = 20,
+	ETF_RIFLE = 30,
+	PROX = 31,
+	ETF_RIFLE_2 = 32,
+	HEATBEAM = 33,
+	BLASTER2 = 34,
+	TRACKER = 35,
+	NUKE1 = 36,
+	NUKE2 = 37,
+	NUKE4 = 38,
+	NUKE8 = 39,
+	SILENCED = 128,
+	NONE = 0
+}
+enum temp_event_t : int32
+{
+	GUNSHOT = 0,
+	BLOOD = 1,
+	BLASTER = 2,
+	RAILTRAIL = 3,
+	SHOTGUN = 4,
+	EXPLOSION1 = 5,
+	EXPLOSION2 = 6,
+	ROCKET_EXPLOSION = 7,
+	GRENADE_EXPLOSION = 8,
+	SPARKS = 9,
+	SPLASH = 10,
+	BUBBLETRAIL = 11,
+	SCREEN_SPARKS = 12,
+	SHIELD_SPARKS = 13,
+	BULLET_SPARKS = 14,
+	LASER_SPARKS = 15,
+	PARASITE_ATTACK = 16,
+	ROCKET_EXPLOSION_WATER = 17,
+	GRENADE_EXPLOSION_WATER = 18,
+	MEDIC_CABLE_ATTACK = 19,
+	BFG_EXPLOSION = 20,
+	BFG_BIGEXPLOSION = 21,
+	BOSSTPORT = 22,
+	BFG_LASER = 23,
+	GRAPPLE_CABLE = 24,
+	WELDING_SPARKS = 25,
+	GREENBLOOD = 26,
+	BLUEHYPERBLASTER_DUMMY = 27,
+	PLASMA_EXPLOSION = 28,
+	TUNNEL_SPARKS = 29,
+	BLASTER2 = 30,
+	RAILTRAIL2 = 31,
+	FLAME = 32,
+	LIGHTNING = 33,
+	DEBUGTRAIL = 34,
+	PLAIN_EXPLOSION = 35,
+	FLASHLIGHT = 36,
+	FORCEWALL = 37,
+	HEATBEAM = 38,
+	MONSTER_HEATBEAM = 39,
+	STEAM = 40,
+	BUBBLETRAIL2 = 41,
+	MOREBLOOD = 42,
+	HEATBEAM_SPARKS = 43,
+	HEATBEAM_STEAM = 44,
+	CHAINFIST_SMOKE = 45,
+	ELECTRIC_SPARKS = 46,
+	TRACKER_EXPLOSION = 47,
+	TELEPORT_EFFECT = 48,
+	DBALL_GOAL = 49,
+	WIDOWBEAMOUT = 50,
+	NUKEBLAST = 51,
+	WIDOWSPLASH = 52,
+	EXPLOSION1_BIG = 53,
+	EXPLOSION1_NP = 54,
+	FLECHETTE = 55,
+	BLUEHYPERBLASTER = 56,
+	BFG_ZAP = 57,
+	BERSERK_SLAM = 58,
+	GRAPPLE_CABLE_2 = 59,
+	POWER_SPLASH = 60,
+	LIGHTNING_BEAM = 61,
+	EXPLOSION1_NL = 62,
+	EXPLOSION2_NL = 63
+}
+enum splash_color_t : int32
+{
+	UNKNOWN = 0,
+	SPARKS = 1,
+	BLUE_WATER = 2,
+	BROWN_WATER = 3,
+	SLIME = 4,
+	LAVA = 5,
+	BLOOD = 6,
+	ELECTRIC = 7
+}
+enum server_flags_t : int32
+{
+	NONE = 0,
+	SLOW_TIME = 1,
+	INTERMISSION = 2,
+	LOADING = 4
+}
+enum renderfx_t : int32
+{
+	NONE = 0,
+	MINLIGHT = 1,
+	VIEWERMODEL = 2,
+	WEAPONMODEL = 4,
+	FULLBRIGHT = 8,
+	DEPTHHACK = 16,
+	TRANSLUCENT = 32,
+	NO_ORIGIN_LERP = 64,
+	BEAM = 128,
+	CUSTOMSKIN = 256,
+	GLOW = 512,
+	SHELL_RED = 1024,
+	SHELL_GREEN = 2048,
+	SHELL_BLUE = 4096,
+	NOSHADOW = 8192,
+	CASTSHADOW = 16384,
+	IR_VISIBLE = 32768,
+	SHELL_DOUBLE = 65536,
+	SHELL_HALF_DAM = 131072,
+	USE_DISGUISE = 262144,
+	SHELL_LITE_GREEN = 524288,
+	CUSTOM_LIGHT = 1048576,
+	FLARE = 2097152,
+	OLD_FRAME_LERP = 4194304,
+	DOT_SHADOW = 8388608,
+	LOW_PRIORITY = 16777216,
+	NO_LOD = 33554432,
+	NO_STEREO = 4,
+	STAIR_STEP = 67108864,
+	FLARE_LOCK_ANGLE = 1,
+	BEAM_LIGHTNING = 640
+}
+enum effects_t : uint64
+{
+	NONE = 0,
+	ROTATE = 1,
+	GIB = 2,
+	BOB = 4,
+	BLASTER = 8,
+	ROCKET = 16,
+	GRENADE = 32,
+	HYPERBLASTER = 64,
+	BFG = 128,
+	COLOR_SHELL = 256,
+	POWERSCREEN = 512,
+	ANIM01 = 1024,
+	ANIM23 = 2048,
+	ANIM_ALL = 4096,
+	ANIM_ALLFAST = 8192,
+	FLIES = 16384,
+	QUAD = 32768,
+	PENT = 65536,
+	TELEPORTER = 131072,
+	FLAG1 = 262144,
+	FLAG2 = 524288,
+	IONRIPPER = 1048576,
+	GREENGIB = 2097152,
+	BLUEHYPERBLASTER = 4194304,
+	SPINNINGLIGHTS = 8388608,
+	PLASMA = 16777216,
+	TRAP = 33554432,
+	TRACKER = 67108864,
+	DOUBLE = 134217728,
+	SPHERETRANS = 268435456,
+	TAGTRAIL = 536870912,
+	HALF_DAMAGE = 1073741824,
+	TRACKERTRAIL = 2147483648,
+	DUALFIRE = 4294967296,
+	HOLOGRAM = 8589934592,
+	FLASHLIGHT = 17179869184,
+	BARREL_EXPLODING = 34359738368,
+	TELEPORTER2 = 68719476736,
+	GRENADE_LIGHT = 137438953472,
+	FIREBALL = 18
+}
+enum entity_event_t : uint8
+{
+	NONE = 0,
+	ITEM_RESPAWN = 1,
+	FOOTSTEP = 2,
+	FALLSHORT = 3,
+	FALL = 4,
+	FALLFAR = 5,
+	PLAYER_TELEPORT = 6,
+	OTHER_TELEPORT = 7,
+	OTHER_FOOTSTEP = 8,
+	LADDER_STEP = 9
+}
+enum svflags_t : uint32
+{
+	NONE = 0,
+	NOCLIENT = 1,
+	DEADMONSTER = 2,
+	MONSTER = 4,
+	PLAYER = 8,
+	BOT = 16,
+	NOBOTS = 32,
+	RESPAWNING = 64,
+	PROJECTILE = 128,
+	INSTANCED = 256,
+	DOOR = 512,
+	NOCULL = 1024,
+	HULL = 2048
+}
+enum solid_t : uint8
+{
+	NOT = 0,
+	TRIGGER = 1,
+	BBOX = 2,
+	BSP = 3
 }
 enum configstring_id_t : int32
 {
@@ -600,20 +924,81 @@ enum monster_muzzle_t : int32
 	MEDIC_HYPERBLASTER2_12 = 288,
 	LAST = 289
 }
+enum GoalReturnCode : int32
+{
+	Error = 0,
+	Started = 1,
+	InProgress = 2,
+	Finished = 3
+}
+enum gesture_type : int32
+{
+	NONE = -1,
+	FLIP_OFF = 0,
+	SALUTE = 1,
+	TAUNT = 2,
+	WAVE = 3,
+	POINT = 4,
+	POINT_NO_PING = 5,
+	MAX = 6
+}
+enum PathReturnCode : int32
+{
+	ReachedGoal = 0,
+	ReachedPathEnd = 1,
+	TraversalPending = 2,
+	RawPathFound = 3,
+	InProgress = 4,
+	StartPathErrors = 5,
+	InvalidStart = 6,
+	InvalidGoal = 7,
+	NoNavAvailable = 8,
+	NoStartNode = 9,
+	NoGoalNode = 10,
+	NoPathFound = 11,
+	MissingWalkOrSwimFlag = 12
+}
+enum PathLinkType : int32
+{
+	Walk = 0,
+	WalkOffLedge = 1,
+	LongJump = 2,
+	BarrierJump = 3,
+	Elevator = 4
+}
+enum PathFlags : int32
+{
+	All = 4294967295,
+	Water = 1,
+	Walk = 2,
+	WalkOffLedge = 4,
+	LongJump = 8,
+	BarrierJump = 16,
+	Elevator = 32
+}
+enum shadow_light_type_t : int32
+{
+	point = 0,
+	cone = 1
+}
+enum text_align_t : int32
+{
+	LEFT = 0,
+	CENTER = 1,
+	RIGHT = 2
+}
 // funcdefs
+funcdef BoxEdictsResult_t BoxEdictsFilter_t(edict_t @, const any @);
 funcdef trace_t pm_trace_f(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t @, contents_t);
 funcdef trace_t pm_clip_f(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t);
 funcdef contents_t pm_pointcontents_f(const vec3_t &in);
 // objects
 class string
 {
-	// funcdefs
-	// properties
 	// behaviors
 	~string();
 	string();
 	string(const string&in);
-	// factories
 	// methods
 	string &opAssign(const string &in);
 	string &opAddAssign(const string &in);
@@ -668,14 +1053,12 @@ class array<T>
 {
 	// funcdefs
 	funcdef bool less(const T &in if_handle_then_const a, const T &in if_handle_then_const b);
-	// properties
 	// behaviors
-    array();
-	array(int&in type, int&in list) { repeat T };
+	array(int&in list) { repeat T };
 	// factories
-	array(int32 &in);
-	array(int32 &in, uint32 length);
-	array(int32 &in, uint32 length, const T &in value);
+	array();
+	array(uint32 length);
+	array(uint32 length, const T &in value);
 	// methods
 	T &opIndex(uint32 index);
 	const T &opIndex(uint32 index) const;
@@ -717,9 +1100,6 @@ class array<T>
 }
 class any
 {
-	// funcdefs
-	// properties
-	// behaviors
 	// factories
 	any();
 	any(? @&in);
@@ -736,12 +1116,9 @@ class any
 }
 class dictionaryValue
 {
-	// funcdefs
-	// properties
 	// behaviors
 	~dictionaryValue();
 	dictionaryValue();
-	// factories
 	// methods
 	dictionaryValue &opAssign(const dictionaryValue &in);
 	dictionaryValue &opHndlAssign(const ? @&in);
@@ -756,8 +1133,6 @@ class dictionaryValue
 }
 class dictionary
 {
-	// funcdefs
-	// properties
 	// behaviors
 	dictionary(int&in) { repeat { string, ? } };
 	// factories
@@ -790,21 +1165,13 @@ class dictionary
 }
 class dictionaryIter
 {
-	// funcdefs
-	// properties
-	// behaviors
-	// factories
-	// methods
 }
 class datetime
 {
-	// funcdefs
-	// properties
 	// behaviors
 	datetime();
 	datetime(const datetime&in);
 	datetime(uint, uint, uint, uint = 0, uint = 0, uint = 0);
-	// factories
 	// methods
 	datetime &opAssign(const datetime &in);
 	uint32 get_year() const property;
@@ -828,13 +1195,10 @@ class datetime
 }
 class weakref<T>
 {
-	// funcdefs
-	// properties
 	// behaviors
 	~weakref();
-	weakref(int&in);
-	weakref(int&in, T@);
-	// factories
+	weakref();
+	weakref(T@);
 	// methods
 	T @opImplCast();
 	T @get() const;
@@ -846,13 +1210,10 @@ class weakref<T>
 }
 class const_weakref<T>
 {
-	// funcdefs
-	// properties
 	// behaviors
 	~const_weakref();
-	const_weakref(int&in);
-	const_weakref(int&in, const T@);
-	// factories
+	const_weakref();
+	const_weakref(const T@);
 	// methods
 	T @opImplCast() const;
 	T @get() const;
@@ -866,7 +1227,6 @@ class const_weakref<T>
 }
 class vec3_t
 {
-	// funcdefs
 	// properties
 	float x;
 	float y;
@@ -878,7 +1238,6 @@ class vec3_t
 	vec3_t(int&in) { float, float, float };
 	vec3_t(float, float, float);
 	vec3_t(const vec3_t&in);
-	// factories
 	// methods
 	float &opIndex(uint32);
 	const float &opIndex(uint32) const;
@@ -912,7 +1271,6 @@ class vec3_t
 }
 class rgba_t
 {
-	// funcdefs
 	// properties
 	uint8 r;
 	uint8 g;
@@ -921,7 +1279,6 @@ class rgba_t
 	// behaviors
 	rgba_t(int&in) { repeat uint8 };
 	rgba_t(uint8, uint8, uint8, uint8);
-	// factories
 	// methods
 	uint8 &opIndex(uint32);
 	const uint8 &opIndex(uint32) const;
@@ -929,14 +1286,12 @@ class rgba_t
 }
 class vec2_t
 {
-	// funcdefs
 	// properties
 	float x;
 	float y;
 	// behaviors
 	vec2_t(int&in) { repeat float };
 	vec2_t(float, float);
-	// factories
 	// methods
 	float &opIndex(uint32);
 	const float &opIndex(uint32) const;
@@ -944,7 +1299,6 @@ class vec2_t
 }
 class vec4_t
 {
-	// funcdefs
 	// properties
 	float x;
 	float y;
@@ -953,7 +1307,6 @@ class vec4_t
 	// behaviors
 	vec4_t(int&in) { repeat float };
 	vec4_t(float, float, float, float);
-	// factories
 	// methods
 	float &opIndex(uint32);
 	const float &opIndex(uint32) const;
@@ -962,11 +1315,8 @@ class vec4_t
 }
 class mat3_t
 {
-	// funcdefs
-	// properties
 	// behaviors
 	mat3_t(int&in) { repeat vec3_t };
-	// factories
 	// methods
 	vec3_t &opIndex(uint32);
 	const vec3_t &opIndex(uint32) const;
@@ -974,14 +1324,12 @@ class mat3_t
 }
 class gtime_t
 {
-	// funcdefs
 	// properties
 	int64 milliseconds;
 	// behaviors
 	gtime_t(int64, timeunit_t);
 	gtime_t(float, timeunit_t);
 	gtime_t(const gtime_t&in);
-	// factories
 	// methods
 	int64 secondsi() const;
 	float secondsf() const;
@@ -1008,14 +1356,11 @@ class gtime_t
 }
 class cvar_t
 {
-	// funcdefs
 	// properties
 	const cvar_flags_t flags;
 	const int32 modified_count;
 	const float value;
 	const int32 integer;
-	// behaviors
-	// factories
 	// methods
 	string get_name() const property;
 	string get_stringval() const property;
@@ -1024,12 +1369,9 @@ class cvar_t
 }
 class string_hashset
 {
-	// funcdefs
-	// properties
 	// behaviors
 	~string_hashset();
 	string_hashset();
-	// factories
 	// methods
 	bool empty() const;
 	void clear();
@@ -1039,36 +1381,26 @@ class string_hashset
 }
 class cplane_t
 {
-	// funcdefs
 	// properties
 	vec3_t normal;
 	float dist;
 	uint8 type;
 	uint8 signbits;
-	// behaviors
-	// factories
-	// methods
 }
 class csurface_t
 {
-	// funcdefs
 	// properties
 	const surfflags_t flags;
 	const int32 value;
 	const uint32 id;
-	// behaviors
-	// factories
 	// methods
 	string get_name() const property;
 	string get_material() const property;
 }
 class stat_array_t
 {
-	// funcdefs
-	// properties
 	// behaviors
 	stat_array_t(int&in) { repeat int16 };
-	// factories
 	// methods
 	int16 &opIndex(uint32);
 	const int16 &opIndex(uint32) const;
@@ -1093,7 +1425,6 @@ class stat_array_t
 }
 class pmove_state_t
 {
-	// funcdefs
 	// properties
 	pmtype_t pm_type;
 	vec3_t origin;
@@ -1103,14 +1434,11 @@ class pmove_state_t
 	int16 gravity;
 	vec3_t delta_angles;
 	int8 viewheight;
-	// behaviors
-	// factories
 	// methods
 	bool opEquals(const pmove_state_t &in) const;
 }
 class player_state_t
 {
-	// funcdefs
 	// properties
 	pmove_state_t pmove;
 	vec3_t viewangles;
@@ -1130,12 +1458,167 @@ class player_state_t
 	uint8 team_id;
 	// behaviors
 	player_state_t();
-	// factories
+}
+class entity_state_t
+{
+	// properties
+	const uint32 number;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t old_origin;
+	int32 modelindex;
+	int32 modelindex2;
+	int32 modelindex3;
+	int32 modelindex4;
+	int32 frame;
+	int32 skinnum;
+	effects_t effects;
+	renderfx_t renderfx;
+	int32 sound;
+	entity_event_t event;
+	float alpha;
+	float scale;
+	float loop_volume;
+	float loop_attenuation;
+	int32 old_frame;
+	const uint32 solid_bits;
+	const int32 owner_id;
+	const uint8 instance_bits;
 	// methods
+	entity_state_t &opAssign(const entity_state_t &in);
+}
+class gclient_t
+{
+	// properties
+	player_state_t ps;
+	int32 ping;
+	pmove_state_t pmove;
+	vec3_t viewangles;
+	vec3_t viewoffset;
+	vec3_t kick_angles;
+	vec3_t gunangles;
+	vec3_t gunoffset;
+	int32 gunindex;
+	int32 gunskin;
+	int32 gunframe;
+	int32 gunrate;
+	vec4_t screen_blend;
+	vec4_t damage_blend;
+	float fov;
+	refdef_flags_t rdflags;
+	stat_array_t stats;
+	uint8 team_id;
+}
+class armorInfo_t
+{
+	// properties
+	int32 item_id;
+	int32 max_count;
+}
+class inventoryArray_t
+{
+	// behaviors
+	inventoryArray_t(int&in) { repeat int };
+	// methods
+	int32 &opIndex(uint32);
+	const int32 &opIndex(uint32) const;
+	uint32 size() const;
+}
+class armorInfoArray_t
+{
+	// behaviors
+	armorInfoArray_t(int&in) { repeat armorInfo_t };
+	// methods
+	armorInfo_t &opIndex(uint32);
+	const armorInfo_t &opIndex(uint32) const;
+	uint32 size() const;
+}
+class edict_t
+{
+	// properties
+	entity_state_t s;
+	player_state_t ps;
+	gclient_t @client;
+	bool inuse;
+	const bool linked;
+	const int32 linkcount;
+	const int32 areanum;
+	const int32 areanum2;
+	svflags_t svflags;
+	vec3_t mins;
+	vec3_t maxs;
+	vec3_t absmin;
+	vec3_t absmax;
+	vec3_t size;
+	solid_t solid;
+	contents_t clipmask;
+	edict_t @owner;
+	const uint32 number;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t old_origin;
+	int32 modelindex;
+	int32 modelindex2;
+	int32 modelindex3;
+	int32 modelindex4;
+	int32 frame;
+	int32 skinnum;
+	effects_t effects;
+	renderfx_t renderfx;
+	int32 sound;
+	entity_event_t event;
+	float alpha;
+	float scale;
+	float loop_volume;
+	float loop_attenuation;
+	int32 old_frame;
+	const uint8 instance_bits;
+	sv_entity_t sv;
+	IASEntity @as_obj;
+	// methods
+	void reset();
+}
+class sv_entity_t
+{
+	// properties
+	bool init;
+	uint64 ent_flags;
+	button_t buttons;
+	uint32 spawnflags;
+	int32 item_id;
+	int32 armor_type;
+	int32 armor_value;
+	int32 health;
+	int32 max_health;
+	int32 starting_health;
+	int32 weapon;
+	int32 team;
+	int32 lobby_usernum;
+	int32 respawntime;
+	int32 viewheight;
+	int32 last_attackertime;
+	water_level_t waterlevel;
+	vec3_t viewangles;
+	vec3_t viewforward;
+	vec3_t velocity;
+	vec3_t start_origin;
+	vec3_t end_origin;
+	edict_t @enemy;
+	edict_t @ground_entity;
+	inventoryArray_t inventory;
+	armorInfoArray_t armor_info;
+	// methods
+	void set_classname(const string &in) property;
+	void set_targetname(const string &in) property;
+	void set_netname(const string &in) property;
+}
+class IASEntity
+{
+	// methods
+	edict_t @get_handle() const property;
 }
 class trace_t
 {
-	// funcdefs
 	// properties
 	bool allsolid;
 	bool startsolid;
@@ -1149,13 +1632,11 @@ class trace_t
 	csurface_t @surface2;
 	// behaviors
 	trace_t(const trace_t&in);
-	// factories
 	// methods
 	trace_t &opAssign(const trace_t &in);
 }
 class usercmd_t
 {
-	// funcdefs
 	// properties
 	uint8 msec;
 	button_t buttons;
@@ -1163,13 +1644,9 @@ class usercmd_t
 	float forwardmove;
 	float sidemove;
 	uint32 server_frame;
-	// behaviors
-	// factories
-	// methods
 }
 class pmove_t
 {
-	// funcdefs
 	// properties
 	pmove_state_t s;
 	usercmd_t cmd;
@@ -1191,7 +1668,6 @@ class pmove_t
 	bool jump_sound;
 	bool step_clip;
 	float impact_delta;
-	// behaviors
 	// factories
 	pmove_t();
 	// methods
@@ -1200,11 +1676,305 @@ class pmove_t
 	const trace_t &touch_get(uint32 i) const;
 	void touch_clear();
 }
+class json_mutval
+{
+	// behaviors
+	~json_mutval();
+	json_mutval();
+	json_mutval(const json_mutval&in);
+	// methods
+	json_mutval &opAssign(const json_mutval &in);
+	bool get_valid() const property;
+	string to_string() const;
+	bool get_is_obj() const property;
+	bool get_is_arr() const property;
+	bool get_is_ctn() const property;
+	bool get_is_true() const property;
+	bool get_is_false() const property;
+	bool get_is_bool() const property;
+	bool get_is_str() const property;
+	bool get_is_uint8() const property;
+	bool get_is_uint16() const property;
+	bool get_is_uint32() const property;
+	bool get_is_uint64() const property;
+	bool get_is_int8() const property;
+	bool get_is_int16() const property;
+	bool get_is_int32() const property;
+	bool get_is_int64() const property;
+	bool get_is_float() const property;
+	bool get_is_double() const property;
+	bool get_is_int() const property;
+	bool get_is_uint() const property;
+	bool get_is_sint() const property;
+	bool get_is_real() const property;
+	bool get_is_null() const property;
+	bool get_is_num() const property;
+	bool arr_insert(json_mutval v, uint64 index);
+	bool arr_append(json_mutval v);
+	bool arr_prepend(json_mutval v);
+	json_mutval arr_replace(uint64 index, json_mutval v);
+	json_mutval arr_remove_first();
+	json_mutval arr_remove_last();
+	bool arr_remove_range(uint64 index, uint64 len);
+	bool arr_clear();
+	uint64 get_arr_size() const property;
+	bool obj_add(const string &in, json_mutval v);
+	bool obj_put(const string &in, json_mutval v);
+	bool obj_remove(const string &in);
+	bool obj_rename_key(const string &in, const string &in);
+	bool obj_clear();
+	uint64 get_obj_size() const property;
+}
+class json_mutdoc
+{
+	// factories
+	json_mutdoc();
+	json_mutdoc(const json_doc &in);
+	// methods
+	json_mutval get_root() property;
+	void set_root(const json_mutval &in val) property;
+	void set_str_pool_size(uint64 len);
+	void set_val_pool_size(uint64 len);
+	json_mutval null_();
+	json_mutval true_();
+	json_mutval false_();
+	json_mutval bool_(bool);
+	json_mutval uint_(uint64);
+	json_mutval sint(int64);
+	json_mutval int_(int64);
+	json_mutval val_(bool);
+	json_mutval val_(uint8);
+	json_mutval val_(uint16);
+	json_mutval val_(uint32);
+	json_mutval val_(uint64);
+	json_mutval val_(int8);
+	json_mutval val_(int16);
+	json_mutval val_(int32);
+	json_mutval val_(int64);
+	json_mutval val_(float);
+	json_mutval val_(double);
+	json_mutval real(double);
+	json_mutval str(const string &in, uint32 len);
+	json_mutval str(const string &in);
+	json_mutval obj();
+	json_mutval arr();
+	string to_string() const;
+}
+class json_val
+{
+	// behaviors
+	~json_val();
+	json_val();
+	json_val(const json_val&in);
+	// methods
+	json_val &opAssign(const json_val &in);
+	bool get_valid() const property;
+	string to_string() const;
+	bool get_is_obj() const property;
+	bool get_is_arr() const property;
+	bool get_is_ctn() const property;
+	bool get_is_true() const property;
+	bool get_is_false() const property;
+	bool get_is_bool() const property;
+	bool get_is_str() const property;
+	bool get_is_uint8() const property;
+	bool get_is_uint16() const property;
+	bool get_is_uint32() const property;
+	bool get_is_uint64() const property;
+	bool get_is_int8() const property;
+	bool get_is_int16() const property;
+	bool get_is_int32() const property;
+	bool get_is_int64() const property;
+	bool get_is_float() const property;
+	bool get_is_double() const property;
+	bool get_is_int() const property;
+	bool get_is_uint() const property;
+	bool get_is_sint() const property;
+	bool get_is_real() const property;
+	bool get_is_null() const property;
+	bool get_is_num() const property;
+	bool get_bool_() const property;
+	uint8 get_uint8() const property;
+	void get_uint8(uint8 &out) const;
+	uint16 get_uint16() const property;
+	void get_uint16(uint16 &out) const;
+	uint32 get_uint32() const property;
+	void get_uint32(uint32 &out) const;
+	uint64 get_uint64() const property;
+	void get_uint64(uint64 &out) const;
+	int8 get_int8() const property;
+	void get_int8(int8 &out) const;
+	int16 get_int16() const property;
+	void get_int16(int16 &out) const;
+	int32 get_int32() const property;
+	void get_int32(int32 &out) const;
+	int64 get_int64() const property;
+	void get_int64(int64 &out) const;
+	float get_float() const property;
+	void get_float(float &out) const;
+	double get_double() const property;
+	void get_double(double &out) const;
+	void get(bool &out) const;
+	void get(uint8 &out) const;
+	void get(uint16 &out) const;
+	void get(uint32 &out) const;
+	void get(uint64 &out) const;
+	void get(int8 &out) const;
+	void get(int16 &out) const;
+	void get(int32 &out) const;
+	void get(int64 &out) const;
+	void get(float &out) const;
+	void get(double &out) const;
+	void get(? @&out) const;
+	uint64 get_uint_() const property;
+	int64 get_sint() const property;
+	int32 get_int_() const property;
+	double get_real() const property;
+	double get_num() const property;
+	string get_str() const property;
+	uint64 get_length() const property;
+	json_val arr_get(uint64) const;
+	json_val arr_get_first() const;
+	json_val arr_get_last() const;
+	json_val obj_get(const string &in) const;
+}
+class json_doc
+{
+	// factories
+	json_doc();
+	json_doc(const string &in);
+	json_doc(const json_mutdoc &in);
+	// methods
+	json_val get_root() property;
+	uint64 get_read_size() const property;
+	uint64 get_val_count() const property;
+	string to_string() const;
+}
+class json_arr_iter
+{
+	// behaviors
+	~json_arr_iter();
+	json_arr_iter();
+	json_arr_iter(const json_arr_iter&in);
+	json_arr_iter(json_val);
+	// methods
+	json_arr_iter &opAssign(const json_arr_iter &in);
+	json_val get_next() const property;
+	bool get_has_next() const property;
+}
+class json_obj_iter
+{
+	// behaviors
+	~json_obj_iter();
+	json_obj_iter();
+	json_obj_iter(const json_obj_iter&in);
+	json_obj_iter(json_val);
+	// methods
+	json_obj_iter &opAssign(const json_obj_iter &in);
+	json_val get_next() const property;
+	json_val get_val(const json_val &in key) const;
+	bool get_has_next() const property;
+}
+class PathDebugSettings
+{
+	// properties
+	float drawTime;
+	// behaviors
+	PathDebugSettings();
+	PathDebugSettings(const PathDebugSettings&in);
+	// methods
+	PathDebugSettings &opAssign(const PathDebugSettings &in);
+}
+class PathNodeSettings
+{
+	// properties
+	bool ignoreNodeFlags;
+	float minHeight;
+	float maxHeight;
+	float radius;
+	// behaviors
+	PathNodeSettings();
+	PathNodeSettings(const PathNodeSettings&in);
+	// methods
+	PathNodeSettings &opAssign(const PathNodeSettings &in);
+}
+class PathTraversalSettings
+{
+	// properties
+	float dropHeight;
+	float jumpHeight;
+	// behaviors
+	PathTraversalSettings();
+	PathTraversalSettings(const PathTraversalSettings&in);
+	// methods
+	PathTraversalSettings &opAssign(const PathTraversalSettings &in);
+}
+class PathRequest
+{
+	// properties
+	vec3_t start;
+	vec3_t goal;
+	PathFlags pathFlags;
+	float moveDist;
+	PathDebugSettings debugging;
+	PathNodeSettings nodeSearch;
+	PathTraversalSettings traversals;
+	int64 maxPathPoints;
+	// behaviors
+	PathRequest();
+	PathRequest(const PathRequest&in);
+	// methods
+	PathRequest &opAssign(const PathRequest &in);
+}
+class PathInfo
+{
+	// properties
+	uint32 numPathPoints;
+	float pathDistSqr;
+	vec3_t firstMovePoint;
+	vec3_t secondMovePoint;
+	PathLinkType pathLinkType;
+	PathReturnCode returnCode;
+	// factories
+	PathInfo();
+	// methods
+	PathInfo &opAssign(const PathInfo &in);
+	const vec3_t &getPathPoint(uint32 i) const;
+}
+class spawnflags_t
+{
+	// methods
+	spawnflags_t opCom() const;
+	spawnflags_t opAnd(spawnflags_t) const;
+	spawnflags_t opOr(spawnflags_t) const;
+	spawnflags_t opXor(spawnflags_t) const;
+	spawnflags_t &opAndAssign(spawnflags_t);
+	spawnflags_t &opOrAssign(spawnflags_t);
+	spawnflags_t &opXorAssign(spawnflags_t);
+	uint32 opConv() const;
+	bool has(spawnflags_t) const;
+	bool has_all(spawnflags_t) const;
+}
+class shadow_light_data_t
+{
+	// properties
+	shadow_light_type_t lighttype;
+	float radius;
+	int32 resolution;
+	float intensity;
+	float fade_start;
+	float fade_end;
+	int32 lightstyle;
+	float coneangle;
+	vec3_t conedirection;
+	// behaviors
+	shadow_light_data_t();
+	shadow_light_data_t(const shadow_light_data_t&in);
+	// methods
+	shadow_light_data_t &opAssign(const shadow_light_data_t &in);
+}
 class tokenizer_t
 {
-	// funcdefs
-	// properties
-	// behaviors
 	// factories
 	tokenizer_t();
 	tokenizer_t(const string &in);
@@ -1236,18 +2006,58 @@ class tokenizer_t
 	void push_state();
 	void pop_state();
 	void reset();
-    // cgame only
 	string as_localized(int32);
+}
+class vrect_t
+{
+	// properties
+	int32 x;
+	int32 y;
+	int32 width;
+	int32 height;
+	// behaviors
+	vrect_t(int&in) { repeat int };
+	// methods
+	int32 &opIndex(uint32);
+	const int32 &opIndex(uint32) const;
+	uint32 size() const;
+}
+class item_array_t
+{
+	// behaviors
+	item_array_t(int&in) { repeat int16 };
+	// methods
+	int16 &opIndex(uint32);
+	const int16 &opIndex(uint32) const;
+	uint32 size() const;
+}
+class cg_server_data_t
+{
+	// properties
+	item_array_t inventory;
+	// methods
+	string get_layout() const property;
 }
 // properties
 const float PIf;
 const double PI;
 const float RAD2DEGf;
-const float DEG2RADf;
 const double RAD2DEG;
+const float DEG2RADf;
 const double DEG2RAD;
 const vec3_t vec3_origin;
+const int32 Max_Armor_Types;
 const uint32 MAX_SPLIT_PLAYERS;
+const uint32 gi_tick_rate;
+const float gi_frame_time_s;
+const uint32 gi_frame_time_ms;
+const uint32 max_edicts;
+uint32 num_edicts;
+const uint32 max_clients;
+server_flags_t server_flags;
+const float cgi_frame_time_s;
+const uint32 cgi_frame_time_ms;
+const uint32 cgi_tick_rate;
 // functions
 uint32 scan(const string &in str, ? &out ...);
 string formatInt(int64 val, const string &in options = "", uint32 width = 0);
@@ -1522,859 +2332,6 @@ void print(const string &in s);
 string typeof(const ? @&in);
 string reflect_name_of_global<T>(T @);
 bool reflect_global_from_name<T>(const string &in, T @&out, bool = false);
-
-// game
-
-enum gesture_type_t : int32
-{
-	NONE = -1,
-	FLIP_OFF = 0,
-	SALUTE = 1,
-	TAUNT = 2,
-	WAVE = 3,
-	POINT = 4,
-	POINT_NO_PING = 5,
-	MAX = 6
-}
-enum print_type_t : int32
-{
-	LOW = 0,
-	MEDIUM = 1,
-	HIGH = 2,
-	CHAT = 3,
-	TYPEWRITER = 4,
-	CENTER = 5,
-	TTS = 6,
-	BROADCAST = 8,
-	NO_NOTIFY = 16
-}
-enum BoxEdictsResult_t : int32
-{
-	Keep = 0,
-	Skip = 1,
-	End = 64,
-	Flags = 64
-}
-enum multicast_t : int32
-{
-	ALL = 0,
-	PHS = 1,
-	PVS = 2
-}
-enum solidity_area_t : int32
-{
-	SOLID = 1,
-	TRIGGERS = 2
-}
-enum soundchan_t : uint8
-{
-	AUTO = 0,
-	WEAPON = 1,
-	VOICE = 2,
-	ITEM = 3,
-	BODY = 4,
-	AUX = 5,
-	FOOTSTEP = 6,
-	AUX3 = 7,
-	NO_PHS_ADD = 8,
-	RELIABLE = 16,
-	FORCE_POS = 32
-}
-enum svc_t : int32
-{
-	bad = 0,
-	muzzleflash = 1,
-	muzzleflash2 = 2,
-	temp_entity = 3,
-	layout = 4,
-	inventory = 5,
-	nop = 6,
-	disconnect = 7,
-	reconnect = 8,
-	sound = 9,
-	print = 10,
-	stufftext = 11,
-	serverdata = 12,
-	configstring = 13,
-	spawnbaseline = 14,
-	centerprint = 15,
-	download = 16,
-	playerinfo = 17,
-	packetentities = 18,
-	deltapacketentities = 19,
-	frame = 20,
-	configblast = 22,
-	spawnbaselineblast = 23,
-	level_restart = 24,
-	damage = 25,
-	locprint = 26,
-	fog = 27,
-	waitingforplayers = 28,
-	bot_chat = 29,
-	poi = 30,
-	help_path = 31,
-	muzzleflash3 = 32,
-	achievement = 33,
-	last = 34
-}
-enum player_muzzle_t : int32
-{
-	BLASTER = 0,
-	MACHINEGUN = 1,
-	SHOTGUN = 2,
-	CHAINGUN1 = 3,
-	CHAINGUN2 = 4,
-	CHAINGUN3 = 5,
-	RAILGUN = 6,
-	ROCKET = 7,
-	GRENADE = 8,
-	LOGIN = 9,
-	LOGOUT = 10,
-	RESPAWN = 11,
-	BFG = 12,
-	SSHOTGUN = 13,
-	HYPERBLASTER = 14,
-	ITEMRESPAWN = 15,
-	IONRIPPER = 16,
-	BLUEHYPERBLASTER = 17,
-	PHALANX = 18,
-	BFG2 = 19,
-	PHALANX2 = 20,
-	ETF_RIFLE = 30,
-	PROX = 31,
-	ETF_RIFLE_2 = 32,
-	HEATBEAM = 33,
-	BLASTER2 = 34,
-	TRACKER = 35,
-	NUKE1 = 36,
-	NUKE2 = 37,
-	NUKE4 = 38,
-	NUKE8 = 39,
-	SILENCED = 128,
-	NONE = 0
-}
-enum temp_event_t : int32
-{
-	GUNSHOT = 0,
-	BLOOD = 1,
-	BLASTER = 2,
-	RAILTRAIL = 3,
-	SHOTGUN = 4,
-	EXPLOSION1 = 5,
-	EXPLOSION2 = 6,
-	ROCKET_EXPLOSION = 7,
-	GRENADE_EXPLOSION = 8,
-	SPARKS = 9,
-	SPLASH = 10,
-	BUBBLETRAIL = 11,
-	SCREEN_SPARKS = 12,
-	SHIELD_SPARKS = 13,
-	BULLET_SPARKS = 14,
-	LASER_SPARKS = 15,
-	PARASITE_ATTACK = 16,
-	ROCKET_EXPLOSION_WATER = 17,
-	GRENADE_EXPLOSION_WATER = 18,
-	MEDIC_CABLE_ATTACK = 19,
-	BFG_EXPLOSION = 20,
-	BFG_BIGEXPLOSION = 21,
-	BOSSTPORT = 22,
-	BFG_LASER = 23,
-	GRAPPLE_CABLE = 24,
-	WELDING_SPARKS = 25,
-	GREENBLOOD = 26,
-	BLUEHYPERBLASTER_DUMMY = 27,
-	PLASMA_EXPLOSION = 28,
-	TUNNEL_SPARKS = 29,
-	BLASTER2 = 30,
-	RAILTRAIL2 = 31,
-	FLAME = 32,
-	LIGHTNING = 33,
-	DEBUGTRAIL = 34,
-	PLAIN_EXPLOSION = 35,
-	FLASHLIGHT = 36,
-	FORCEWALL = 37,
-	HEATBEAM = 38,
-	MONSTER_HEATBEAM = 39,
-	STEAM = 40,
-	BUBBLETRAIL2 = 41,
-	MOREBLOOD = 42,
-	HEATBEAM_SPARKS = 43,
-	HEATBEAM_STEAM = 44,
-	CHAINFIST_SMOKE = 45,
-	ELECTRIC_SPARKS = 46,
-	TRACKER_EXPLOSION = 47,
-	TELEPORT_EFFECT = 48,
-	DBALL_GOAL = 49,
-	WIDOWBEAMOUT = 50,
-	NUKEBLAST = 51,
-	WIDOWSPLASH = 52,
-	EXPLOSION1_BIG = 53,
-	EXPLOSION1_NP = 54,
-	FLECHETTE = 55,
-	BLUEHYPERBLASTER = 56,
-	BFG_ZAP = 57,
-	BERSERK_SLAM = 58,
-	GRAPPLE_CABLE_2 = 59,
-	POWER_SPLASH = 60,
-	LIGHTNING_BEAM = 61,
-	EXPLOSION1_NL = 62,
-	EXPLOSION2_NL = 63
-}
-enum splash_color_t : int32
-{
-	UNKNOWN = 0,
-	SPARKS = 1,
-	BLUE_WATER = 2,
-	BROWN_WATER = 3,
-	SLIME = 4,
-	LAVA = 5,
-	BLOOD = 6,
-	ELECTRIC = 7
-}
-enum server_flags_t : int32
-{
-	NONE = 0,
-	SLOW_TIME = 1,
-	INTERMISSION = 2,
-	LOADING = 4
-}
-enum renderfx_t : int32
-{
-	NONE = 0,
-	MINLIGHT = 1,
-	VIEWERMODEL = 2,
-	WEAPONMODEL = 4,
-	FULLBRIGHT = 8,
-	DEPTHHACK = 16,
-	TRANSLUCENT = 32,
-	NO_ORIGIN_LERP = 64,
-	BEAM = 128,
-	CUSTOMSKIN = 256,
-	GLOW = 512,
-	SHELL_RED = 1024,
-	SHELL_GREEN = 2048,
-	SHELL_BLUE = 4096,
-	NOSHADOW = 8192,
-	CASTSHADOW = 16384,
-	IR_VISIBLE = 32768,
-	SHELL_DOUBLE = 65536,
-	SHELL_HALF_DAM = 131072,
-	USE_DISGUISE = 262144,
-	SHELL_LITE_GREEN = 524288,
-	CUSTOM_LIGHT = 1048576,
-	FLARE = 2097152,
-	OLD_FRAME_LERP = 4194304,
-	DOT_SHADOW = 8388608,
-	LOW_PRIORITY = 16777216,
-	NO_LOD = 33554432,
-	NO_STEREO = 4,
-	STAIR_STEP = 67108864,
-	FLARE_LOCK_ANGLE = 1,
-	BEAM_LIGHTNING = 640
-}
-enum effects_t : uint64
-{
-	NONE = 0,
-	ROTATE = 1,
-	GIB = 2,
-	BOB = 4,
-	BLASTER = 8,
-	ROCKET = 16,
-	GRENADE = 32,
-	HYPERBLASTER = 64,
-	BFG = 128,
-	COLOR_SHELL = 256,
-	POWERSCREEN = 512,
-	ANIM01 = 1024,
-	ANIM23 = 2048,
-	ANIM_ALL = 4096,
-	ANIM_ALLFAST = 8192,
-	FLIES = 16384,
-	QUAD = 32768,
-	PENT = 65536,
-	TELEPORTER = 131072,
-	FLAG1 = 262144,
-	FLAG2 = 524288,
-	IONRIPPER = 1048576,
-	GREENGIB = 2097152,
-	BLUEHYPERBLASTER = 4194304,
-	SPINNINGLIGHTS = 8388608,
-	PLASMA = 16777216,
-	TRAP = 33554432,
-	TRACKER = 67108864,
-	DOUBLE = 134217728,
-	SPHERETRANS = 268435456,
-	TAGTRAIL = 536870912,
-	HALF_DAMAGE = 1073741824,
-	TRACKERTRAIL = 2147483648,
-	DUALFIRE = 4294967296,
-	HOLOGRAM = 8589934592,
-	FLASHLIGHT = 17179869184,
-	BARREL_EXPLODING = 34359738368,
-	TELEPORTER2 = 68719476736,
-	GRENADE_LIGHT = 137438953472,
-	FIREBALL = 18
-}
-enum entity_event_t : uint8
-{
-	NONE = 0,
-	ITEM_RESPAWN = 1,
-	FOOTSTEP = 2,
-	FALLSHORT = 3,
-	FALL = 4,
-	FALLFAR = 5,
-	PLAYER_TELEPORT = 6,
-	OTHER_TELEPORT = 7,
-	OTHER_FOOTSTEP = 8,
-	LADDER_STEP = 9
-}
-enum svflags_t : int32
-{
-	NONE = 0,
-	NOCLIENT = 1,
-	DEADMONSTER = 2,
-	MONSTER = 4,
-	PLAYER = 8,
-	BOT = 16,
-	NOBOTS = 32,
-	RESPAWNING = 64,
-	PROJECTILE = 128,
-	INSTANCED = 256,
-	DOOR = 512,
-	NOCULL = 1024,
-	HULL = 2048
-}
-enum solid_t : uint8
-{
-	NOT = 0,
-	TRIGGER = 1,
-	BBOX = 2,
-	BSP = 3
-}
-
-enum GoalReturnCode : int32
-{
-	Error = 0,
-	Started = 1,
-	InProgress = 2,
-	Finished = 3
-}
-enum gesture_type : int32
-{
-	NONE = -1,
-	FLIP_OFF = 0,
-	SALUTE = 1,
-	TAUNT = 2,
-	WAVE = 3,
-	POINT = 4,
-	POINT_NO_PING = 5,
-	MAX = 6
-}
-enum PathReturnCode : int32
-{
-	ReachedGoal = 0,
-	ReachedPathEnd = 1,
-	TraversalPending = 2,
-	RawPathFound = 3,
-	InProgress = 4,
-	StartPathErrors = 5,
-	InvalidStart = 6,
-	InvalidGoal = 7,
-	NoNavAvailable = 8,
-	NoStartNode = 9,
-	NoGoalNode = 10,
-	NoPathFound = 11,
-	MissingWalkOrSwimFlag = 12
-}
-enum PathLinkType : int32
-{
-	Walk = 0,
-	WalkOffLedge = 1,
-	LongJump = 2,
-	BarrierJump = 3,
-	Elevator = 4
-}
-enum PathFlags : int32
-{
-	All = 4294967295,
-	Water = 1,
-	Walk = 2,
-	WalkOffLedge = 4,
-	LongJump = 8,
-	BarrierJump = 16,
-	Elevator = 32
-}
-enum shadow_light_type_t : int32
-{
-	point = 0,
-	cone = 1
-}
-
-funcdef BoxEdictsResult_t BoxEdictsFilter_t(edict_t @, const any @);
-
-class entity_state_t
-{
-	// funcdefs
-	// properties
-	const uint32 number;
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t old_origin;
-	int32 modelindex;
-	int32 modelindex2;
-	int32 modelindex3;
-	int32 modelindex4;
-	int32 frame;
-	int32 skinnum;
-	effects_t effects;
-	renderfx_t renderfx;
-	int32 sound;
-	entity_event_t event;
-	float alpha;
-	float scale;
-	float loop_volume;
-	float loop_attenuation;
-	int32 old_frame;
-	const uint32 solid_bits;
-	const int32 owner_id;
-	const uint8 instance_bits;
-	// behaviors
-	// factories
-	// methods
-	entity_state_t &opAssign(const entity_state_t &in);
-}
-class gclient_t
-{
-	// funcdefs
-	// properties
-	player_state_t ps;
-	pmove_state_t pmove;
-	vec3_t viewangles;
-	vec3_t viewoffset;
-	vec3_t kick_angles;
-	vec3_t gunangles;
-	vec3_t gunoffset;
-	int32 gunindex;
-	int32 gunskin;
-	int32 gunframe;
-	int32 gunrate;
-	vec4_t screen_blend;
-	vec4_t damage_blend;
-	float fov;
-	refdef_flags_t rdflags;
-	stat_array_t stats;
-	uint8 team_id;
-	const int32 ping;
-	// behaviors
-	// factories
-	// methods
-}
-class armorInfo_t
-{
-	// funcdefs
-	// properties
-	int32 item_id;
-	int32 max_count;
-	// behaviors
-	// factories
-	// methods
-}
-class inventoryArray_t
-{
-	// funcdefs
-	// properties
-	// behaviors
-	inventoryArray_t(int&in) { repeat int };
-	// factories
-	// methods
-	int32 &opIndex(uint32);
-	const int32 &opIndex(uint32) const;
-	uint32 size() const;
-}
-class armorInfoArray_t
-{
-	// funcdefs
-	// properties
-	// behaviors
-	armorInfoArray_t(int&in) { repeat armorInfo_t };
-	// factories
-	// methods
-	armorInfo_t &opIndex(uint32);
-	const armorInfo_t &opIndex(uint32) const;
-	uint32 size() const;
-}
-class edict_t
-{
-	// funcdefs
-	// properties
-	entity_state_t s;
-	const uint32 number;
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t old_origin;
-	int32 modelindex;
-	int32 modelindex2;
-	int32 modelindex3;
-	int32 modelindex4;
-	int32 frame;
-	int32 skinnum;
-	effects_t effects;
-	renderfx_t renderfx;
-	int32 sound;
-	entity_event_t event;
-	float alpha;
-	float scale;
-	float loop_volume;
-	float loop_attenuation;
-	int32 old_frame;
-	const uint8 instance_bits;
-	player_state_t ps;
-	gclient_t @client;
-	bool inuse;
-	const bool linked;
-	const int32 linkcount;
-	const int32 areanum;
-	const int32 areanum2;
-	svflags_t svflags;
-	vec3_t mins;
-	vec3_t maxs;
-	vec3_t absmin;
-	vec3_t absmax;
-	vec3_t size;
-	solid_t solid;
-	contents_t clipmask;
-	edict_t @owner;
-	sv_entity_t sv;
-	IASEntity @as_obj;
-	// behaviors
-	// factories
-	// methods
-	void reset();
-}
-class sv_entity_t
-{
-	// funcdefs
-	// properties
-	bool init;
-	uint64 ent_flags;
-	button_t buttons;
-	uint32 spawnflags;
-	int32 item_id;
-	int32 armor_type;
-	int32 armor_value;
-	int32 health;
-	int32 max_health;
-	int32 starting_health;
-	int32 weapon;
-	int32 team;
-	int32 lobby_usernum;
-	int32 respawntime;
-	int32 viewheight;
-	int32 last_attackertime;
-	water_level_t waterlevel;
-	vec3_t viewangles;
-	vec3_t viewforward;
-	vec3_t velocity;
-	vec3_t start_origin;
-	vec3_t end_origin;
-	edict_t @enemy;
-	edict_t @ground_entity;
-	inventoryArray_t inventory;
-	armorInfoArray_t armor_info;
-	// behaviors
-	// factories
-	// methods
-	void set_classname(const string &in) property;
-	void set_targetname(const string &in) property;
-	void set_netname(const string &in) property;
-}
-class IASEntity
-{
-	// funcdefs
-	// properties
-	// behaviors
-	// factories
-	// methods
-	edict_t @get_handle() const property;
-}
-
-class json_mutval
-{
-	// funcdefs
-	// properties
-	// behaviors
-	~json_mutval();
-	json_mutval();
-	json_mutval(const json_mutval&in);
-	// factories
-	// methods
-	json_mutval &opAssign(const json_mutval &in);
-	bool get_valid() const property;
-	string to_string() const;
-	bool get_is_obj() const property;
-	bool get_is_arr() const property;
-	bool get_is_ctn() const property;
-	bool get_is_true() const property;
-	bool get_is_false() const property;
-	bool get_is_bool() const property;
-	bool get_is_str() const property;
-	bool get_is_int() const property;
-	bool get_is_uint() const property;
-	bool get_is_sint() const property;
-	bool get_is_real() const property;
-	bool get_is_null() const property;
-	bool get_is_num() const property;
-	bool arr_insert(json_mutval v, uint64 index);
-	bool arr_append(json_mutval v);
-	bool arr_prepend(json_mutval v);
-	json_mutval arr_replace(uint64 index, json_mutval v);
-	json_mutval arr_remove_first();
-	json_mutval arr_remove_last();
-	bool arr_remove_range(uint64 index, uint64 len);
-	bool arr_clear();
-	uint64 get_arr_size() const property;
-	bool obj_add(const string &in, json_mutval v);
-	bool obj_put(const string &in, json_mutval v);
-	bool obj_remove(const string &in);
-	bool obj_rename_key(const string &in, const string &in);
-	bool obj_clear();
-	uint64 get_obj_size() const property;
-}
-class json_mutdoc
-{
-	// funcdefs
-	// properties
-	// behaviors
-	// factories
-	json_mutdoc();
-	json_mutdoc(const json_doc &in);
-	// methods
-	json_mutval get_root() property;
-	void set_root(const json_mutval &in val) property;
-	void set_str_pool_size(uint64 len);
-	void set_val_pool_size(uint64 len);
-	json_mutval null_();
-	json_mutval true_();
-	json_mutval false_();
-	json_mutval bool_(bool);
-	json_mutval uint_(uint64);
-	json_mutval sint(int64);
-	json_mutval int_(int64);
-	json_mutval real(double);
-	json_mutval str(const string &in, uint32 len);
-	json_mutval str(const string &in);
-	json_mutval obj();
-	json_mutval arr();
-	string to_string() const;
-}
-class json_val
-{
-	// funcdefs
-	// properties
-	// behaviors
-	~json_val();
-	json_val();
-	json_val(const json_val&in);
-	// factories
-	// methods
-	json_val &opAssign(const json_val &in);
-	bool get_valid() const property;
-	string to_string() const;
-	bool get_is_obj() const property;
-	bool get_is_arr() const property;
-	bool get_is_ctn() const property;
-	bool get_is_true() const property;
-	bool get_is_false() const property;
-	bool get_is_bool() const property;
-	bool get_is_str() const property;
-	bool get_is_int() const property;
-	bool get_is_uint() const property;
-	bool get_is_sint() const property;
-	bool get_is_real() const property;
-	bool get_is_null() const property;
-	bool get_is_num() const property;
-	bool get_bool_() const property;
-	uint64 get_uint_() const property;
-	int64 get_sint() const property;
-	int32 get_int_() const property;
-	double get_real() const property;
-	double get_num() const property;
-	string get_str() const property;
-	uint64 get_length() const property;
-	json_val arr_get(uint64) const;
-	json_val arr_get_first() const;
-	json_val arr_get_last() const;
-	json_val obj_get(const string &in) const;
-}
-class json_doc
-{
-	// funcdefs
-	// properties
-	// behaviors
-	// factories
-	json_doc();
-	json_doc(const string &in);
-	json_doc(const json_mutdoc &in);
-	// methods
-	json_val get_root() property;
-	uint64 get_read_size() const property;
-	uint64 get_val_count() const property;
-	string to_string() const;
-}
-class json_arr_iter
-{
-	// funcdefs
-	// properties
-	// behaviors
-	~json_arr_iter();
-	json_arr_iter();
-	json_arr_iter(const json_arr_iter&in);
-	json_arr_iter(json_val);
-	// factories
-	// methods
-	json_arr_iter &opAssign(const json_arr_iter &in);
-	json_val get_next() const property;
-	bool get_has_next() const property;
-}
-class json_obj_iter
-{
-	// funcdefs
-	// properties
-	// behaviors
-	~json_obj_iter();
-	json_obj_iter();
-	json_obj_iter(const json_obj_iter&in);
-	json_obj_iter(json_val);
-	// factories
-	// methods
-	json_obj_iter &opAssign(const json_obj_iter &in);
-	json_val get_next() const property;
-	json_val get_val(const json_val &in key) const;
-	bool get_has_next() const property;
-}
-class PathDebugSettings
-{
-	// funcdefs
-	// properties
-	float drawTime;
-	// behaviors
-	PathDebugSettings();
-	PathDebugSettings(const PathDebugSettings&in);
-	// factories
-	// methods
-	PathDebugSettings &opAssign(const PathDebugSettings &in);
-}
-class PathNodeSettings
-{
-	// funcdefs
-	// properties
-	bool ignoreNodeFlags;
-	float minHeight;
-	float maxHeight;
-	float radius;
-	// behaviors
-	PathNodeSettings();
-	PathNodeSettings(const PathNodeSettings&in);
-	// factories
-	// methods
-	PathNodeSettings &opAssign(const PathNodeSettings &in);
-}
-class PathTraversalSettings
-{
-	// funcdefs
-	// properties
-	float dropHeight;
-	float jumpHeight;
-	// behaviors
-	PathTraversalSettings();
-	PathTraversalSettings(const PathTraversalSettings&in);
-	// factories
-	// methods
-	PathTraversalSettings &opAssign(const PathTraversalSettings &in);
-}
-class PathRequest
-{
-	// funcdefs
-	// properties
-	vec3_t start;
-	vec3_t goal;
-	PathFlags pathFlags;
-	float moveDist;
-	PathDebugSettings debugging;
-	PathNodeSettings nodeSearch;
-	PathTraversalSettings traversals;
-	int64 maxPathPoints;
-	// behaviors
-	PathRequest();
-	PathRequest(const PathRequest&in);
-	// factories
-	// methods
-	PathRequest &opAssign(const PathRequest &in);
-}
-class PathInfo
-{
-	// funcdefs
-	// properties
-	uint32 numPathPoints;
-	float pathDistSqr;
-	vec3_t firstMovePoint;
-	vec3_t secondMovePoint;
-	PathLinkType pathLinkType;
-	PathReturnCode returnCode;
-	// behaviors
-	// factories
-	PathInfo();
-	// methods
-	PathInfo &opAssign(const PathInfo &in);
-	const vec3_t &getPathPoint(uint32 i) const;
-}
-class spawnflags_t
-{
-	// funcdefs
-	// properties
-	// behaviors
-	// factories
-	// methods
-	spawnflags_t opCom() const;
-	spawnflags_t opAnd(spawnflags_t) const;
-	spawnflags_t opOr(spawnflags_t) const;
-	spawnflags_t opXor(spawnflags_t) const;
-	spawnflags_t &opAndAssign(spawnflags_t);
-	spawnflags_t &opOrAssign(spawnflags_t);
-	spawnflags_t &opXorAssign(spawnflags_t);
-	uint32 opConv() const;
-	bool has(spawnflags_t) const;
-	bool has_all(spawnflags_t) const;
-}
-class shadow_light_data_t
-{
-	// funcdefs
-	// properties
-	shadow_light_type_t lighttype;
-	float radius;
-	int32 resolution;
-	float intensity;
-	float fade_start;
-	float fade_end;
-	int32 lightstyle;
-	float coneangle;
-	vec3_t conedirection;
-	// behaviors
-	shadow_light_data_t();
-	shadow_light_data_t(const shadow_light_data_t&in);
-	// factories
-	// methods
-	shadow_light_data_t &opAssign(const shadow_light_data_t &in);
-}
-
-const uint32 gi_tick_rate;
-const float gi_frame_time_s;
-const uint32 gi_frame_time_ms;
-const uint32 max_edicts;
-uint32 num_edicts;
-const uint32 max_clients;
-server_flags_t server_flags;
-
 edict_t @G_EdictForNum(uint32 n);
 gclient_t @G_ClientForNum(uint32 n);
 trace_t gi_trace(const vec3_t &in start, const vec3_t &in mins, const vec3_t &in maxs, const vec3_t &in end, edict_t @passent, contents_t contentmask) nodiscard;
@@ -2458,60 +2415,9 @@ spawnflags_t spawnflag_bit(uint32);
 void gi_SetShadowLightData(uint32, const shadow_light_data_t &in);
 void gi_GetShadowLightData(uint32, shadow_light_data_t &out);
 void gi_RemoveShadowLightData(int32);
-
-// cgame
-
-enum text_align_t : int32
-{
-	LEFT = 0,
-	CENTER = 1,
-	RIGHT = 2
-}
-
-
-class vrect_t
-{
-	// funcdefs
-	// properties
-	int32 x;
-	int32 y;
-	int32 width;
-	int32 height;
-	// behaviors
-	vrect_t(int&in) { repeat int };
-	// factories
-	// methods
-	int32 &opIndex(uint32);
-	const int32 &opIndex(uint32) const;
-	uint32 size() const;
-}
-class item_array_t
-{
-	// funcdefs
-	// properties
-	// behaviors
-	item_array_t(int&in) { repeat int16 };
-	// factories
-	// methods
-	int16 &opIndex(uint32);
-	const int16 &opIndex(uint32) const;
-	uint32 size() const;
-}
-class cg_server_data_t
-{
-	// funcdefs
-	// properties
-	item_array_t inventory;
-	// behaviors
-	// factories
-	// methods
-	string get_layout() const property;
-}
-
-float cgi_frame_time_s;
-uint32 cgi_frame_time_ms;
-uint32 cgi_tick_rate;
-
+trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t @, contents_t);
+trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t);
+contents_t _cg_pointcontents(const vec3_t &in);
 cvar_t @cgi_cvar(const string &in, const string &in, cvar_flags_t);
 uint64 cgi_CL_ClientRealTime();
 uint64 cgi_CL_ClientTime();
@@ -2541,3 +2447,4 @@ int32 cgi_SCR_DrawBind(int32, const string &in, const string &in, int32, int32, 
 bool cgi_CL_GetTextInput(string &out, bool &out);
 string cgi_CL_GetClientName(int32);
 string cgi_CL_GetClientDogtag(int32);
+
