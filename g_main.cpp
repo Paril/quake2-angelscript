@@ -3,6 +3,7 @@
 
 #include "g_local.h"
 #include "q2as_main.h"
+#include "q2as_platform.h"
 
 std::mt19937 mt_rand;
 
@@ -35,9 +36,10 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
 		return api;
 	}
 
-	import->Com_Error("Failed to load AngleScript game API\n");
+	import->Com_Print("Failed to load AngelScript game API\n");
 
-	return NULL;
+	// Fall back to loading baseq2 game api.
+	GetGameAPIEXTERNAL external_game_api = Q2AS_GetGameAPI(import);
+	return external_game_api(import);
 }
 
-//======================================================================

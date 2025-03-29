@@ -205,6 +205,7 @@
     <ClCompile Include="q2as_pmove.cpp" />
     <ClCompile Include="q2as_predefined.cpp" />
     <ClCompile Include="q2as_random.cpp" />
+    <ClCompile Include="q2as_platform_win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
@@ -441,6 +442,7 @@
     <ClInclude Include="q2as_modules.h" />
     <ClInclude Include="q2as_pmove.h" />
     <ClInclude Include="q2as_predefined.h" />
+    <ClInclude Include="q2as_platform.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
