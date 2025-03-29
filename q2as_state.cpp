@@ -16,7 +16,7 @@
 #define USE_PL 1
 #define PL_IMPL_COLLECTION_BUFFER_BYTE_QTY 10000000
 #define PL_COMPACT_MODEL 1
-#include "palinteer.h"
+#include "thirdparty/palanteer/palinteer.h"
 
 #undef min
 #undef max
@@ -254,7 +254,7 @@ bool q2as_state_t::CreateEngine()
 #include <filesystem>
 namespace fs = std::filesystem;
 
-static fs::path Q2AS_ScriptPathFromBaseDir()
+static std::string Q2AS_ScriptPathFromBaseDir()
 {
     cvar_t *bp = (gi.cvar ? gi.cvar : cgi.cvar)("basedir", "", CVAR_NOFLAGS);
     cvar_t *gn = (gi.cvar ? gi.cvar : cgi.cvar)("game", "", CVAR_NOFLAGS);
@@ -268,10 +268,10 @@ static fs::path Q2AS_ScriptPathFromBaseDir()
 
     path /= "scripts";
 
-    return path;
+    return path.generic_string();
 }
 
-static fs::path Q2AS_ScriptPath()
+static std::string Q2AS_ScriptPath()
 {
     cvar_t *cv = (gi.cvar ? gi.cvar : cgi.cvar)("q2as_path", "", CVAR_NOFLAGS);
 
@@ -289,7 +289,7 @@ static fs::path Q2AS_ScriptPath()
     alongside_dll /= "scripts";
 
     if (fs::exists(alongside_dll))
-        return alongside_dll;
+        return alongside_dll.generic_string();
 
     return Q2AS_ScriptPathFromBaseDir();
 }
@@ -304,6 +304,9 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
     
     fs::path script_dir(Q2AS_ScriptPath());
 
+    if (debugger_state.workspace.base_path.empty())
+        debugger_state.workspace.base_path = script_dir.generic_string();
+
     Print("Searching for AS scripts in \"");
     Print(script_dir.string().c_str());
     Print("\"\n");
@@ -317,7 +320,8 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
 	asSetGlobalMemoryFunctions(allocFunc, freeFunc);
 
-    debugger_state.debugger_cvar = (gi.cvar ? gi.cvar : cgi.cvar)("q2as_debugger_cvar", "0", CVAR_NOFLAGS);
+    if (!debugger_state.debugger_cvar)
+        debugger_state.debugger_cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
 
     return CreateEngine();
 }
@@ -338,9 +342,15 @@ bool q2as_state_t::CreateMainModule()
 
 bool q2as_state_t::LoadLibraries(library_reg_t *const *const libraries, size_t num_libs)
 {
+    q2as_registry registry(engine);
+
 	for (size_t i = 0; i < num_libs; i++)
 	{
-		if (!(libraries[i])(engine))
+        try
+        {
+		    (libraries[i])(registry);
+        }
+        catch(q2as_registry_exception)
 		{
 			Print("Couldn't register built-in library.\n");
 			Destroy();
@@ -384,14 +394,16 @@ bool q2as_state_t::LoadFilesFromPath(const char *base, const char *path, asIScri
 
         path = entry.path().generic_string();
 
-		if (module->AddScriptSection(path.c_str(), script_str.c_str(), script_str.size(), 0) < 0)
+        std::string relative_section = fs::relative(path, basePath).generic_string();
+
+		if (module->AddScriptSection(relative_section.c_str(), script_str.c_str(), script_str.size(), 0) < 0)
 		{
 			Print("Error loading script section.\n");
 			Destroy();
 			return false;
 		}
 
-        debugger_state.AddSection(path);
+        debugger_state.workspace.sections.insert(relative_section);
 	}
 
     return true;
@@ -407,8 +419,6 @@ bool q2as_state_t::LoadFiles(const char *self_scripts, asIScriptModule *module)
         return false;
     else if (!LoadFilesFromPath(script_path.string().c_str(), g_path.string().c_str(), module))
         return false;
-
-    debugger_state.OptimizeSections();
 
     return true;
 }

@@ -1,6 +1,8 @@
 // MIT Licensed
 // see https://github.com/Paril/angelscript-ui-debugger
 
+#ifdef ENABLE_UI_DEBUGGER
+
 #include "as_debugger_imgui.h"
 #include <optional>
 #include "imgui.h"
@@ -36,14 +38,19 @@ void asIDBImGuiFrontend::SetupImGui()
         if (ImGui::InvisibleButton("##Toggle", ImVec2(size, size)))
             debugger->ToggleBreakpoint(selected_stack_section, decorator.line + 1);
 
-        asIDBBreakpoint bp = asIDBBreakpoint::FileLocation({ selected_stack_section, decorator.line + 1 });
-
-        if (auto it = debugger->breakpoints.find(bp); it != debugger->breakpoints.end())
+        if (auto it = debugger->breakpoints.find(selected_stack_section); it != debugger->breakpoints.end())
         {
-            drawlist->AddCircleFilled(
-                ImVec2(pos.x - 1 + size * 0.5, pos.y + size * 0.5f),
-                (size - 6.0f) * 0.5f,
-                IM_COL32(255, 0, 0, 255));
+            for (auto &bp : it->second)
+            {
+                if (decorator.line + 1 == bp.line)
+                {
+                    drawlist->AddCircleFilled(
+                        ImVec2(pos.x - 1 + size * 0.5, pos.y + size * 0.5f),
+                        (size - 6.0f) * 0.5f,
+                        IM_COL32(255, 0, 0, 255));
+                    break;
+                }
+            }
         }
 
         if (decorator.line == update_row - 1)
@@ -58,7 +65,7 @@ void asIDBImGuiFrontend::SetupImGui()
                 pos
             };
             drawlist->AddPolyline(points, std::extent_v<decltype(points)>,
-                (debugger->cache->system_function.empty() && selected_stack_entry == 0) ? IM_COL32(255, 255, 0, 255) : IM_COL32(0, 255, 255, 255),
+                (debugger->cache->call_stack[selected_stack_entry].scope.offset != SCOPE_SYSTEM) ? IM_COL32(255, 255, 0, 255) : IM_COL32(0, 255, 255, 255),
                 ImDrawFlags_RoundCornersAll, 1.5);
         }
     });
@@ -78,38 +85,28 @@ void asIDBImGuiFrontend::ChangeScript()
     asIScriptContext *ctx = debugger->cache->ctx;
     
     asIScriptFunction *func = nullptr;
-    int col = 0;
-    const char *sec = nullptr;
 
-    if (ctx->GetState() == asEXECUTION_EXCEPTION && selected_stack_entry == 0)
+    if (selected_stack_entry == 0 && debugger->cache->call_stack.front().scope.offset == SCOPE_SYSTEM)
+        selected_stack_entry = 1;
+
+    auto &stack = debugger->cache->call_stack[selected_stack_entry];
+    update_row = stack.row;
+    std::string_view sec = stack.section;
+
+    if (!sec.empty())
     {
-        func = ctx->GetExceptionFunction();
+        if (selected_stack_section != sec)
+        {
+            selected_stack_section = sec;
 
-        if (func)
-            update_row = ctx->GetExceptionLineNumber(&col, &sec);
+            auto file = debugger->FetchSource(sec.data());
+            editor.SetText(file);
+        }
+
+        editor.SetCursor(update_row - 1, 0);
+        editor.ScrollToLine(update_row - 1, TextEditor::Scroll::alignMiddle);
+        editor.AddMarker(update_row - 1, 0, IM_COL32(127, 127, 0, 127), "", "");
     }
-    else
-    {
-        func = ctx->GetFunction(selected_stack_entry);
-
-        if (func)
-            update_row = ctx->GetLineNumber(selected_stack_entry, &col, &sec);
-    }
-
-    if (!func)
-        return;
-
-    if (selected_stack_section != sec)
-    {
-        selected_stack_section = sec;
-
-        auto file = debugger->FetchSource(sec);
-        editor.SetText(file);
-    }
-
-    editor.SetCursor(update_row - 1, 0);
-    editor.ScrollToLine(update_row - 1, TextEditor::Scroll::alignMiddle);
-    editor.AddMarker(update_row - 1, 0, IM_COL32(127, 127, 0, 127), "", "");
 
     resetOpenStates = true;
 }
@@ -180,6 +177,7 @@ bool asIDBImGuiFrontend::Render(bool full)
         ImGuiWindowFlags_MenuBar |
         ImGuiWindowFlags_NoBackground;     
     bool show = ImGui::Begin("DockSpace", NULL, windowFlags);
+    asIDBAction new_action = asIDBAction::None;
 
     if (show)
     {
@@ -196,21 +194,13 @@ bool asIDBImGuiFrontend::Render(bool full)
         if (ImGui::BeginMainMenuBar())
         {
             if (ImGui::MenuItem("Continue"))
-            {
-                debugger->Continue();
-            }
+                new_action = asIDBAction::Continue;
             else if (ImGui::MenuItem("Step Into"))
-            {
-                debugger->StepInto();
-            }
+                new_action = asIDBAction::StepInto;
             else if (ImGui::MenuItem("Step Over"))
-            {
-                debugger->StepOver();
-            }
+                new_action = asIDBAction::StepOver;
             else if (ImGui::MenuItem("Step Out"))
-            {
-                debugger->StepOut();
-            }
+                new_action = asIDBAction::StepOut;
             else if (ImGui::MenuItem("Toggle Breakpoint"))
             {
                 int line, col;
@@ -227,14 +217,11 @@ bool asIDBImGuiFrontend::Render(bool full)
         {
             if (cache)
             {
-                if (!cache->system_function.empty())
-                    ImGui::Selectable(cache->system_function.c_str(), false, ImGuiSelectableFlags_Disabled);
-
                 int n = 0;
                 for (auto &stack : cache->call_stack)
                 {
                     bool sel = selected_stack_entry == n;
-                    if (ImGui::Selectable(stack.declaration.c_str(), &sel))
+                    if (ImGui::Selectable(stack.declaration.c_str(), &sel, stack.scope.offset == SCOPE_SYSTEM ? ImGuiSelectableFlags_Disabled : 0))
                     {
                         selected_stack_entry = n;
                         resetText = true;
@@ -262,26 +249,29 @@ bool asIDBImGuiFrontend::Render(bool full)
 
                 int n = 0;
 
-                for (auto it = debugger->breakpoints.begin(); it != debugger->breakpoints.end(); )
+                std::string_view remove_breakpoint_name;
+                int remove_breakpoint_line;
+
+                for (auto &sbp : debugger->breakpoints)
                 {
-                    auto &bp = *it;
-                    ImGui::PushID(n++);
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    if (bp.location.index() == 0)
+                    for (auto &l : sbp.second)
                     {
-                        auto &v = std::get<0>(bp.location);
-                        ImGui::Text(fmt::format("{} : {}", v.section, v.line).c_str());
+                        ImGui::PushID(n++);
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::Text(fmt::format("{} : {}", sbp.first, l.line).c_str());
+                        ImGui::TableNextColumn();
+                        if (ImGui::Button("X"))
+                        {
+                            remove_breakpoint_name = sbp.first;
+                            remove_breakpoint_line = l.line;
+                        }
+                        ImGui::PopID();
                     }
-                    else
-                        ImGui::Text(std::get<1>(bp.location).c_str());
-                    ImGui::TableNextColumn();
-                    if (ImGui::Button("X"))
-                        it = debugger->breakpoints.erase(it);
-                    else
-                        it++;
-                    ImGui::PopID();
                 }
+
+                if (!remove_breakpoint_name.empty())
+                    debugger->ToggleBreakpoint(remove_breakpoint_name, remove_breakpoint_line);
 
                 ImGui::EndTable();
             }
@@ -300,14 +290,16 @@ bool asIDBImGuiFrontend::Render(bool full)
         if (!full)
             ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 
+        asIDBCallStackEntry *stack = cache ? &cache->call_stack[selected_stack_entry] : nullptr;
+
         if (ImGui::Begin("Parameters"))
         {
             ImGui::PushItemWidth(-1);
 
-            static char filterBuf[64] {};
+            static char filterBuf[256] {};
             ImGui::InputText("##Filter", filterBuf, sizeof(filterBuf));
             if (cache)
-                RenderLocals(filterBuf, asIDBLocalKey(selected_stack_entry, asIDBLocalType::Parameter));
+                RenderLocals(filterBuf, stack->scope, stack->scope.parameters);
             ImGui::PopItemWidth();
         }
         ImGui::End();
@@ -319,7 +311,7 @@ bool asIDBImGuiFrontend::Render(bool full)
             static char filterBuf[256] {};
             ImGui::InputText("##Filter", filterBuf, sizeof(filterBuf));
             if (cache)
-                RenderLocals(filterBuf, asIDBLocalKey(selected_stack_entry, asIDBLocalType::Variable));
+                RenderLocals(filterBuf, stack->scope, stack->scope.locals);
             ImGui::PopItemWidth();
         }
         ImGui::End();
@@ -331,7 +323,7 @@ bool asIDBImGuiFrontend::Render(bool full)
             static char filterBuf[256] {};
             ImGui::InputText("##Filter", filterBuf, sizeof(filterBuf));
             if (cache)
-                RenderLocals(filterBuf, asIDBLocalKey(selected_stack_entry, asIDBLocalType::Temporary));
+                RenderLocals(filterBuf, stack->scope, stack->scope.registers);
             ImGui::PopItemWidth();
         }
         ImGui::End();
@@ -373,10 +365,10 @@ bool asIDBImGuiFrontend::Render(bool full)
 
         if (ImGui::Begin("Sections", nullptr, ImGuiWindowFlags_HorizontalScrollbar))
         {
-            for (auto &section : debugger->sections)
+            for (auto &section : debugger->workspace.sections)
             {
-                if (ImGui::Selectable(section.second.data(), selected_stack_section == section.first))
-                    change_section = section.first;
+                if (ImGui::Selectable(section.c_str(), selected_stack_section == section))
+                    change_section = section;
             }
         }
         ImGui::End();
@@ -503,24 +495,24 @@ bool asIDBImGuiFrontend::Render(bool full)
                             if (action == asIDBVarPopupAction::CopyPath)
                                 ImGui::SetClipboardText(path.c_str());
                             else
-                                cache->watch.emplace_back(path.c_str());
+                                watch.emplace_back(path.c_str());
                         break; }
                     case asIDBVarPopupAction::Paste:
-                        cache->watch.emplace_back(ImGui::GetClipboardText());
+                        watch.emplace_back(ImGui::GetClipboardText());
                         break;
                     case asIDBVarPopupAction::Delete: {
-                        for (auto it = cache->watch.begin(); it != cache->watch.end(); it++)
+                        for (auto it = watch.begin(); it != watch.end(); it++)
                         {
                             if (&(*it) == rightClickedVariableStack.back())
                             {
-                                cache->watch.erase(it);
+                                watch.erase(it);
                                 break;
                             }
                         }
                         break;
                     }
                     case asIDBVarPopupAction::ClearAll:
-                        cache->watch.clear();
+                        watch.clear();
                         break;
                     default:
                         break;
@@ -568,13 +560,13 @@ bool asIDBImGuiFrontend::Render(bool full)
     if (full)
     {
         if (ImGui::IsKeyPressed(ImGuiKey::ImGuiKey_F5, false))
-            debugger->Continue();
+            new_action = asIDBAction::Continue;
         else if (ImGui::IsKeyPressed(ImGuiKey::ImGuiKey_F10))
-            debugger->StepOver();
+            new_action = asIDBAction::StepOver;
         else if (ImGui::IsKeyPressed(ImGuiKey::ImGuiKey_F11) && (mods & ImGuiKey::ImGuiMod_Shift) == 0)
-            debugger->StepInto();
+            new_action = asIDBAction::StepInto;
         else if (ImGui::IsKeyPressed(ImGuiKey::ImGuiKey_F11) && (mods & ImGuiKey::ImGuiMod_Shift) == ImGuiKey::ImGuiMod_Shift)
-            debugger->StepOut();
+            new_action = asIDBAction::StepOut;
 
         wasVisible = true;
     }
@@ -585,6 +577,9 @@ bool asIDBImGuiFrontend::Render(bool full)
         editor.GetMainCursor(line, col);
         debugger->ToggleBreakpoint(selected_stack_section, line + 1);
     }
+
+    if (new_action != asIDBAction::None)
+        debugger->SetAction(new_action);
 
     return true;
 }
@@ -607,21 +602,20 @@ void asIDBImGuiFrontend::RenderVariableTable(const char *label, std::function<vo
     }
 }
 
-void asIDBImGuiFrontend::RenderLocals(const char *filter, asIDBLocalKey stack_entry)
+void asIDBImGuiFrontend::RenderLocals(const char *filter, asIDBScope &scope, asIDBLocalScopeVariables &variables)
 {
     asIDBCache *cache = debugger->cache.get();
 
-    if (auto f = cache->locals.find(stack_entry); f == cache->locals.end())
-        cache->CacheLocals(stack_entry);
+    cache->CacheLocals(scope, variables);
 
-    auto &f = cache->locals.find(stack_entry)->second;
+    auto &f = variables.variables;
 
     RenderVariableTable("##Locals", [&]() {
         for (int n = 0; n < f.size(); n++)
         {
             ImGui::PushID(n);
             auto &local = f[n];
-            RenderDebuggerVariable(local, filter);
+            RenderDebuggerVariable(local.var, filter);
             ImGui::PopID();
         }
     });
@@ -637,23 +631,22 @@ void asIDBImGuiFrontend::RenderGlobals(const char *filter, bool showConstants, b
 {
     asIDBCache *cache = debugger->cache.get();
 
-    if (!cache->globalsCached)
-        cache->CacheGlobals();
+    cache->CacheGlobals();
 
-    auto &f = cache->globals;
+    auto &f = cache->global.variables;
     
     RenderVariableTable("##Globals", [&]() {
         for (int n = 0; n < f.size(); n++)
         {
             auto &global = f[n];
 
-            if (!showConstants && global.id.constant)
+            if (!showConstants && global.var.id.constant)
                 continue;
-            else if (!showNamespaced && global.name.find_first_of(':') != std::string_view::npos)
+            else if (!showNamespaced && global.var.name.find_first_of(':') != std::string_view::npos)
                 continue;
 
             ImGui::PushID(n);
-            RenderDebuggerVariable(global, filter);
+            RenderDebuggerVariable(global.var, filter);
             ImGui::PopID();
         }
     });
@@ -668,7 +661,7 @@ void asIDBImGuiFrontend::RenderGlobals(const char *filter, bool showConstants, b
 void asIDBImGuiFrontend::RenderWatch()
 {
     asIDBCache *cache = debugger->cache.get();
-    auto &f = cache->watch;
+    auto &f = watch;
 
     RenderVariableTable("##Watch", [&]() {
         for (int n = 0; n < f.size(); n++)
@@ -700,7 +693,7 @@ void asIDBImGuiFrontend::RenderWatch()
 
     if (ImGui::IsItemDeactivatedAfterEdit())
     {
-        cache->watch.emplace_back(buf);
+        watch.emplace_back(buf);
         buf[0] = '\0';
     }
 
@@ -836,3 +829,5 @@ bool asIDBImGuiFrontend::RenderDebuggerVariable(asIDBVarViewBase &varView, const
 
     return add_to_stack;
 }
+
+#endif

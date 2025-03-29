@@ -2,7 +2,6 @@
 #include "g_local.h"
 #include <chrono>
 
-#include "q2as_reg.h"
 #include "q2as_fixedarray.h"
 #include "q2as_stringex.h"
 #include "q2as_json.h"
@@ -25,6 +24,11 @@
 /*virtual*/ bool q2as_sv_state_t::InstrumentationEnabled() /*override*/
 {
     return instrumenting;
+}
+
+/*virtual*/ cvar_t *q2as_sv_state_t::Cvar(const char *name, const char *value, cvar_flags_t flags) /*override*/
+{
+    return gi.cvar(name, value, flags);
 }
 
 enum
@@ -535,289 +539,253 @@ static bool Q2AS_Entity_IsVisibleToPlayer(edict_t* ent, edict_t* player)
 	return false;
 }
 
-static bool Q2AS_RegisterGameImports(asIScriptEngine *engine)
+static void Q2AS_RegisterGameImports(q2as_registry &registry)
 {
-#define Q2AS_OBJECT gesture_type_t
-#define Q2AS_ENUM_PREFIX GESTURE_
-
-	EnsureRegisteredEnumRaw("gesture_type_t");
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "NONE", GESTURE_NONE);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "FLIP_OFF", GESTURE_FLIP_OFF);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "SALUTE", GESTURE_SALUTE);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "TAUNT", GESTURE_TAUNT);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "WAVE", GESTURE_WAVE);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "POINT", GESTURE_POINT);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "POINT_NO_PING", GESTURE_POINT_NO_PING);
-	EnsureRegisteredEnumValueRaw("gesture_type_t", "MAX", GESTURE_MAX);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT print_type_t
-#define Q2AS_ENUM_PREFIX PRINT_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(PRINT_, LOW);
-	EnsureRegisteredEnumValue(PRINT_, MEDIUM);
-	EnsureRegisteredEnumValue(PRINT_, HIGH);
-	EnsureRegisteredEnumValue(PRINT_, CHAT);
-	EnsureRegisteredEnumValue(PRINT_, TYPEWRITER);
-	EnsureRegisteredEnumValue(PRINT_, CENTER);
-	EnsureRegisteredEnumValue(PRINT_, TTS);
-
-	EnsureRegisteredEnumValue(PRINT_, BROADCAST);
-	EnsureRegisteredEnumValue(PRINT_, NO_NOTIFY);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT BoxEdictsResult_t
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValueRaw("BoxEdictsResult_t", "Keep", (int) BoxEdictsResult_t::Keep);
-	EnsureRegisteredEnumValueRaw("BoxEdictsResult_t", "Skip", (int) BoxEdictsResult_t::Skip);
-	EnsureRegisteredEnumValueRaw("BoxEdictsResult_t", "End", (int) BoxEdictsResult_t::End);
-	EnsureRegisteredEnumValueRaw("BoxEdictsResult_t", "Flags", (int) BoxEdictsResult_t::Flags);
-
-#undef Q2AS_OBJECT
+	registry
+		.enumeration("gesture_type_t")
+		.values({
+			{ "NONE", GESTURE_NONE },
+			{ "FLIP_OFF", GESTURE_FLIP_OFF },
+			{ "SALUTE", GESTURE_SALUTE },
+			{ "TAUNT", GESTURE_TAUNT },
+			{ "WAVE", GESTURE_WAVE },
+			{ "POINT", GESTURE_POINT },
+			{ "POINT_NO_PING", GESTURE_POINT_NO_PING },
+			{ "MAX", GESTURE_MAX }
+		});
 	
-#define Q2AS_OBJECT multicast_t
-#define Q2AS_ENUM_PREFIX MULTICAST_
+	registry
+		.enumeration("print_type_t")
+		.values({
+			{ "LOW",         PRINT_LOW },
+			{ "MEDIUM",      PRINT_MEDIUM },
+			{ "HIGH",        PRINT_HIGH },
+			{ "CHAT",        PRINT_CHAT },
+			{ "TYPEWRITER",  PRINT_TYPEWRITER },
+			{ "CENTER",      PRINT_CENTER },
+			{ "TTS",         PRINT_TTS },
 
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(MULTICAST_, ALL);
-	EnsureRegisteredEnumValue(MULTICAST_, PHS);
-	EnsureRegisteredEnumValue(MULTICAST_, PVS);
+			{ "BROADCAST", PRINT_BROADCAST },
+			{ "NO_NOTIFY", PRINT_NO_NOTIFY }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("BoxEdictsResult_t")
+		.values({
+			{ "Keep", (asINT64) BoxEdictsResult_t::Keep },
+			{ "Skip", (asINT64) BoxEdictsResult_t::Skip },
+			{ "End", (asINT64) BoxEdictsResult_t::End },
+			{ "Flags", (asINT64) BoxEdictsResult_t::Flags }
+		});
 	
-
-#define Q2AS_OBJECT solidity_area_t
-#define Q2AS_ENUM_PREFIX AREA_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(AREA_, SOLID);
-	EnsureRegisteredEnumValue(AREA_, TRIGGERS);
+	registry
+		.enumeration("multicast_t")
+		.values({
+			{ "ALL", MULTICAST_ALL },
+			{ "PHS", MULTICAST_PHS },
+			{ "PVS", MULTICAST_PVS }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT soundchan_t
-#define Q2AS_ENUM_PREFIX CHAN_
+	registry
+		.enumeration("solidity_area_t")
+		.values({
+			{ "SOLID",    AREA_SOLID },
+			{ "TRIGGERS", AREA_TRIGGERS }
+		});
 	
-	EnsureRegisteredTypedEnum("uint8");
-	EnsureRegisteredEnumValue(CHAN_, AUTO);
-	EnsureRegisteredEnumValue(CHAN_, WEAPON);
-	EnsureRegisteredEnumValue(CHAN_, VOICE);
-	EnsureRegisteredEnumValue(CHAN_, ITEM);
-	EnsureRegisteredEnumValue(CHAN_, BODY);
-	EnsureRegisteredEnumValue(CHAN_, AUX);
-	EnsureRegisteredEnumValue(CHAN_, FOOTSTEP);
-	EnsureRegisteredEnumValue(CHAN_, AUX3);
+	registry
+		.enumeration("soundchan_t", "uint8")
+		.values({
+			{ "AUTO",     CHAN_AUTO },
+			{ "WEAPON",   CHAN_WEAPON },
+			{ "VOICE",    CHAN_VOICE },
+			{ "ITEM",     CHAN_ITEM },
+			{ "BODY",     CHAN_BODY },
+			{ "AUX",      CHAN_AUX },
+			{ "FOOTSTEP", CHAN_FOOTSTEP },
+			{ "AUX3",     CHAN_AUX3 },
 
-	EnsureRegisteredEnumValue(CHAN_, NO_PHS_ADD);
-	EnsureRegisteredEnumValue(CHAN_, RELIABLE);
-	EnsureRegisteredEnumValue(CHAN_, FORCE_POS);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT svc_t
-#define Q2AS_ENUM_PREFIX svc_
+			{ "NO_PHS_ADD", CHAN_NO_PHS_ADD },
+			{ "RELIABLE",   CHAN_RELIABLE },
+			{ "FORCE_POS",  CHAN_FORCE_POS }
+		});
 	
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, bad);
+	registry
+		.enumeration("svc_t")
+		.values({
+			{ "bad", svc_bad },
 
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, muzzleflash);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, muzzleflash2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, temp_entity);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, layout);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, inventory);
+			{ "muzzleflash",  svc_muzzleflash },
+			{ "muzzleflash2", svc_muzzleflash2 },
+			{ "temp_entity",  svc_temp_entity },
+			{ "layout",       svc_layout },
+			{ "inventory",    svc_inventory },
 
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, nop);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, disconnect);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, reconnect);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, sound);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, print);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, stufftext);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, serverdata);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, configstring);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, spawnbaseline);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, centerprint);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, download);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, playerinfo);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, packetentities);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, deltapacketentities);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, frame);
+			{ "nop",                 svc_nop },
+			{ "disconnect",          svc_disconnect },
+			{ "reconnect",           svc_reconnect },
+			{ "sound",               svc_sound },
+			{ "print",               svc_print },
+			{ "stufftext",           svc_stufftext },
+			{ "serverdata",          svc_serverdata },
+			{ "configstring",        svc_configstring },
+			{ "spawnbaseline",       svc_spawnbaseline },
+			{ "centerprint",         svc_centerprint },
+			{ "download",            svc_download },
+			{ "playerinfo",          svc_playerinfo },
+			{ "packetentities",      svc_packetentities },
+			{ "deltapacketentities", svc_deltapacketentities },
+			{ "frame",               svc_frame },
 
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, configblast);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, spawnbaselineblast);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, level_restart);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, damage);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, locprint);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, fog);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, waitingforplayers);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, bot_chat);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, poi);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, help_path);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, muzzleflash3);
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, achievement);
+			{ "configblast",        svc_configblast },
+			{ "spawnbaselineblast", svc_spawnbaselineblast },
+			{ "level_restart",      svc_level_restart },
+			{ "damage",             svc_damage },
+			{ "locprint",           svc_locprint },
+			{ "fog",                svc_fog },
+			{ "waitingforplayers",  svc_waitingforplayers },
+			{ "bot_chat",           svc_bot_chat },
+			{ "poi",                svc_poi },
+			{ "help_path",          svc_help_path },
+			{ "muzzleflash3",       svc_muzzleflash3 },
+			{ "achievement",        svc_achievement },
 
-	EnsureRegisteredEnumValueGlobalNoPrefix(svc_, last);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT player_muzzle_t
-#define Q2AS_ENUM_PREFIX MZ_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, BLASTER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, MACHINEGUN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, SHOTGUN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, CHAINGUN1);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, CHAINGUN2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, CHAINGUN3);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, RAILGUN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, ROCKET);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, GRENADE);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, LOGIN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, LOGOUT);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, RESPAWN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, BFG);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, SSHOTGUN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, HYPERBLASTER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, ITEMRESPAWN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, IONRIPPER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, BLUEHYPERBLASTER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, PHALANX);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, BFG2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, PHALANX2);
-
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, ETF_RIFLE);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, PROX);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, ETF_RIFLE_2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, HEATBEAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, BLASTER2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, TRACKER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, NUKE1);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, NUKE2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, NUKE4);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, NUKE8);
-
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, SILENCED);
-	EnsureRegisteredEnumValueGlobalNoPrefix(MZ_, NONE);
+			{ "last", svc_last }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("player_muzzle_t")
+		.values({
+			{ "BLASTER",          MZ_BLASTER },
+			{ "MACHINEGUN",       MZ_MACHINEGUN },
+			{ "SHOTGUN",          MZ_SHOTGUN },
+			{ "CHAINGUN1",        MZ_CHAINGUN1 },
+			{ "CHAINGUN2",        MZ_CHAINGUN2 },
+			{ "CHAINGUN3",        MZ_CHAINGUN3 },
+			{ "RAILGUN",          MZ_RAILGUN },
+			{ "ROCKET",           MZ_ROCKET },
+			{ "GRENADE",          MZ_GRENADE },
+			{ "LOGIN",            MZ_LOGIN },
+			{ "LOGOUT",           MZ_LOGOUT },
+			{ "RESPAWN",          MZ_RESPAWN },
+			{ "BFG",              MZ_BFG },
+			{ "SSHOTGUN",         MZ_SSHOTGUN },
+			{ "HYPERBLASTER",     MZ_HYPERBLASTER },
+			{ "ITEMRESPAWN",      MZ_ITEMRESPAWN },
+			{ "IONRIPPER",        MZ_IONRIPPER },
+			{ "BLUEHYPERBLASTER", MZ_BLUEHYPERBLASTER },
+			{ "PHALANX",          MZ_PHALANX },
+			{ "BFG2",             MZ_BFG2 },
+			{ "PHALANX2",         MZ_PHALANX2 },
 
-#define Q2AS_OBJECT temp_event_t
-#define Q2AS_ENUM_PREFIX TE_
+			{ "ETF_RIFLE",   MZ_ETF_RIFLE },
+			{ "PROX",        MZ_PROX },
+			{ "ETF_RIFLE_2", MZ_ETF_RIFLE_2 },
+			{ "HEATBEAM",    MZ_HEATBEAM },
+			{ "BLASTER2",    MZ_BLASTER2 },
+			{ "TRACKER",     MZ_TRACKER },
+			{ "NUKE1",       MZ_NUKE1 },
+			{ "NUKE2",       MZ_NUKE2 },
+			{ "NUKE4",       MZ_NUKE4 },
+			{ "NUKE8",       MZ_NUKE8 },
 
-	EnsureRegisteredEnum();
-
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, GUNSHOT);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BLOOD);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BLASTER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, RAILTRAIL);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, SHOTGUN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, EXPLOSION1);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, EXPLOSION2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, ROCKET_EXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, GRENADE_EXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, SPLASH);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BUBBLETRAIL);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, SCREEN_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, SHIELD_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BULLET_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, LASER_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, PARASITE_ATTACK);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, ROCKET_EXPLOSION_WATER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, GRENADE_EXPLOSION_WATER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, MEDIC_CABLE_ATTACK);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BFG_EXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BFG_BIGEXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BOSSTPORT);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BFG_LASER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, GRAPPLE_CABLE);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, WELDING_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, GREENBLOOD);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BLUEHYPERBLASTER_DUMMY);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, PLASMA_EXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, TUNNEL_SPARKS);
-
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BLASTER2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, RAILTRAIL2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, FLAME);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, LIGHTNING);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, DEBUGTRAIL);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, PLAIN_EXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, FLASHLIGHT);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, FORCEWALL);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, HEATBEAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, MONSTER_HEATBEAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, STEAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BUBBLETRAIL2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, MOREBLOOD);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, HEATBEAM_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, HEATBEAM_STEAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, CHAINFIST_SMOKE);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, ELECTRIC_SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, TRACKER_EXPLOSION);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, TELEPORT_EFFECT);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, DBALL_GOAL);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, WIDOWBEAMOUT);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, NUKEBLAST);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, WIDOWSPLASH);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, EXPLOSION1_BIG);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, EXPLOSION1_NP);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, FLECHETTE);
-
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BLUEHYPERBLASTER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BFG_ZAP);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, BERSERK_SLAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, GRAPPLE_CABLE_2);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, POWER_SPLASH);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, LIGHTNING_BEAM);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, EXPLOSION1_NL);
-	EnsureRegisteredEnumValueGlobalNoPrefix(TE_, EXPLOSION2_NL);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT splash_color_t
-#define Q2AS_ENUM_PREFIX SPLASH_
-
-	EnsureRegisteredEnum();
+			{ "SILENCED", MZ_SILENCED },
+			{ "NONE",     MZ_NONE }
+		});
 	
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, UNKNOWN);
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, SPARKS);
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, BLUE_WATER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, BROWN_WATER);
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, SLIME);
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, LAVA);
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, BLOOD);
+	registry
+		.enumeration("temp_event_t")
+		.values({
+			{ "GUNSHOT",                 TE_GUNSHOT },
+			{ "BLOOD",                   TE_BLOOD },
+			{ "BLASTER",                 TE_BLASTER },
+			{ "RAILTRAIL",               TE_RAILTRAIL },
+			{ "SHOTGUN",                 TE_SHOTGUN },
+			{ "EXPLOSION1",              TE_EXPLOSION1 },
+			{ "EXPLOSION2",              TE_EXPLOSION2 },
+			{ "ROCKET_EXPLOSION",        TE_ROCKET_EXPLOSION },
+			{ "GRENADE_EXPLOSION",       TE_GRENADE_EXPLOSION },
+			{ "SPARKS",                  TE_SPARKS },
+			{ "SPLASH",                  TE_SPLASH },
+			{ "BUBBLETRAIL",             TE_BUBBLETRAIL },
+			{ "SCREEN_SPARKS",           TE_SCREEN_SPARKS },
+			{ "SHIELD_SPARKS",           TE_SHIELD_SPARKS },
+			{ "BULLET_SPARKS",           TE_BULLET_SPARKS },
+			{ "LASER_SPARKS",            TE_LASER_SPARKS },
+			{ "PARASITE_ATTACK",         TE_PARASITE_ATTACK },
+			{ "ROCKET_EXPLOSION_WATER",  TE_ROCKET_EXPLOSION_WATER },
+			{ "GRENADE_EXPLOSION_WATER", TE_GRENADE_EXPLOSION_WATER },
+			{ "MEDIC_CABLE_ATTACK",      TE_MEDIC_CABLE_ATTACK },
+			{ "BFG_EXPLOSION",           TE_BFG_EXPLOSION },
+			{ "BFG_BIGEXPLOSION",        TE_BFG_BIGEXPLOSION },
+			{ "BOSSTPORT",               TE_BOSSTPORT },
+			{ "BFG_LASER",               TE_BFG_LASER },
+			{ "GRAPPLE_CABLE",           TE_GRAPPLE_CABLE },
+			{ "WELDING_SPARKS",          TE_WELDING_SPARKS },
+			{ "GREENBLOOD",              TE_GREENBLOOD },
+			{ "BLUEHYPERBLASTER_DUMMY",  TE_BLUEHYPERBLASTER_DUMMY },
+			{ "PLASMA_EXPLOSION",        TE_PLASMA_EXPLOSION },
+			{ "TUNNEL_SPARKS",           TE_TUNNEL_SPARKS },
 
-	EnsureRegisteredEnumValueGlobalNoPrefix(SPLASH_, ELECTRIC);
+			{ "BLASTER2",          TE_BLASTER2 },
+			{ "RAILTRAIL2",        TE_RAILTRAIL2 },
+			{ "FLAME",             TE_FLAME },
+			{ "LIGHTNING",         TE_LIGHTNING },
+			{ "DEBUGTRAIL",        TE_DEBUGTRAIL },
+			{ "PLAIN_EXPLOSION",   TE_PLAIN_EXPLOSION },
+			{ "FLASHLIGHT",        TE_FLASHLIGHT },
+			{ "FORCEWALL",         TE_FORCEWALL },
+			{ "HEATBEAM",          TE_HEATBEAM },
+			{ "MONSTER_HEATBEAM",  TE_MONSTER_HEATBEAM },
+			{ "STEAM",             TE_STEAM },
+			{ "BUBBLETRAIL2",      TE_BUBBLETRAIL2 },
+			{ "MOREBLOOD",         TE_MOREBLOOD },
+			{ "HEATBEAM_SPARKS",   TE_HEATBEAM_SPARKS },
+			{ "HEATBEAM_STEAM",    TE_HEATBEAM_STEAM },
+			{ "CHAINFIST_SMOKE",   TE_CHAINFIST_SMOKE },
+			{ "ELECTRIC_SPARKS",   TE_ELECTRIC_SPARKS },
+			{ "TRACKER_EXPLOSION", TE_TRACKER_EXPLOSION },
+			{ "TELEPORT_EFFECT",   TE_TELEPORT_EFFECT },
+			{ "DBALL_GOAL",        TE_DBALL_GOAL },
+			{ "WIDOWBEAMOUT",      TE_WIDOWBEAMOUT },
+			{ "NUKEBLAST",         TE_NUKEBLAST },
+			{ "WIDOWSPLASH",       TE_WIDOWSPLASH },
+			{ "EXPLOSION1_BIG",    TE_EXPLOSION1_BIG },
+			{ "EXPLOSION1_NP",     TE_EXPLOSION1_NP },
+			{ "FLECHETTE",         TE_FLECHETTE },
 
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+			{ "BLUEHYPERBLASTER", TE_BLUEHYPERBLASTER },
+			{ "BFG_ZAP",          TE_BFG_ZAP },
+			{ "BERSERK_SLAM",     TE_BERSERK_SLAM },
+			{ "GRAPPLE_CABLE_2",  TE_GRAPPLE_CABLE_2 },
+			{ "POWER_SPLASH",     TE_POWER_SPLASH },
+			{ "LIGHTNING_BEAM",   TE_LIGHTNING_BEAM },
+			{ "EXPLOSION1_NL",    TE_EXPLOSION1_NL },
+			{ "EXPLOSION2_NL",    TE_EXPLOSION2_NL }
+		});
+	
+	registry
+		.enumeration("splash_color_t")
+		.values({
+			{ "UNKNOWN",     SPLASH_UNKNOWN },
+			{ "SPARKS",      SPLASH_SPARKS },
+			{ "BLUE_WATER",  SPLASH_BLUE_WATER },
+			{ "BROWN_WATER", SPLASH_BROWN_WATER },
+			{ "SLIME",       SPLASH_SLIME },
+			{ "LAVA",        SPLASH_LAVA },
+			{ "BLOOD",       SPLASH_BLOOD },
 
-#define Q2AS_OBJECT server_flags_t
-#define Q2AS_ENUM_PREFIX SERVER_FLAG_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(SERVER_FLAGS_, NONE);
-	EnsureRegisteredEnumValue(SERVER_FLAG_,  SLOW_TIME);
-	EnsureRegisteredEnumValue(SERVER_FLAG_,  INTERMISSION);
-	EnsureRegisteredEnumValue(SERVER_FLAG_,  LOADING);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-    return true;
+			{ "ELECTRIC", SPLASH_ELECTRIC }
+		});
+	
+	registry
+		.enumeration("server_flags_t")
+		.values({
+			{ "NONE",         SERVER_FLAG_NONE },
+			{ "SLOW_TIME",    SERVER_FLAG_SLOW_TIME },
+			{ "INTERMISSION", SERVER_FLAG_INTERMISSION },
+			{ "LOADING",      SERVER_FLAG_LOADING },
+		});
 }
 
 static q2as_edict_t *G_EdictForNum(uint32_t n)
@@ -893,195 +861,177 @@ static void q2as_sv_entity_t_set_targetname(const std::string &s, sv_entity_t &s
     loopin = (loopin + 1) % MAX_EDICTS;
 }
 
-static bool Q2AS_RegisterEntity(asIScriptEngine *engine)
+static void Q2AS_RegisterEntity(q2as_registry &registry)
 {
-#define Q2AS_OBJECT renderfx_t
-#define Q2AS_ENUM_PREFIX RF_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(RF_, NONE);
-	EnsureRegisteredEnumValue(RF_, MINLIGHT);
-	EnsureRegisteredEnumValue(RF_, VIEWERMODEL);
-	EnsureRegisteredEnumValue(RF_, WEAPONMODEL);
-	EnsureRegisteredEnumValue(RF_, FULLBRIGHT);
-	EnsureRegisteredEnumValue(RF_, DEPTHHACK);
-	EnsureRegisteredEnumValue(RF_, TRANSLUCENT);
-	EnsureRegisteredEnumValue(RF_, NO_ORIGIN_LERP);
-	EnsureRegisteredEnumValue(RF_, BEAM);
-	EnsureRegisteredEnumValue(RF_, CUSTOMSKIN);
-	EnsureRegisteredEnumValue(RF_, GLOW);
-	EnsureRegisteredEnumValue(RF_, SHELL_RED);
-	EnsureRegisteredEnumValue(RF_, SHELL_GREEN);
-	EnsureRegisteredEnumValue(RF_, SHELL_BLUE);
-	EnsureRegisteredEnumValue(RF_, NOSHADOW);
-	EnsureRegisteredEnumValue(RF_, CASTSHADOW);
+	registry
+		.enumeration("renderfx_t")
+		.values({
+			{ "NONE",           RF_NONE },
+			{ "MINLIGHT",       RF_MINLIGHT },
+			{ "VIEWERMODEL",    RF_VIEWERMODEL },
+			{ "WEAPONMODEL",    RF_WEAPONMODEL },
+			{ "FULLBRIGHT",     RF_FULLBRIGHT },
+			{ "DEPTHHACK",      RF_DEPTHHACK },
+			{ "TRANSLUCENT",    RF_TRANSLUCENT },
+			{ "NO_ORIGIN_LERP", RF_NO_ORIGIN_LERP },
+			{ "BEAM",           RF_BEAM },
+			{ "CUSTOMSKIN",     RF_CUSTOMSKIN },
+			{ "GLOW",           RF_GLOW },
+			{ "SHELL_RED",      RF_SHELL_RED },
+			{ "SHELL_GREEN",    RF_SHELL_GREEN },
+			{ "SHELL_BLUE",     RF_SHELL_BLUE },
+			{ "NOSHADOW",       RF_NOSHADOW },
+			{ "CASTSHADOW",     RF_CASTSHADOW },
 	
-	EnsureRegisteredEnumValue(RF_, IR_VISIBLE);
-	EnsureRegisteredEnumValue(RF_, SHELL_DOUBLE);
-	EnsureRegisteredEnumValue(RF_, SHELL_HALF_DAM);
-	EnsureRegisteredEnumValue(RF_, USE_DISGUISE);
+			{ "IR_VISIBLE",     RF_IR_VISIBLE },
+			{ "SHELL_DOUBLE",   RF_SHELL_DOUBLE },
+			{ "SHELL_HALF_DAM", RF_SHELL_HALF_DAM },
+			{ "USE_DISGUISE",   RF_USE_DISGUISE },
 	
-	EnsureRegisteredEnumValue(RF_, SHELL_LITE_GREEN);
-	EnsureRegisteredEnumValue(RF_, CUSTOM_LIGHT);
-	EnsureRegisteredEnumValue(RF_, FLARE);
-	EnsureRegisteredEnumValue(RF_, OLD_FRAME_LERP);
-	EnsureRegisteredEnumValue(RF_, DOT_SHADOW);
-	EnsureRegisteredEnumValue(RF_, LOW_PRIORITY);
-	EnsureRegisteredEnumValue(RF_, NO_LOD);
-	EnsureRegisteredEnumValue(RF_, NO_STEREO);
-	EnsureRegisteredEnumValue(RF_, STAIR_STEP);
+			{ "SHELL_LITE_GREEN", RF_SHELL_LITE_GREEN },
+			{ "CUSTOM_LIGHT",     RF_CUSTOM_LIGHT },
+			{ "FLARE",            RF_FLARE },
+			{ "OLD_FRAME_LERP",   RF_OLD_FRAME_LERP },
+			{ "DOT_SHADOW",       RF_DOT_SHADOW },
+			{ "LOW_PRIORITY",     RF_LOW_PRIORITY },
+			{ "NO_LOD",           RF_NO_LOD },
+			{ "NO_STEREO",        RF_NO_STEREO },
+			{ "STAIR_STEP",       RF_STAIR_STEP },
 	
-	EnsureRegisteredEnumValue(RF_, FLARE_LOCK_ANGLE);
-	EnsureRegisteredEnumValueGlobalNoPrefix(RF_, BEAM_LIGHTNING);
+			{ "FLARE_LOCK_ANGLE", RF_FLARE_LOCK_ANGLE },
+			{ "BEAM_LIGHTNING",   RF_BEAM_LIGHTNING }
+		});
 
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-	
-#define Q2AS_OBJECT effects_t
+	registry
+		.enumeration("effects_t", "uint64")
+		.values({
+			{ "NONE",             EF_NONE },
+			{ "ROTATE",           EF_ROTATE },
+			{ "GIB",              EF_GIB },
+			{ "BOB",              EF_BOB },
+			{ "BLASTER",          EF_BLASTER },
+			{ "ROCKET",           EF_ROCKET },
+			{ "GRENADE",          EF_GRENADE },
+			{ "HYPERBLASTER",     EF_HYPERBLASTER },
+			{ "BFG",              EF_BFG },
+			{ "COLOR_SHELL",      EF_COLOR_SHELL },
+			{ "POWERSCREEN",      EF_POWERSCREEN },
+			{ "ANIM01",           EF_ANIM01 },
+			{ "ANIM23",           EF_ANIM23 },
+			{ "ANIM_ALL",         EF_ANIM_ALL },
+			{ "ANIM_ALLFAST",     EF_ANIM_ALLFAST },
+			{ "FLIES",            EF_FLIES },
+			{ "QUAD",             EF_QUAD },
+			{ "PENT",             EF_PENT },
+			{ "TELEPORTER",       EF_TELEPORTER },
+			{ "FLAG1",            EF_FLAG1 },
+			{ "FLAG2",            EF_FLAG2 },
+			{ "IONRIPPER",        EF_IONRIPPER },
+			{ "GREENGIB",         EF_GREENGIB },
+			{ "BLUEHYPERBLASTER", EF_BLUEHYPERBLASTER },
+			{ "SPINNINGLIGHTS",   EF_SPINNINGLIGHTS },
+			{ "PLASMA",           EF_PLASMA },
+			{ "TRAP",             EF_TRAP },
+			{ "TRACKER",          EF_TRACKER },
+			{ "DOUBLE",           EF_DOUBLE },
+			{ "SPHERETRANS",      EF_SPHERETRANS },
+			{ "TAGTRAIL",         EF_TAGTRAIL },
+			{ "HALF_DAMAGE",      EF_HALF_DAMAGE },
+			{ "TRACKERTRAIL",     EF_TRACKERTRAIL },
+			{ "DUALFIRE",         EF_DUALFIRE },
+			{ "HOLOGRAM",         EF_HOLOGRAM },
+			{ "FLASHLIGHT",       EF_FLASHLIGHT },
+			{ "BARREL_EXPLODING", EF_BARREL_EXPLODING },
+			{ "TELEPORTER2",      EF_TELEPORTER2 },
+			{ "GRENADE_LIGHT",    EF_GRENADE_LIGHT },
+			{ "FIREBALL",         EF_FIREBALL }
+		});
 
-	EnsureRegisteredTypedEnum("uint64");
-	
-	EnsureRegisteredEnumValue(EF_, NONE        );
-	EnsureRegisteredEnumValue(EF_, ROTATE      );
-	EnsureRegisteredEnumValue(EF_, GIB         );
-	EnsureRegisteredEnumValue(EF_, BOB         );
-	EnsureRegisteredEnumValue(EF_, BLASTER     );
-	EnsureRegisteredEnumValue(EF_, ROCKET      );
-	EnsureRegisteredEnumValue(EF_, GRENADE     );
-	EnsureRegisteredEnumValue(EF_, HYPERBLASTER);
-	EnsureRegisteredEnumValue(EF_, BFG         );
-	EnsureRegisteredEnumValue(EF_, COLOR_SHELL );
-	EnsureRegisteredEnumValue(EF_, POWERSCREEN );
-	EnsureRegisteredEnumValue(EF_, ANIM01      );
-	EnsureRegisteredEnumValue(EF_, ANIM23      );
-	EnsureRegisteredEnumValue(EF_, ANIM_ALL    );
-	EnsureRegisteredEnumValue(EF_, ANIM_ALLFAST);
-	EnsureRegisteredEnumValue(EF_, FLIES       );
-	EnsureRegisteredEnumValue(EF_, QUAD        );
-	EnsureRegisteredEnumValue(EF_, PENT        );
-	EnsureRegisteredEnumValue(EF_, TELEPORTER  );
-	EnsureRegisteredEnumValue(EF_, FLAG1       );
-	EnsureRegisteredEnumValue(EF_, FLAG2       );
-	EnsureRegisteredEnumValue(EF_, IONRIPPER       );
-	EnsureRegisteredEnumValue(EF_, GREENGIB        );
-	EnsureRegisteredEnumValue(EF_, BLUEHYPERBLASTER);
-	EnsureRegisteredEnumValue(EF_, SPINNINGLIGHTS  );
-	EnsureRegisteredEnumValue(EF_, PLASMA          );
-	EnsureRegisteredEnumValue(EF_, TRAP            );
-	EnsureRegisteredEnumValue(EF_, TRACKER     );
-	EnsureRegisteredEnumValue(EF_, DOUBLE      );
-	EnsureRegisteredEnumValue(EF_, SPHERETRANS );
-	EnsureRegisteredEnumValue(EF_, TAGTRAIL    );
-	EnsureRegisteredEnumValue(EF_, HALF_DAMAGE );
-	EnsureRegisteredEnumValue(EF_, TRACKERTRAIL);
-	EnsureRegisteredEnumValue(EF_, DUALFIRE        );
-	EnsureRegisteredEnumValue(EF_, HOLOGRAM        );
-	EnsureRegisteredEnumValue(EF_, FLASHLIGHT      );
-	EnsureRegisteredEnumValue(EF_, BARREL_EXPLODING);
-	EnsureRegisteredEnumValue(EF_, TELEPORTER2     );
-	EnsureRegisteredEnumValue(EF_, GRENADE_LIGHT   );
-	EnsureRegisteredEnumValueRaw("effects_t", "FIREBALL", EF_FIREBALL);
+	registry
+		.enumeration("entity_event_t", "uint8")
+		.values({
+			{ "NONE",            EV_NONE },
+			{ "ITEM_RESPAWN",    EV_ITEM_RESPAWN },
+			{ "FOOTSTEP",        EV_FOOTSTEP },
+			{ "FALLSHORT",       EV_FALLSHORT },
+			{ "FALL",            EV_FALL },
+			{ "FALLFAR",         EV_FALLFAR },
+			{ "PLAYER_TELEPORT", EV_PLAYER_TELEPORT },
+			{ "OTHER_TELEPORT",  EV_OTHER_TELEPORT },
+			{ "OTHER_FOOTSTEP",  EV_OTHER_FOOTSTEP },
+			{ "LADDER_STEP",     EV_LADDER_STEP }
+		});
 
-#undef Q2AS_OBJECT
-	
-#define Q2AS_OBJECT entity_event_t
-#define Q2AS_ENUM_PREFIX EV_
+	registry
+		.type("entity_state_t", sizeof(entity_state_t), asOBJ_VALUE | asOBJ_POD)
+		.properties({
+			{ "const uint32 number",       asOFFSET(entity_state_t, number) },
+			{ "vec3_t origin",             asOFFSET(entity_state_t, origin) },
+			{ "vec3_t angles",             asOFFSET(entity_state_t, angles) },
+			{ "vec3_t old_origin",         asOFFSET(entity_state_t, old_origin) },
+			{ "int32 modelindex",          asOFFSET(entity_state_t, modelindex) },
+			{ "int32 modelindex2",         asOFFSET(entity_state_t, modelindex2) },
+			{ "int32 modelindex3",         asOFFSET(entity_state_t, modelindex3) },
+			{ "int32 modelindex4",         asOFFSET(entity_state_t, modelindex4) },
+			{ "int32 frame",               asOFFSET(entity_state_t, frame) },
+			{ "int32 skinnum",             asOFFSET(entity_state_t, skinnum) },
+			{ "effects_t effects",         asOFFSET(entity_state_t, effects) },
+			{ "renderfx_t renderfx",       asOFFSET(entity_state_t, renderfx) },
+			{ "int32 sound",               asOFFSET(entity_state_t, sound) },
+			{ "entity_event_t event",      asOFFSET(entity_state_t, event) },
+			{ "float alpha",               asOFFSET(entity_state_t, alpha) },
+			{ "float scale",               asOFFSET(entity_state_t, scale) },
+			{ "float loop_volume",         asOFFSET(entity_state_t, loop_volume) },
+			{ "float loop_attenuation",    asOFFSET(entity_state_t, loop_attenuation) },
+			{ "int32 old_frame",           asOFFSET(entity_state_t, old_frame) },
+			// these members are server-only
+			{ "const uint32 solid_bits",   asOFFSET(entity_state_t, solid) },
+			{ "const int32 owner_id",      asOFFSET(entity_state_t, owner) },
+			{ "const uint8 instance_bits", asOFFSET(entity_state_t, instance_bits) }
+		})
+		.methods({
+			{ "entity_state_t &opAssign(const entity_state_t &in)", asFUNCTION(Q2AS_entity_state_t_assign), asCALL_CDECL_OBJLAST }
+		});
 
-	EnsureRegisteredTypedEnum("uint8");
-	EnsureRegisteredEnumValue(EV_, NONE);
-	EnsureRegisteredEnumValue(EV_, ITEM_RESPAWN);
-	EnsureRegisteredEnumValue(EV_, FOOTSTEP);
-	EnsureRegisteredEnumValue(EV_, FALLSHORT);
-	EnsureRegisteredEnumValue(EV_, FALL);
-	EnsureRegisteredEnumValue(EV_, FALLFAR);
-	EnsureRegisteredEnumValue(EV_, PLAYER_TELEPORT);
-	EnsureRegisteredEnumValue(EV_, OTHER_TELEPORT);
-	EnsureRegisteredEnumValue(EV_, OTHER_FOOTSTEP);
-	EnsureRegisteredEnumValue(EV_, LADDER_STEP);
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("svflags_t", "uint32")
+		.values({
+			{ "NONE",       SVF_NONE },
+			{ "NOCLIENT",   SVF_NOCLIENT },
+			{ "DEADMONSTER",SVF_DEADMONSTER },
+			{ "MONSTER",    SVF_MONSTER },
+			{ "PLAYER",     SVF_PLAYER },
+			{ "BOT",        SVF_BOT },
+			{ "NOBOTS",     SVF_NOBOTS },
+			{ "RESPAWNING", SVF_RESPAWNING },
+			{ "PROJECTILE", SVF_PROJECTILE },
+			{ "INSTANCED",  SVF_INSTANCED },
+			{ "DOOR",       SVF_DOOR },
+			{ "NOCULL",     SVF_NOCULL },
+			{ "HULL",       SVF_HULL },
+		});
 
-#define Q2AS_OBJECT entity_state_t
-	
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD);
-
-    // behaviors
-	EnsureRegisteredMethod("entity_state_t &opAssign(const entity_state_t &in)", asFUNCTION(Q2AS_entity_state_t_assign), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredProperty("const uint32", number);
-	EnsureRegisteredProperty("vec3_t", origin);
-	EnsureRegisteredProperty("vec3_t", angles);
-	EnsureRegisteredProperty("vec3_t", old_origin);
-	EnsureRegisteredProperty("int32", modelindex);
-	EnsureRegisteredProperty("int32", modelindex2);
-	EnsureRegisteredProperty("int32", modelindex3);
-	EnsureRegisteredProperty("int32", modelindex4);
-	EnsureRegisteredProperty("int32", frame);
-	EnsureRegisteredProperty("int32", skinnum);
-	EnsureRegisteredProperty("effects_t", effects);
-	EnsureRegisteredProperty("renderfx_t", renderfx);
-	EnsureRegisteredProperty("int32", sound);
-	EnsureRegisteredProperty("entity_event_t", event);
-	EnsureRegisteredProperty("float", alpha);
-	EnsureRegisteredProperty("float", scale);
-	EnsureRegisteredProperty("float", loop_volume);
-	EnsureRegisteredProperty("float", loop_attenuation);
-	EnsureRegisteredProperty("int32", old_frame);
-
-    // these members are server-only
-	Ensure(engine->RegisterObjectProperty("entity_state_t", "const uint32 solid_bits", asOFFSET(entity_state_t, solid)));
-	Ensure(engine->RegisterObjectProperty("entity_state_t", "const int32 owner_id", asOFFSET(entity_state_t, owner)));
-	Ensure(engine->RegisterObjectProperty("entity_state_t", "const uint8 instance_bits", asOFFSET(entity_state_t, instance_bits)));
-
-#undef Q2AS_OBJECT
-
-#define Q2AS_OBJECT svflags_t
-#define Q2AS_ENUM_PREFIX SVF_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(SVF_, NONE);
-	EnsureRegisteredEnumValue(SVF_, NOCLIENT);
-	EnsureRegisteredEnumValue(SVF_, DEADMONSTER);
-	EnsureRegisteredEnumValue(SVF_, MONSTER);
-	EnsureRegisteredEnumValue(SVF_, PLAYER);
-	EnsureRegisteredEnumValue(SVF_, BOT);
-	EnsureRegisteredEnumValue(SVF_, NOBOTS);
-	EnsureRegisteredEnumValue(SVF_, RESPAWNING);
-	EnsureRegisteredEnumValue(SVF_, PROJECTILE);
-	EnsureRegisteredEnumValue(SVF_, INSTANCED);
-	EnsureRegisteredEnumValue(SVF_, DOOR);
-	EnsureRegisteredEnumValue(SVF_, NOCULL);
-	EnsureRegisteredEnumValue(SVF_, HULL);
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT solid_t
-#define Q2AS_ENUM_PREFIX SOLID_
-
-	EnsureRegisteredTypedEnum("uint8");
-	EnsureRegisteredEnumValue(SOLID_, NOT);
-	EnsureRegisteredEnumValue(SOLID_, TRIGGER);
-	EnsureRegisteredEnumValue(SOLID_, BBOX);
-	EnsureRegisteredEnumValue(SOLID_, BSP);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT gclient_t
+	registry
+		.enumeration("solid_t", "uint8")
+		.values({
+			{ "NOT",     SOLID_NOT },
+			{ "TRIGGER", SOLID_TRIGGER },
+			{ "BBOX",    SOLID_BBOX },
+			{ "BSP",     SOLID_BSP }
+		});
 
 	// client handle; special handle, always active and allocated
 	// by the host, wrapped by AngelScript.
-
-	EnsureRegisteredTypeRaw("gclient_t", sizeof(gclient_t), asOBJ_REF | asOBJ_NOCOUNT);
-
-	EnsureRegisteredProperty("player_state_t", ps);
+	registry
+		.type("gclient_t", sizeof(gclient_t), asOBJ_REF | asOBJ_NOCOUNT)
+		.properties({
+			{ "player_state_t ps", asOFFSET(gclient_t, ps) },
+			{ "int ping",          asOFFSET(gclient_t, ping) }
+		});
 
     // convenience
     {
-        auto ti = engine->GetTypeInfoByName("player_state_t");
+        auto ti = registry.engine->GetTypeInfoByName("player_state_t");
 
         for (asUINT prop = 0; prop < ti->GetPropertyCount(); prop++)
         {
@@ -1089,43 +1039,58 @@ static bool Q2AS_RegisterEntity(asIScriptEngine *engine)
             int offset;
             ti->GetProperty(prop, nullptr, nullptr, nullptr, nullptr, &offset);
 
-            Ensure(engine->RegisterObjectProperty("gclient_t", decl, offset));
+            Ensure(registry.engine->RegisterObjectProperty("gclient_t", decl, offset));
         }
     }
 
-	EnsureRegisteredProperty("const int", ping);
+	registry
+		.type("armorInfo_t", sizeof(armorInfo_t), asOBJ_VALUE | asOBJ_POD)
+		.properties({
+			{ "int item_id",   asOFFSET(armorInfo_t, item_id) },
+			{ "int max_count", asOFFSET(armorInfo_t, max_count) }
+		});
 
-#undef Q2AS_OBJECT
+	registry
+		.for_global()
+		.properties({
+			{ "const int Max_Armor_Types", &Max_Armor_Types }
+		});
 
-#define Q2AS_OBJECT armorInfo_t
-
-	// client handle; special handle, always active and allocated
-	// by the host, wrapped by AngelScript.
-
-	EnsureRegisteredTypeRaw("armorInfo_t", sizeof(armorInfo_t), asOBJ_VALUE | asOBJ_POD);
-
-	EnsureRegisteredProperty("int", item_id);
-	EnsureRegisteredProperty("int", max_count);
-
-#undef Q2AS_OBJECT
-
-    Ensure(Q2AS_RegisterFixedArray<int, MAX_ITEMS>(engine, "inventoryArray_t", "int", asOBJ_APP_CLASS_ALLINTS));
-    Ensure(Q2AS_RegisterFixedArray<armorInfo_t, Max_Armor_Types>(engine, "armorInfoArray_t", "armorInfo_t", asOBJ_APP_CLASS_ALLINTS));
-	
-#define Q2AS_OBJECT edict_t
+    Q2AS_RegisterFixedArray<int, MAX_ITEMS>(registry, "inventoryArray_t", "int", asOBJ_APP_CLASS_ALLINTS);
+    Q2AS_RegisterFixedArray<armorInfo_t, Max_Armor_Types>(registry, "armorInfoArray_t", "armorInfo_t", asOBJ_APP_CLASS_ALLINTS);
 	
 	// entity handle; special handle, always active and allocated
 	// by the host, wrapped by AngelScript.
 
-	EnsureRegisteredTypeRaw("edict_t", sizeof(q2as_edict_t), asOBJ_REF | asOBJ_NOCOUNT);
+	registry
+		.type("edict_t", sizeof(q2as_edict_t), asOBJ_REF | asOBJ_NOCOUNT)
+		.properties({
+			{ "entity_state_t s",  asOFFSET(q2as_edict_t, s) },
+			{ "player_state_t ps", asOFFSET(gclient_t, ps), asOFFSET(edict_t, client), true },
 
-	EnsureRegisteredMethodRaw("edict_t", "void reset()", asFUNCTION(q2as_edict_t_reset), asCALL_CDECL_OBJLAST);
-
-	EnsureRegisteredProperty("entity_state_t", s);
+			{ "gclient_t @client",     asOFFSET(q2as_edict_t, client) },
+			{ "bool inuse",            asOFFSET(q2as_edict_t, inuse) },
+			{ "const bool linked",     asOFFSET(q2as_edict_t, linked) },
+			{ "const int32 linkcount", asOFFSET(q2as_edict_t, linkcount) },
+			{ "const int32 areanum",   asOFFSET(q2as_edict_t, areanum) },
+			{ "const int32 areanum2",  asOFFSET(q2as_edict_t, areanum2) },
+			{ "svflags_t svflags",     asOFFSET(q2as_edict_t, svflags) },
+			{ "vec3_t mins",           asOFFSET(q2as_edict_t, mins) },
+			{ "vec3_t maxs",           asOFFSET(q2as_edict_t, maxs) },
+			{ "vec3_t absmin",         asOFFSET(q2as_edict_t, absmin) },
+			{ "vec3_t absmax",         asOFFSET(q2as_edict_t, absmax) },
+			{ "vec3_t size",           asOFFSET(q2as_edict_t, size) },
+			{ "solid_t solid",         asOFFSET(q2as_edict_t, solid) },
+			{ "contents_t clipmask",   asOFFSET(q2as_edict_t, clipmask) },
+			{ "edict_t @owner",        asOFFSET(q2as_edict_t, owner) }
+		})
+		.methods({
+			{ "void reset()", asFUNCTION(q2as_edict_t_reset), asCALL_CDECL_OBJLAST }
+		});
 
     // convenience
     {
-        auto ti = engine->GetTypeInfoByName("entity_state_t");
+        auto ti = registry.engine->GetTypeInfoByName("entity_state_t");
 
         for (asUINT prop = 0; prop < ti->GetPropertyCount(); prop++)
         {
@@ -1138,80 +1103,72 @@ static bool Q2AS_RegisterEntity(asIScriptEngine *engine)
                 strcmp(name, "owner_id") == 0)
                 continue;
 
-            Ensure(engine->RegisterObjectProperty("edict_t", decl, offset));
+            Ensure(registry.engine->RegisterObjectProperty("edict_t", decl, offset));
         }
     }
 
-    Ensure(engine->RegisterObjectProperty("edict_t", "player_state_t ps", asOFFSET(gclient_t, ps), asOFFSET(edict_t, client), true));
-
-	EnsureRegisteredProperty("gclient_t @", client);
-	EnsureRegisteredProperty("bool", inuse);
-	EnsureRegisteredProperty("const bool", linked);
-	EnsureRegisteredProperty("const int32", linkcount);
-	EnsureRegisteredProperty("const int32", areanum);
-	EnsureRegisteredProperty("const int32", areanum2);
-	EnsureRegisteredProperty("svflags_t", svflags);
-	EnsureRegisteredProperty("vec3_t", mins);
-	EnsureRegisteredProperty("vec3_t", maxs);
-	EnsureRegisteredProperty("vec3_t", absmin);
-	EnsureRegisteredProperty("vec3_t", absmax);
-	EnsureRegisteredProperty("vec3_t", size);
-	EnsureRegisteredProperty("solid_t", solid);
-	EnsureRegisteredProperty("contents_t", clipmask);
-	EnsureRegisteredProperty("edict_t @", owner);
-	
-#undef Q2AS_OBJECT
+	registry
+		.type("sv_entity_t", sizeof(sv_entity_t), asOBJ_VALUE | asOBJ_POD)
+		.properties({
+			{ "bool init",                   asOFFSET(sv_entity_t, init)  },
+			{ "uint64 ent_flags",            asOFFSET(sv_entity_t, ent_flags) },
+			{ "button_t buttons",            asOFFSET(sv_entity_t, buttons) },
+			{ "uint32 spawnflags",           asOFFSET(sv_entity_t, spawnflags) },
+			{ "int32 item_id",               asOFFSET(sv_entity_t, item_id) },
+			{ "int32 armor_type",            asOFFSET(sv_entity_t, armor_type) },
+			{ "int32 armor_value",           asOFFSET(sv_entity_t, armor_value) },
+			{ "int32 health",                asOFFSET(sv_entity_t, health) },
+			{ "int32 max_health",            asOFFSET(sv_entity_t, max_health) },
+			{ "int32 starting_health",       asOFFSET(sv_entity_t, starting_health) },
+			{ "int32 weapon",                asOFFSET(sv_entity_t, weapon) },
+			{ "int32 team",                  asOFFSET(sv_entity_t, team) },
+			{ "int32 lobby_usernum",         asOFFSET(sv_entity_t, lobby_usernum) },
+			{ "int32 respawntime",           asOFFSET(sv_entity_t, respawntime) },
+			{ "int32 viewheight",            asOFFSET(sv_entity_t, viewheight) },
+			{ "int32 last_attackertime",     asOFFSET(sv_entity_t, last_attackertime) },
+			{ "water_level_t waterlevel",    asOFFSET(sv_entity_t, waterlevel) },
+			{ "vec3_t viewangles",           asOFFSET(sv_entity_t, viewangles) },
+			{ "vec3_t viewforward",          asOFFSET(sv_entity_t, viewforward) },
+			{ "vec3_t velocity",             asOFFSET(sv_entity_t, velocity) },
+			{ "vec3_t start_origin",         asOFFSET(sv_entity_t, start_origin) },
+			{ "vec3_t end_origin",           asOFFSET(sv_entity_t, end_origin) },
+			{ "edict_t @ enemy",             asOFFSET(sv_entity_t, enemy) },
+			{ "edict_t @ ground_entity",     asOFFSET(sv_entity_t, ground_entity) },
+			{ "inventoryArray_t inventory",  asOFFSET(sv_entity_t, inventory) },
+			{ "armorInfoArray_t armor_info", asOFFSET(sv_entity_t, armor_info) }
+		})
+		.methods({
+			{ "void set_classname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_classname), asCALL_CDECL_OBJLAST },
+			{ "void set_targetname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_targetname), asCALL_CDECL_OBJLAST },
+			{ "void set_netname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_netname), asCALL_CDECL_OBJLAST }
+		});
     
-#define Q2AS_OBJECT sv_entity_t
+	registry
+		.for_type("edict_t")
+		.properties({
+			{ "sv_entity_t sv", asOFFSET(q2as_edict_t, sv) }
+		});
+
+	registry
+		.for_global()
+		.functions({
+			{ "edict_t @G_EdictForNum(uint n)",    asFUNCTION(G_EdictForNum),  asCALL_CDECL },
+			{ "gclient_t @G_ClientForNum(uint n)", asFUNCTION(G_ClientForNum), asCALL_CDECL }
+		});
+
+	Ensure(registry.engine->RegisterFuncdef("BoxEdictsResult_t BoxEdictsFilter_t(edict_t @, any @const)"));
 	
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD);
-    
-    EnsureRegisteredProperty("bool", init);
-    EnsureRegisteredProperty("uint64", ent_flags);
-    EnsureRegisteredProperty("button_t", buttons);
-    EnsureRegisteredProperty("uint32", spawnflags);
-    EnsureRegisteredProperty("int32", item_id);
-    EnsureRegisteredProperty("int32", armor_type);
-    EnsureRegisteredProperty("int32", armor_value);
-    EnsureRegisteredProperty("int32", health);
-    EnsureRegisteredProperty("int32", max_health);
-    EnsureRegisteredProperty("int32", starting_health);
-    EnsureRegisteredProperty("int32", weapon);
-    EnsureRegisteredProperty("int32", team);
-    EnsureRegisteredProperty("int32", lobby_usernum);
-    EnsureRegisteredProperty("int32", respawntime);
-    EnsureRegisteredProperty("int32", viewheight);
-    EnsureRegisteredProperty("int32", last_attackertime);
-    EnsureRegisteredProperty("water_level_t", waterlevel);
-    EnsureRegisteredProperty("vec3_t", viewangles);
-    EnsureRegisteredProperty("vec3_t", viewforward);
-    EnsureRegisteredProperty("vec3_t", velocity);
-    EnsureRegisteredProperty("vec3_t", start_origin);
-    EnsureRegisteredProperty("vec3_t", end_origin);
-    EnsureRegisteredProperty("edict_t @", enemy);
-    EnsureRegisteredProperty("edict_t @", ground_entity);
-    EnsureRegisteredMethod("void set_classname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_classname), asCALL_CDECL_OBJLAST);
-    EnsureRegisteredMethod("void set_targetname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_targetname), asCALL_CDECL_OBJLAST);
-    EnsureRegisteredMethod("void set_netname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_netname), asCALL_CDECL_OBJLAST);
-    EnsureRegisteredProperty("inventoryArray_t", inventory);
-    EnsureRegisteredProperty("armorInfoArray_t", armor_info);
+	registry
+		.interface("IASEntity")
+		.methods({
+			"edict_t @get_handle() const property"
+		});
 
-#undef Q2AS_OBJECT
-    
-    EnsureRegisteredPropertyRaw("edict_t", "sv_entity_t sv", asOFFSET(q2as_edict_t, sv));
-
-	engine->RegisterGlobalFunction("edict_t @G_EdictForNum(uint n)", asFUNCTION(G_EdictForNum), asCALL_CDECL);
-	engine->RegisterGlobalFunction("gclient_t @G_ClientForNum(uint n)", asFUNCTION(G_ClientForNum), asCALL_CDECL);
-
-	Ensure(engine->RegisterFuncdef("BoxEdictsResult_t BoxEdictsFilter_t(edict_t @, any @const)"));
-	
-	engine->RegisterInterface("IASEntity");
-
-	engine->RegisterInterfaceMethod("IASEntity", "edict_t @get_handle() const property");
-
-    EnsureRegisteredPropertyRaw("edict_t", "IASEntity @as_obj", asOFFSET(q2as_edict_t, as_obj));
-
-	return true;
+	registry
+		.for_type("edict_t")
+		.properties({
+			{ "IASEntity @as_obj", asOFFSET(q2as_edict_t, as_obj) }
+		});
 }
 
 
@@ -1317,23 +1274,29 @@ static void q2as_spawnflags_opXorAssign(asIScriptGeneric *gen)
 
 // register spawnflags_t type for use in scripts. just helps
 // manage spawnflags.
-static bool Q2AS_RegisterSpawnflags(asIScriptEngine *engine)
+static void Q2AS_RegisterSpawnflags(q2as_registry &registry)
 {
-	Ensure(engine->RegisterObjectType("spawnflags_t", sizeof(int), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_ALLINTS));
-	Ensure(engine->RegisterGlobalFunction("spawnflags_t spawnflag_dec(uint)", asFUNCTION(q2as_spawnflag_dec), asCALL_CDECL));
-	Ensure(engine->RegisterGlobalFunction("spawnflags_t spawnflag_bit(uint)", asFUNCTION(q2as_spawnflag_bit), asCALL_CDECL));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t opCom() const", asFUNCTION(q2as_spawnflags_opCom), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t opAnd(spawnflags_t) const", asFUNCTION(q2as_spawnflags_opAnd), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t opOr(spawnflags_t) const", asFUNCTION(q2as_spawnflags_opOr), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t opXor(spawnflags_t) const", asFUNCTION(q2as_spawnflags_opXor), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t &opAndAssign(spawnflags_t)", asFUNCTION(q2as_spawnflags_opAndAssign), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t &opOrAssign(spawnflags_t)", asFUNCTION(q2as_spawnflags_opOrAssign), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "spawnflags_t &opXorAssign(spawnflags_t)", asFUNCTION(q2as_spawnflags_opXorAssign), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "uint opConv() const", asFUNCTION(q2as_spawnflags_t_uint), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "bool has(spawnflags_t) const", asFUNCTION(q2as_spawnflags_t_has), asCALL_GENERIC));
-	Ensure(engine->RegisterObjectMethod("spawnflags_t", "bool has_all(spawnflags_t) const", asFUNCTION(q2as_spawnflags_t_has_all), asCALL_GENERIC));
+	registry
+		.type("spawnflags_t", sizeof(uint32_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_ALLINTS)
+		.methods({
+			{ "spawnflags_t opCom() const",              asFUNCTION(q2as_spawnflags_opCom),       asCALL_GENERIC },
+			{ "spawnflags_t opAnd(spawnflags_t) const",  asFUNCTION(q2as_spawnflags_opAnd),       asCALL_GENERIC },
+			{ "spawnflags_t opOr(spawnflags_t) const",   asFUNCTION(q2as_spawnflags_opOr),        asCALL_GENERIC },
+			{ "spawnflags_t opXor(spawnflags_t) const",  asFUNCTION(q2as_spawnflags_opXor),       asCALL_GENERIC },
+			{ "spawnflags_t &opAndAssign(spawnflags_t)", asFUNCTION(q2as_spawnflags_opAndAssign), asCALL_GENERIC },
+			{ "spawnflags_t &opOrAssign(spawnflags_t)",  asFUNCTION(q2as_spawnflags_opOrAssign),  asCALL_GENERIC },
+			{ "spawnflags_t &opXorAssign(spawnflags_t)", asFUNCTION(q2as_spawnflags_opXorAssign), asCALL_GENERIC },
+			{ "uint opConv() const",                     asFUNCTION(q2as_spawnflags_t_uint),      asCALL_GENERIC },
+			{ "bool has(spawnflags_t) const",            asFUNCTION(q2as_spawnflags_t_has),       asCALL_GENERIC },
+			{ "bool has_all(spawnflags_t) const",        asFUNCTION(q2as_spawnflags_t_has_all),   asCALL_GENERIC }
+		});
 
-    return true;
+	registry
+		.for_global()
+		.functions({
+			{ "spawnflags_t spawnflag_dec(uint)", asFUNCTION(q2as_spawnflag_dec), asCALL_CDECL },
+			{ "spawnflags_t spawnflag_bit(uint)", asFUNCTION(q2as_spawnflag_bit), asCALL_CDECL }
+		});
 }
 
 static void q2as_find_by_str(asIScriptGeneric *gen)
@@ -1797,100 +1760,104 @@ static void q2as_SendToClipBoard(const std::string &text)
 	gi.SendToClipBoard(text.c_str());
 }
 
-static bool Q2AS_RegisterGame(asIScriptEngine *engine)
+static void Q2AS_RegisterGame(q2as_registry &registry)
 {
 	// game imports
-	EnsureRegisteredGlobalFunction("trace_t gi_trace(const vec3_t &in start, const vec3_t &in mins, const vec3_t &in maxs, const vec3_t &in end, edict_t @passent, contents_t contentmask) nodiscard", asFUNCTION(gi.game_import_t::trace), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("trace_t gi_traceline(const vec3_t &in start, const vec3_t &in end, edict_t @passent, contents_t contentmask) nodiscard", asFUNCTION(q2as_traceline), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("trace_t gi_clip(edict_t @entity, const vec3_t &in start, const vec3_t &in mins, const vec3_t &in maxs, const vec3_t &in end, contents_t) nodiscard", asFUNCTION(gi.game_import_t::clip), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("contents_t gi_pointcontents(const vec3_t &in point) nodiscard", asFUNCTION(gi.game_import_t::pointcontents), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_linkentity(edict_t @ent)", asFUNCTION(gi.game_import_t::linkentity), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_unlinkentity(edict_t @ent)", asFUNCTION(gi.game_import_t::unlinkentity), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_positioned_sound(const vec3_t &in origin, edict_t @ent, uint8 channel, int soundindex, float volume, float attenuation, float timeofs)", asFUNCTION(gi.game_import_t::positioned_sound), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_sound(edict_t @ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs)", asFUNCTION(gi.game_import_t::sound), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_local_sound(edict_t @target, const vec3_t &in origin, edict_t @ent, uint8 channel, int soundindex, float volume, float attenuation, float timeofs, uint dupe_key)", asFUNCTION(gi.game_import_t::local_sound), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_local_sound(edict_t @target, edict_t @ent, uint8 channel, int soundindex, float volume, float attenuation, float timeofs, uint dupe_key)", asFUNCTION(q2as_local_sound_nullptr), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("int gi_soundindex(const string &in str)", asFUNCTION(q2as_soundindex), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("int gi_modelindex(const string &in str)", asFUNCTION(q2as_modelindex), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("int gi_imageindex(const string &in str)", asFUNCTION(q2as_imageindex), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteByte(int c)", asFUNCTION(gi.game_import_t::WriteByte), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteChar(int c)", asFUNCTION(gi.game_import_t::WriteChar), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteShort(int c)", asFUNCTION(gi.game_import_t::WriteShort), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteLong(int c)", asFUNCTION(gi.game_import_t::WriteLong), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteFloat(float f)", asFUNCTION(gi.game_import_t::WriteFloat), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteString(const string &in s)", asFUNCTION(q2as_WriteString), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WritePosition(const vec3_t &in pos)", asFUNCTION(gi.game_import_t::WritePosition), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteDir(const vec3_t &in dir)", asFUNCTION(gi.game_import_t::WriteDir), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteAngle(float f)", asFUNCTION(gi.game_import_t::WriteAngle), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_WriteEntity(edict_t @ent)", asFUNCTION(gi.game_import_t::WriteEntity), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_multicast(const vec3_t &in origin, multicast_t to, bool reliable)", asFUNCTION(gi.game_import_t::multicast), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_unicast(edict_t @ent, bool reliable, uint dupe_key)", asFUNCTION(gi.game_import_t::unicast), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Com_Error(const string &in message)", asFUNCTION(q2as_Com_Error), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Com_Error(const string &in fmt, const ?&in...)", asFUNCTION(q2as_Com_ErrorFmt), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_Com_Print(const string &in message)", asFUNCTION(q2as_Com_Print), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Com_Print(const string &in fmt, const ?&in...)", asFUNCTION(q2as_Com_PrintFmt), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_cvar_set(const string &in var_name, const string &in value)", asFUNCTION(q2as_cvar_set), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_cvar_forceset(const string &in var_name, const string &in value)", asFUNCTION(q2as_cvar_forceset), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("uint gi_Info_ValueForKey(const string &in, const string &in, const string &out)", asFUNCTION(q2as_Info_ValueForKey), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("bool gi_Info_SetValueForKey(const string &in, const string &in, const string &in, string &out)", asFUNCTION(q2as_Info_SetValueForKey), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_configstring(int num, const string &in str)", asFUNCTION(q2as_configstring), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("string gi_get_configstring(int num) nodiscard", asFUNCTION(q2as_get_configstring), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("uint gi_ServerFrame() nodiscard", asFUNCTION(gi.ServerFrame), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_setmodel(edict_t @ent, const string &in name)", asFUNCTION(q2as_setmodel), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("bool gi_inPHS(const vec3_t &in p1, const vec3_t &in p2, bool portals) nodiscard", asFUNCTION(gi.game_import_t::inPHS), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("bool gi_inPVS(const vec3_t &in p1, const vec3_t &in p2, bool portals) nodiscard", asFUNCTION(gi.game_import_t::inPVS), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("bool gi_AreasConnected(int area1, int area2) nodiscard", asFUNCTION(gi.game_import_t::AreasConnected), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("uint gi_BoxEdicts(const vec3_t &in mins, const vec3_t &in maxs, array<edict_t@> @+list, uint maxcount, solidity_area_t areatype, BoxEdictsFilter_t @+filter, any @const+ filter_data, bool append)", asFUNCTION(q2as_boxedicts), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("int gi_argc() nodiscard", asFUNCTION(q2as_argc), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("const string &gi_args() nodiscard", asFUNCTION(q2as_args), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("const string &gi_argv(int n) nodiscard", asFUNCTION(q2as_argv), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_LocClient_Print(edict_t @, print_type_t printlevel, const string &in message)", asFUNCTION(q2as_gi_LocClient_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_LocClient_Print(edict_t @, print_type_t printlevel, const string &in fmt, const ?&in...)", asFUNCTION(q2as_gi_LocClient_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_Client_Print(edict_t @ent, print_type_t printlevel, const string &in message)", asFUNCTION(q2as_gi_Client_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Client_Print(edict_t @ent, print_type_t printlevel, const string &in fmt, const ?&in...)", asFUNCTION(q2as_gi_Client_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_Center_Print(edict_t @ent, const string &in)", asFUNCTION(q2as_gi_Center_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Center_Print(edict_t @ent, const string &in, const ?&in...)", asFUNCTION(q2as_gi_Center_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_LocCenter_Print(edict_t @ent, const string &in message)", asFUNCTION(q2as_gi_LocCenter_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_LocCenter_Print(edict_t @ent, const string &in fmt, const ?&in...)", asFUNCTION(q2as_gi_LocCenter_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_Loc_Print(edict_t @ent, print_type_t printlevel, const string &in base)", asFUNCTION(q2as_gi_Loc_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Loc_Print(edict_t @ent, print_type_t printlevel, const string &in base, const ?&in...)", asFUNCTION(q2as_gi_Loc_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_LocBroadcast_Print(print_type_t printlevel, const string &in message)", asFUNCTION(q2as_gi_LocBroadcast_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_LocBroadcast_Print(print_type_t printlevel, const string &in fmt, const ?&in...)", asFUNCTION(q2as_gi_LocBroadcast_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_Broadcast_Print(print_type_t printlevel, const string &in message)", asFUNCTION(q2as_gi_LocBroadcast_Print_Zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_Broadcast_Print(print_type_t printlevel, const string &in fmt, const ?&in...)", asFUNCTION(q2as_gi_LocBroadcast_Print), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void gi_SetAreaPortalState(int portalnum, bool open)", asFUNCTION(gi.game_import_t::SetAreaPortalState), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("cvar_t @gi_cvar(const string &in var_name, const string &in value, cvar_flags_t flags)", asFUNCTION(Q2AS_cvar), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_AddCommandString(const string &in text)", asFUNCTION(Q2AS_AddCommandString_Zero), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_AddCommandString(const string &in fmt, const ?&in...)", asFUNCTION(Q2AS_AddCommandString), asCALL_GENERIC);
-    EnsureRegisteredGlobalFunction("void gi_Bot_RegisterEdict(edict_t @)", asFUNCTION(gi.game_import_t::Bot_RegisterEdict), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Bot_UnRegisterEdict(edict_t @)", asFUNCTION(gi.game_import_t::Bot_UnRegisterEdict), asCALL_CDECL);
+	registry
+		.for_global()
+		.functions({
+			{ "trace_t gi_trace(const vec3_t &in start, const vec3_t &in mins, const vec3_t &in maxs, const vec3_t &in end, edict_t @passent, contents_t contentmask) nodiscard",                                   asFUNCTION(gi.game_import_t::trace),               asCALL_CDECL },
+			{ "trace_t gi_traceline(const vec3_t &in start, const vec3_t &in end, edict_t @passent, contents_t contentmask) nodiscard",                                                                             asFUNCTION(q2as_traceline),                        asCALL_CDECL },
+			{ "trace_t gi_clip(edict_t @entity, const vec3_t &in start, const vec3_t &in mins, const vec3_t &in maxs, const vec3_t &in end, contents_t) nodiscard",                                                 asFUNCTION(gi.game_import_t::clip),                asCALL_CDECL },
+			{ "contents_t gi_pointcontents(const vec3_t &in point) nodiscard",                                                                                                                                      asFUNCTION(gi.game_import_t::pointcontents),       asCALL_CDECL },
+			{ "void gi_linkentity(edict_t @ent)",                                                                                                                                                                   asFUNCTION(gi.game_import_t::linkentity),          asCALL_CDECL },
+			{ "void gi_unlinkentity(edict_t @ent)",                                                                                                                                                                 asFUNCTION(gi.game_import_t::unlinkentity),        asCALL_CDECL },
+			{ "void gi_positioned_sound(const vec3_t &in origin, edict_t @ent, uint8 channel, int soundindex, float volume, float attenuation, float timeofs)",                                                     asFUNCTION(gi.game_import_t::positioned_sound),    asCALL_CDECL },
+			{ "void gi_sound(edict_t @ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs)",                                                                                   asFUNCTION(gi.game_import_t::sound),               asCALL_CDECL },
+			{ "void gi_local_sound(edict_t @target, const vec3_t &in origin, edict_t @ent, uint8 channel, int soundindex, float volume, float attenuation, float timeofs, uint dupe_key)",                          asFUNCTION(gi.game_import_t::local_sound),         asCALL_CDECL },
+			{ "void gi_local_sound(edict_t @target, edict_t @ent, uint8 channel, int soundindex, float volume, float attenuation, float timeofs, uint dupe_key)",                                                   asFUNCTION(q2as_local_sound_nullptr),              asCALL_CDECL },
+			{ "int gi_soundindex(const string &in str)",                                                                                                                                                            asFUNCTION(q2as_soundindex),                       asCALL_CDECL },
+			{ "int gi_modelindex(const string &in str)",                                                                                                                                                            asFUNCTION(q2as_modelindex),                       asCALL_CDECL },
+			{ "int gi_imageindex(const string &in str)",                                                                                                                                                            asFUNCTION(q2as_imageindex),                       asCALL_CDECL },
+			{ "void gi_WriteByte(int c)",                                                                                                                                                                           asFUNCTION(gi.game_import_t::WriteByte),           asCALL_CDECL },
+			{ "void gi_WriteChar(int c)",                                                                                                                                                                           asFUNCTION(gi.game_import_t::WriteChar),           asCALL_CDECL },
+			{ "void gi_WriteShort(int c)",                                                                                                                                                                          asFUNCTION(gi.game_import_t::WriteShort),          asCALL_CDECL },
+			{ "void gi_WriteLong(int c)",                                                                                                                                                                           asFUNCTION(gi.game_import_t::WriteLong),           asCALL_CDECL },
+			{ "void gi_WriteFloat(float f)",                                                                                                                                                                        asFUNCTION(gi.game_import_t::WriteFloat),          asCALL_CDECL },
+			{ "void gi_WriteString(const string &in s)",                                                                                                                                                            asFUNCTION(q2as_WriteString),                      asCALL_CDECL },
+			{ "void gi_WritePosition(const vec3_t &in pos)",                                                                                                                                                        asFUNCTION(gi.game_import_t::WritePosition),       asCALL_CDECL },
+			{ "void gi_WriteDir(const vec3_t &in dir)",                                                                                                                                                             asFUNCTION(gi.game_import_t::WriteDir),            asCALL_CDECL },
+			{ "void gi_WriteAngle(float f)",                                                                                                                                                                        asFUNCTION(gi.game_import_t::WriteAngle),          asCALL_CDECL },
+			{ "void gi_WriteEntity(edict_t @ent)",                                                                                                                                                                  asFUNCTION(gi.game_import_t::WriteEntity),         asCALL_CDECL },
+			{ "void gi_multicast(const vec3_t &in origin, multicast_t to, bool reliable)",                                                                                                                          asFUNCTION(gi.game_import_t::multicast),           asCALL_CDECL },
+			{ "void gi_unicast(edict_t @ent, bool reliable, uint dupe_key)",                                                                                                                                        asFUNCTION(gi.game_import_t::unicast),             asCALL_CDECL },
+			{ "void gi_Com_Error(const string &in message)",                                                                                                                                                        asFUNCTION(q2as_Com_Error),                        asCALL_CDECL },
+			{ "void gi_Com_Error(const string &in fmt, const ?&in...)",                                                                                                                                             asFUNCTION(q2as_Com_ErrorFmt),                     asCALL_GENERIC },
+			{ "void gi_Com_Print(const string &in message)",                                                                                                                                                        asFUNCTION(q2as_Com_Print),                        asCALL_CDECL },
+			{ "void gi_Com_Print(const string &in fmt, const ?&in...)",                                                                                                                                             asFUNCTION(q2as_Com_PrintFmt),                     asCALL_GENERIC },
+			{ "void gi_cvar_set(const string &in var_name, const string &in value)",                                                                                                                                asFUNCTION(q2as_cvar_set),                         asCALL_CDECL },
+			{ "void gi_cvar_forceset(const string &in var_name, const string &in value)",                                                                                                                           asFUNCTION(q2as_cvar_forceset),                    asCALL_CDECL },
+			{ "uint gi_Info_ValueForKey(const string &in, const string &in, const string &out)",                                                                                                                    asFUNCTION(q2as_Info_ValueForKey),                 asCALL_CDECL },
+			{ "bool gi_Info_SetValueForKey(const string &in, const string &in, const string &in, string &out)",                                                                                                     asFUNCTION(q2as_Info_SetValueForKey),              asCALL_CDECL },
+			{ "void gi_configstring(int num, const string &in str)",                                                                                                                                                asFUNCTION(q2as_configstring),                     asCALL_CDECL },
+			{ "string gi_get_configstring(int num) nodiscard",                                                                                                                                                      asFUNCTION(q2as_get_configstring),                 asCALL_CDECL },
+			{ "uint gi_ServerFrame() nodiscard",                                                                                                                                                                    asFUNCTION(gi.ServerFrame),                        asCALL_CDECL },
+			{ "void gi_setmodel(edict_t @ent, const string &in name)",                                                                                                                                              asFUNCTION(q2as_setmodel),                         asCALL_CDECL },
+			{ "bool gi_inPHS(const vec3_t &in p1, const vec3_t &in p2, bool portals) nodiscard",                                                                                                                    asFUNCTION(gi.game_import_t::inPHS),               asCALL_CDECL },
+			{ "bool gi_inPVS(const vec3_t &in p1, const vec3_t &in p2, bool portals) nodiscard",                                                                                                                    asFUNCTION(gi.game_import_t::inPVS),               asCALL_CDECL },
+			{ "bool gi_AreasConnected(int area1, int area2) nodiscard",                                                                                                                                             asFUNCTION(gi.game_import_t::AreasConnected),      asCALL_CDECL },
+			{ "uint gi_BoxEdicts(const vec3_t &in mins, const vec3_t &in maxs, array<edict_t@> @+list, uint maxcount, solidity_area_t areatype, BoxEdictsFilter_t @+filter, any @const+ filter_data, bool append)", asFUNCTION(q2as_boxedicts),                        asCALL_CDECL },
+			{ "int gi_argc() nodiscard",                                                                                                                                                                            asFUNCTION(q2as_argc),                             asCALL_CDECL },
+			{ "const string &gi_args() nodiscard",                                                                                                                                                                  asFUNCTION(q2as_args),                             asCALL_CDECL },
+			{ "const string &gi_argv(int n) nodiscard",                                                                                                                                                             asFUNCTION(q2as_argv),                             asCALL_CDECL },
+			{ "void gi_LocClient_Print(edict_t @, print_type_t printlevel, const string &in message)",                                                                                                              asFUNCTION(q2as_gi_LocClient_Print_Zero),          asCALL_CDECL },
+			{ "void gi_LocClient_Print(edict_t @, print_type_t printlevel, const string &in fmt, const ?&in...)",                                                                                                   asFUNCTION(q2as_gi_LocClient_Print),               asCALL_GENERIC },
+			{ "void gi_Client_Print(edict_t @ent, print_type_t printlevel, const string &in message)",                                                                                                              asFUNCTION(q2as_gi_Client_Print_Zero),             asCALL_CDECL },
+			{ "void gi_Client_Print(edict_t @ent, print_type_t printlevel, const string &in fmt, const ?&in...)",                                                                                                   asFUNCTION(q2as_gi_Client_Print),                  asCALL_GENERIC },
+			{ "void gi_Center_Print(edict_t @ent, const string &in)",                                                                                                                                               asFUNCTION(q2as_gi_Center_Print_Zero),             asCALL_CDECL },
+			{ "void gi_Center_Print(edict_t @ent, const string &in, const ?&in...)",                                                                                                                                asFUNCTION(q2as_gi_Center_Print),                  asCALL_GENERIC },
+			{ "void gi_LocCenter_Print(edict_t @ent, const string &in message)",                                                                                                                                    asFUNCTION(q2as_gi_LocCenter_Print_Zero),          asCALL_CDECL },
+			{ "void gi_LocCenter_Print(edict_t @ent, const string &in fmt, const ?&in...)",                                                                                                                         asFUNCTION(q2as_gi_LocCenter_Print),               asCALL_GENERIC },
+			{ "void gi_Loc_Print(edict_t @ent, print_type_t printlevel, const string &in base)",                                                                                                                    asFUNCTION(q2as_gi_Loc_Print_Zero),                asCALL_CDECL },
+			{ "void gi_Loc_Print(edict_t @ent, print_type_t printlevel, const string &in base, const ?&in...)",                                                                                                     asFUNCTION(q2as_gi_Loc_Print),                     asCALL_GENERIC },
+			{ "void gi_LocBroadcast_Print(print_type_t printlevel, const string &in message)",                                                                                                                      asFUNCTION(q2as_gi_LocBroadcast_Print_Zero),       asCALL_CDECL },
+			{ "void gi_LocBroadcast_Print(print_type_t printlevel, const string &in fmt, const ?&in...)",                                                                                                           asFUNCTION(q2as_gi_LocBroadcast_Print),            asCALL_GENERIC },
+			{ "void gi_Broadcast_Print(print_type_t printlevel, const string &in message)",                                                                                                                         asFUNCTION(q2as_gi_LocBroadcast_Print_Zero),       asCALL_CDECL },
+			{ "void gi_Broadcast_Print(print_type_t printlevel, const string &in fmt, const ?&in...)",                                                                                                              asFUNCTION(q2as_gi_LocBroadcast_Print),            asCALL_GENERIC },
+			{ "void gi_SetAreaPortalState(int portalnum, bool open)",                                                                                                                                               asFUNCTION(gi.game_import_t::SetAreaPortalState),  asCALL_CDECL },
+			{ "cvar_t @gi_cvar(const string &in var_name, const string &in value, cvar_flags_t flags)",                                                                                                             asFUNCTION(Q2AS_cvar),                             asCALL_CDECL },
+			{ "void gi_AddCommandString(const string &in text)",                                                                                                                                                    asFUNCTION(Q2AS_AddCommandString_Zero),            asCALL_CDECL },
+			{ "void gi_AddCommandString(const string &in fmt, const ?&in...)",                                                                                                                                      asFUNCTION(Q2AS_AddCommandString),                 asCALL_GENERIC },
+			{ "void gi_Bot_RegisterEdict(edict_t @)",                                                                                                                                                               asFUNCTION(gi.game_import_t::Bot_RegisterEdict),   asCALL_CDECL },
+			{ "void gi_Bot_UnRegisterEdict(edict_t @)",                                                                                                                                                             asFUNCTION(gi.game_import_t::Bot_UnRegisterEdict), asCALL_CDECL },
+		})
+		.properties({
+			{ "const uint gi_tick_rate",     (const void *) &gi.tick_rate },
+			{ "const float gi_frame_time_s", (const void *) &gi.frame_time_s },
+			{ "const uint gi_frame_time_ms", (const void *) &gi.frame_time_ms }
+		})
+		.functions({
+			{ "void gi_Draw_Line(const vec3_t &in start, const vec3_t &in end, const rgba_t &in color, float lifeTime, bool depthTest)",                                                   asFUNCTION(gi.game_import_t::Draw_Line),     asCALL_CDECL },
+			{ "void gi_Draw_Point(const vec3_t &in point, float size, const rgba_t &in color, float lifeTime, bool depthTest)",                                                            asFUNCTION(gi.game_import_t::Draw_Point),    asCALL_CDECL },
+			{ "void gi_Draw_Circle(const vec3_t &in origin, float size, const rgba_t &in color, float lifeTime, bool depthTest)",                                                          asFUNCTION(gi.game_import_t::Draw_Circle),   asCALL_CDECL },
+			{ "void gi_Draw_Bounds(const vec3_t &in mins, const vec3_t &in maxs, const rgba_t &in color, float lifeTime, bool depthTest)",                                                 asFUNCTION(gi.game_import_t::Draw_Bounds),   asCALL_CDECL },
+			{ "void gi_Draw_Sphere(const vec3_t &in origin, float radius, const rgba_t &in color, float lifeTime, bool depthTest)",                                                        asFUNCTION(gi.game_import_t::Draw_Sphere),   asCALL_CDECL },
+			{ "void gi_Draw_OrientedWorldText(const vec3_t &in origin, const string &in text, const rgba_t &in color, float size, float lifeTime, bool depthTest)",                        asFUNCTION(Q2AS_Draw_OrientedWorldText),     asCALL_CDECL },
+			{ "void gi_Draw_StaticWorldText(const vec3_t &in origin, const vec3_t &in angles, const string &in text, const rgba_t &in color, float size, float lifeTime, bool depthTest)", asFUNCTION(Q2AS_Draw_StaticWorldText),       asCALL_CDECL },
+			{ "void gi_Draw_Cylinder(const vec3_t &in origin, float halfHeight, float radius, const rgba_t &in color, float lifeTime, bool depthTest)",                                    asFUNCTION(gi.game_import_t::Draw_Cylinder), asCALL_CDECL },
+			{ "void gi_Draw_Arrow(const vec3_t &in start, const vec3_t &in end, float size, const rgba_t &in lineColor, const rgba_t &in arrowColor, float lifeTime, bool depthTest)",     asFUNCTION(gi.game_import_t::Draw_Arrow),    asCALL_CDECL },
 
-	EnsureRegisteredGlobalProperty("const uint gi_tick_rate", (void *) &gi.tick_rate);
-	EnsureRegisteredGlobalProperty("const float gi_frame_time_s", (void *) &gi.frame_time_s);
-	EnsureRegisteredGlobalProperty("const uint gi_frame_time_ms", (void *) &gi.frame_time_ms);
-    
-    EnsureRegisteredGlobalFunction("void gi_Draw_Line(const vec3_t &in start, const vec3_t &in end, const rgba_t &in color, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Line), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_Point(const vec3_t &in point, float size, const rgba_t &in color, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Point), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_Circle(const vec3_t &in origin, float size, const rgba_t &in color, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Circle), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_Bounds(const vec3_t &in mins, const vec3_t &in maxs, const rgba_t &in color, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Bounds), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_Sphere(const vec3_t &in origin, float radius, const rgba_t &in color, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Sphere), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_OrientedWorldText(const vec3_t &in origin, const string &in text, const rgba_t &in color, float size, float lifeTime, bool depthTest)", asFUNCTION(Q2AS_Draw_OrientedWorldText), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_StaticWorldText(const vec3_t &in origin, const vec3_t &in angles, const string &in text, const rgba_t &in color, float size, float lifeTime, bool depthTest)", asFUNCTION(Q2AS_Draw_StaticWorldText), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_Cylinder(const vec3_t &in origin, float halfHeight, float radius, const rgba_t &in color, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Cylinder), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void gi_Draw_Arrow(const vec3_t &in start, const vec3_t &in end, float size, const rgba_t &in lineColor, const rgba_t &in arrowColor, float lifeTime, bool depthTest)", asFUNCTION(gi.game_import_t::Draw_Arrow), asCALL_CDECL);
-
-	EnsureRegisteredGlobalFunction("void SendToClipBoard(const string &in text)", asFUNCTION(q2as_SendToClipBoard), asCALL_CDECL);
-
-	// edict stuff
-	EnsureRegisteredGlobalProperty("const uint max_edicts", (void *) &globals.max_edicts);
-	EnsureRegisteredGlobalProperty("uint num_edicts", (void *) &globals.num_edicts);
-	EnsureRegisteredGlobalProperty("const uint max_clients", (void *) &svas.maxclients);
-	EnsureRegisteredGlobalProperty("server_flags_t server_flags", (void *) &globals.server_flags);
-
-    // helpers
-    EnsureRegisteredGlobalFunction("T @+find_by_str<T>(T @+from, const string &in member, const string &in value) nodiscard", asFUNCTION(q2as_find_by_str), asCALL_GENERIC);
-
-	return true;
+			{ "void SendToClipBoard(const string &in text)", asFUNCTION(q2as_SendToClipBoard), asCALL_CDECL }
+		})
+		.properties({
+			{ "const uint max_edicts",       (const void *) &globals.max_edicts },
+			{ "uint num_edicts",             (void *) &globals.num_edicts },
+			{ "const uint max_clients",      (const void *) &svas.maxclients },
+			{ "server_flags_t server_flags", (void *) &globals.server_flags }
+		})
+		.functions({
+			{ "T @+find_by_str<T>(T @+from, const string &in member, const string &in value) nodiscard", asFUNCTION(q2as_find_by_str), asCALL_GENERIC }
+		});
 }
 
 static std::unordered_map<int, shadow_light_data_t> shadowlightinfo;
@@ -1921,43 +1888,43 @@ void q2as_gi_RemoveShadowLightData(int index)
 	shadowlightinfo.erase(index);
 }
 
-static bool Q2AS_RegisterShadowLightData(asIScriptEngine *engine)
+static void Q2AS_RegisterShadowLightData(q2as_registry &registry)
 {
-#define Q2AS_OBJECT shadow_light_type_t
+	registry
+		.enumeration("shadow_light_type_t")
+		.values({
+			{ "point", (asINT64) shadow_light_type_t::point },
+			{ "cone", (asINT64) shadow_light_type_t::cone }
+		});
 
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValueRaw("shadow_light_type_t", "point", (int) shadow_light_type_t::point);
-	EnsureRegisteredEnumValueRaw("shadow_light_type_t", "cone", (int) shadow_light_type_t::cone);
-	
-#undef Q2AS_OBJECT
+	registry
+		.type("shadow_light_data_t", sizeof(shadow_light_data_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<shadow_light_data_t>), asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(const shadow_light_data_t &in)", asFUNCTION(Q2AS_init_construct_copy<shadow_light_data_t>), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "shadow_light_data_t &opAssign (const shadow_light_data_t &in)", asFUNCTION(Q2AS_assign<shadow_light_data_t>), asCALL_CDECL_OBJLAST }
+		})
+		.properties({
+			{ "shadow_light_type_t lighttype", asOFFSET(shadow_light_data_t, lighttype) },
+			{ "float radius",                  asOFFSET(shadow_light_data_t, radius) },
+			{ "int resolution",                asOFFSET(shadow_light_data_t, resolution) },
+			{ "float intensity",               asOFFSET(shadow_light_data_t, intensity) },
+			{ "float fade_start",              asOFFSET(shadow_light_data_t, fade_start) },
+			{ "float fade_end",                asOFFSET(shadow_light_data_t, fade_end) },
+			{ "int lightstyle",                asOFFSET(shadow_light_data_t, lightstyle) },
+			{ "float coneangle",               asOFFSET(shadow_light_data_t, coneangle) },
+			{ "vec3_t conedirection",          asOFFSET(shadow_light_data_t, conedirection) }
+		});
 
-#define Q2AS_OBJECT shadow_light_data_t
-
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C);
-
-	// behaviors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<shadow_light_data_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(const shadow_light_data_t &in)", asFUNCTION(Q2AS_init_construct_copy<shadow_light_data_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethod("shadow_light_data_t &opAssign (const shadow_light_data_t &in)", asFUNCTION(Q2AS_assign<shadow_light_data_t>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredProperty("shadow_light_type_t", lighttype);
-	EnsureRegisteredProperty("float", radius);
-	EnsureRegisteredProperty("int", resolution);
-	EnsureRegisteredProperty("float", intensity);
-	EnsureRegisteredProperty("float", fade_start);
-	EnsureRegisteredProperty("float", fade_end);
-	EnsureRegisteredProperty("int", lightstyle);
-	EnsureRegisteredProperty("float", coneangle);
-	EnsureRegisteredProperty("vec3_t", conedirection);
-
-#undef Q2AS_OBJECT
-
-	EnsureRegisteredGlobalFunction("void gi_SetShadowLightData(uint, const shadow_light_data_t &in)", asFUNCTION(q2as_gi_SetShadowLightData), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_GetShadowLightData(uint, shadow_light_data_t &out)", asFUNCTION(q2as_gi_GetShadowLightData), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void gi_RemoveShadowLightData(int)", asFUNCTION(q2as_gi_RemoveShadowLightData), asCALL_CDECL);
-
-	return true;
+	registry
+		.for_global()
+		.functions({
+			{ "void gi_SetShadowLightData(uint, const shadow_light_data_t &in)", asFUNCTION(q2as_gi_SetShadowLightData),    asCALL_CDECL },
+			{ "void gi_GetShadowLightData(uint, shadow_light_data_t &out)",      asFUNCTION(q2as_gi_GetShadowLightData),    asCALL_CDECL },
+			{ "void gi_RemoveShadowLightData(int)",                              asFUNCTION(q2as_gi_RemoveShadowLightData), asCALL_CDECL }
+		});
 }
 
 struct q2as_PathInfo : q2as_ref_t
@@ -1993,180 +1960,160 @@ static bool q2as_gi_GetPathToGoal(const PathRequest &in, q2as_PathInfo &out)
 	return result;
 }
 
-static bool Q2AS_RegisterPathFinding(asIScriptEngine *engine)
+static void Q2AS_RegisterPathFinding(q2as_registry &registry)
 {
-#define Q2AS_OBJECT GoalReturnCode
-#define Q2AS_ENUM_PREFIX
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(, Error);
-	EnsureRegisteredEnumValue(, Started);
-	EnsureRegisteredEnumValue(, InProgress);
-	EnsureRegisteredEnumValue(, Finished);
+	registry
+		.enumeration("GoalReturnCode")
+		.values({
+			{ "Error",      GoalReturnCode::Error },
+			{ "Started",    GoalReturnCode::Started },
+			{ "InProgress", GoalReturnCode::InProgress },
+			{ "Finished",   GoalReturnCode::Finished }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT gesture_type
-#define Q2AS_ENUM_PREFIX GESTURE_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(GESTURE_, NONE);
-	EnsureRegisteredEnumValue(GESTURE_, FLIP_OFF);
-	EnsureRegisteredEnumValue(GESTURE_, SALUTE);
-	EnsureRegisteredEnumValue(GESTURE_, TAUNT);
-	EnsureRegisteredEnumValue(GESTURE_, WAVE);
-	EnsureRegisteredEnumValue(GESTURE_, POINT);
-	EnsureRegisteredEnumValue(GESTURE_, POINT_NO_PING);
-	EnsureRegisteredEnumValue(GESTURE_, MAX);
+	registry
+		.enumeration("gesture_type")
+		.values({
+			{ "NONE",          GESTURE_NONE },
+			{ "FLIP_OFF",      GESTURE_FLIP_OFF },
+			{ "SALUTE",        GESTURE_SALUTE },
+			{ "TAUNT",         GESTURE_TAUNT },
+			{ "WAVE",          GESTURE_WAVE },
+			{ "POINT",         GESTURE_POINT },
+			{ "POINT_NO_PING", GESTURE_POINT_NO_PING },
+			{ "MAX",           GESTURE_MAX }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("PathReturnCode")
+		.values({
+			{ "ReachedGoal",           (asINT64) PathReturnCode::ReachedGoal },
+			{ "ReachedPathEnd",        (asINT64) PathReturnCode::ReachedPathEnd },
+			{ "TraversalPending",      (asINT64) PathReturnCode::TraversalPending },
+			{ "RawPathFound",          (asINT64) PathReturnCode::RawPathFound },
+			{ "InProgress",            (asINT64) PathReturnCode::InProgress },
+			{ "StartPathErrors",       (asINT64) PathReturnCode::StartPathErrors },
+			{ "InvalidStart",          (asINT64) PathReturnCode::InvalidStart },
+			{ "InvalidGoal",           (asINT64) PathReturnCode::InvalidGoal },
+			{ "NoNavAvailable",        (asINT64) PathReturnCode::NoNavAvailable },
+			{ "NoStartNode",           (asINT64) PathReturnCode::NoStartNode },
+			{ "NoGoalNode",            (asINT64) PathReturnCode::NoGoalNode },
+			{ "NoPathFound",           (asINT64) PathReturnCode::NoPathFound },
+			{ "MissingWalkOrSwimFlag", (asINT64) PathReturnCode::MissingWalkOrSwimFlag }
+		});
 	
-#define Q2AS_OBJECT PathReturnCode
-#define Q2AS_ENUM_PREFIX
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(, ReachedGoal);
-	EnsureRegisteredEnumValue(, ReachedPathEnd);
-	EnsureRegisteredEnumValue(, TraversalPending);
-	EnsureRegisteredEnumValue(, RawPathFound);
-	EnsureRegisteredEnumValue(, InProgress);
-	EnsureRegisteredEnumValue(, StartPathErrors);
-	EnsureRegisteredEnumValue(, InvalidStart);
-	EnsureRegisteredEnumValue(, InvalidGoal);
-	EnsureRegisteredEnumValue(, NoNavAvailable);
-	EnsureRegisteredEnumValue(, NoStartNode);
-	EnsureRegisteredEnumValue(, NoGoalNode);
-	EnsureRegisteredEnumValue(, NoPathFound);
-	EnsureRegisteredEnumValue(, MissingWalkOrSwimFlag);
+	registry
+		.enumeration("PathLinkType")
+		.values({
+			{ "Walk",         (asINT64) PathLinkType::Walk },
+			{ "WalkOffLedge", (asINT64) PathLinkType::WalkOffLedge },
+			{ "LongJump",     (asINT64) PathLinkType::LongJump },
+			{ "BarrierJump",  (asINT64) PathLinkType::BarrierJump },
+			{ "Elevator",     (asINT64) PathLinkType::Elevator }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("PathFlags")
+		.values({
+			{ "All",          PathFlags::All },
+			{ "Water",        PathFlags::Water },
+			{ "Walk",         PathFlags::Walk },
+			{ "WalkOffLedge", PathFlags::WalkOffLedge },
+			{ "LongJump",     PathFlags::LongJump },
+			{ "BarrierJump",  PathFlags::BarrierJump },
+			{ "Elevator",     PathFlags::Elevator },
+		});
+
+	registry
+		.type("PathDebugSettings", sizeof(PathRequest::DebugSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::DebugSettings>())
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()",                            asFUNCTION(Q2AS_init_construct<PathRequest::DebugSettings>),      asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(const PathDebugSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "PathDebugSettings &opAssign (const PathDebugSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST }
+		})
+		.properties({
+			{ "float drawTime", asOFFSET(PathRequest::DebugSettings, drawTime) }
+		});
+
+	registry
+		.type("PathNodeSettings", sizeof(PathRequest::NodeSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::NodeSettings>())
+		.properties({
+			{ "bool ignoreNodeFlags", asOFFSET(PathRequest::NodeSettings, ignoreNodeFlags) },
+			{ "float minHeight",      asOFFSET(PathRequest::NodeSettings, minHeight) },
+			{ "float maxHeight",      asOFFSET(PathRequest::NodeSettings, maxHeight) },
+			{ "float radius",         asOFFSET(PathRequest::NodeSettings, radius) }
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()",                           asFUNCTION(Q2AS_init_construct<PathRequest::NodeSettings>),      asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(const PathNodeSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "PathNodeSettings &opAssign (const PathNodeSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST }
+		});
+
+	registry
+		.type("PathTraversalSettings", sizeof(PathRequest::TraversalSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::TraversalSettings>())
+		.properties({
+			{ "float dropHeight", asOFFSET(PathRequest::TraversalSettings, dropHeight) },
+			{ "float jumpHeight", asOFFSET(PathRequest::TraversalSettings, jumpHeight) }
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()",                                asFUNCTION(Q2AS_init_construct<PathRequest::TraversalSettings>),      asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(const PathTraversalSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "PathTraversalSettings &opAssign (const PathTraversalSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST }
+		});
+
+	registry
+		.type("PathRequest", sizeof(PathRequest), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest>())
+		.properties({
+			{ "vec3_t start",        asOFFSET(PathRequest, start) },
+			{ "vec3_t goal",         asOFFSET(PathRequest, goal) },
+			{ "PathFlags pathFlags", asOFFSET(PathRequest, pathFlags) },
+			{ "float moveDist",      asOFFSET(PathRequest, moveDist) },
 	
-#define Q2AS_OBJECT PathLinkType
-#define Q2AS_ENUM_PREFIX
+			{ "PathDebugSettings debugging",      asOFFSET(PathRequest, debugging) },
+			{ "PathNodeSettings nodeSearch",      asOFFSET(PathRequest, nodeSearch) },
+			{ "PathTraversalSettings traversals", asOFFSET(PathRequest, traversals) },
 
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(, Walk);
-	EnsureRegisteredEnumValue(, WalkOffLedge);
-	EnsureRegisteredEnumValue(, LongJump);
-	EnsureRegisteredEnumValue(, BarrierJump);
-	EnsureRegisteredEnumValue(, Elevator);
+			{ "int64 maxPathPoints", asOFFSET(PathRequest, pathPoints.count) }
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()",                      asFUNCTION(Q2AS_init_construct<PathRequest>),      asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(const PathRequest &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest>), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "PathRequest &opAssign (const PathRequest &in)", asFUNCTION(Q2AS_assign<PathRequest>), asCALL_CDECL_OBJLAST }
+		});
+
+	registry
+		.type("PathInfo", sizeof(q2as_PathInfo), asOBJ_REF)
+		.properties({
+			{ "uint numPathPoints",        asOFFSET(q2as_PathInfo, info.numPathPoints) },
+			{ "float pathDistSqr",         asOFFSET(q2as_PathInfo, info.pathDistSqr) },
+			{ "vec3_t firstMovePoint",     asOFFSET(q2as_PathInfo, info.firstMovePoint) },
+			{ "vec3_t secondMovePoint",    asOFFSET(q2as_PathInfo, info.secondMovePoint) },
+			{ "PathLinkType pathLinkType", asOFFSET(q2as_PathInfo, info.pathLinkType) },
+			{ "PathReturnCode returnCode", asOFFSET(q2as_PathInfo, info.returnCode) }
+		})
+		.behaviors({
+			{ asBEHAVE_FACTORY, "PathInfo@ f()", asFUNCTION((Q2AS_Factory<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC },
+			{ asBEHAVE_ADDREF, "void f()",       asFUNCTION((Q2AS_AddRef<q2as_PathInfo>)),                   asCALL_GENERIC },
+			{ asBEHAVE_RELEASE, "void f()",      asFUNCTION((Q2AS_Release<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC }
+		})
+		.methods({
+			{ "PathInfo &opAssign (const PathInfo &in)",  asFUNCTION(Q2AS_assign<q2as_PathInfo>), asCALL_CDECL_OBJLAST },
+			{ "const vec3_t &getPathPoint(uint i) const", asMETHOD(q2as_PathInfo, getPathPoint),  asCALL_THISCALL }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT PathFlags
-#define Q2AS_ENUM_PREFIX
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(, All);
-	EnsureRegisteredEnumValue(, Water);
-	EnsureRegisteredEnumValue(, Walk);
-	EnsureRegisteredEnumValue(, WalkOffLedge);
-	EnsureRegisteredEnumValue(, LongJump);
-	EnsureRegisteredEnumValue(, BarrierJump);
-	EnsureRegisteredEnumValue(, Elevator);
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT PathDebugSettings
-
-	EnsureRegisteredTypeRaw("PathDebugSettings", sizeof(PathRequest::DebugSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::DebugSettings>());
-
-	// behaviors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(const PathDebugSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethod("PathDebugSettings &opAssign (const PathDebugSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredPropertyRaw("PathDebugSettings", "float drawTime", asOFFSET(PathRequest::DebugSettings, drawTime));
-
-#undef Q2AS_OBJECT
-
-#define Q2AS_OBJECT PathNodeSettings
-
-	EnsureRegisteredTypeRaw("PathNodeSettings", sizeof(PathRequest::NodeSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::NodeSettings>());
-
-	// behaviors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(const PathNodeSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethod("PathNodeSettings &opAssign (const PathNodeSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredPropertyRaw("PathNodeSettings", "bool ignoreNodeFlags", asOFFSET(PathRequest::NodeSettings, ignoreNodeFlags));
-	EnsureRegisteredPropertyRaw("PathNodeSettings", "float minHeight", asOFFSET(PathRequest::NodeSettings, minHeight));
-	EnsureRegisteredPropertyRaw("PathNodeSettings", "float maxHeight", asOFFSET(PathRequest::NodeSettings, maxHeight));
-	EnsureRegisteredPropertyRaw("PathNodeSettings", "float radius", asOFFSET(PathRequest::NodeSettings, radius));
-
-#undef Q2AS_OBJECT
-
-#define Q2AS_OBJECT PathTraversalSettings
-
-	EnsureRegisteredTypeRaw("PathTraversalSettings", sizeof(PathRequest::TraversalSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::TraversalSettings>());
-
-	// behaviors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(const PathTraversalSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethod("PathTraversalSettings &opAssign (const PathTraversalSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredPropertyRaw("PathTraversalSettings", "float dropHeight", asOFFSET(PathRequest::TraversalSettings, dropHeight));
-	EnsureRegisteredPropertyRaw("PathTraversalSettings", "float jumpHeight", asOFFSET(PathRequest::TraversalSettings, jumpHeight));
-
-#undef Q2AS_OBJECT
-
-#define Q2AS_OBJECT PathRequest
-
-	EnsureRegisteredTypeRaw("PathRequest", sizeof(PathRequest), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest>());
-
-	// behaviors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<PathRequest>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(const PathRequest &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethod("PathRequest &opAssign (const PathRequest &in)", asFUNCTION(Q2AS_assign<PathRequest>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredProperty("vec3_t", start);
-	EnsureRegisteredProperty("vec3_t", goal);
-	EnsureRegisteredProperty("PathFlags", pathFlags);
-	EnsureRegisteredProperty("float", moveDist);
-	
-	EnsureRegisteredProperty("PathDebugSettings", debugging);
-	EnsureRegisteredProperty("PathNodeSettings", nodeSearch);
-	EnsureRegisteredProperty("PathTraversalSettings", traversals);
-
-	EnsureRegisteredPropertyRaw("PathRequest", "int64 maxPathPoints", asOFFSET(PathRequest, pathPoints.count));
-
-#undef Q2AS_OBJECT
-
-#define Q2AS_OBJECT PathInfo
-
-	EnsureRegisteredTypeRaw("PathInfo", sizeof(q2as_PathInfo), asOBJ_REF);
-
-	// behaviors
-	EnsureRegisteredBehaviourRaw("PathInfo", asBEHAVE_FACTORY, "PathInfo@ f()", asFUNCTION((Q2AS_Factory<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC);
-	EnsureRegisteredBehaviourRaw("PathInfo", asBEHAVE_ADDREF, "void f()", asFUNCTION((Q2AS_AddRef<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC);
-	EnsureRegisteredBehaviourRaw("PathInfo", asBEHAVE_RELEASE, "void f()", asFUNCTION((Q2AS_Release<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC);
-
-	EnsureRegisteredMethod("PathInfo &opAssign (const PathInfo &in)", asFUNCTION(Q2AS_assign<q2as_PathInfo>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredPropertyRaw("PathInfo", "uint numPathPoints", asOFFSET(q2as_PathInfo, info.numPathPoints));
-	EnsureRegisteredPropertyRaw("PathInfo", "float pathDistSqr", asOFFSET(q2as_PathInfo, info.pathDistSqr));
-	EnsureRegisteredPropertyRaw("PathInfo", "vec3_t firstMovePoint", asOFFSET(q2as_PathInfo, info.firstMovePoint));
-	EnsureRegisteredPropertyRaw("PathInfo", "vec3_t secondMovePoint", asOFFSET(q2as_PathInfo, info.secondMovePoint));
-	EnsureRegisteredPropertyRaw("PathInfo", "PathLinkType pathLinkType", asOFFSET(q2as_PathInfo, info.pathLinkType));
-	EnsureRegisteredPropertyRaw("PathInfo", "PathReturnCode returnCode", asOFFSET(q2as_PathInfo, info.returnCode));
-
-	EnsureRegisteredMethodRaw("PathInfo", "const vec3_t &getPathPoint(uint i) const", asMETHOD(q2as_PathInfo, getPathPoint), asCALL_THISCALL);
-
-#undef Q2AS_OBJECT
-
-	EnsureRegisteredGlobalFunction("bool gi_GetPathToGoal(const PathRequest &in, PathInfo &out)", asFUNCTION(q2as_gi_GetPathToGoal), asCALL_CDECL);
-
-	return true;
+	registry
+		.for_global()
+		.functions({
+			{ "bool gi_GetPathToGoal(const PathRequest &in, PathInfo &out)", asFUNCTION(q2as_gi_GetPathToGoal), asCALL_CDECL }
+		});
 }
 
 // unused import

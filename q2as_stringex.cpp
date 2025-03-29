@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "q2as_reg.h"
 #include "g_local.h"
 #include <fmt/args.h>
 
@@ -133,14 +132,21 @@ static std::string q2as_string_asupper(const std::string &in)
     return result;
 }
 
-bool Q2AS_RegisterStringEx(asIScriptEngine *engine)
+void Q2AS_RegisterStringEx(q2as_registry &registry)
 {
-	EnsureRegisteredMethodRaw("string", "string &appendChar(uint8)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredGlobalFunction("int Q_strcasecmp(const string &in, const string &in)", asFUNCTION(q2as_Q_strcasecmp), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("int Q_strncasecmp(const string &in, const string &in, uint n)", asFUNCTION(q2as_Q_strncasecmp), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("string format(const string&in fmt, const ?&in ...)", asFUNCTION(q2as_format), asCALL_GENERIC);
-    EnsureRegisteredMethodRaw("string", "string aslower() const", asFUNCTION(q2as_string_aslower), asCALL_CDECL_OBJLAST);
-    EnsureRegisteredMethodRaw("string", "string asupper() const", asFUNCTION(q2as_string_asupper), asCALL_CDECL_OBJLAST);
+	registry
+		.for_type("string")
+		.methods({
+			{ "string &appendChar(uint8)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST },
+			{ "string aslower() const",    asFUNCTION(q2as_string_aslower),     asCALL_CDECL_OBJLAST },
+			{ "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST }
+		});
 
-	return true;
+	registry
+		.for_global()
+		.functions({
+			{ "int Q_strcasecmp(const string &in, const string &in)",          asFUNCTION(q2as_Q_strcasecmp),  asCALL_CDECL },
+			{ "int Q_strncasecmp(const string &in, const string &in, uint n)", asFUNCTION(q2as_Q_strncasecmp), asCALL_CDECL },
+			{ "string format(const string&in fmt, const ?&in ...)",            asFUNCTION(q2as_format),        asCALL_GENERIC }
+		});
 }

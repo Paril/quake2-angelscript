@@ -2,9 +2,12 @@
 #pragma once
 
 #include "q_std.h"
+#define USE_VEC3_TYPE
+#include "game.h"
 #include "angelscript.h"
-#include <map>
+#include <set>
 #include <memory>
+#include "q2as_reg.h"
 
 // auto-destruct wrapper for an execution context
 struct q2as_ctx_t
@@ -35,7 +38,7 @@ struct declhash_t
     uint32_t h;
 };
 
-using library_reg_t = bool(asIScriptEngine *);
+using library_reg_t = void(q2as_registry &);
 
 // stores the state for each Q2AS engine.
 struct q2as_state_t
@@ -70,6 +73,7 @@ struct q2as_state_t
     virtual bool InstrumentationEnabled() = 0;
     virtual void *Alloc(size_t size) = 0;
     virtual void Free(void *ptr) = 0;
+    virtual cvar_t *Cvar(const char *name, const char *value, cvar_flags_t flags) = 0;
 
     q2as_ctx_t RequestContext();
     bool Execute(asIScriptContext *context);
@@ -126,17 +130,16 @@ static T *Q2AS_assign(const T &in, T *self)
 	return self;
 }
 
+#include "debugger/as_debugger.h"
+
 // stores the debugger state for both Q2AS modules.
 // no need to have a debugger for each one.
 struct q2as_dbg_state_t
 {
-    std::unique_ptr<class asIDBDebugger> debugger;
-    std::map<std::string, std::string>   sections;
-    bool                                 sections_optimized = false;
+    std::unique_ptr<asIDBDebugger>       debugger;
+    asIDBWorkspace                       workspace;
     struct cvar_t                        *debugger_cvar;
-
-    void AddSection(std::string_view section);
-    void OptimizeSections();
+    int                                  debugger_type; // active debugger type
 
     void CheckDebugger(asIScriptContext *ctx);
     void DebugBreak(asIScriptContext *ctx = nullptr);

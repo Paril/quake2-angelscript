@@ -1121,7 +1121,7 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
                     index = start / CS_MAX_STRING_LENGTH;
                 }
 
-                if (index < 0 || index >= MAX_CONFIGSTRINGS)
+                if (index < 0 || index >= configstring_id_t::MAX)
                     cgi_Com_Error("Bad stat_string index");
                 if (scr_usekfont.integer == 0)
                     CG_DrawString (x, y, scale, cgi_get_configstring(index));
@@ -1230,7 +1230,7 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
                     index = start / CS_MAX_STRING_LENGTH;
                 }
 
-                if (index < 0 || index >= MAX_CONFIGSTRINGS)
+                if (index < 0 || index >= configstring_id_t::MAX)
                     cgi_Com_Error("Bad stat_string index");
                 if (scr_usekfont.integer == 0)
                     CG_DrawString (x, y, scale, cgi_Localize(cgi_get_configstring(index)));
@@ -1257,7 +1257,7 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
                     index = start / CS_MAX_STRING_LENGTH;
                 }
 
-                if (index < 0 || index >= MAX_CONFIGSTRINGS)
+                if (index < 0 || index >= configstring_id_t::MAX)
                     cgi_Com_Error("Bad stat_string index");
                 string s = cgi_Localize(cgi_get_configstring(index));
                 if (scr_usekfont.integer == 0)
@@ -1288,7 +1288,7 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
                     index = start / CS_MAX_STRING_LENGTH;
                 }
 
-                if (index < 0 || index >= MAX_CONFIGSTRINGS)
+                if (index < 0 || index >= configstring_id_t::MAX)
                     cgi_Com_Error("Bad stat_string index");
                 CG_DrawHUDString (cgi_Localize(cgi_get_configstring(index)), x, y, hx*2*scale, 0, scale);
             }
@@ -1312,7 +1312,7 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
                     index = start / CS_MAX_STRING_LENGTH;
                 }
 
-                if (index < 0 || index >= MAX_CONFIGSTRINGS)
+                if (index < 0 || index >= configstring_id_t::MAX)
                     cgi_Com_Error("Bad stat_string index");
                 CG_DrawHUDString (cgi_Localize(cgi_get_configstring(index)), x, y, hx*2*scale, 0x80, scale);
             }
@@ -1602,7 +1602,7 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
 */
         else
         {
-            cgi_Com_Print("invalid layout cmd: {}\n", tokenizer.as_string());
+            //cgi_Com_Print("invalid layout cmd: {}\n", tokenizer.as_string());
         }
     }
 

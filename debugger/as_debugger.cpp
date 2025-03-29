@@ -21,6 +21,129 @@
     return state;
 }
 
+void asIDBVariableContainer::Cache()
+{
+    if (cached)
+        return;
+
+    if (!source.container)
+        __debugbreak(); // error
+
+    asIDBVarState state { dbg->cache->evaluators.Evaluate(*dbg->cache, source.container->named_variables[source.index].address) };
+    dbg->cache->evaluators.Expand(*dbg->cache, source.container->named_variables[source.index].address, state);
+
+    if (state.stackMemory)
+        __debugbreak(); // todo
+
+    if (state.value.expandable == asIDBExpandType::Children)
+    {
+        for (auto &child : state.children)
+        {
+            auto &var = named_variables.emplace_back(asIDBNamedVariable { child.GetID(), child.name, child.type, std::move(child.state.value.value) });
+
+            if (child.state.value.expandable != asIDBExpandType::None)
+                var.container = dbg->cache->CreateVariableContainer(asIDBVariableSource { this, named_variables.size() - 1 });
+        }
+    }
+    else if (state.value.expandable == asIDBExpandType::Entries)
+    {
+        for (auto &child : state.entries)
+            named_variables.emplace_back(asIDBNamedVariable { asIDBVarAddr {}, "*", "", std::move(child.value) });
+    }
+    else if (state.value.expandable == asIDBExpandType::Value)
+    {
+        named_variables.emplace_back(asIDBNamedVariable { asIDBVarAddr {}, "value", "", std::move(state.value.value) });
+    }
+
+    cached = true;
+}
+
+asIDBScope::asIDBScope(asUINT offset, asIDBDebugger *dbg, asIScriptFunction *function) :
+    offset(offset),
+    parameters(dbg->cache->CreateVariableContainer()),
+    locals(dbg->cache->CreateVariableContainer()),
+    registers(dbg->cache->CreateVariableContainer())
+{
+    CalcLocals(dbg, function, parameters);
+    CalcLocals(dbg, function, locals);
+    CalcLocals(dbg, function, registers);
+}
+
+void asIDBScope::CalcLocals(asIDBDebugger *dbg, asIScriptFunction *function, asIDBVariableContainer *container)
+{
+    if (!function)
+        return;
+
+    auto cache = dbg->cache.get();
+    auto ctx = cache->ctx;
+    asUINT numParams = function->GetParamCount();
+    asUINT numLocals = ctx->GetVarCount(offset);
+
+    asUINT start = 0, end = 0;
+
+    if (container == parameters)
+        end = numParams;
+    else
+    {
+        start = numParams;
+        end = numLocals;
+    }
+
+    if (container == locals)
+    {
+        if (auto thisPtr = ctx->GetThisPointer(offset))
+        {
+            int thisTypeId = ctx->GetThisTypeId(offset);
+
+            asIDBTypeId typeKey { thisTypeId, asTM_NONE };
+
+            const std::string_view viewType = dbg->cache->GetTypeNameFromType(typeKey);
+
+            asIDBVarAddr idKey { thisTypeId, false, thisPtr };
+
+            asIDBVarView view { "this", viewType, idKey, asIDBVarState { cache->evaluators.Evaluate(*cache, idKey) } };
+
+            auto &var = container->named_variables.emplace_back(asIDBNamedVariable { idKey, "this", viewType, std::move(view.state.value.value) });
+
+            if (view.state.value.expandable != asIDBExpandType::None)
+                var.container = cache->CreateVariableContainer(asIDBVariableSource { container, container->named_variables.size() - 1 });
+        }
+    }
+
+    for (asUINT n = start; n < end; n++)
+    {
+        const char *name;
+        int typeId;
+        asETypeModifiers modifiers;
+        int stackOffset;
+        ctx->GetVar(n, offset, &name, &typeId, &modifiers, 0, &stackOffset);
+
+        bool isTemporary = (container != parameters) && (!name || !*name);
+        
+        if (!ctx->IsVarInScope(n, offset))
+            continue;
+        else if (isTemporary != (container == registers))
+            continue;
+
+        void *ptr = ctx->GetAddressOfVar(n, offset);
+
+        asIDBTypeId typeKey { typeId, modifiers };
+
+        std::string localName = (name && *name) ? fmt::format("{} (&{})", name, n) : fmt::format("&{}", n);
+
+        const std::string_view viewType = dbg->cache->GetTypeNameFromType(typeKey);
+
+        asIDBVarAddr idKey { typeId, (modifiers & asTM_CONST) != 0, ptr };
+
+        asIDBVarView view { std::move(localName), viewType, idKey, asIDBVarState { cache->evaluators.Evaluate(*cache, idKey) } };
+
+        auto &var = container->named_variables.emplace_back(asIDBNamedVariable { idKey, name, viewType, std::move(view.state.value.value) });
+
+        if (view.state.value.expandable != asIDBExpandType::None)
+            var.container = cache->CreateVariableContainer(asIDBVariableSource { container, container->named_variables.size() - 1 });
+    }
+}
+
 /*virtual*/ void asIDBCache::Refresh()
 {
 }
@@ -95,6 +218,9 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
 /*virtual*/ asIDBExpected<asIDBExprResult> asIDBCache::ResolveExpression(const std::string_view expr, int stack_index)
 {
+    if (expr.empty())
+        return asIDBExpected<asIDBExprResult>("empty string");
+
     // isolate the variable name first
     size_t variable_end = expr.find_first_of(".[", 0);
     std::string_view variable_name = expr.substr(0, variable_end);
@@ -329,15 +455,18 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
 /*virtual*/ void asIDBCache::CacheCallstack()
 {
-    if (!ctx)
+    if (!ctx || !call_stack.empty())
         return;
 
-    call_stack.clear();
-
     if (auto sysfunc = ctx->GetSystemFunction())
-        system_function = fmt::format("{} (system function)", sysfunc->GetDeclaration(true, false, true));
-    else
-        system_function = "";
+        call_stack.emplace_back(asIDBCallStackEntry {
+            dbg->frame_offset++,
+            sysfunc->GetDeclaration(true, false, true),
+            "(system function)",
+            0,
+            0,
+            asIDBScope(SCOPE_SYSTEM, dbg, sysfunc)
+        });
 
     for (asUINT n = 0; n < ctx->GetCallstackSize(); n++)
     {
@@ -346,6 +475,8 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         const char *section = "";
         int row = 0;
 
+        // FIXME: check this, because this will skip GetFunction(n).
+        // I think this is correct though...?
         if (n == 0 && ctx->GetState() == asEXECUTION_EXCEPTION)
         {
             func = ctx->GetExceptionFunction();
@@ -355,7 +486,6 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         else
         {
             func = ctx->GetFunction(n);
-
             if (func)
                 row = ctx->GetLineNumber(n, &column, &section);
         }
@@ -363,18 +493,20 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         std::string decl;
         
         if (func)
-            decl = fmt::format("{} Line {}", func->GetDeclaration(true, false, true), row);
+            decl = func->GetDeclaration(true, false, true);
         else
-            decl = "???";
+            decl = "???"; // FIXME: why does this happen?
 
         call_stack.push_back(asIDBCallStackEntry {
+            dbg->frame_offset++,
             std::move(decl),
             section,
             row,
-            column
+            column,
+            asIDBScope(n, dbg, func)
         });
 
-        dbg->EnsureSectionCached(call_stack.back().section, call_stack.back().section);
+        dbg->workspace.sections.insert(section);
     }
 }
 
@@ -382,15 +514,12 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 // being replaced by this one.
 /*virtual*/ void asIDBCache::Restore(asIDBCache &cache)
 {
-    watch = std::move(cache.watch);
-
-    for (auto &w : watch)
-        w.dirty = true;
 }
 
 /*virtual*/ void asIDBCache::CacheGlobals()
 {
-    if (!ctx)
+#if 0
+    if (!ctx || global.cached)
         return;
 
     auto main = ctx->GetFunction(0)->GetModule();
@@ -411,7 +540,11 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         asIDBVarAddr idKey { typeId, isConst, ptr };
 
-        globals.emplace_back(((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) });
+        global.variables.emplace_back(asIDBGlobal {
+            false,
+            n,
+            { ((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } }
+        });
     }
 
     for (asUINT n = 0; n < main->GetEngine()->GetGlobalPropertyCount(); n++)
@@ -429,27 +562,35 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         asIDBVarAddr idKey { typeId, isConst, ptr };
 
-        globals.emplace_back((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name, viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) });
+        global.variables.emplace_back(asIDBGlobal {
+            true,
+            n,
+            { (nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name, viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } }
+        });
     }
 
-    globalsCached = true;
+    global.cached = true;
+#endif
 }
 
-/*virtual*/ void asIDBCache::CacheLocals(asIDBLocalKey stack_entry)
+/*virtual*/ void asIDBCache::CacheLocals(asIDBScope &scope)
 {
-    if (!ctx)
+#if 0
+    if (!ctx || variables.cached)
         return;
 
-    // variables in AS are always ordered the same way it seems:
-    // function parameters come first,
-    // then local variables,
-    // then temporaries used during calculations.
-    int numParams = ctx->GetFunction(stack_entry.offset)->GetParamCount();
-    int numLocals = ctx->GetVarCount(stack_entry.offset);
+    if (scope.offset == SCOPE_SYSTEM)
+    {
+        variables.cached = true;
+        return;
+    }
 
-    int start = 0, end = 0;
+    asUINT numParams = ctx->GetFunction(scope.offset)->GetParamCount();
+    asUINT numLocals = ctx->GetVarCount(scope.offset);
 
-    if (stack_entry.type == asIDBLocalType::Parameter)
+    asUINT start = 0, end = 0;
+
+    if (&variables == &scope.parameters)
         end = numParams;
     else
     {
@@ -457,13 +598,11 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         end = numLocals;
     }
 
-    auto &map = locals[stack_entry];
-
-    if (stack_entry.type == asIDBLocalType::Variable)
+    if (&variables == &scope.locals)
     {
-        if (auto thisPtr = ctx->GetThisPointer(stack_entry.offset))
+        if (auto thisPtr = ctx->GetThisPointer(scope.offset))
         {
-            int thisTypeId = ctx->GetThisTypeId(stack_entry.offset);
+            int thisTypeId = ctx->GetThisTypeId(scope.offset);
 
             asIDBTypeId typeKey { thisTypeId, asTM_NONE };
 
@@ -471,26 +610,26 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
             asIDBVarAddr idKey { thisTypeId, false, thisPtr };
 
-            map.emplace_back("this", viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) });
+            variables.variables.emplace_back(asIDBLocal { LOCAL_THIS, asIDBVarView { "this", viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } } });
         }
     }
 
-    for (int n = start; n < end; n++)
+    for (asUINT n = start; n < end; n++)
     {
         const char *name;
         int typeId;
         asETypeModifiers modifiers;
         int stackOffset;
-        ctx->GetVar(n, stack_entry.offset, &name, &typeId, &modifiers, 0, &stackOffset);
+        ctx->GetVar(n, scope.offset, &name, &typeId, &modifiers, 0, &stackOffset);
 
-        bool isTemporary = stack_entry.type != asIDBLocalType::Parameter && (!name || !*name);
+        bool isTemporary = (&variables != &scope.parameters) && (!name || !*name);
         
-        if (!ctx->IsVarInScope(n, stack_entry.offset))
+        if (!ctx->IsVarInScope(n, scope.offset))
             continue;
-        else if (isTemporary != (stack_entry.type == asIDBLocalType::Temporary))
+        else if (isTemporary != (&variables == &scope.registers))
             continue;
 
-        void *ptr = ctx->GetAddressOfVar(n, stack_entry.offset);
+        void *ptr = ctx->GetAddressOfVar(n, scope.offset);
 
         asIDBTypeId typeKey { typeId, modifiers };
 
@@ -500,8 +639,11 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         asIDBVarAddr idKey { typeId, (modifiers & asTM_CONST) != 0, ptr };
 
-        map.emplace_back(std::move(localName), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) });
+        variables.variables.emplace_back(asIDBLocal { n, asIDBVarView { std::move(localName), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } } });
     }
+
+    variables.cached = true;
+#endif
 }
 
 class asIDBNullTypeEvaluator : public asIDBTypeEvaluator
@@ -1077,25 +1219,21 @@ void asIDBTypeEvaluatorMap::Register(int typeId, std::unique_ptr<asIDBTypeEvalua
     // breakpoint can be hit by multiple things on the same
     // line.
     bool break_from_bp = false;
+    const char *section = nullptr;
+    int row = ctx->GetLineNumber(0, nullptr, &section);
 
+    if (section)
     {
         std::scoped_lock lock(debugger->mutex);
-
-        if (!debugger->breakpoints.empty())
+        
+        if (auto entries = debugger->breakpoints.find(section); entries != debugger->breakpoints.end())
         {
-            const char *section = nullptr;
-            int row = ctx->GetLineNumber(0, nullptr, &section);
-
-            if (section && debugger->breakpoints.find(asIDBBreakpoint::FileLocation(asIDBBreakpointLocation { section, row })) != debugger->breakpoints.end())
-                break_from_bp = true;
-            else
+            for (auto &lines : entries->second)
             {
-                // FIXME: this makes an std::string every time
-                auto func = ctx->GetFunction(0);
-                if (auto f = debugger->breakpoints.find(asIDBBreakpoint::Function(func->GetName())); f != debugger->breakpoints.end())
+                if (row == lines.line)
                 {
-                    debugger->breakpoints.erase(f);
                     break_from_bp = true;
+                    break;
                 }
             }
         }
@@ -1109,15 +1247,18 @@ void asIDBDebugger::HookContext(asIScriptContext *ctx)
 {
     // TODO: is this safe to be called even if
     // the context is being switched?
-    if (ctx->GetState() != asEXECUTION_EXCEPTION)
+    if (ctx->GetState() != asEXECUTION_EXCEPTION && engines.find(ctx->GetEngine()) != engines.end())
         ctx->SetLineCallback(asFUNCTION(asIDBDebugger::LineCallback), this, asCALL_CDECL);
 }
 
 void asIDBDebugger::DebugBreak(asIScriptContext *ctx)
 {
-    action = asIDBAction::None;
+    if (engines.find(ctx->GetEngine()) == engines.end())
+        return;
+
     {
         std::scoped_lock lock(mutex);
+        action = asIDBAction::None;
         std::unique_ptr<asIDBCache> new_cache = CreateCache(ctx);
 
         if (cache)
@@ -1137,59 +1278,42 @@ bool asIDBDebugger::HasWork()
 
 // debugger operations; these set the next breakpoint
 // and call Resume.
-void asIDBDebugger::StepInto()
+void asIDBDebugger::SetAction(asIDBAction new_action)
 {
-    action = asIDBAction::StepInto;
-    stack_size = cache->ctx->GetCallstackSize();
-    Continue();
-}
+    // should never happen
+    if (new_action == asIDBAction::None)
+        return;
 
-void asIDBDebugger::StepOver()
-{
-    action = asIDBAction::StepOver;
-    stack_size = cache->ctx->GetCallstackSize();
-    Continue();
-}
-
-void asIDBDebugger::StepOut()
-{
-    action = asIDBAction::StepOut;
-    stack_size = cache->ctx->GetCallstackSize();
-    Continue();
-}
-
-void asIDBDebugger::Continue()
-{
+    if (new_action != asIDBAction::Continue)
+    {
+        std::scoped_lock lock(mutex);
+        action = new_action;
+        stack_size = cache->ctx->GetCallstackSize();
+    }
+    
     Resume();
 }
 
 bool asIDBDebugger::ToggleBreakpoint(std::string_view section, int line)
 {
-    asIDBBreakpoint bp = asIDBBreakpoint::FileLocation({ section, line });
+    auto it = breakpoints.find(section);
 
-    if (auto f = breakpoints.find(bp); f != breakpoints.end())
-    {
-        breakpoints.erase(f);
-        return false;
-    }
-    else
-    {
-        breakpoints.insert(bp);
-        return true;
-    }
-}
+    if (it == breakpoints.end())
+        it = breakpoints.emplace(section, asIDBSectionBreakpoints {}).first;
 
-/*virtual*/ void asIDBDebugger::CacheSections(asIScriptModule *module)
-{
-    for (asUINT n = 0; n < module->GetFunctionCount(); n++)
+    for (auto lit = it->second.begin(); lit != it->second.end(); lit++)
     {
-        const char *section = nullptr;
-        module->GetFunctionByIndex(n)->GetDeclaredAt(&section, nullptr, nullptr);
-        EnsureSectionCached(section, section);
-    }
-}
+        if (lit->line == line)
+        {
+            it->second.erase(lit);
 
-/*virtual*/ void asIDBDebugger::EnsureSectionCached(std::string_view section, std::string_view canonical)
-{
-    sections.insert({ std::string(section), std::string(canonical) });
+            if (it->second.empty())
+                breakpoints.erase(it);
+
+            return false;
+        }
+    }
+
+    it->second.push_back({ line });
+    return true;
 }

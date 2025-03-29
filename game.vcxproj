@@ -46,24 +46,24 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)_x64</TargetName>
-    <OutDir>$(SolutionDir)build\</OutDir>
+    <OutDir>C:\Users\Paril\Saved Games\Nightdive Studios\Quake II\as\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>$(ProjectName)_x64</TargetName>
-    <OutDir>$(SolutionDir)build\</OutDir>
+    <OutDir>C:\Users\Paril\Saved Games\Nightdive Studios\Quake II\as\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4267;4244</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\angelscript\include;$(ProjectDir)thirdparty\jsoncpp\include;$(ProjectDir)thirdparty\fmt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\angelscript\include;$(ProjectDir)thirdparty\jsoncpp\include;$(ProjectDir)thirdparty\asio\include;$(ProjectDir)thirdparty\cppdap\include;$(ProjectDir)thirdparty\yyjson;$(ProjectDir)thirdparty\fmt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SupportJustMyCode>false</SupportJustMyCode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <TreatSpecificWarningsAsErrors>4533;4700;4703;4146;4308;4532</TreatSpecificWarningsAsErrors>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -89,7 +89,7 @@
       <DisableSpecificWarnings>4267;4244</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatSpecificWarningsAsErrors>4533;4700;4703;4146;4308;4532</TreatSpecificWarningsAsErrors>
-      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\angelscript\include;$(ProjectDir)thirdparty\jsoncpp\include;$(ProjectDir)thirdparty\fmt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)thirdparty\angelscript\include;$(ProjectDir)thirdparty\jsoncpp\include;$(ProjectDir)thirdparty\asio\include;$(ProjectDir)thirdparty\cppdap\include;$(ProjectDir)thirdparty\yyjson;$(ProjectDir)thirdparty\fmt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="debugger\as_debugger.cpp" />
+    <ClCompile Include="debugger\as_debugger_dap.cpp" />
     <ClCompile Include="debugger\as_debugger_imgui.cpp" />
     <ClCompile Include="debugger\imgui.cpp" />
     <ClCompile Include="debugger\imgui_demo.cpp" />
@@ -176,6 +177,19 @@
     <ClCompile Include="thirdparty\angelscript\source\as_tokenizer.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_typeinfo.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_variablescope.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\content_stream.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\io.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\network.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\null_json_serializer.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\protocol_events.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\protocol_requests.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\protocol_response.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\protocol_types.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\session.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\socket.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\typeinfo.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\typeof.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\yyjson_json_serializer.cpp" />
     <ClCompile Include="thirdparty\datetime\datetime.cpp" />
     <ClCompile Include="thirdparty\fmt\src\os.cc" />
     <ClCompile Include="thirdparty\scriptany\scriptany.cpp" />
@@ -185,13 +199,14 @@
     <ClCompile Include="thirdparty\scriptstdstring\scriptstdstring.cpp" />
     <ClCompile Include="thirdparty\scriptstdstring\scriptstdstring_utils.cpp" />
     <ClCompile Include="thirdparty\weakref\weakref.cpp" />
-    <ClCompile Include="yyjson.c" />
+    <ClCompile Include="thirdparty\yyjson\yyjson.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
     <ClInclude Include="cg_local.h" />
     <ClInclude Include="ctrack.hpp" />
     <ClInclude Include="debugger\as_debugger.h" />
+    <ClInclude Include="debugger\as_debugger_dap.h" />
     <ClInclude Include="debugger\as_debugger_imgui.h" />
     <ClInclude Include="debugger\imconfig.h" />
     <ClInclude Include="debugger\imgui.h" />
@@ -204,7 +219,6 @@
     <ClInclude Include="debugger\TextEditor.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
-    <ClInclude Include="palinteer.h" />
     <ClInclude Include="q2as_cgame.h" />
     <ClInclude Include="q2as_fixedarray.h" />
     <ClInclude Include="q2as_game.h" />
@@ -219,7 +233,6 @@
     <ClInclude Include="q2as_stringex.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
-    <ClInclude Include="spall.h" />
     <ClInclude Include="thirdparty\angelscript\include\angelscript.h" />
     <ClInclude Include="thirdparty\angelscript\source\as_array.h" />
     <ClInclude Include="thirdparty\angelscript\source\as_atomic.h" />
@@ -259,6 +272,28 @@
     <ClInclude Include="thirdparty\angelscript\source\as_typeinfo.h" />
     <ClInclude Include="thirdparty\angelscript\source\as_variablescope.h" />
     <ClInclude Include="thirdparty\autowrapper\aswrappedcall.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\any.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\dap.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\future.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\io.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\network.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\optional.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\protocol.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\serialization.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\session.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\traits.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\typeinfo.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\typeof.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\types.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\variant.h" />
+    <ClInclude Include="thirdparty\cppdap\src\chan.h" />
+    <ClInclude Include="thirdparty\cppdap\src\content_stream.h" />
+    <ClInclude Include="thirdparty\cppdap\src\json_serializer.h" />
+    <ClInclude Include="thirdparty\cppdap\src\null_json_serializer.h" />
+    <ClInclude Include="thirdparty\cppdap\src\rwmutex.h" />
+    <ClInclude Include="thirdparty\cppdap\src\socket.h" />
+    <ClInclude Include="thirdparty\cppdap\src\string_buffer.h" />
+    <ClInclude Include="thirdparty\cppdap\src\yyjson_json_serializer.h" />
     <ClInclude Include="thirdparty\datetime\datetime.h" />
     <ClInclude Include="thirdparty\fmt\include\fmt\args.h" />
     <ClInclude Include="thirdparty\fmt\include\fmt\base.h" />
@@ -274,13 +309,15 @@
     <ClInclude Include="thirdparty\fmt\include\fmt\ranges.h" />
     <ClInclude Include="thirdparty\fmt\include\fmt\std.h" />
     <ClInclude Include="thirdparty\fmt\include\fmt\xchar.h" />
+    <ClInclude Include="thirdparty\palanteer\palinteer.h" />
     <ClInclude Include="thirdparty\scriptany\scriptany.h" />
     <ClInclude Include="thirdparty\scriptarray\scriptarray.h" />
     <ClInclude Include="thirdparty\scriptdictionary\scriptdictionary.h" />
     <ClInclude Include="thirdparty\scripthelper\scripthelper.h" />
     <ClInclude Include="thirdparty\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="thirdparty\spall\spall.h" />
     <ClInclude Include="thirdparty\weakref\weakref.h" />
-    <ClInclude Include="yyjson.h" />
+    <ClInclude Include="thirdparty\yyjson\yyjson.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="scripts\as.predefined" />

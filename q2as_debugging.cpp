@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "q2as_reg.h"
 #include <chrono>
 
 // DEBUGGER
@@ -15,8 +14,6 @@
 
 #pragma comment(lib, "d3d9.lib")
 
-#include "debugger/TextEditor.h"
-
 #undef min
 #undef max
 #undef hyper
@@ -25,6 +22,8 @@
 
 #include "q2as_game.h"
 #include "q2as_cgame.h"
+
+#include <filesystem>
 
 class q2as_asIDBStringTypeEvaluator : public asIDBTypeEvaluator
 {
@@ -114,6 +113,7 @@ public:
     }
 };
 
+#ifdef ENABLE_UI_DEBUGGER
 #include <thread>
 
 class q2as_imguiDebuggerUI : public asIDBImGuiFrontend
@@ -156,7 +156,7 @@ protected:
         if (resume)
         {
             resume = false;
-            debugger->Continue();
+            debugger->SetAction(asIDBAction::Continue);
             return asIDBFrameResult::Defer;
         }
 
@@ -281,24 +281,25 @@ protected:
 
 /*static*/ q2as_imguiDebuggerUI *q2as_imguiDebuggerUI::ui = nullptr;
 
-class q2as_asIDBDebugger : public asIDBDebugger
+class q2as_asIDBDebuggerUI : public asIDBDebugger
 {
 public:
-    q2as_asIDBDebugger()
+    q2as_asIDBDebuggerUI()
     {
+        workspace = debugger_state.workspace;
         ui = std::make_unique<q2as_imguiDebuggerUI>(this);
-        ui_thread = std::thread(q2as_asIDBDebugger::RunThread, this);
+        ui_thread = std::thread(RunThread, this);
         ui->SetWindowVisibility(true);
     }
 
-    ~q2as_asIDBDebugger()
+    ~q2as_asIDBDebuggerUI()
     {
         StopThread();
     }
     
     std::string FetchSource(const char *section) override
     {
-        return (svas.mainModule ? (q2as_state_t &) svas : (q2as_state_t &)cgas).LoadFile(section);
+        return (svas.mainModule ? (q2as_state_t &) svas : (q2as_state_t &)cgas).LoadFile(((workspace.base_path + "/") + section).c_str());
     }
 
 protected:
@@ -325,7 +326,7 @@ protected:
     std::atomic_bool wants_exit = false;
     std::atomic_bool wants_render = true;
 
-    static void RunThread(q2as_asIDBDebugger *dbg)
+    static void RunThread(q2as_asIDBDebuggerUI *dbg)
     {
         if (!dbg->ui->SetupWindow())
             return;
@@ -361,12 +362,6 @@ protected:
 
         // ask the UI to stop
         wants_render = false;
-    }
-
-    virtual void CacheSections(asIScriptModule *module) override
-    {
-        for (auto &section : debugger_state.sections)
-            sections.emplace(section);
     }
 
     std::unique_ptr<q2as_imguiDebuggerUI> ui;
@@ -437,6 +432,110 @@ void q2as_imguiDebuggerUI::SetupImGuiBackend()
     ImGui_ImplWin32_Init(hWnd);
     ImGui_ImplDX9_Init(g_pd3dDevice);
 }
+#endif
+
+#include "debugger/as_debugger_dap.h"
+
+// VSCode DAP, will be moved into a separate
+// type eventually.
+class q2as_asIDBDebuggerVSCode : public asIDBDebugger
+{
+public:
+    std::unique_ptr<asIDBDAPServer> server;
+
+    q2as_asIDBDebuggerVSCode()  :
+        asIDBDebugger()
+    {
+        workspace = debugger_state.workspace;
+        if (svas.engine)
+            engines.insert(svas.engine);
+        if (cgas.engine)
+            engines.insert(cgas.engine);
+        server = std::make_unique<asIDBDAPServer>(27979, this);
+        server->StartServer();
+    }
+
+    virtual ~q2as_asIDBDebuggerVSCode()
+    {
+    }
+
+    virtual std::string FetchSource(const char *section) override
+    {
+        // not necessary since the sources are already
+        // available in vscode
+        return "";
+    }
+
+    virtual bool HasWork() override
+    {
+        server->Tick();
+
+        return server->ClientConnected() && asIDBDebugger::HasWork();
+    }
+
+protected:
+    bool resume = false;
+
+    virtual void Suspend() override
+    {
+        if (!server->ClientConnected())
+            return;
+
+        auto ctx = cache->ctx;
+        
+        asIScriptFunction *func = nullptr;
+        int col = 0;
+        const char *sec = nullptr;
+        int row = 0;
+
+        if (ctx->GetState() == asEXECUTION_EXCEPTION)
+        {
+            func = ctx->GetExceptionFunction();
+
+            if (func)
+                row = ctx->GetExceptionLineNumber(&col, &sec);
+        }
+        else
+        {
+            func = ctx->GetFunction(0);
+
+            if (func)
+                row = ctx->GetLineNumber(0, &col, &sec);
+        }
+
+        {
+            dap::StoppedEvent stoppedEvent;
+            stoppedEvent.reason = "breakpoint";
+            stoppedEvent.threadId = 1;
+            server->SendEventToClient(stoppedEvent);
+        }
+
+        resume = false;
+
+        while (server->ClientConnected() && !resume)
+        {
+            // TODO: we can use a condition var or something at some point
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+
+            server->Tick();
+        }
+
+        server->Tick();
+    }
+
+    // called when the debugger is being asked to resume.
+    // don't call directly, use Continue.
+    virtual void Resume() override
+    {
+        resume = true;
+    }
+
+    // create a cache for the given context.
+    virtual std::unique_ptr<asIDBCache> CreateCache(asIScriptContext *ctx) override
+    {
+        return std::make_unique<q2as_asIDBCache>(this, ctx);
+    }
+};
 
 static std::chrono::high_resolution_clock profile_clock;
 static std::chrono::high_resolution_clock::time_point profile_time;
@@ -472,63 +571,46 @@ static std::string q2as_backtrace()
 
 q2as_dbg_state_t debugger_state;
 
-void q2as_dbg_state_t::AddSection(std::string_view section)
-{
-    sections.emplace(section, section);
-    sections_optimized = false;
-}
-
-void q2as_dbg_state_t::OptimizeSections()
-{
-    if (sections_optimized)
-        return;
-
-    sections_optimized = true;
-
-    std::string_view first = sections.begin()->first;
-    std::string_view last = sections.rbegin()->first;
-    int len = min(first.size(), last.size());
-    int i = 0;
-  
-    while (i < len && first[i] == last[i])
-        i++;
-
-    for (auto &section : sections)
-        section.second = section.first.substr(i);
-}
-
-#include "game.h"
-#include <charconv>
-
 void q2as_dbg_state_t::CheckDebugger(asIScriptContext *ctx)
 {
-    bool want_debugger = debugger_state.debugger_cvar->integer ? true : (debugger && debugger->HasWork());
+    // check if the debugger needs to be changed
+    if (debugger_state.debugger_type != debugger_state.debugger_cvar->integer)
+    {
+        debugger_state.debugger.reset();
+        debugger_state.debugger_type = debugger_state.debugger_cvar->integer;
+    }
 
-    if (want_debugger)
+    // we don't want debugging
+    if (!debugger_state.debugger_cvar->integer)
+        return;
+
+    // create the debugger
+    if (!debugger)
     {
-        if (!debugger)
-        {
-            debugger = std::make_unique<q2as_asIDBDebugger>();
-            if (svas.mainModule)
-                debugger->CacheSections(svas.mainModule);
-            if (cgas.mainModule)
-                debugger->CacheSections(cgas.mainModule);
-        }
-        
+#ifdef ENABLE_UI_DEBUGGER
+        if (debugger_state.debugger_cvar->integer == 1)
+            debugger = std::make_unique<q2as_asIDBDebuggerUI>();
+        else
+#endif
+            debugger = std::make_unique<q2as_asIDBDebuggerVSCode>();
+    }
+
+    // hook the context if the debugger
+    // has work to do (breakpoints, etc)
+    if (debugger->HasWork())
         debugger->HookContext(ctx);
-    }
-    else
-    {
-        debugger.reset();
-    }
 }
 
 void q2as_dbg_state_t::DebugBreak(asIScriptContext *ctx)
 {
-    if (!debugger)
-        debugger = std::make_unique<q2as_asIDBDebugger>();
+    if (!ctx)
+        ctx = asGetActiveContext();
 
-    debugger->DebugBreak(ctx ? ctx : asGetActiveContext());
+    if (!debugger)
+        CheckDebugger(ctx);
+
+    if (debugger)
+        debugger->DebugBreak(ctx);
 }
 
 static void q2as_debugbreak()
@@ -579,16 +661,17 @@ static void q2as_print(const std::string &s)
     state->Print("\n");
 }
 
-bool Q2AS_RegisterDebugging(asIScriptEngine *engine)
+void Q2AS_RegisterDebugging(q2as_registry &registry)
 {
-    // debugging
-    EnsureRegisteredGlobalFunction("void profile_start(const string &in)", asFUNCTION(q2as_profile_start), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void profile_end()", asFUNCTION(q2as_profile_end), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("string backtrace()", asFUNCTION(q2as_backtrace), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void debugbreak()", asFUNCTION(q2as_debugbreak), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void sleep(int)", asFUNCTION(q2as_sleep), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void print(const string &in s)", asFUNCTION(q2as_print), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("string typeof(const ? &in)", asFUNCTION(q2as_typeof), asCALL_GENERIC);
-
-    return true;
+    registry
+		.for_global()
+        .functions({
+            { "void profile_start(const string &in)", asFUNCTION(q2as_profile_start), asCALL_CDECL },
+            { "void profile_end()",                   asFUNCTION(q2as_profile_end),   asCALL_CDECL },
+            { "string backtrace()",                   asFUNCTION(q2as_backtrace),     asCALL_CDECL },
+            { "void debugbreak()",                    asFUNCTION(q2as_debugbreak),    asCALL_CDECL },
+            { "void sleep(int)",                      asFUNCTION(q2as_sleep),         asCALL_CDECL },
+            { "void print(const string &in s)",       asFUNCTION(q2as_print),         asCALL_CDECL },
+            { "string typeof(const ? &in)",           asFUNCTION(q2as_typeof),        asCALL_GENERIC }
+        });
 }

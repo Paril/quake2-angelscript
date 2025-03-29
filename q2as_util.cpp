@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "q2as_reg.h"
 #include "q2as_fixedarray.h"
 #include "bg_local.h"
 
@@ -37,58 +36,56 @@ static void q2as_AddBlend(float r, float g, float b, float a, const vec4_t &src,
 }
 
 // utility types (rgba_t, vec2_t, vec4_t)
-bool Q2AS_RegisterUtil(asIScriptEngine *engine)
+void Q2AS_RegisterUtil(q2as_registry &registry)
 {
-#define Q2AS_OBJECT rgba_t
+	Q2AS_RegisterFixedArray<uint8_t, 4>(registry, "rgba_t", "uint8", asOBJ_APP_CLASS_ALLINTS);
 
-	Ensure(Q2AS_RegisterFixedArray<uint8_t, 4>(engine, "rgba_t", "uint8", asOBJ_APP_CLASS_ALLINTS));
+	registry
+		.for_type("rgba_t")
+		.properties({
+			{ "uint8 r", asOFFSET(rgba_t, r) },
+			{ "uint8 g", asOFFSET(rgba_t, g) },
+			{ "uint8 b", asOFFSET(rgba_t, b) },
+			{ "uint8 a", asOFFSET(rgba_t, a) },
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f(uint8, uint8, uint8, uint8)", asFUNCTION(Q2AS_rgba_t_init_construct_u8u8u8u8), asCALL_CDECL_OBJLAST }
+		});
 
-	// props
-	EnsureRegisteredProperty("uint8", r);
-	EnsureRegisteredProperty("uint8", g);
-	EnsureRegisteredProperty("uint8", b);
-	EnsureRegisteredProperty("uint8", a);
+	Q2AS_RegisterFixedArray<float, 2>(registry, "vec2_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
 
-	// constructors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(uint8, uint8, uint8, uint8)", asFUNCTION(Q2AS_rgba_t_init_construct_u8u8u8u8), asCALL_CDECL_OBJLAST);
+	registry
+		.for_type("vec2_t")
+		.properties({
+			{ "float x", asOFFSET(vec2_t, x) },
+			{ "float y", asOFFSET(vec2_t, y) }
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f(float, float)", asFUNCTION(Q2AS_vec2_t_init_construct_ff), asCALL_CDECL_OBJLAST }
+		});
 
-#undef Q2AS_OBJECT
-	
-#define Q2AS_OBJECT vec2_t
+	Q2AS_RegisterFixedArray<float, 4>(registry, "vec4_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
 
-	Ensure(Q2AS_RegisterFixedArray<float, 4>(engine, "vec2_t", "float", asOBJ_APP_CLASS_ALLFLOATS));
+	registry
+		.for_type("vec4_t")
+		.properties({
+			{ "float x", asOFFSET(vec4_t, x) },
+			{ "float y", asOFFSET(vec4_t, y) },
+			{ "float z", asOFFSET(vec4_t, z) },
+			{ "float w", asOFFSET(vec4_t, w) }
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f(float, float, float, float)", asFUNCTION(Q2AS_vec4_t_init_construct_ffff), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "bool opEquals(const vec4_t &in) const", asFUNCTION(Q2AS_type_equals<vec4_t>), asCALL_CDECL_OBJLAST }
+		});
 
-	// props
-	EnsureRegisteredProperty("float", x);
-	EnsureRegisteredProperty("float", y);
+	Q2AS_RegisterFixedArray<vec3_t, 3>(registry, "mat3_t", "vec3_t", asOBJ_APP_CLASS_ALLFLOATS);
 
-	// constructors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(float, float)", asFUNCTION(Q2AS_vec2_t_init_construct_ff), asCALL_CDECL_OBJLAST);
-
-#undef Q2AS_OBJECT
-	
-#define Q2AS_OBJECT vec4_t
-	
-	Ensure(Q2AS_RegisterFixedArray<float, 4>(engine, "vec4_t", "float", asOBJ_APP_CLASS_ALLFLOATS));
-
-	// props
-	EnsureRegisteredProperty("float", x);
-	EnsureRegisteredProperty("float", y);
-	EnsureRegisteredProperty("float", z);
-	EnsureRegisteredProperty("float", w);
-
-	// constructors
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(float, float, float, float)", asFUNCTION(Q2AS_vec4_t_init_construct_ffff), asCALL_CDECL_OBJLAST);
-
-    // operators
-	EnsureRegisteredMethod("bool opEquals(const vec4_t &in) const", asFUNCTION(Q2AS_type_equals<vec4_t>), asCALL_CDECL_OBJLAST);
-
-    // global functions (color mixing)
-    EnsureRegisteredGlobalFunction("void G_AddBlend(float r, float g, float b, float a, const vec4_t &in, vec4_t &out)", asFUNCTION(q2as_AddBlend), asCALL_CDECL);
-
-#undef Q2AS_OBJECT
-
-	Ensure(Q2AS_RegisterFixedArray<vec3_t, 3>(engine, "mat3_t", "vec3_t", asOBJ_APP_CLASS_ALLFLOATS));
-
-	return true;
+	registry
+		.for_global()
+		.functions({
+			{ "void G_AddBlend(float r, float g, float b, float a, const vec4_t &in, vec4_t &out)", asFUNCTION(q2as_AddBlend), asCALL_CDECL }
+		});
 }

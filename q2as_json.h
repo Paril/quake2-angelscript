@@ -5,7 +5,7 @@
 #define YYJSON_DISABLE_UTILS 1
 #define YYJSON_DISABLE_UTF8_VALIDATION 1
 
-#include "yyjson.h"
+#include <yyjson.h>
 
 #include <string_view>
 

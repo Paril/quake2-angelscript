@@ -3,6 +3,8 @@
 
 #pragma once
 
+#ifdef ENABLE_UI_DEBUGGER
+
 #include "as_debugger.h"
 #include "TextEditor.h"
 
@@ -27,6 +29,26 @@ enum class asIDBVarPopupWindow
     Watch
 };
 
+// watch entry name + result.
+// set to dirty if the value is out of date.
+struct asIDBWatchEntry : public asIDBVarViewBase
+{
+    bool                               dirty = true;
+    asIDBExpected<asIDBExprResult>     result;
+
+    inline asIDBWatchEntry(const char *expr) :
+        asIDBVarViewBase(expr, "")
+    {
+    }
+
+    virtual const asIDBVarAddr &GetID() const override { return result.value().idKey; }
+    virtual asIDBVarState &GetState() override { return result.value().value; }
+    virtual const asIDBVarState &GetState() const override { return result.value().value; }
+    virtual bool IsValid() const override { return result.has_value(); }
+};
+
+using asIDBWatchEntryVector = std::vector<asIDBWatchEntry>;
+
 // Front end base class for an ImGui debugger.
 // Requires ImGui Docking and some third party
 // stuff that is in the same folder here.
@@ -34,6 +56,9 @@ enum class asIDBVarPopupWindow
 {
 public:
     asIDBDebugger *debugger;
+
+    // cached watch
+    asIDBWatchEntryVector watch;
 
     asIDBImGuiFrontend(asIDBDebugger *debugger) :
         debugger(debugger)
@@ -58,7 +83,7 @@ public:
 
     // window renderings
     void RenderVariableTable(const char *label, std::function<void()> render_variables);
-    void RenderLocals(const char *filter, asIDBLocalKey stack_entry);
+    void RenderLocals(const char *filter, asIDBScope &scope, asIDBLocalScopeVariables &variables);
     void RenderGlobals(const char *filter, bool showConstants, bool showNamespaced);
     void RenderWatch();
 
@@ -100,3 +125,5 @@ protected:
     // Called at the end of render loop.
     virtual void BackendRender() = 0;
 };
+
+#endif

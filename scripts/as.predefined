@@ -275,7 +275,7 @@ enum configstring_id_t : int32
 	WHEEL_POWERUPS = 12414,
 	CD_LOOP_COUNT = 12446,
 	GAME_STYLE = 12447,
-	MAX_CONFIGSTRINGS = 12448
+	MAX = 12448
 }
 enum configstring_old_id_t : int32
 {
@@ -295,7 +295,7 @@ enum configstring_old_id_t : int32
 	ITEMS_OLD = 1056,
 	PLAYERSKINS_OLD = 1312,
 	GENERAL_OLD = 1568,
-	MAX_CONFIGSTRINGS_OLD = 2080
+	MAX = 2080
 }
 enum layout_flags_t : int16
 {

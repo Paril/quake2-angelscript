@@ -102,7 +102,7 @@ uint CS_SIZE(configstring_id_t v)
 	if (v >= configstring_id_t::STATUSBAR && v < configstring_id_t::AIRACCEL)
 		return CS_MAX_STRING_LENGTH * (int(configstring_id_t::AIRACCEL) - int(v));
 	else if (v >= configstring_id_t::GENERAL && v < configstring_id_t::WHEEL_WEAPONS)
-		return CS_MAX_STRING_LENGTH * (int(configstring_id_t::MAX_CONFIGSTRINGS) - int(v));
+		return CS_MAX_STRING_LENGTH * (int(configstring_id_t::MAX) - int(v));
 	
 	return CS_MAX_STRING_LENGTH;
 }
@@ -165,7 +165,7 @@ void CS_REMAP(configstring_old_id_t id, int &out start, int &out length)
         // general also needs some special handling because it's both
         // offset *and* allowed to overflow
         start = (id + (int(configstring_id_t::GENERAL) - int(configstring_old_id_t::GENERAL_OLD))) * CS_MAX_STRING_LENGTH_OLD;
-        length = (int(configstring_id_t::MAX_CONFIGSTRINGS) - int(configstring_id_t::GENERAL)) * CS_MAX_STRING_LENGTH;
+        length = (int(configstring_id_t::MAX) - int(configstring_id_t::GENERAL)) * CS_MAX_STRING_LENGTH;
     }
 }
 
@@ -173,8 +173,6 @@ void CS_REMAP(configstring_old_id_t id, int &out start, int &out length)
 
 const int32 MODELINDEX_WORLD = 1;    // special index for world
 const int32 MODELINDEX_PLAYER = MAX_MODELS_OLD - 1; // special index for player models
-
-const int Max_Armor_Types = 3;
 
 const int32 PROTOCOL_VERSION_3XX   = 34;
 const int32 PROTOCOL_VERSION_DEMOS = 2022;

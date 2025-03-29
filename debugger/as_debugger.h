@@ -22,10 +22,14 @@
 #include <type_traits>
 #include <string>
 #include <map>
+#include <set>
 #include <fmt/format.h>
 #include <variant>
 #include <mutex>
+#include <filesystem>
 #include "angelscript.h"
+
+class asIDBDebugger;
 
 template <class T>
 inline void asIDBHashCombine(size_t &seed, const T& v)
@@ -197,7 +201,7 @@ struct asIDBVarState
 // this lets them retain their proper decl.
 struct asIDBVarView : public asIDBVarViewBase
 {
-    asIDBVarAddr id;
+    asIDBVarAddr  id;
     asIDBVarState state;
 
     inline asIDBVarView(std::string name, std::string_view type, asIDBVarAddr id, asIDBVarState &&state) :
@@ -213,52 +217,81 @@ struct asIDBVarView : public asIDBVarViewBase
     virtual bool IsValid() const override { return true; }
 };
 
-enum class asIDBLocalType : uint8_t
+// a local, fetched from GetVar
+constexpr uint32_t LOCAL_THIS = (uint32_t) -1;
+
+class asIDBVariableContainer;
+
+struct asIDBNamedVariable
 {
-    Parameter, // parameter sent to function
-    Variable,  // local named variable
-    Temporary  // a temporary; has no name but has a stack offset & type
+    asIDBResolvedVarAddr    address;
+    std::string             name;
+    std::string_view        type;
+    std::string             value;
+    asIDBVariableContainer  *container = nullptr;
 };
 
-// key used for storage into the local map.
-struct asIDBLocalKey
+struct asIDBVariableSource
 {
-    uint8_t          offset;
-    asIDBLocalType   type;    
-
-    inline asIDBLocalKey(int offset, asIDBLocalType type) :
-        offset(offset),
-        type(type)
-    {
-    }
-
-    constexpr bool operator==(const asIDBLocalKey &k) const
-    {
-        return offset == k.offset && type == k.type;
-    }
+    asIDBVariableContainer  *container = nullptr;
+    size_t                  index = 0;
 };
 
-template<>
-struct std::hash<asIDBLocalKey>
+// in the debugger, all variable fetches are deferred.
+// this is an interface to a variable that will be
+// fetched at some point.
+class asIDBVariableContainer
 {
-    inline std::size_t operator()(const asIDBLocalKey &key) const
-    {
-        std::size_t h = std::hash<uint8_t>()(key.offset);
-        asIDBHashCombine(h, std::hash<asIDBLocalType>()(key.type));
-        return h;
-    }
+public:
+    asIDBDebugger       *dbg; // pointer back to debugger
+    int64_t             ref_id; // reference to our own variable id.
+                                // this is set by the cache.
+    asIDBVariableSource source; // the container is a child of this source
+    bool cached;
+
+    std::vector<asIDBNamedVariable>     named_variables;
+
+    void Cache();
+
+    asIDBVariableContainer(asIDBDebugger *dbg, int64_t ref_id, asIDBVariableSource source) : dbg(dbg), ref_id(ref_id), source(source), cached(source.container == nullptr) { }
+    virtual ~asIDBVariableContainer() { }
 };
 
-using asIDBLocalMap = std::unordered_map<asIDBLocalKey, asIDBVarViewVector>;
+using asIDBVariableMap = std::unordered_map<int64_t, std::unique_ptr<asIDBVariableContainer>>;
+
+constexpr uint32_t SCOPE_SYSTEM = (uint32_t) -1;
+
+// A scope contains variables.
+struct asIDBScope
+{
+    uint32_t                   offset; // offset in stack fetches (GetVar, etc)
+    asIDBVariableContainer     *parameters = nullptr;
+    asIDBVariableContainer     *locals = nullptr;
+    asIDBVariableContainer     *registers = nullptr; // "temporaries"
+
+    asIDBScope(asUINT offset, asIDBDebugger *dbg, asIScriptFunction *function);
+
+private:
+    void CalcLocals(asIDBDebugger *dbg, asIScriptFunction *function, asIDBVariableContainer *container);
+};
 
 struct asIDBCallStackEntry
 {
+    int64_t             id; // unique id during debugging
     std::string         declaration;
     std::string_view    section;
     int                 row, column;
+    asIDBScope          scope;
 };
 
 using asIDBCallStackVector = std::vector<asIDBCallStackEntry>;
+
+struct asIDBGlobal
+{
+    bool            isProperty; // global property vs global variable
+    uint32_t        offset;
+    asIDBVarView    var;
+};
 
 class asIDBCache;
 
@@ -567,26 +600,6 @@ public:
     constexpr T &value() { return std::get<1>(data); }
 };
 
-// watch entry name + result.
-// set to dirty if the value is out of date.
-struct asIDBWatchEntry : public asIDBVarViewBase
-{
-    bool                               dirty = true;
-    asIDBExpected<asIDBExprResult>     result;
-
-    inline asIDBWatchEntry(const char *expr) :
-        asIDBVarViewBase(expr, "")
-    {
-    }
-
-    virtual const asIDBVarAddr &GetID() const override { return result.value().idKey; }
-    virtual asIDBVarState &GetState() override { return result.value().value; }
-    virtual const asIDBVarState &GetState() const override { return result.value().value; }
-    virtual bool IsValid() const override { return result.has_value(); }
-};
-
-using asIDBWatchEntryVector = std::vector<asIDBWatchEntry>;
-
 // this class holds the cached state of stuff
 // so that we're not querying things from AS
 // every frame. You should only ever make one of these
@@ -609,27 +622,28 @@ public:
     // cache of type id+modifiers to names
     asIDBTypeNameMap type_names;
 
-    // cached globals
-    bool globalsCached = false;
-    asIDBVarViewVector globals;
-
-    // cached locals
-    asIDBLocalMap locals;
-
-    // cached watch
-    asIDBWatchEntryVector watch;
-
     // cached call stack
-    std::string system_function;
     asIDBCallStackVector call_stack;
 
     // type evaluators
     asIDBTypeEvaluatorMap evaluators;
 
-    // ptr back to debugger
-    class asIDBDebugger *dbg;
+    // cached globals
+    // TODO
+    asIDBVariableContainer *global = nullptr;
 
-    inline asIDBCache(class asIDBDebugger *dbg, asIScriptContext *ctx) :
+    // cached map of variable reference to
+    // a variable provider.
+    asIDBVariableMap variables;
+
+    // ptr back to debugger
+    asIDBDebugger *dbg;
+
+    // pointers to temporary memory, which can be referred
+    // to by a asIDBResolvedVarAddr
+    std::vector<std::unique_ptr<uint8_t[]>> temp_memory;
+
+    inline asIDBCache(asIDBDebugger *dbg, asIScriptContext *ctx) :
         dbg(dbg),
         ctx(ctx)
     {
@@ -650,7 +664,7 @@ public:
     virtual void CacheGlobals();
 
     // caches all of the locals with the specified key.
-    virtual void CacheLocals(asIDBLocalKey stack_entry);
+    virtual void CacheLocals(asIDBScope &scope);
 
     // cache call stack entries
     virtual void CacheCallstack();
@@ -695,82 +709,52 @@ public:
     // Resolve the remainder of a sub-expression; see ResolveExpression
     // for the syntax.
     virtual asIDBExpected<asIDBExprResult> ResolveSubExpression(const asIDBResolvedVarAddr &idKey, const std::string_view rest, int stack_index);
-};
 
-struct asIDBBreakpointLocation
-{
-    std::string_view    section;
-    int                 line;
-
-    constexpr bool operator==(const asIDBBreakpointLocation &k) const
+    // Create a variable container.
+    asIDBVariableContainer *CreateVariableContainer(asIDBVariableSource source = {})
     {
-        return section == k.section && line == k.line;
-    }
-};
-
-template<>
-struct std::hash<asIDBBreakpointLocation>
-{
-    inline std::size_t operator()(const asIDBBreakpointLocation &key) const
-    {
-        std::size_t h = std::hash<std::string_view>()(key.section);
-        asIDBHashCombine(h, key.line);
-        return h;
+        int64_t next_id = variables.size() + 1;
+        return variables.emplace(next_id, std::make_unique<asIDBVariableContainer>(dbg, next_id, source)).first->second.get();
     }
 };
 
 struct asIDBBreakpoint
 {
-private:
-    asIDBBreakpoint() = default;
-
-public:
-    std::variant<asIDBBreakpointLocation, std::string>  location;
-
-    static asIDBBreakpoint Function(std::string_view f)
-    {
-        asIDBBreakpoint bp;
-        bp.location = std::string(f);
-        return bp;
-    }
-
-    static asIDBBreakpoint FileLocation(asIDBBreakpointLocation loc)
-    {
-        asIDBBreakpoint bp;
-        bp.location = loc;
-        return bp;
-    }
-
-    constexpr bool operator==(const asIDBBreakpoint &k) const
-    {
-        return location == k.location;
-    }
+    int line;
 };
 
-template<>
-struct std::hash<asIDBBreakpoint>
-{
-    inline std::size_t operator()(const asIDBBreakpoint &key) const
-    {
-        std::size_t h = std::hash<uint8_t>()(key.location.index() == 0 ? 0x40000000 : 0x00000000);
-        if (key.location.index() == 0)
-            asIDBHashCombine(h, std::get<0>(key.location));
-        else
-            asIDBHashCombine(h, std::get<1>(key.location));
-        return h;
-    }
-};
+using asIDBSectionBreakpoints = std::vector<asIDBBreakpoint>;
 
 enum class asIDBAction : uint8_t
 {
     None,
     StepInto,
     StepOver,
-    StepOut
+    StepOut,
+    Continue
 };
 
-// map of script source path -> canonical name.
-using asIDBSectionSet = std::map<std::string, std::string>;
+// The workspace is contains information about the
+// "project" that the debugger is operating within.
+// This should be set, otherwise file comparisons
+// and such may not work. File paths are always
+// stored relatively, because debuggers have different
+// ideas on file paths.
+struct asIDBWorkspace
+{
+    std::string             base_path;
+    std::set<std::string>   sections;
+
+    std::string PathToSection(const std::string_view v)
+    {
+        return std::filesystem::relative(v, base_path).generic_string();
+    }
+
+    std::string SectionToPath(const std::string_view v)
+    {
+        return (base_path + '/').append(v);
+    }
+};
 
 // This is the main class for interfacing with
 // the debugger. This manages the debugger thread
@@ -781,6 +765,9 @@ using asIDBSectionSet = std::map<std::string, std::string>;
 /*abstract*/ class asIDBDebugger
 {
 public:
+    // mutex for shared state, like the cache and breakpoints.
+    std::recursive_mutex mutex;
+
     // next action to perform
     asIDBAction action = asIDBAction::None;
     asUINT stack_size = 0; // for certain actions (like Step Over) we have to know
@@ -789,21 +776,24 @@ public:
     // if true, line callback will not execute
     // (used to prevent infinite loops)
     std::atomic_bool internal_execution = false;
-
-    // mutex for shared state, like the cache and breakpoints.
-    std::recursive_mutex mutex;
     
     // active breakpoints
-    std::unordered_set<asIDBBreakpoint> breakpoints;
+    std::unordered_map<std::string_view, asIDBSectionBreakpoints> breakpoints;
 
-    // cached sections
-    asIDBSectionSet sections;
+    // workspace
+    asIDBWorkspace workspace;
+
+    // list of engines that can be hooked.
+    std::unordered_set<asIScriptEngine *> engines;
 
     // cache for the current active broken state.
     // the cache is only kept for the duration of
     // a broken state; resuming in any way destroys
     // the cache.
     std::unique_ptr<asIDBCache> cache;
+
+    // current frame offset for use by the cache
+    std::atomic_int64_t frame_offset = 0;
 
     asIDBDebugger() { }
     virtual ~asIDBDebugger() { }
@@ -827,31 +817,18 @@ public:
     // if this returns false. If it returns true,
     // a context still has a linecallback set
     // using this debugger.
-    bool HasWork();
+    virtual bool HasWork();
 
     // debugger operations; these set the next breakpoint,
     // clear the cache context and call Resume.
-    void StepInto();
-    void StepOver();
-    void StepOut();
-    void Continue();
+    virtual void SetAction(asIDBAction new_action);
 
     // breakpoint stuff
     bool ToggleBreakpoint(std::string_view section, int line);
-    
-    // add script sections; note that this must be done entirely
-    // by an overridden class, and you'll have to keep track of
-    // this data yourself, because AS doesn't currently provide
-    // a way to know where all script sections used are from.
-    // If this is not implemented, it simply registers all of
-    // the sections it can find with functions.
-    virtual void CacheSections(asIScriptModule *module);
-
-    // adds to cache.
-    virtual void EnsureSectionCached(std::string_view section, std::string_view canonical);
 
     // get the source code for the given section
     // of the given module.
+    // FIXME: can we move this to cache?
     virtual std::string FetchSource(const char *section) = 0;
 
 protected:

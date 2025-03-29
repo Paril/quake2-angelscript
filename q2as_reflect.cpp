@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "q2as_reg.h"
 
 static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
 {
@@ -21,7 +20,6 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
     
     if (auto sig = typeInfo->GetFuncdefSignature())
     {
-        // engine?
         asIScriptFunction *func = as->mainModule->GetFunctionByName(in_name->c_str());
 
         if (func)
@@ -35,7 +33,6 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
     {
         std::string str;
 
-        // engine?
         for (asUINT i = 0; i < as->mainModule->GetGlobalVarCount(); i++)
         {
             const char *name, *ns;
@@ -92,7 +89,6 @@ static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
     }
     else
     {
-        // engine?
         for (; i < as->mainModule->GetGlobalVarCount(); i++)
         {
             if (as->mainModule->GetAddressOfGlobalVar(i) == addr)
@@ -117,11 +113,12 @@ static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
     ((asIScriptObject *) addr)->Release();
 }
 
-bool Q2AS_RegisterReflection(asIScriptEngine *engine)
+void Q2AS_RegisterReflection(q2as_registry &registry)
 {
-    // reflection
-    EnsureRegisteredGlobalFunction("string reflect_name_of_global<T>(const T @)", asFUNCTION(q2as_reflect_name_of_global), asCALL_GENERIC);
-    EnsureRegisteredGlobalFunction("bool reflect_global_from_name<T>(const string &in, T @&out, bool = false)", asFUNCTION(q2as_reflect_global_from_name), asCALL_GENERIC);
-
-    return true;
+    registry
+        .for_global()
+        .functions({
+            { "string reflect_name_of_global<T>(const T @)",                               asFUNCTION(q2as_reflect_name_of_global),   asCALL_GENERIC },
+            { "bool reflect_global_from_name<T>(const string &in, T @&out, bool = false)", asFUNCTION(q2as_reflect_global_from_name), asCALL_GENERIC }
+        });
 }

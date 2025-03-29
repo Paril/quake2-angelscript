@@ -54,22 +54,19 @@ struct q2as_fixedarray
 };
 
 template<typename T, size_t N>
-inline bool Q2AS_RegisterFixedArray(asIScriptEngine *engine, const char *name, const char *underlying, int traits)
+inline void Q2AS_RegisterFixedArray(q2as_registry &registry, const char *name, const char *underlying, int traits)
 {
 	using AT = std::array<T, N>;
-	Ensure(engine->RegisterObjectType(name, sizeof(AT), asOBJ_VALUE | asOBJ_POD | traits | asGetTypeTraits<AT>()));
+	using FT = q2as_fixedarray<T, N>;
 
-	const char *decl = G_Fmt("void f(int &in) {{ repeat {} }}", underlying).data();
-
-	// list construct
-	Ensure(engine->RegisterObjectBehaviour(name, asBEHAVE_LIST_CONSTRUCT, decl, asFunctionPtr(q2as_fixedarray<T, N>::ListConstruct), asCALL_CDECL_OBJLAST));
-	
-	// array
-	decl = G_Fmt("{} &opIndex(uint)", underlying).data();
-	Ensure(engine->RegisterObjectMethod(name, decl,asFunctionPtr(q2as_fixedarray<T, N>::IndexRef), asCALL_CDECL_OBJLAST));
-	decl = G_Fmt("const {} &opIndex(uint) const", underlying).data();
-	Ensure(engine->RegisterObjectMethod(name, decl, asFunctionPtr(q2as_fixedarray<T, N>::IndexRefConst), asCALL_CDECL_OBJLAST));
-	Ensure(engine->RegisterObjectMethod(name, "uint32 size() const", asFunctionPtr(q2as_fixedarray<T, N>::Size), asCALL_CDECL_OBJLAST));
-
-	return true;
+	registry
+		.type(name, sizeof(AT), asOBJ_VALUE | asOBJ_POD | traits | asGetTypeTraits<AT>())
+		.behaviors({
+			{ asBEHAVE_LIST_CONSTRUCT, fmt::format("void f(int &in) {{ repeat {} }}", underlying), asFunctionPtr(FT::ListConstruct), asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ fmt::format("{} &opIndex(uint)", underlying),             asFunctionPtr(FT::IndexRef),      asCALL_CDECL_OBJLAST },
+			{ fmt::format("const {} &opIndex(uint) const", underlying), asFunctionPtr(FT::IndexRefConst), asCALL_CDECL_OBJLAST },
+			{ "uint32 size() const",                                    asFunctionPtr(FT::Size),          asCALL_CDECL_OBJLAST }
+		});
 }

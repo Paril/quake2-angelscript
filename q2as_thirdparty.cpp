@@ -8,20 +8,18 @@
 #include "thirdparty/weakref/weakref.h"
 #include "thirdparty/scripthelper/scripthelper.h"
 
-bool Q2AS_RegisterThirdParty(asIScriptEngine *engine)
+void Q2AS_RegisterThirdParty(q2as_registry &registry)
 {
-	RegisterStdString(engine);
-	RegisterScriptArray(engine, true);
+	RegisterStdString(registry.engine);
+	RegisterScriptArray(registry.engine, true);
 
-	RegisterScriptAny(engine);
-	RegisterScriptDictionary(engine);
+	RegisterScriptAny(registry.engine);
+	RegisterScriptDictionary(registry.engine);
 
-	RegisterStdStringUtils(engine);
+	RegisterStdStringUtils(registry.engine);
 
-	RegisterScriptDateTime(engine);
-	RegisterScriptWeakRef(engine);
+	RegisterScriptDateTime(registry.engine);
+	RegisterScriptWeakRef(registry.engine);
 
-    RegisterExceptionRoutines(engine);
-
-	return true;
+    RegisterExceptionRoutines(registry.engine);
 }

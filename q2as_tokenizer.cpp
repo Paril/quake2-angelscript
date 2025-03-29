@@ -1,5 +1,4 @@
 #include "q2as_json.h"
-#include "q2as_reg.h"
 #include "bg_local.h"
 #include "cg_local.h"
 #include "q2as_cgame.h"
@@ -8,7 +7,7 @@
 
 int Q_strcasecmp(const std::string_view s1, const std::string_view s2)
 {
-	int c1, c2;
+	char c1, c2;
     size_t i1 = 0, i2 = 0;
 
 	do
@@ -35,7 +34,7 @@ int Q_strcasecmp(const std::string_view s1, const std::string_view s2)
 
 int Q_strncasecmp(const std::string_view s1, const std::string_view s2, size_t n)
 {
-	int c1, c2;
+	char c1, c2;
     size_t i1 = 0, i2 = 0;
 
 	do
@@ -231,6 +230,7 @@ struct tokenizer_t : q2as_ref_t
     }
 };
 
+// TODO: move to factory (see pmove)
 void Q2AS_tokenizer_t_factory_cgcs(asIScriptGeneric *gen)
 {
 	tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_cg_state_t::AllocStatic(sizeof(tokenizer_t)));
@@ -238,6 +238,7 @@ void Q2AS_tokenizer_t_factory_cgcs(asIScriptGeneric *gen)
 	new(ptr) tokenizer_t(cgi.get_configstring(gen->GetArgDWord(0)));
 }
 
+// TODO: move to factory (see pmove)
 void Q2AS_tokenizer_t_factory_svcs(asIScriptGeneric *gen)
 {
 	tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
@@ -252,60 +253,64 @@ void Q2AS_tokenizer_t_factory_str(asIScriptGeneric *gen)
 	new(ptr) tokenizer_t(*((std::string *) gen->GetArgAddress(0)));
 }
 
-bool Q2AS_RegisterTokenizer(asIScriptEngine *engine)
+void Q2AS_RegisterTokenizer(q2as_registry &registry)
 {
-#define Q2AS_OBJECT tokenizer_t
-
-	EnsureRegisteredTypeRaw("tokenizer_t", sizeof(tokenizer_t), asOBJ_REF);
-
-	// behaviors
-	EnsureRegisteredBehaviourRaw("tokenizer_t", asBEHAVE_FACTORY, "tokenizer_t@ f()", asFUNCTION((Q2AS_Factory<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC);
-	EnsureRegisteredBehaviourRaw("tokenizer_t", asBEHAVE_FACTORY, "tokenizer_t@ f(const string &in)", asFUNCTION(Q2AS_tokenizer_t_factory_str), asCALL_GENERIC);
-    if (engine->GetUserData(0) == &cgas)
+    registry
+        .type("tokenizer_t", sizeof(tokenizer_t), asOBJ_REF)
+        .behaviors({
+            { asBEHAVE_ADDREF, "void f()", asFUNCTION((Q2AS_AddRef<tokenizer_t>)), asCALL_GENERIC },
+    // TODO: move to factory (see pmove)
+            { asBEHAVE_FACTORY, "tokenizer_t@ f()",                 asFUNCTION((Q2AS_Factory<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC },
+            { asBEHAVE_FACTORY, "tokenizer_t@ f(const string &in)", asFUNCTION(Q2AS_tokenizer_t_factory_str),                 asCALL_GENERIC },
+            { asBEHAVE_RELEASE, "void f()",                         asFUNCTION((Q2AS_Release<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC }
+        })
+        .methods({
+            { "string get_separators() const property",            asMETHOD(tokenizer_t, get_separators),         asCALL_THISCALL },
+            { "void set_separators(const string &in) property",    asMETHOD(tokenizer_t, set_separators),         asCALL_THISCALL },
+            { "bool get_has_next() const property",                asMETHOD(tokenizer_t, has_next),               asCALL_THISCALL },
+            { "bool get_has_token() const property",               asMETHOD(tokenizer_t, has_token),              asCALL_THISCALL },
+            { "bool token_equals(const string &in) const",         asMETHOD(tokenizer_t, token_equals),           asCALL_THISCALL },
+	        { "bool token_iequals(const string &in) const",        asMETHOD(tokenizer_t, token_iequals),          asCALL_THISCALL },
+	        { "bool token_equalsn(const string &in, uint) const",  asMETHOD(tokenizer_t, token_equalsn),          asCALL_THISCALL },
+	        { "bool token_iequalsn(const string &in, uint) const", asMETHOD(tokenizer_t, token_iequalsn),         asCALL_THISCALL },
+	        { "bool next()",                                       asMETHOD(tokenizer_t, next),                   asCALL_THISCALL },
+	        { "uint32 token_length() const",                       asMETHOD(tokenizer_t, token_length),           asCALL_THISCALL },
+	        { "uint8 token_char(uint32) const",                    asMETHOD(tokenizer_t, token_char),             asCALL_THISCALL },
+	        { "uint8 as_uint8() const",                            asMETHOD(tokenizer_t, as_primitive<uint8_t>),  asCALL_THISCALL },
+	        { "uint16 as_uint16() const",                          asMETHOD(tokenizer_t, as_primitive<uint16_t>), asCALL_THISCALL },
+	        { "uint32 as_uint32() const",                          asMETHOD(tokenizer_t, as_primitive<uint32_t>), asCALL_THISCALL },
+	        { "uint64 as_uint64() const",                          asMETHOD(tokenizer_t, as_primitive<uint64_t>), asCALL_THISCALL },
+	        { "int8 as_int8() const",                              asMETHOD(tokenizer_t, as_primitive<int8_t>),   asCALL_THISCALL },
+	        { "int16 as_int16() const",                            asMETHOD(tokenizer_t, as_primitive<int16_t>),  asCALL_THISCALL },
+	        { "int32 as_int32() const",                            asMETHOD(tokenizer_t, as_primitive<int32_t>),  asCALL_THISCALL },
+	        { "int64 as_int64() const",                            asMETHOD(tokenizer_t, as_primitive<int64_t>),  asCALL_THISCALL },
+	        { "float as_float() const",                            asMETHOD(tokenizer_t, as_primitive<float>),    asCALL_THISCALL },
+	        { "double as_double() const",                          asMETHOD(tokenizer_t, as_primitive<double>),   asCALL_THISCALL },
+	        { "string as_string() const",                          asMETHOD(tokenizer_t, as_string),              asCALL_THISCALL },
+	        { "bool skip_tokens(int)",                             asMETHOD(tokenizer_t, skip_tokens),            asCALL_THISCALL },
+	        { "void push_state()",                                 asMETHOD(tokenizer_t, push_state),             asCALL_THISCALL },
+	        { "void pop_state()",                                  asMETHOD(tokenizer_t, pop_state),              asCALL_THISCALL },
+	        { "void reset()",                                      asMETHOD(tokenizer_t, reset),                  asCALL_THISCALL }
+        });
+    
+    // TODO: move to factory (see pmove)
+    if (registry.engine->GetUserData(0) == &cgas)
     {
-    	EnsureRegisteredBehaviourRaw("tokenizer_t", asBEHAVE_FACTORY, "tokenizer_t@ f(configstring_id_t id)", asFUNCTION(Q2AS_tokenizer_t_factory_cgcs), asCALL_GENERIC);
+        registry
+            .for_type("tokenizer_t")
+            .behaviors({
+                { asBEHAVE_FACTORY, "tokenizer_t@ f(configstring_id_t id)", asFUNCTION(Q2AS_tokenizer_t_factory_cgcs), asCALL_GENERIC }
+            })
+            .methods({
+                { "string as_localized(int)", asMETHOD(tokenizer_t, as_localized), asCALL_THISCALL }
+            });
     }
     else
     {
-    	EnsureRegisteredBehaviourRaw("tokenizer_t", asBEHAVE_FACTORY, "tokenizer_t@ f(configstring_id_t id)", asFUNCTION(Q2AS_tokenizer_t_factory_svcs), asCALL_GENERIC);
+        registry
+            .for_type("tokenizer_t")
+            .behaviors({
+                { asBEHAVE_FACTORY, "tokenizer_t@ f(configstring_id_t id)", asFUNCTION(Q2AS_tokenizer_t_factory_svcs), asCALL_GENERIC }
+            });
     }
-	EnsureRegisteredBehaviourRaw("tokenizer_t", asBEHAVE_ADDREF, "void f()", asFUNCTION((Q2AS_AddRef<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC);
-	EnsureRegisteredBehaviourRaw("tokenizer_t", asBEHAVE_RELEASE, "void f()", asFUNCTION((Q2AS_Release<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC);
-
-	// methods
-	EnsureRegisteredMethodRaw("tokenizer_t", "string get_separators() const property", asMETHOD(tokenizer_t, get_separators), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "void set_separators(const string &in) property", asMETHOD(tokenizer_t, set_separators), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool get_has_next() const property", asMETHOD(tokenizer_t, has_next), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool get_has_token() const property", asMETHOD(tokenizer_t, has_token), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool token_equals(const string &in) const", asMETHOD(tokenizer_t, token_equals), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool token_iequals(const string &in) const", asMETHOD(tokenizer_t, token_iequals), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool token_equalsn(const string &in, uint) const", asMETHOD(tokenizer_t, token_equalsn), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool token_iequalsn(const string &in, uint) const", asMETHOD(tokenizer_t, token_iequalsn), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool next()", asMETHOD(tokenizer_t, next), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "uint32 token_length() const", asMETHOD(tokenizer_t, token_length), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "uint8 token_char(uint32) const", asMETHOD(tokenizer_t, token_char), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "uint8 as_uint8() const", asMETHOD(tokenizer_t, as_primitive<uint8_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "uint16 as_uint16() const", asMETHOD(tokenizer_t, as_primitive<uint16_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "uint32 as_uint32() const", asMETHOD(tokenizer_t, as_primitive<uint32_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "uint64 as_uint64() const", asMETHOD(tokenizer_t, as_primitive<uint64_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "int8 as_int8() const", asMETHOD(tokenizer_t, as_primitive<int8_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "int16 as_int16() const", asMETHOD(tokenizer_t, as_primitive<int16_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "int32 as_int32() const", asMETHOD(tokenizer_t, as_primitive<int32_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "int64 as_int64() const", asMETHOD(tokenizer_t, as_primitive<int64_t>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "float as_float() const", asMETHOD(tokenizer_t, as_primitive<float>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "double as_double() const", asMETHOD(tokenizer_t, as_primitive<double>), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "string as_string() const", asMETHOD(tokenizer_t, as_string), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "bool skip_tokens(int)", asMETHOD(tokenizer_t, skip_tokens), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "void push_state()", asMETHOD(tokenizer_t, push_state), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "void pop_state()", asMETHOD(tokenizer_t, pop_state), asCALL_THISCALL);
-	EnsureRegisteredMethodRaw("tokenizer_t", "void reset()", asMETHOD(tokenizer_t, reset), asCALL_THISCALL);
-
-    if (engine->GetUserData(0) == &cgas)
-    {
-    	EnsureRegisteredMethodRaw("tokenizer_t", "string as_localized(int)", asMETHOD(tokenizer_t, as_localized), asCALL_THISCALL);
-    }
-
-#undef Q2AS_OBJECT
-
-    return true;
 }

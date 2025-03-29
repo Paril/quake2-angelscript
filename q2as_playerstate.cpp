@@ -1,6 +1,5 @@
 #include "q2as_local.h"
 #include "bg_local.h"
-#include "q2as_reg.h"
 #include "q2as_fixedarray.h"
 
 static std::string Q2AS_csurface_t_name(csurface_t *n)
@@ -36,257 +35,229 @@ static void q2as_stat_array_fill(uint32_t byte_offset, uint8_t value, uint32_t l
     std::fill_n((reinterpret_cast<uint8_t *>(stats.data()) + byte_offset), length, value);
 }
 
-bool Q2AS_RegisterPlayerState(asIScriptEngine *engine)
+void Q2AS_RegisterPlayerState(q2as_registry &registry)
 {
-#define Q2AS_OBJECT contents_t
-#define Q2AS_ENUM_PREFIX CONTENTS_
+	// TODO: LAST_VISIBLE_CONTENTS? might be too internal to bother with
+	registry
+		.enumeration("contents_t")
+		.values({
+			{ "NONE",           CONTENTS_NONE },
+			{ "SOLID",          CONTENTS_SOLID },
+			{ "WINDOW",         CONTENTS_WINDOW },
+			{ "AUX",            CONTENTS_AUX },
+			{ "LAVA",           CONTENTS_LAVA },
+			{ "SLIME",          CONTENTS_SLIME },
+			{ "WATER",          CONTENTS_WATER },
+			{ "MIST",           CONTENTS_MIST },
+			{ "NO_WATERJUMP",   CONTENTS_NO_WATERJUMP },
+			{ "PROJECTILECLIP", CONTENTS_PROJECTILECLIP },
+			{ "AREAPORTAL",     CONTENTS_AREAPORTAL },
+			{ "PLAYERCLIP",     CONTENTS_PLAYERCLIP },
+			{ "MONSTERCLIP",    CONTENTS_MONSTERCLIP },
+			{ "CURRENT_0",      CONTENTS_CURRENT_0 },
+			{ "CURRENT_90",     CONTENTS_CURRENT_90 },
+			{ "CURRENT_180",    CONTENTS_CURRENT_180 },
+			{ "CURRENT_270",    CONTENTS_CURRENT_270 },
+			{ "CURRENT_UP",     CONTENTS_CURRENT_UP },
+			{ "CURRENT_DOWN",   CONTENTS_CURRENT_DOWN },
+			{ "ORIGIN",         CONTENTS_ORIGIN },
+			{ "MONSTER",        CONTENTS_MONSTER },
+			{ "DEADMONSTER",    CONTENTS_DEADMONSTER },
+			{ "DETAIL",         CONTENTS_DETAIL },
+			{ "TRANSLUCENT",    CONTENTS_TRANSLUCENT },
+			{ "LADDER",         CONTENTS_LADDER },
+			{ "PLAYER",         CONTENTS_PLAYER },
+			{ "PROJECTILE",     CONTENTS_PROJECTILE }
+		})
+		.values({
+			{ "MASK_ALL",              MASK_ALL },
+			{ "MASK_SOLID",            MASK_SOLID },
+			{ "MASK_PLAYERSOLID",      MASK_PLAYERSOLID },
+			{ "MASK_DEADSOLID",        MASK_DEADSOLID },
+			{ "MASK_MONSTERSOLID",     MASK_MONSTERSOLID },
+			{ "MASK_WATER",            MASK_WATER },
+			{ "MASK_OPAQUE",           MASK_OPAQUE },
+			{ "MASK_SHOT",             MASK_SHOT },
+			{ "MASK_CURRENT",          MASK_CURRENT },
+			{ "MASK_BLOCK_SIGHT",      MASK_BLOCK_SIGHT },
+			{ "MASK_NAV_SOLID",        MASK_NAV_SOLID },
+			{ "MASK_LADDER_NAV_SOLID", MASK_LADDER_NAV_SOLID },
+			{ "MASK_WALK_NAV_SOLID",   MASK_WALK_NAV_SOLID },
+			{ "MASK_PROJECTILE",       MASK_PROJECTILE }
+		});
 
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(CONTENTS_, NONE);
-	EnsureRegisteredEnumValue(CONTENTS_, SOLID);
-	EnsureRegisteredEnumValue(CONTENTS_, WINDOW);
-	EnsureRegisteredEnumValue(CONTENTS_, AUX);
-	EnsureRegisteredEnumValue(CONTENTS_, LAVA);
-	EnsureRegisteredEnumValue(CONTENTS_, SLIME);
-	EnsureRegisteredEnumValue(CONTENTS_, WATER);
-	EnsureRegisteredEnumValue(CONTENTS_, MIST);
-	EnsureRegisteredEnumValue(CONTENTS_, NO_WATERJUMP);
-	EnsureRegisteredEnumValue(CONTENTS_, PROJECTILECLIP);
-	EnsureRegisteredEnumValue(CONTENTS_, AREAPORTAL);
-	EnsureRegisteredEnumValue(CONTENTS_, PLAYERCLIP);
-	EnsureRegisteredEnumValue(CONTENTS_, MONSTERCLIP);
-	EnsureRegisteredEnumValue(CONTENTS_, CURRENT_0);
-	EnsureRegisteredEnumValue(CONTENTS_, CURRENT_90);
-	EnsureRegisteredEnumValue(CONTENTS_, CURRENT_180);
-	EnsureRegisteredEnumValue(CONTENTS_, CURRENT_270);
-	EnsureRegisteredEnumValue(CONTENTS_, CURRENT_UP);
-	EnsureRegisteredEnumValue(CONTENTS_, CURRENT_DOWN);
-	EnsureRegisteredEnumValue(CONTENTS_, ORIGIN);
-	EnsureRegisteredEnumValue(CONTENTS_, MONSTER);
-	EnsureRegisteredEnumValue(CONTENTS_, DEADMONSTER);
-	EnsureRegisteredEnumValue(CONTENTS_, DETAIL);
-	EnsureRegisteredEnumValue(CONTENTS_, TRANSLUCENT);
-	EnsureRegisteredEnumValue(CONTENTS_, LADDER);
-	EnsureRegisteredEnumValue(CONTENTS_, PLAYER);
-	EnsureRegisteredEnumValue(CONTENTS_, PROJECTILE);
+	registry
+		.enumeration("surfflags_t")
+		.values({
+			{ "NONE",            SURF_NONE },
+			{ "LIGHT",           SURF_LIGHT },
+			{ "SLICK",           SURF_SLICK },
+			{ "SKY",             SURF_SKY },
+			{ "WARP",            SURF_WARP },
+			{ "TRANS33",         SURF_TRANS33 },
+			{ "TRANS66",         SURF_TRANS66 },
+			{ "FLOWING",         SURF_FLOWING },
+			{ "NODRAW",          SURF_NODRAW },
+			{ "ALPHATEST",       SURF_ALPHATEST },
+			{ "N64_UV",          SURF_N64_UV },
+			{ "N64_SCROLL_X",    SURF_N64_SCROLL_X },
+			{ "N64_SCROLL_Y",    SURF_N64_SCROLL_Y },
+			{ "N64_SCROLL_FLIP", SURF_N64_SCROLL_FLIP }
+		});
 
-	// TODO: LAST_VISIBLE_CONTENTS?
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT contents_t
-#define Q2AS_ENUM_PREFIX MASK_
-	
-	EnsureRegisteredEnumValueGlobal(MASK_, ALL);
-	EnsureRegisteredEnumValueGlobal(MASK_, SOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, PLAYERSOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, DEADSOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, MONSTERSOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, WATER);
-	EnsureRegisteredEnumValueGlobal(MASK_, OPAQUE);
-	EnsureRegisteredEnumValueGlobal(MASK_, SHOT);
-	EnsureRegisteredEnumValueGlobal(MASK_, CURRENT);
-	EnsureRegisteredEnumValueGlobal(MASK_, BLOCK_SIGHT);
-	EnsureRegisteredEnumValueGlobal(MASK_, NAV_SOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, LADDER_NAV_SOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, WALK_NAV_SOLID);
-	EnsureRegisteredEnumValueGlobal(MASK_, PROJECTILE);
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-	
-#define Q2AS_OBJECT surfflags_t
-#define Q2AS_ENUM_PREFIX SURF_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(SURF_, NONE);
-	EnsureRegisteredEnumValue(SURF_, LIGHT);
-	EnsureRegisteredEnumValue(SURF_, SLICK);
-	EnsureRegisteredEnumValue(SURF_, SKY);
-	EnsureRegisteredEnumValue(SURF_, WARP);
-	EnsureRegisteredEnumValue(SURF_, TRANS33);
-	EnsureRegisteredEnumValue(SURF_, TRANS66);
-	EnsureRegisteredEnumValue(SURF_, FLOWING);
-	EnsureRegisteredEnumValue(SURF_, NODRAW);
-	EnsureRegisteredEnumValue(SURF_, ALPHATEST);
-	EnsureRegisteredEnumValue(SURF_, N64_UV);
-	EnsureRegisteredEnumValue(SURF_, N64_SCROLL_X);
-	EnsureRegisteredEnumValue(SURF_, N64_SCROLL_Y);
-	EnsureRegisteredEnumValue(SURF_, N64_SCROLL_FLIP);
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT cplane_t
-
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD);
-
-	// props
-	EnsureRegisteredProperty("vec3_t", normal);
-	EnsureRegisteredProperty("float", dist);
-	EnsureRegisteredProperty("uint8", type);
-	EnsureRegisteredProperty("uint8", signbits);
-
-#undef Q2AS_OBJECT
+	registry
+		.type("cplane_t", sizeof(cplane_t), asOBJ_VALUE | asOBJ_POD)
+		.properties({
+			{ "vec3_t normal",  asOFFSET(cplane_t, normal) },
+			{ "float dist",     asOFFSET(cplane_t, dist) },
+			{ "uint8 type",     asOFFSET(cplane_t, type) },
+			{ "uint8 signbits", asOFFSET(cplane_t, signbits) }
+		});
 
 	// csurface is a bit special (handle type)
+	registry
+		.type("csurface_t", sizeof(csurface_t), asOBJ_REF | asOBJ_NOCOUNT)
+		.methods({
+			{ "string get_name() const property",     asFUNCTION(Q2AS_csurface_t_name),     asCALL_CDECL_OBJLAST },
+			{ "string get_material() const property", asFUNCTION(Q2AS_csurface_t_material), asCALL_CDECL_OBJLAST }
+		})
+		.properties({
+			{ "const surfflags_t flags", asOFFSET(csurface_t, flags) },
+			{ "const int value",         asOFFSET(csurface_t, value) },
+			{ "const uint id",           asOFFSET(csurface_t, id) }
+		});
 
-	EnsureRegisteredTypeRaw("csurface_t", sizeof(csurface_t), asOBJ_REF | asOBJ_NOCOUNT);
+	Q2AS_RegisterFixedArray<int16_t, MAX_STATS>(registry, "stat_array_t", "int16", asOBJ_APP_CLASS_ALLINTS);
 
-	Ensure(engine->RegisterObjectMethod("csurface_t", "string get_name() const property", asFUNCTION(Q2AS_csurface_t_name), asCALL_CDECL_OBJLAST));
-	EnsureRegisteredPropertyRaw("csurface_t", "const surfflags_t flags", asOFFSET(csurface_t, flags));
-	EnsureRegisteredPropertyRaw("csurface_t", "const int value", asOFFSET(csurface_t, value));
-	EnsureRegisteredPropertyRaw("csurface_t", "const uint id", asOFFSET(csurface_t, id));
-	Ensure(engine->RegisterObjectMethod("csurface_t", "string get_material() const property", asFUNCTION(Q2AS_csurface_t_material), asCALL_CDECL_OBJLAST));
+	registry
+		.for_type("stat_array_t")
+		.methods({
+			{ "uint8 get_stat_uint8(uint byte_offset) const",         asFUNCTION(q2as_stat_array_get_stat<uint8_t>),  asCALL_CDECL_OBJLAST },
+			{ "void set_stat_uint8(uint byte_offset, uint8 value)",   asFUNCTION(q2as_stat_array_set_stat<uint8_t>),  asCALL_CDECL_OBJLAST },
+			{ "uint16 get_stat_uint16(uint byte_offset) const",       asFUNCTION(q2as_stat_array_get_stat<uint16_t>), asCALL_CDECL_OBJLAST },
+			{ "void set_stat_uint16(uint byte_offset, uint16 value)", asFUNCTION(q2as_stat_array_set_stat<uint16_t>), asCALL_CDECL_OBJLAST },
+			{ "uint32 get_stat_uint32(uint byte_offset) const",       asFUNCTION(q2as_stat_array_get_stat<uint32_t>), asCALL_CDECL_OBJLAST },
+			{ "void set_stat_uint32(uint byte_offset, uint32 value)", asFUNCTION(q2as_stat_array_set_stat<uint32_t>), asCALL_CDECL_OBJLAST },
+			{ "uint64 get_stat_uint64(uint byte_offset) const",       asFUNCTION(q2as_stat_array_get_stat<uint64_t>), asCALL_CDECL_OBJLAST },
+			{ "void set_stat_uint64(uint byte_offset, uint64 value)", asFUNCTION(q2as_stat_array_set_stat<uint64_t>), asCALL_CDECL_OBJLAST },
 
-	Ensure(Q2AS_RegisterFixedArray<int16_t, MAX_STATS>(engine, "stat_array_t", "int16", asOBJ_APP_CLASS_ALLINTS));
-    
-	EnsureRegisteredMethodRaw("stat_array_t", "uint8 get_stat_uint8(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<uint8_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_uint8(uint byte_offset, uint8 value)", asFUNCTION(q2as_stat_array_set_stat<uint8_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "uint16 get_stat_uint16(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<uint16_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_uint16(uint byte_offset, uint16 value)", asFUNCTION(q2as_stat_array_set_stat<uint16_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "uint32 get_stat_uint32(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<uint32_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_uint32(uint byte_offset, uint32 value)", asFUNCTION(q2as_stat_array_set_stat<uint32_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "uint64 get_stat_uint64(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<uint64_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_uint64(uint byte_offset, uint64 value)", asFUNCTION(q2as_stat_array_set_stat<uint64_t>), asCALL_CDECL_OBJLAST);
+			{ "int8 get_stat_int8(uint byte_offset) const",         asFUNCTION(q2as_stat_array_get_stat<int8_t>),  asCALL_CDECL_OBJLAST },
+			{ "void set_stat_int8(uint byte_offset, int8 value)",   asFUNCTION(q2as_stat_array_set_stat<int8_t>),  asCALL_CDECL_OBJLAST },
+			{ "int16 get_stat_int16(uint byte_offset) const",       asFUNCTION(q2as_stat_array_get_stat<int16_t>), asCALL_CDECL_OBJLAST },
+			{ "void set_stat_int16(uint byte_offset, int16 value)", asFUNCTION(q2as_stat_array_set_stat<int16_t>), asCALL_CDECL_OBJLAST },
+			{ "int32 get_stat_int32(uint byte_offset) const",       asFUNCTION(q2as_stat_array_get_stat<int32_t>), asCALL_CDECL_OBJLAST },
+			{ "void set_stat_int32(uint byte_offset, int32 value)", asFUNCTION(q2as_stat_array_set_stat<int32_t>), asCALL_CDECL_OBJLAST },
+			{ "int64 get_stat_int64(uint byte_offset) const",       asFUNCTION(q2as_stat_array_get_stat<int64_t>), asCALL_CDECL_OBJLAST },
+			{ "void set_stat_int64(uint byte_offset, int64 value)", asFUNCTION(q2as_stat_array_set_stat<int64_t>), asCALL_CDECL_OBJLAST },
 
-	EnsureRegisteredMethodRaw("stat_array_t", "int8 get_stat_int8(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<int8_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_int8(uint byte_offset, int8 value)", asFUNCTION(q2as_stat_array_set_stat<int8_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "int16 get_stat_int16(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<int16_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_int16(uint byte_offset, int16 value)", asFUNCTION(q2as_stat_array_set_stat<int16_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "int32 get_stat_int32(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<int32_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_int32(uint byte_offset, int32 value)", asFUNCTION(q2as_stat_array_set_stat<int32_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "int64 get_stat_int64(uint byte_offset) const", asFUNCTION(q2as_stat_array_get_stat<int64_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredMethodRaw("stat_array_t", "void set_stat_int64(uint byte_offset, int64 value)", asFUNCTION(q2as_stat_array_set_stat<int64_t>), asCALL_CDECL_OBJLAST);
+			{ "void fill(uint byte_offset, uint8 value, uint count)", asFUNCTION(q2as_stat_array_fill), asCALL_CDECL_OBJLAST }
+		});
 
-	EnsureRegisteredMethodRaw("stat_array_t", "void fill(uint byte_offset, uint8 value, uint count)", asFUNCTION(q2as_stat_array_fill), asCALL_CDECL_OBJLAST);
-
-#define Q2AS_OBJECT refdef_flags_t
-#define Q2AS_ENUM_PREFIX RDF_
-
-	EnsureRegisteredTypedEnum("uint8");
-	EnsureRegisteredEnumValue(RDF_, NONE);
-	EnsureRegisteredEnumValue(RDF_, UNDERWATER);
-	EnsureRegisteredEnumValue(RDF_, NOWORLDMODEL);
-	EnsureRegisteredEnumValue(RDF_, IRGOGGLES);
-	EnsureRegisteredEnumValue(RDF_, UVGOGGLES);
-	EnsureRegisteredEnumValue(RDF_, NO_WEAPON_LERP);
-
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT pmtype_t
-#define Q2AS_ENUM_PREFIX PM_
-
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(PM_, NORMAL);
-	EnsureRegisteredEnumValue(PM_, GRAPPLE);
-	EnsureRegisteredEnumValue(PM_, NOCLIP);
-	EnsureRegisteredEnumValue(PM_, SPECTATOR);
-	EnsureRegisteredEnumValue(PM_, DEAD);
-	EnsureRegisteredEnumValue(PM_, GIB);
-	EnsureRegisteredEnumValue(PM_, FREEZE);
+	registry
+		.enumeration("refdef_flags_t", "uint8")
+		.values({
+			{ "NONE",           RDF_NONE },
+			{ "UNDERWATER",     RDF_UNDERWATER },
+			{ "NOWORLDMODEL",   RDF_NOWORLDMODEL },
+			{ "IRGOGGLES",      RDF_IRGOGGLES },
+			{ "UVGOGGLES",      RDF_UVGOGGLES },
+			{ "NO_WEAPON_LERP", RDF_NO_WEAPON_LERP }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("pmtype_t")
+		.values({
+			{ "NORMAL",    PM_NORMAL },
+			{ "GRAPPLE",   PM_GRAPPLE },
+			{ "NOCLIP",    PM_NOCLIP },
+			{ "SPECTATOR", PM_SPECTATOR },
+			{ "DEAD",      PM_DEAD },
+			{ "GIB",       PM_GIB },
+			{ "FREEZE",    PM_FREEZE }
+		});
 	
-#define Q2AS_OBJECT pmflags_t
-#define Q2AS_ENUM_PREFIX PMF_
-
-	EnsureRegisteredTypedEnum("uint16");
-	EnsureRegisteredEnumValue(PMF_, NONE);
-	EnsureRegisteredEnumValue(PMF_, DUCKED);
-	EnsureRegisteredEnumValue(PMF_, JUMP_HELD);
-	EnsureRegisteredEnumValue(PMF_, ON_GROUND);
-	EnsureRegisteredEnumValue(PMF_, TIME_WATERJUMP);
-	EnsureRegisteredEnumValue(PMF_, TIME_LAND);
-	EnsureRegisteredEnumValue(PMF_, TIME_TELEPORT);
-	EnsureRegisteredEnumValue(PMF_, NO_POSITIONAL_PREDICTION);
-	EnsureRegisteredEnumValue(PMF_, ON_LADDER);
-	EnsureRegisteredEnumValue(PMF_, NO_ANGULAR_PREDICTION);
-	EnsureRegisteredEnumValue(PMF_, IGNORE_PLAYER_COLLISION);
-	EnsureRegisteredEnumValue(PMF_, TIME_TRICK);
-	EnsureRegisteredEnumValue(PMF_, NO_GROUND_SEEK);
+	registry
+		.enumeration("pmflags_t", "uint16")
+		.values({
+			{ "NONE",                     PMF_NONE },
+			{ "DUCKED",                   PMF_DUCKED },
+			{ "JUMP_HELD",                PMF_JUMP_HELD },
+			{ "ON_GROUND",                PMF_ON_GROUND },
+			{ "TIME_WATERJUMP",           PMF_TIME_WATERJUMP },
+			{ "TIME_LAND",                PMF_TIME_LAND },
+			{ "TIME_TELEPORT",            PMF_TIME_TELEPORT },
+			{ "NO_POSITIONAL_PREDICTION", PMF_NO_POSITIONAL_PREDICTION },
+			{ "ON_LADDER",                PMF_ON_LADDER },
+			{ "NO_ANGULAR_PREDICTION",    PMF_NO_ANGULAR_PREDICTION },
+			{ "IGNORE_PLAYER_COLLISION",  PMF_IGNORE_PLAYER_COLLISION },
+			{ "TIME_TRICK",               PMF_TIME_TRICK },
+			{ "NO_GROUND_SEEK",           PMF_NO_GROUND_SEEK }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT button_t
-#define Q2AS_ENUM_PREFIX BUTTON_
-
-	EnsureRegisteredTypedEnum("uint8");
-	EnsureRegisteredEnumValue(BUTTON_, NONE);
-	EnsureRegisteredEnumValue(BUTTON_, ATTACK);
-	EnsureRegisteredEnumValue(BUTTON_, USE);
-	EnsureRegisteredEnumValue(BUTTON_, HOLSTER);
-	EnsureRegisteredEnumValue(BUTTON_, JUMP);
-	EnsureRegisteredEnumValue(BUTTON_, CROUCH);
-	EnsureRegisteredEnumValue(BUTTON_, ANY);
+	registry
+		.enumeration("button_t", "uint8")
+		.values({
+			{ "NONE",    BUTTON_NONE },
+			{ "ATTACK",  BUTTON_ATTACK },
+			{ "USE",     BUTTON_USE },
+			{ "HOLSTER", BUTTON_HOLSTER },
+			{ "JUMP",    BUTTON_JUMP },
+			{ "CROUCH",  BUTTON_CROUCH },
+			{ "ANY",     BUTTON_ANY }
+		});
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+	registry
+		.enumeration("water_level_t", "uint8")
+		.values({
+			{ "NONE", WATER_NONE },
+			{ "FEET", WATER_FEET },
+			{ "WAIST", WATER_WAIST },
+			{ "UNDER", WATER_UNDER }
+		});
 
-#define Q2AS_OBJECT water_level_t
-#define Q2AS_ENUM_PREFIX WATER_
+	registry
+		.type("pmove_state_t", sizeof(pmove_state_t), asOBJ_VALUE | asOBJ_POD)
+		.methods({
+			{ "bool opEquals(const pmove_state_t &in) const", asFUNCTION(Q2AS_type_equals<pmove_state_t>), asCALL_CDECL_OBJLAST }
+		})
+		.properties({
+			{ "pmtype_t pm_type",    asOFFSET(pmove_state_t, pm_type) },
+			{ "vec3_t origin",       asOFFSET(pmove_state_t, origin) },
+			{ "vec3_t velocity",     asOFFSET(pmove_state_t, velocity) },
+			{ "uint16 pm_time",      asOFFSET(pmove_state_t, pm_time) },
+			{ "pmflags_t pm_flags",  asOFFSET(pmove_state_t, pm_flags) },
+			{ "int16 gravity",       asOFFSET(pmove_state_t, gravity) },
+			{ "vec3_t delta_angles", asOFFSET(pmove_state_t, delta_angles) },
+			{ "int8 viewheight",     asOFFSET(pmove_state_t, viewheight) }
+		});
 
-	EnsureRegisteredTypedEnum("uint8");
-	EnsureRegisteredEnumValue(WATER_, NONE);
-	EnsureRegisteredEnumValue(WATER_, FEET);
-	EnsureRegisteredEnumValue(WATER_, WAIST);
-	EnsureRegisteredEnumValue(WATER_, UNDER);
+	registry
+		.type("player_state_t", sizeof(player_state_t), asOBJ_VALUE | asOBJ_POD)
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<player_state_t>), asCALL_CDECL_OBJLAST }
+		})
+		.properties({
+			{ "pmove_state_t pmove", asOFFSET(player_state_t, pmove) },
+
+			{ "vec3_t viewangles",  asOFFSET(player_state_t, viewangles) },
+			{ "vec3_t viewoffset",  asOFFSET(player_state_t, viewoffset) },
+			{ "vec3_t kick_angles", asOFFSET(player_state_t, kick_angles) },
 	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-#define Q2AS_OBJECT pmove_state_t
-
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD);
-
-	EnsureRegisteredMethod("bool opEquals(const pmove_state_t &in) const", asFUNCTION(Q2AS_type_equals<pmove_state_t>), asCALL_CDECL_OBJLAST);
-
-	// props
-	EnsureRegisteredProperty("pmtype_t", pm_type);
-	EnsureRegisteredProperty("vec3_t", origin);
-	EnsureRegisteredProperty("vec3_t", velocity);
-	EnsureRegisteredProperty("uint16", pm_time);
-	EnsureRegisteredProperty("pmflags_t", pm_flags);
-	EnsureRegisteredProperty("int16", gravity);
-	EnsureRegisteredProperty("vec3_t", delta_angles);
-	EnsureRegisteredProperty("int8", viewheight);
-
-#undef Q2AS_OBJECT
-    
-#define Q2AS_OBJECT player_state_t
+			{ "vec3_t gunangles", asOFFSET(player_state_t, gunangles) },
+			{ "vec3_t gunoffset", asOFFSET(player_state_t, gunoffset) },
+			{ "int gunindex",     asOFFSET(player_state_t, gunindex) },
+			{ "int gunskin",      asOFFSET(player_state_t, gunskin) },
+			{ "int gunframe",     asOFFSET(player_state_t, gunframe) },
+			{ "int gunrate",      asOFFSET(player_state_t, gunrate) },
 	
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD);
+			{ "vec4_t screen_blend", asOFFSET(player_state_t, screen_blend) },
+			{ "vec4_t damage_blend", asOFFSET(player_state_t, damage_blend) },
 	
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<player_state_t>), asCALL_CDECL_OBJLAST);
-	
-	EnsureRegisteredProperty("pmove_state_t", pmove);
+			{ "float fov",              asOFFSET(player_state_t, fov) },
+			{ "refdef_flags_t rdflags", asOFFSET(player_state_t, rdflags) },
 
-	EnsureRegisteredProperty("vec3_t", viewangles);
-	EnsureRegisteredProperty("vec3_t", viewoffset);
-	EnsureRegisteredProperty("vec3_t", kick_angles);
-	
-	EnsureRegisteredProperty("vec3_t", gunangles);
-	EnsureRegisteredProperty("vec3_t", gunoffset);
-	EnsureRegisteredProperty("int", gunindex);
-	EnsureRegisteredProperty("int", gunskin);
-	EnsureRegisteredProperty("int", gunframe);
-	EnsureRegisteredProperty("int", gunrate);
-	
-	EnsureRegisteredProperty("vec4_t", screen_blend);
-	EnsureRegisteredProperty("vec4_t", damage_blend);
-	
-	EnsureRegisteredProperty("float", fov);
-	EnsureRegisteredProperty("refdef_flags_t", rdflags);
+			{ "stat_array_t stats", asOFFSET(player_state_t, stats) },
 
-	EnsureRegisteredProperty("stat_array_t", stats);
-
-	EnsureRegisteredProperty("uint8", team_id);
-
-#undef Q2AS_OBJECT
-
-    return true;
+			{ "uint8 team_id", asOFFSET(player_state_t, team_id) }
+		});
 }

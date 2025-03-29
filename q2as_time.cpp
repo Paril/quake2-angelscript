@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "q2as_reg.h"
 #include "g_local.h"
 
 static void Q2AS_gtime_t_copy_construct(const gtime_t &t, gtime_t *o)
@@ -81,73 +80,76 @@ static gtime_t Q2AS_max_time(const gtime_t &a, const gtime_t &b)
 	return max(a, b);
 }
 
-bool Q2AS_RegisterTime(asIScriptEngine *engine)
+void Q2AS_RegisterTime(q2as_registry &registry)
 {
-#define Q2AS_OBJECT timeunit_t
-#define Q2AS_ENUM_PREFIX PRINT_
+	registry
+		.enumeration("timeunit_t")
+		.values({
+			{ "ms",  (asINT64) timeunit_t::ms },
+			{ "sec", (asINT64) timeunit_t::sec },
+			{ "min", (asINT64) timeunit_t::min },
+			{ "hz",  (asINT64) timeunit_t::hz }
+		});
 
-	EnsureRegisteredEnum();
-	engine->RegisterEnumValue("timeunit_t", "ms", (int) timeunit_t::ms);
-	engine->RegisterEnumValue("timeunit_t", "sec", (int) timeunit_t::sec);
-	engine->RegisterEnumValue("timeunit_t", "min", (int) timeunit_t::min);
-	engine->RegisterEnumValue("timeunit_t", "hz", (int) timeunit_t::hz);
+	registry
+		.type("gtime_t", sizeof(gtime_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLINTS | asOBJ_APP_CLASS_CAK)
+		.properties({
+			{ "int64 milliseconds", 0 }
+		})
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f(int64, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<int64_t>), asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(float, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<float>),   asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_copy_construct),              asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			// getters
+			{ "int64 secondsi() const", asMETHOD(gtime_t, seconds<int64_t>), asCALL_THISCALL },
+			{ "float secondsf() const", asMETHOD(gtime_t, seconds<float>),   asCALL_THISCALL },
+			{ "int64 minutesi() const", asMETHOD(gtime_t, minutes<int64_t>), asCALL_THISCALL },
+			{ "float minutesf() const", asMETHOD(gtime_t, minutes<float>),   asCALL_THISCALL },
+			{ "int64 frames() const",   asMETHOD(gtime_t, frames),           asCALL_THISCALL },
 
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
+			// equality
+			{ "bool opEquals(const gtime_t &in) const", asMETHODPR(gtime_t, operator==, (const gtime_t &) const, bool), asCALL_THISCALL },
+			{ "int opCmp(const gtime_t &in) const",     asFUNCTION(Q2AS_gtime_t_compare),                               asCALL_CDECL_OBJLAST },
 
-#define Q2AS_OBJECT gtime_t
+			// operators
+			{ "gtime_t &opAssign(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_assign), asCALL_CDECL_OBJLAST },
 
-	EnsureRegisteredType(asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLINTS | asOBJ_APP_CLASS_CAK);
+			{ "gtime_t opSub(const gtime_t &in) const", asMETHODPR(gtime_t, operator-, (const gtime_t &v) const, gtime_t), asCALL_THISCALL },
+			{ "gtime_t opAdd(const gtime_t &in) const", asMETHODPR(gtime_t, operator+, (const gtime_t &v) const, gtime_t), asCALL_THISCALL },
+			{ "gtime_t opDiv(const int &in) const",     asMETHODPR(gtime_t, operator/, (const int &v) const, gtime_t),     asCALL_THISCALL },
+			{ "gtime_t opMul(const int &in) const",     asMETHODPR(gtime_t, operator*, (const int &v) const, gtime_t),     asCALL_THISCALL },
+			{ "gtime_t opDiv(const float &in) const",   asMETHODPR(gtime_t, operator/, (const float &v) const, gtime_t),   asCALL_THISCALL },
+			{ "gtime_t opMul(const float &in) const",   asMETHODPR(gtime_t, operator*, (const float &v) const, gtime_t),   asCALL_THISCALL },
+			{ "gtime_t opNeg() const",                  asMETHODPR(gtime_t, operator-, () const, gtime_t),                 asCALL_THISCALL },
 
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(int64, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<int64_t>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(float, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<float>), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredBehaviour(asBEHAVE_CONSTRUCT, "void f(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_copy_construct), asCALL_CDECL_OBJLAST);
-	
-	Ensure(engine->RegisterObjectProperty("gtime_t", "int64 milliseconds", 0));
-	EnsureRegisteredMethod("int64 secondsi() const", asMETHOD(gtime_t, seconds<int64_t>), asCALL_THISCALL);
-	EnsureRegisteredMethod("float secondsf() const", asMETHOD(gtime_t, seconds<float>), asCALL_THISCALL);
-	EnsureRegisteredMethod("int64 minutesi() const", asMETHOD(gtime_t, minutes<int64_t>), asCALL_THISCALL);
-	EnsureRegisteredMethod("float minutesf() const", asMETHOD(gtime_t, minutes<float>), asCALL_THISCALL);
-	EnsureRegisteredMethod("int64 frames() const", asMETHOD(gtime_t, frames), asCALL_THISCALL);
+			{ "gtime_t &opSubAssign(const gtime_t &in)", asMETHODPR(gtime_t, operator-=, (const gtime_t &v), gtime_t &), asCALL_THISCALL },
+			{ "gtime_t &opAddAssign(const gtime_t &in)", asMETHODPR(gtime_t, operator+=, (const gtime_t &v), gtime_t &), asCALL_THISCALL },
+			{ "gtime_t &opDivAssign(const int &in)",     asMETHODPR(gtime_t, operator/=, (const int &v), gtime_t &),     asCALL_THISCALL },
+			{ "gtime_t &opMulAssign(const int &in)",     asMETHODPR(gtime_t, operator*=, (const int &v), gtime_t &),     asCALL_THISCALL },
+			{ "gtime_t &opDivAssign(const float &in)",   asMETHODPR(gtime_t, operator/=, (const float &v), gtime_t &),   asCALL_THISCALL },
+			{ "gtime_t &opMulAssign(const float &in)",   asMETHODPR(gtime_t, operator*=, (const float &v), gtime_t &),   asCALL_THISCALL },
 
-	// equality
-	EnsureRegisteredMethod("bool opEquals(const gtime_t &in) const", asMETHODPR(gtime_t, operator==, (const gtime_t &) const, bool), asCALL_THISCALL);
-	EnsureRegisteredMethod("int opCmp(const gtime_t &in) const", asFUNCTION(Q2AS_gtime_t_compare), asCALL_CDECL_OBJLAST);
+			// conversions
+			{ "bool opImplConv() const", asMETHODPR(gtime_t, operator bool, () const, bool), asCALL_THISCALL }
+		});
 
-	EnsureRegisteredMethod("gtime_t &opAssign(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_assign), asCALL_CDECL_OBJLAST);
+	registry
+		.for_global()
+		.functions({
+			// create times
+			{ "gtime_t time_ms(int64)",  asFUNCTION(Q2AS_gtime_t_timeunit_ms),           asCALL_CDECL },
+			{ "gtime_t time_sec(int64)", asFUNCTION(Q2AS_gtime_t_timeunit_sec<int64_t>), asCALL_CDECL },
+			{ "gtime_t time_sec(float)", asFUNCTION(Q2AS_gtime_t_timeunit_sec<float>),   asCALL_CDECL },
+			{ "gtime_t time_min(int64)", asFUNCTION(Q2AS_gtime_t_timeunit_min<int64_t>), asCALL_CDECL },
+			{ "gtime_t time_min(float)", asFUNCTION(Q2AS_gtime_t_timeunit_min<float>),   asCALL_CDECL },
+			{ "gtime_t time_hz(uint64)", asFUNCTION(Q2AS_gtime_t_timeunit_hz),           asCALL_CDECL },
 
-	EnsureRegisteredMethod("gtime_t opSub(const gtime_t &in) const", asMETHODPR(gtime_t, operator-, (const gtime_t &v) const, gtime_t), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t opAdd(const gtime_t &in) const", asMETHODPR(gtime_t, operator+, (const gtime_t &v) const, gtime_t), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t opDiv(const int &in) const", asMETHODPR(gtime_t, operator/, (const int &v) const, gtime_t), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t opMul(const int &in) const", asMETHODPR(gtime_t, operator*, (const int &v) const, gtime_t), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t opDiv(const float &in) const", asMETHODPR(gtime_t, operator/, (const float &v) const, gtime_t), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t opMul(const float &in) const", asMETHODPR(gtime_t, operator*, (const float &v) const, gtime_t), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t opNeg() const", asMETHODPR(gtime_t, operator-, () const, gtime_t), asCALL_THISCALL);
-
-	EnsureRegisteredMethod("gtime_t &opSubAssign(const gtime_t &in)", asMETHODPR(gtime_t, operator-=, (const gtime_t &v), gtime_t &), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t &opAddAssign(const gtime_t &in)", asMETHODPR(gtime_t, operator+=, (const gtime_t &v), gtime_t &), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t &opDivAssign(const int &in)", asMETHODPR(gtime_t, operator/=, (const int &v), gtime_t &), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t &opMulAssign(const int &in)", asMETHODPR(gtime_t, operator*=, (const int &v), gtime_t &), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t &opDivAssign(const float &in)", asMETHODPR(gtime_t, operator/=, (const float &v), gtime_t &), asCALL_THISCALL);
-	EnsureRegisteredMethod("gtime_t &opMulAssign(const float &in)", asMETHODPR(gtime_t, operator*=, (const float &v), gtime_t &), asCALL_THISCALL);
-
-	// conversion
-	EnsureRegisteredMethod("bool opImplConv() const", asMETHODPR(gtime_t, operator bool, () const, bool), asCALL_THISCALL);
-	
-	EnsureRegisteredGlobalFunction("gtime_t time_ms(int64)", asFUNCTION(Q2AS_gtime_t_timeunit_ms), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t time_sec(int64)", asFUNCTION(Q2AS_gtime_t_timeunit_sec<int64_t>), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t time_sec(float)", asFUNCTION(Q2AS_gtime_t_timeunit_sec<float>), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t time_min(int64)", asFUNCTION(Q2AS_gtime_t_timeunit_min<int64_t>), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t time_min(float)", asFUNCTION(Q2AS_gtime_t_timeunit_min<float>), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t time_hz(uint64)", asFUNCTION(Q2AS_gtime_t_timeunit_hz), asCALL_CDECL);
-
-    // math specializations
-    // FIXME: why do these only work by ref? does it matter?
-	EnsureRegisteredGlobalFunction("gtime_t clamp(const gtime_t &in, const gtime_t &in, const gtime_t &in)", asFUNCTION(Q2AS_clamp_time), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t min(const gtime_t &in, const gtime_t &in)", asFUNCTION(Q2AS_min_time), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("gtime_t max(const gtime_t &in, const gtime_t &in)", asFUNCTION(Q2AS_max_time), asCALL_CDECL);
-
-#undef Q2AS_OBJECT
-	
-	return true;
+			// math specializations
+			// FIXME: why do these only work by ref? does it matter?
+			{ "gtime_t clamp(const gtime_t &in, const gtime_t &in, const gtime_t &in)", asFUNCTION(Q2AS_clamp_time), asCALL_CDECL },
+			{ "gtime_t min(const gtime_t &in, const gtime_t &in)",                      asFUNCTION(Q2AS_min_time),   asCALL_CDECL },
+			{ "gtime_t max(const gtime_t &in, const gtime_t &in)",                      asFUNCTION(Q2AS_max_time),   asCALL_CDECL }
+		});
 }

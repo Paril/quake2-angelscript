@@ -1,6 +1,5 @@
 #include "q2as_cgame.h"
 #include "cg_local.h"
-#include "q2as_reg.h"
 #include "q2as_fixedarray.h"
 #include "q2as_stringex.h"
 
@@ -20,6 +19,11 @@
 /*virtual*/ bool q2as_cg_state_t::InstrumentationEnabled() /*override*/
 {
     return instrumenting;
+}
+
+/*virtual*/ cvar_t *q2as_cg_state_t::Cvar(const char *name, const char *value, cvar_flags_t flags) /*override*/
+{
+    return cgi.cvar(name, value, flags);
 }
 
 enum
@@ -214,63 +218,66 @@ static contents_t Q2AS_CG_Pointcontents(const vec3_t &p)
     return cgas.pmove_inst->pm.pointcontents(p);
 }
 
-static bool Q2AS_RegisterCGamePmove(asIScriptEngine *engine)
+static void Q2AS_RegisterCGamePmove(q2as_registry &registry)
 {
-    EnsureRegisteredGlobalFunction("trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)", asFUNCTION(Q2AS_CG_Trace), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)", asFUNCTION(Q2AS_CG_Clip), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("contents_t _cg_pointcontents(const vec3_t &in)", asFUNCTION(Q2AS_CG_Pointcontents), asCALL_CDECL);
-
-    return true;
+    // TODO these names suck
+    registry
+        .for_global()
+        .functions({
+            { "trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)", asFUNCTION(Q2AS_CG_Trace),         asCALL_CDECL },
+            { "trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)",            asFUNCTION(Q2AS_CG_Clip),          asCALL_CDECL },
+            { "contents_t _cg_pointcontents(const vec3_t &in)",                                                                  asFUNCTION(Q2AS_CG_Pointcontents), asCALL_CDECL }
+        });
 }
 
-static bool Q2AS_RegisterCGame(asIScriptEngine *engine)
+static void Q2AS_RegisterCGame(q2as_registry &registry)
 {
-#define Q2AS_OBJECT text_align_t
-#define Q2AS_ENUM_PREFIX
+    registry
+        .enumeration("text_align_t")
+        .values({
+	        { "LEFT",   (asINT64) text_align_t::LEFT },
+	        { "CENTER", (asINT64) text_align_t::CENTER },
+	        { "RIGHT",  (asINT64) text_align_t::RIGHT }
+        });
 
-	EnsureRegisteredEnum();
-	EnsureRegisteredEnumValue(, LEFT);
-	EnsureRegisteredEnumValue(, CENTER);
-	EnsureRegisteredEnumValue(, RIGHT);
-	
-#undef Q2AS_OBJECT
-#undef Q2AS_ENUM_PREFIX
-
-    EnsureRegisteredGlobalFunction("cvar_t @cgi_cvar(const string &in, const string &in, cvar_flags_t)", asFUNCTION(Q2AS_CG_cvar), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("uint64 cgi_CL_ClientRealTime()", asFUNCTION(cgi.CL_ClientRealTime), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("uint64 cgi_CL_ClientTime()", asFUNCTION(cgi.CL_ClientTime), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("bool cgi_CL_FrameValid()", asFUNCTION(cgi.CL_FrameValid), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("float cgi_CL_FrameTime()", asFUNCTION(cgi.CL_FrameTime), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("int32 cgi_CL_ServerFrame()", asFUNCTION(cgi.CL_ServerFrame), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("int32 cgi_CL_ServerProtocol()", asFUNCTION(cgi.CL_ServerProtocol), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void cgi_SCR_DrawChar(int32, int32, int32, int32, bool)", asFUNCTION(cgi.SCR_DrawChar), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("void cgi_SCR_SetAltTypeface(bool)", asFUNCTION(cgi.SCR_SetAltTypeface), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("float cgi_SCR_FontLineHeight(int)", asFUNCTION(cgi.SCR_FontLineHeight), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("int cgi_CL_GetWarnAmmoCount(int)", asFUNCTION(cgi.CL_GetWarnAmmoCount), asCALL_CDECL);
-    EnsureRegisteredGlobalFunction("bool cgi_CL_InAutoDemoLoop()", asFUNCTION(cgi.CL_InAutoDemoLoop), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("string cgi_get_configstring(uint16)", asFUNCTION(q2as_CG_get_configstring), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("bool cgi_Draw_RegisterPic(const string &in)", asFUNCTION(q2as_CG_Draw_RegisterPic), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void cgi_Draw_GetPicSize(int &out, int &out, const string &in)", asFUNCTION(q2as_CG_Draw_GetPicSize), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void cgi_SCR_DrawPic(int, int, int, int, const string &in)", asFUNCTION(q2as_CG_SCR_DrawPic), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void cgi_SCR_DrawColorPic(int, int, int, int, const string &in, rgba_t)", asFUNCTION(q2as_CG_SCR_DrawColorPic), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void cgi_SCR_DrawFontString(const string &in, int, int, int, rgba_t, bool, text_align_t)", asFUNCTION(q2as_CG_SCR_DrawFontString), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("vec2_t cgi_SCR_MeasureFontString(const string &in, int)", asFUNCTION(q2as_CG_SCR_MeasureFontString), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void cgi_Com_Error(const string &in)", asFUNCTION(q2as_CG_Com_Error), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void cgi_Com_Print(const string &in)", asFUNCTION(q2as_CG_Com_Print), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("void cgi_Com_Error(const string &in, const ? &in ...)", asFUNCTION(q2as_CG_Com_ErrorFmt), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("void cgi_Com_Print(const string &in, const ? &in ...)", asFUNCTION(q2as_CG_Com_PrintFmt), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("string cgi_Localize(const string &in)", asFUNCTION(q2as_CG_Localize_zero), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("string cgi_Localize(const string &in, const string &in ...)", asFUNCTION(q2as_CG_Localize), asCALL_GENERIC);
-	EnsureRegisteredGlobalFunction("int cgi_SCR_DrawBind(int, const string &in, const string &in, int, int, int)", asFUNCTION(q2as_CG_SCR_DrawBind), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("bool cgi_CL_GetTextInput(string &out, bool &out)", asFUNCTION(q2as_CG_CL_GetTextInput), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("string cgi_CL_GetClientName(int)", asFUNCTION(q2as_CG_CL_GetClientName), asCALL_CDECL);
-	EnsureRegisteredGlobalFunction("string cgi_CL_GetClientDogtag(int)", asFUNCTION(q2as_CG_CL_GetClientDogtag), asCALL_CDECL);
-
-	EnsureRegisteredGlobalProperty("float cgi_frame_time_s", (void *) &cgi.frame_time_s);
-	EnsureRegisteredGlobalProperty("uint cgi_frame_time_ms", (void *) &cgi.frame_time_ms);
-	EnsureRegisteredGlobalProperty("uint cgi_tick_rate", (void *) &cgi.tick_rate);
-
-    return true;
+    registry
+        .for_global()
+        .functions({
+            { "cvar_t @cgi_cvar(const string &in, const string &in, cvar_flags_t)",                       asFUNCTION(Q2AS_CG_cvar),                  asCALL_CDECL },
+            { "uint64 cgi_CL_ClientRealTime()",                                                           asFUNCTION(cgi.CL_ClientRealTime),         asCALL_CDECL },
+            { "uint64 cgi_CL_ClientTime()",                                                               asFUNCTION(cgi.CL_ClientTime),             asCALL_CDECL },
+            { "bool cgi_CL_FrameValid()",                                                                 asFUNCTION(cgi.CL_FrameValid),             asCALL_CDECL },
+            { "float cgi_CL_FrameTime()",                                                                 asFUNCTION(cgi.CL_FrameTime),              asCALL_CDECL },
+            { "int32 cgi_CL_ServerFrame()",                                                               asFUNCTION(cgi.CL_ServerFrame),            asCALL_CDECL },
+            { "int32 cgi_CL_ServerProtocol()",                                                            asFUNCTION(cgi.CL_ServerProtocol),         asCALL_CDECL },
+            { "void cgi_SCR_DrawChar(int32, int32, int32, int32, bool)",                                  asFUNCTION(cgi.SCR_DrawChar),              asCALL_CDECL },
+            { "void cgi_SCR_SetAltTypeface(bool)",                                                        asFUNCTION(cgi.SCR_SetAltTypeface),        asCALL_CDECL },
+            { "float cgi_SCR_FontLineHeight(int)",                                                        asFUNCTION(cgi.SCR_FontLineHeight),        asCALL_CDECL },
+            { "int cgi_CL_GetWarnAmmoCount(int)",                                                         asFUNCTION(cgi.CL_GetWarnAmmoCount),       asCALL_CDECL },
+            { "bool cgi_CL_InAutoDemoLoop()",                                                             asFUNCTION(cgi.CL_InAutoDemoLoop),         asCALL_CDECL },
+	        { "string cgi_get_configstring(uint16)",                                                      asFUNCTION(q2as_CG_get_configstring),      asCALL_CDECL },
+	        { "bool cgi_Draw_RegisterPic(const string &in)",                                              asFUNCTION(q2as_CG_Draw_RegisterPic),      asCALL_CDECL },
+	        { "void cgi_Draw_GetPicSize(int &out, int &out, const string &in)",                           asFUNCTION(q2as_CG_Draw_GetPicSize),       asCALL_CDECL },
+	        { "void cgi_SCR_DrawPic(int, int, int, int, const string &in)",                               asFUNCTION(q2as_CG_SCR_DrawPic),           asCALL_CDECL },
+	        { "void cgi_SCR_DrawColorPic(int, int, int, int, const string &in, rgba_t)",                  asFUNCTION(q2as_CG_SCR_DrawColorPic),      asCALL_CDECL },
+	        { "void cgi_SCR_DrawFontString(const string &in, int, int, int, rgba_t, bool, text_align_t)", asFUNCTION(q2as_CG_SCR_DrawFontString),    asCALL_CDECL },
+	        { "vec2_t cgi_SCR_MeasureFontString(const string &in, int)",                                  asFUNCTION(q2as_CG_SCR_MeasureFontString), asCALL_GENERIC },
+	        { "void cgi_Com_Error(const string &in)",                                                     asFUNCTION(q2as_CG_Com_Error),             asCALL_CDECL },
+	        { "void cgi_Com_Print(const string &in)",                                                     asFUNCTION(q2as_CG_Com_Print),             asCALL_CDECL },
+	        { "void cgi_Com_Error(const string &in, const ? &in ...)",                                    asFUNCTION(q2as_CG_Com_ErrorFmt),          asCALL_GENERIC },
+	        { "void cgi_Com_Print(const string &in, const ? &in ...)",                                    asFUNCTION(q2as_CG_Com_PrintFmt),          asCALL_GENERIC },
+	        { "string cgi_Localize(const string &in)",                                                    asFUNCTION(q2as_CG_Localize_zero),         asCALL_CDECL },
+	        { "string cgi_Localize(const string &in, const string &in ...)",                              asFUNCTION(q2as_CG_Localize),              asCALL_GENERIC },
+	        { "int cgi_SCR_DrawBind(int, const string &in, const string &in, int, int, int)",             asFUNCTION(q2as_CG_SCR_DrawBind),          asCALL_CDECL },
+	        { "bool cgi_CL_GetTextInput(string &out, bool &out)",                                         asFUNCTION(q2as_CG_CL_GetTextInput),       asCALL_CDECL },
+	        { "string cgi_CL_GetClientName(int)",                                                         asFUNCTION(q2as_CG_CL_GetClientName),      asCALL_CDECL },
+	        { "string cgi_CL_GetClientDogtag(int)",                                                       asFUNCTION(q2as_CG_CL_GetClientDogtag),    asCALL_CDECL }
+        })
+        .properties({
+            { "const float cgi_frame_time_s", (const void *) &cgi.frame_time_s },
+	        { "const uint cgi_frame_time_ms", (const void *) &cgi.frame_time_ms },
+	        { "const uint cgi_tick_rate",     (const void *) &cgi.tick_rate }
+        });
 }
 
 std::string q2as_cg_server_data_t_get_layout(const cg_server_data_t *data)
@@ -278,47 +285,37 @@ std::string q2as_cg_server_data_t_get_layout(const cg_server_data_t *data)
     return data->layout;
 }
 
-static bool Q2AS_RegisterCGameUtil(asIScriptEngine *engine)
+static void Q2AS_RegisterCGameUtil(q2as_registry &registry)
 {
-#define Q2AS_OBJECT vrect_t
+	Q2AS_RegisterFixedArray<int32_t, 4>(registry, "vrect_t", "int32", asOBJ_APP_CLASS_ALLINTS);
 
-	Ensure(Q2AS_RegisterFixedArray<int32_t, 4>(engine, "vrect_t", "int32", asOBJ_APP_CLASS_ALLINTS));
-
-	// props
-	EnsureRegisteredProperty("int32", x);
-	EnsureRegisteredProperty("int32", y);
-	EnsureRegisteredProperty("int32", width);
-	EnsureRegisteredProperty("int32", height);
-
-#undef Q2AS_OBJECT
+    registry
+        .for_type("vrect_t")
+        .properties({
+            { "int32 x",      asOFFSET(vrect_t, x) },
+	        { "int32 y",      asOFFSET(vrect_t, y) },
+	        { "int32 width",  asOFFSET(vrect_t, width) },
+	        { "int32 height", asOFFSET(vrect_t, height) },
+        });
 	
-	Ensure(Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(engine, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS));
+	Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(registry, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS);
     
-#define Q2AS_OBJECT cg_server_data_t
-
 	// special handle, always active and allocated
 	// by the host, wrapped by AngelScript.
-
-	EnsureRegisteredTypeRaw("cg_server_data_t", sizeof(cg_server_data_t), asOBJ_REF | asOBJ_NOCOUNT);
-
-    // string layout
-	EnsureRegisteredMethod("string get_layout() const property", asFUNCTION(q2as_cg_server_data_t_get_layout), asCALL_CDECL_OBJLAST);
-	EnsureRegisteredProperty("item_array_t", inventory);
-
-#undef Q2AS_OBJECT
-	
-	
-#define Q2AS_OBJECT edict_t
+    registry
+        .type("cg_server_data_t", sizeof(cg_server_data_t), asOBJ_REF | asOBJ_NOCOUNT)
+        .properties({
+            { "item_array_t inventory", asOFFSET(cg_server_data_t, inventory) }
+        })
+        .methods({
+            { "string get_layout() const property", asFUNCTION(q2as_cg_server_data_t_get_layout), asCALL_CDECL_OBJLAST }
+        });
 	
 	// entity handle; special handle, always active and allocated
 	// by the host, wrapped by AngelScript.
     // the cgame just has a blank version.
-
-	EnsureRegisteredTypeRaw("edict_t", 0, asOBJ_REF | asOBJ_NOCOUNT);
-
-#undef Q2AS_OBJECT
-
-    return true;
+    registry
+        .type("edict_t", 0, asOBJ_REF | asOBJ_NOCOUNT);
 }
 
 static void Q2AS_CG_ClearCenterprint(int32_t isplit)

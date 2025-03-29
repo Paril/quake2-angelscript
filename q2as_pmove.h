@@ -42,15 +42,14 @@ public:
     void touch_clear() { pm.touch.num = 0; }
 };
 
-#include "q2as_reg.h"
-
 // register the factory for pmove itself.
 template<typename T>
-bool Q2AS_RegisterPmoveFactory(asIScriptEngine *engine)
+void Q2AS_RegisterPmoveFactory(q2as_registry &registry)
 {
-	EnsureRegisteredBehaviourRaw("pmove_t", asBEHAVE_FACTORY, "pmove_t@ f()", asFUNCTION((Q2AS_Factory<as_pmove_t, T>)), asCALL_GENERIC);
-	EnsureRegisteredBehaviourRaw("pmove_t", asBEHAVE_ADDREF, "void f()", asFUNCTION((Q2AS_AddRef<as_pmove_t, T>)), asCALL_GENERIC);
-	EnsureRegisteredBehaviourRaw("pmove_t", asBEHAVE_RELEASE, "void f()", asFUNCTION((Q2AS_Release<as_pmove_t, T>)), asCALL_GENERIC);
-
-    return true;
+    registry
+        .for_type("pmove_t")
+        .behaviors({
+            { asBEHAVE_FACTORY, "pmove_t@ f()", asFUNCTION((Q2AS_Factory<as_pmove_t, T>)), asCALL_GENERIC },
+            { asBEHAVE_RELEASE, "void f()", asFUNCTION((Q2AS_Release<as_pmove_t, T>)), asCALL_GENERIC }
+        });
 }

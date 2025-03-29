@@ -2052,10 +2052,10 @@ struct shadow_light_data_t
 
 enum server_flags_t
 {
-    SERVER_FLAGS_NONE           = 0,
-    SERVER_FLAG_SLOW_TIME       = bit_v<0>,
-    SERVER_FLAG_INTERMISSION    = bit_v<1>,
-    SERVER_FLAG_LOADING         = bit_v<2>
+    SERVER_FLAG_NONE           = 0,
+    SERVER_FLAG_SLOW_TIME      = bit_v<0>,
+    SERVER_FLAG_INTERMISSION   = bit_v<1>,
+    SERVER_FLAG_LOADING        = bit_v<2>
 };
 
 MAKE_ENUM_BITFLAGS(server_flags_t);

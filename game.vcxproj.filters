@@ -191,7 +191,6 @@
     <ClCompile Include="q2as_trace.cpp" />
     <ClCompile Include="q2as_util.cpp" />
     <ClCompile Include="q2as_vec3.cpp" />
-    <ClCompile Include="yyjson.c" />
     <ClCompile Include="q2as_cgame.cpp" />
     <ClCompile Include="q2as_cvar.cpp" />
     <ClCompile Include="q2as_debugging.cpp" />
@@ -206,6 +205,51 @@
     <ClCompile Include="q2as_predefined.cpp" />
     <ClCompile Include="q2as_random.cpp" />
     <ClCompile Include="q2as_platform_win32.cpp" />
+    <ClCompile Include="thirdparty\cppdap\src\content_stream.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\io.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\network.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\null_json_serializer.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\protocol_events.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\protocol_requests.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\protocol_response.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\protocol_types.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\typeof.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\typeinfo.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\socket.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\session.cpp">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\yyjson\yyjson.c">
+      <Filter>thirdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cppdap\src\yyjson_json_serializer.cpp">
+      <Filter>thirdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\as_debugger_dap.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
@@ -429,10 +473,7 @@
     </ClInclude>
     <ClInclude Include="q2as_reg.h" />
     <ClInclude Include="q2as_stringex.h" />
-    <ClInclude Include="spall.h" />
-    <ClInclude Include="yyjson.h" />
     <ClInclude Include="ctrack.hpp" />
-    <ClInclude Include="palinteer.h" />
     <ClInclude Include="q2as_cgame.h" />
     <ClInclude Include="q2as_fixedarray.h" />
     <ClInclude Include="q2as_game.h" />
@@ -443,6 +484,84 @@
     <ClInclude Include="q2as_pmove.h" />
     <ClInclude Include="q2as_predefined.h" />
     <ClInclude Include="q2as_platform.h" />
+    <ClInclude Include="thirdparty\cppdap\include\dap\any.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\chan.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\content_stream.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\dap.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\future.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\io.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\json_serializer.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\network.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\null_json_serializer.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\optional.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\protocol.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\variant.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\types.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\typeof.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\typeinfo.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\traits.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\string_buffer.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\socket.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\session.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\include\dap\serialization.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\rwmutex.h">
+      <Filter>thirdparty\cppdap</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\palanteer\palinteer.h">
+      <Filter>thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\spall\spall.h">
+      <Filter>thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\yyjson\yyjson.h">
+      <Filter>thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\cppdap\src\yyjson_json_serializer.h">
+      <Filter>thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\as_debugger_dap.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
@@ -507,6 +626,9 @@
     </Filter>
     <Filter Include="thirdparty\fmt\include\fmt">
       <UniqueIdentifier>{4f21767d-5a1d-47be-96d8-aabc9ef44b46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\cppdap">
+      <UniqueIdentifier>{1fb43641-083f-436a-867a-9c63c356cf4c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

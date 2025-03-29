@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "q2as_reg.h"
 #include <unordered_set>
 
 using StringHashSet = std::unordered_set<std::string>;
@@ -39,21 +38,20 @@ static void RemoveStringHashSet(const std::string &str, StringHashSet *s)
 	s->erase(str);
 }
 
-bool Q2AS_RegisterStringHashSet(asIScriptEngine *engine)
+void Q2AS_RegisterStringHashSet(q2as_registry &registry)
 {
-	const char *name = "string_hashset";
+	registry
+		.type("string_hashset", sizeof(StringHashSet), asOBJ_VALUE | asGetTypeTraits<StringHashSet>())
+		.behaviors({
+			{ asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(ConstructStringHashSet), asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_DESTRUCT,  "void f()", asFUNCTION(DestructStringHashSet),  asCALL_CDECL_OBJLAST }
+		})
+		.methods({
+			{ "bool empty() const", asFUNCTION(EmptyStringHashSet), asCALL_CDECL_OBJLAST },
+			{ "void clear()",       asFUNCTION(ClearStringHashSet), asCALL_CDECL_OBJLAST },
 
-	Ensure(engine->RegisterObjectType(name, sizeof(StringHashSet), asOBJ_VALUE | asGetTypeTraits<StringHashSet>()));
-
-	Ensure(engine->RegisterObjectBehaviour(name, asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(ConstructStringHashSet), asCALL_CDECL_OBJLAST));
-	Ensure(engine->RegisterObjectBehaviour(name, asBEHAVE_DESTRUCT,  "void f()", asFUNCTION(DestructStringHashSet),  asCALL_CDECL_OBJLAST));
-	
-	Ensure(engine->RegisterObjectMethod(name,  "bool empty() const", asFUNCTION(EmptyStringHashSet),  asCALL_CDECL_OBJLAST));
-	Ensure(engine->RegisterObjectMethod(name,  "void clear()",       asFUNCTION(ClearStringHashSet),  asCALL_CDECL_OBJLAST));
-	
-	Ensure(engine->RegisterObjectMethod(name,  "bool contains(const string &in) const", asFUNCTION(ContainsStringHashSet),  asCALL_CDECL_OBJLAST));
-	Ensure(engine->RegisterObjectMethod(name,  "void add(const string &in)",            asFUNCTION(AddStringHashSet),  asCALL_CDECL_OBJLAST));
-	Ensure(engine->RegisterObjectMethod(name,  "void remove(const string &in)",         asFUNCTION(AddStringHashSet),  asCALL_CDECL_OBJLAST));
-
-	return true;
+			{ "bool contains(const string &in) const", asFUNCTION(ContainsStringHashSet), asCALL_CDECL_OBJLAST },
+			{ "void add(const string &in)",            asFUNCTION(AddStringHashSet),	  asCALL_CDECL_OBJLAST },
+			{ "void remove(const string &in)",         asFUNCTION(AddStringHashSet),	  asCALL_CDECL_OBJLAST }
+		});
 }

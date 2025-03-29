@@ -56,6 +56,7 @@ struct q2as_sv_state_t : q2as_state_t
     virtual bool InstrumentationEnabled() override;
     virtual void *Alloc(size_t size) override;
     virtual void Free(void *ptr) override;
+    virtual cvar_t *Cvar(const char *name, const char *value, cvar_flags_t flags) override;
 
     static void *AllocStatic(size_t size);
     static void FreeStatic(void *ptr);
