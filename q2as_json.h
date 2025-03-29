@@ -102,6 +102,11 @@ bool q2as_type_in_range(SourceType value)
     // Floating point to integer
     if constexpr (is_target_integer && !is_source_integer)
     {
+        if (std::isinf(value) || std::isnan(value))
+        {
+            return false;
+        }
+
         // Don't allow decimals
         if (std::trunc(value) != value) 
         {
