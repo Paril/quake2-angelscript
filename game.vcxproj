@@ -115,6 +115,7 @@
     <ClCompile Include="q2as_cgame.cpp" />
     <ClCompile Include="q2as_cvar.cpp" />
     <ClCompile Include="q2as_debugging.cpp" />
+    <ClCompile Include="q2as_dynamic_bitset.cpp" />
     <ClCompile Include="q2as_game.cpp" />
     <ClCompile Include="q2as_imports.cpp" />
     <ClCompile Include="q2as_json.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="q2as_cgame.h" />
+    <ClInclude Include="q2as_dynamic_bitset.h" />
     <ClInclude Include="q2as_fixedarray.h" />
     <ClInclude Include="q2as_game.h" />
     <ClInclude Include="q2as_json.h" />
