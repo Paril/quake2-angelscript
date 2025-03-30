@@ -345,15 +345,16 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "void get(float &out) const",  asMETHODPR(q2as_yyjson_val, get, (float&) const, void),      asCALL_THISCALL },
             { "void get(double &out) const", asMETHODPR(q2as_yyjson_val, get, (double&) const, void),     asCALL_THISCALL },
             { "void get(string &out) const", asMETHOD(q2as_yyjson_val, as_string),                        asCALL_THISCALL },
+            // TODO: this should be `get` but implicit conversion rules make that not work
             { "void get_enum(? &out) const", asMETHODPR(q2as_yyjson_val, get, (void *, int) const, void), asCALL_THISCALL },
 
-            { "uint64 get_uint_() const property",  asMETHOD(q2as_yyjson_val,  get_uint),   asCALL_THISCALL },
-            { "int64 get_sint() const property",    asMETHOD(q2as_yyjson_val,    get_sint), asCALL_THISCALL },
-            { "int32 get_int_() const property",    asMETHOD(q2as_yyjson_val,    get_int),  asCALL_THISCALL },
-            { "double get_real() const property",   asMETHOD(q2as_yyjson_val,   get_real),  asCALL_THISCALL },
-            { "double get_num() const property",    asMETHOD(q2as_yyjson_val,    get_num),  asCALL_THISCALL },
-            { "string get_str() const property",    asMETHOD(q2as_yyjson_val,    get_str),  asCALL_THISCALL },
-            { "uint64 get_length() const property", asMETHOD(q2as_yyjson_val, get_length),  asCALL_THISCALL },
+            { "uint64 get_uint_() const property",  asMETHOD(q2as_yyjson_val, get_uint),   asCALL_THISCALL },
+            { "int64 get_sint() const property",    asMETHOD(q2as_yyjson_val, get_sint),   asCALL_THISCALL },
+            { "int32 get_int_() const property",    asMETHOD(q2as_yyjson_val, get_int),    asCALL_THISCALL },
+            { "double get_real() const property",   asMETHOD(q2as_yyjson_val, get_real),   asCALL_THISCALL },
+            { "double get_num() const property",    asMETHOD(q2as_yyjson_val, get_num),    asCALL_THISCALL },
+            { "string get_str() const property",    asMETHOD(q2as_yyjson_val, get_str),    asCALL_THISCALL },
+            { "uint64 get_length() const property", asMETHOD(q2as_yyjson_val, get_length), asCALL_THISCALL },
     
             { "json_val arr_get(uint64) const", asMETHOD(q2as_yyjson_val, arr_get),       asCALL_THISCALL },
             { "json_val arr_get_first() const", asMETHOD(q2as_yyjson_val, arr_get_first), asCALL_THISCALL },

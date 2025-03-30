@@ -1820,6 +1820,7 @@ class json_val
 	void get(int64 &out) const;
 	void get(float &out) const;
 	void get(double &out) const;
+	void get(string &out) const;
 	void get_enum(? &out) const;
 	uint64 get_uint_() const property;
 	int64 get_sint() const property;
