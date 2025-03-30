@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <vector>
 
-class dynamic_bitset
+struct dynamic_bitset
 {
     std::vector<bool> _bitset;
 

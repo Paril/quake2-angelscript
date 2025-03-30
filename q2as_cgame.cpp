@@ -581,6 +581,7 @@ cgame_export_t *Q2AS_GetCGameAPI()
         Q2AS_RegisterLimits,
 		Q2AS_RegisterMath,
 		Q2AS_RegisterVec3,
+        Q2AS_RegisterDynamicBitset,
         Q2AS_RegisterUtil,
 		Q2AS_RegisterTime,
 		Q2AS_RegisterRandom,
