@@ -4,191 +4,191 @@ const uint SAVE_FORMAT_VERSION = 2;
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const string &in value)
 {
     if (!value.empty())
-        obj.obj_add(key, doc.str(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const uint64 &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const int64 &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.int_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const effects_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const solid_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const ai_flags_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const renderfx_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const handedness_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const item_id_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const pmtype_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const weaponstate_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const water_level_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const anim_priority_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const move_state_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const ai_attack_state_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const combat_style_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const svflags_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const contents_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const movetype_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const plat2flags_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const bmodel_animstyle_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const mod_id_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const pmflags_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const ent_flags_t &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.uint_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const double &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.real(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const float &in value)
 {
     if (value != 0)
-        obj.obj_add(key, doc.real(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const float &in value, const float &in defaultValue)
 {
     if (value != defaultValue)
-        obj.obj_add(key, doc.real(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const bool &in value)
 {
     if (value)
-        obj.obj_add(key, doc.bool_(value));
+        obj.obj_add(key, doc.val(value));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const gtime_t &in value)
 {
     if (value)
-        obj.obj_add(key, doc.int_(value.milliseconds));
+        obj.obj_add(key, doc.val(value.milliseconds));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const spawnflags_t &in value)
 {
     if (uint(value) != 0)
-        obj.obj_add(key, doc.int_(uint(value)));
+        obj.obj_add(key, doc.val(uint(value)));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const vec3_t &in v)
 {
     if (v)
     {
-        json_mutval vector = doc.arr();
-        vector.arr_append(doc.real(v[0]));
-        vector.arr_append(doc.real(v[1]));
-        vector.arr_append(doc.real(v[2]));
+        json_mutval vector = doc.val_arr();
+        vector.arr_append(doc.val(v[0]));
+        vector.arr_append(doc.val(v[1]));
+        vector.arr_append(doc.val(v[2]));
         obj.obj_add(key, vector);
     }
 }
@@ -197,10 +197,10 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
 {
     if (v != defaultValue)
     {
-        json_mutval vector = doc.arr();
-        vector.arr_append(doc.real(v[0]));
-        vector.arr_append(doc.real(v[1]));
-        vector.arr_append(doc.real(v[2]));
+        json_mutval vector = doc.val_arr();
+        vector.arr_append(doc.val(v[0]));
+        vector.arr_append(doc.val(v[1]));
+        vector.arr_append(doc.val(v[2]));
         obj.obj_add(key, vector);
     }
 }
@@ -208,19 +208,19 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const gitem_t @value)
 {
     if (value !is null)
-        obj.obj_add(key, doc.str(value.classname));
+        obj.obj_add(key, doc.val(value.classname));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const edict_t @value)
 {
     if (value !is null)
-        obj.obj_add(key, doc.uint_(value.s.number));
+        obj.obj_add(key, doc.val(value.s.number));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const ASEntity @value)
 {
     if (value !is null)
-        obj.obj_add(key, doc.uint_(value.e.s.number));
+        obj.obj_add(key, doc.val(value.e.s.number));
 }
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, json_mutval v)
@@ -233,86 +233,55 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
 // get wrappers
 void json_get_optional(json_doc &doc, json_val obj, string &out value)
 {
-    value = obj.str;
+    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, uint64 &out value)
 {
-    if (!obj.valid)
-    {
-        value = 0;
-        return;
-    }
-
-    if (obj.is_uint)
-        value = obj.uint_;
-    else if (obj.is_sint)
-        value = obj.sint;
-    else if (obj.is_int)
-        value = obj.int_;
-    else
-        value = uint64(obj.num);
+    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, int64 &out value)
 {
-    if (obj.is_sint)
-        value = obj.sint;
-    else if (obj.is_uint)
-        value = obj.uint_;
-    else if (obj.is_int)
-        value = obj.int_;
-    else
-        value = int64(obj.num);
+    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, double &out value)
 {
-    if (obj.is_real)
-        value = obj.real;
-    else
-        value = obj.num;
+    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, float &out value)
 {
-    if (obj.is_real)
-        value = obj.real;
-    else
-        value = obj.num;
+    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, float &out value, const float &in defaultValue)
 {
-    if (obj.is_real)
-        value = obj.real;
-    else if (obj.is_num)
-        value = obj.num;
-    else
+    if (!obj.valid)
         value = defaultValue;
+    else
+        obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, bool &out value)
 {
-    value = obj.bool_;
+    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, gtime_t &out value)
 {
-    int64 i64 = obj.is_sint ? obj.sint : obj.is_uint ? obj.uint_ : obj.is_int ? obj.int_ : int64(obj.num);
+    int64 i64;
+    obj.get(i64);
     value = time_ms(i64);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, spawnflags_t &out value)
 {
-    if (obj.is_uint)
-        value = spawnflag_dec(uint(obj.uint_));
-    else if (obj.is_sint)
-        value = spawnflag_dec(uint(obj.sint));
-    else if (obj.is_int)
-        value = spawnflag_dec(uint(obj.int_));
-    else
-        value = spawnflag_dec(uint(obj.num));
+    uint32 u32;
+    obj.get(u32);
+    value = spawnflag_dec(u32);
+
 }
 
 void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v)
@@ -320,9 +289,9 @@ void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v)
     if (obj.is_arr && obj.length == 3)
     {
         json_arr_iter iter(obj);
-        v.x = iter.next.num;
-        v.y = iter.next.num;
-        v.z = iter.next.num;
+        iter.next.get(v.x);
+        iter.next.get(v.y);
+        iter.next.get(v.z);
     }
     else
         v = vec3_origin;
@@ -333,9 +302,9 @@ void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v, const vec3_t 
     if (obj.is_arr && obj.length == 3)
     {
         json_arr_iter iter(obj);
-        v.x = iter.next.num;
-        v.y = iter.next.num;
-        v.z = iter.next.num;
+        iter.next.get(v.x);
+        iter.next.get(v.y);
+        iter.next.get(v.z);
     }
     else
         v = defaultValue;
@@ -351,19 +320,16 @@ void json_get_optional(json_doc &doc, json_val obj, const gitem_t @&out value)
 
 void json_get_optional(json_doc &doc, json_val obj, edict_t @&out value)
 {
-    if (obj.is_uint)
-        @value = G_EdictForNum(obj.uint_);
-    else if (obj.is_int)
-        @value = G_EdictForNum(obj.int_);
-    else if (obj.is_num)
-        @value = G_EdictForNum(uint(obj.num));
-    else
-        @value = null;
+    if (obj.is_num)
+    {
+        @value = G_EdictForNum(obj.get_uint32());
 
-    // "reserve" an ASEntity slot
-    if (value !is null)
+        // "reserve" an ASEntity slot
         if (entities[value.s.number] is null)
             @entities[value.s.number] = ASEntity(value);
+    }
+    else
+        @value = null;
 }
 
 void json_get_optional(json_doc &doc, json_val obj, ASEntity @&out value)
@@ -379,154 +345,112 @@ void json_get_optional(json_doc &doc, json_val obj, ASEntity @&out value)
 
 void json_get_optional(json_doc &doc, json_val obj, handedness_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = handedness_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, item_id_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = item_id_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, pmtype_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = pmtype_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, weaponstate_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = weaponstate_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, water_level_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = water_level_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, anim_priority_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = anim_priority_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, move_state_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = move_state_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, ai_attack_state_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = ai_attack_state_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, combat_style_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = combat_style_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, renderfx_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = renderfx_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, effects_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = effects_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, solid_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = solid_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, ai_flags_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = ai_flags_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, svflags_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = svflags_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, contents_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = contents_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, movetype_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = movetype_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, plat2flags_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = plat2flags_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, bmodel_animstyle_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = bmodel_animstyle_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, mod_id_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = mod_id_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, pmflags_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = pmflags_t(v);
+    obj.get_enum(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, ent_flags_t &out value)
 {
-    int64 v;
-    json_get_optional(doc, obj, v);
-    value = ent_flags_t(v);
+    obj.get_enum(value);
 }
 
 json_mutval WriteGameLocals(json_mutdoc &doc)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     json_add_optional(doc, obj, "helpmessage1", game.helpmessage1);
     json_add_optional(doc, obj, "helpmessage2", game.helpmessage2);
@@ -563,7 +487,7 @@ void ReadGameLocals(json_doc &doc, json_val obj)
 
 json_mutval WriteClientPersistent(json_mutdoc &doc, client_persistant_t &p)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     json_add_optional(doc, obj, "userinfo", p.userinfo);
     json_add_optional(doc, obj, "social_id", p.social_id);
@@ -574,15 +498,15 @@ json_mutval WriteClientPersistent(json_mutdoc &doc, client_persistant_t &p)
     json_add_optional(doc, obj, "savedFlags", p.savedFlags);
     json_add_optional(doc, obj, "selected_item", p.selected_item);
     {
-        json_mutval arr = doc.arr();
+        json_mutval arr = doc.val_arr();
         for (int i = 0; i < item_id_t::TOTAL; i++)
-            arr.arr_append(doc.int_(p.inventory[i]));
+            arr.arr_append(doc.val(p.inventory[i]));
         json_add_optional(doc, obj, "inventory", arr);
     }
     {
-        json_mutval arr = doc.arr();
+        json_mutval arr = doc.val_arr();
         for (int i = 0; i < ammo_t::MAX; i++)
-            arr.arr_append(doc.int_(p.max_ammo[i]));
+            arr.arr_append(doc.val(p.max_ammo[i]));
         json_add_optional(doc, obj, "max_ammo", arr);
     }
     json_add_optional(doc, obj, "weapon", p.weapon);
@@ -670,7 +594,7 @@ void ReadClientPersistent(json_doc &doc, json_val obj, client_persistant_t &p)
 
 json_mutval WriteClient(json_mutdoc &doc, ASEntity &ent)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     ASClient @cl = ent.client;
     gclient_t @gcl = ent.e.client;
@@ -694,9 +618,9 @@ json_mutval WriteClient(json_mutdoc &doc, ASEntity &ent)
     json_add_optional(doc, obj, "ps.gunframe", gcl.ps.gunframe);
     json_add_optional(doc, obj, "ps.gunskin", gcl.ps.gunskin);
     {
-        json_mutval arr = doc.arr();
+        json_mutval arr = doc.val_arr();
         for (int i = 0; i < 64; i++)
-            arr.arr_append(doc.int_(gcl.ps.stats[i]));
+            arr.arr_append(doc.val(gcl.ps.stats[i]));
         json_add_optional(doc, obj, "ps.stats", arr);
     }
 
@@ -910,9 +834,9 @@ void WriteGame(bool autosave, json_mutdoc &doc)
 	if (!autosave)
 		SaveClientData();
     
-    json_mutval root = doc.obj();
+    json_mutval root = doc.val_obj();
 
-    root.obj_add("as_save_version", doc.int_(SAVE_FORMAT_VERSION));
+    root.obj_add("as_save_version", doc.val(SAVE_FORMAT_VERSION));
 
 	// write game
 	game.autosaved = autosave;
@@ -921,7 +845,7 @@ void WriteGame(bool autosave, json_mutdoc &doc)
         root.obj_add("game", locals);
 	game.autosaved = false;
 
-    json_mutval clients = doc.arr();
+    json_mutval clients = doc.val_arr();
     root.obj_add("clients", clients);
 
 	// write clients
@@ -948,6 +872,8 @@ void ReadGame(json_doc &doc)
 	game = game_locals_t();
 
     entities = array<ASEntity@>(max_edicts);
+
+    internal::allow_value_assign = true;
 
     @world = ASEntity(G_EdictForNum(0));
     @entities[0] = @world;
@@ -980,11 +906,13 @@ void ReadGame(json_doc &doc)
         //upgrade_client(players[i], uint(v.num), save_version);
         i++;
 	}
+
+    internal::allow_value_assign = false;
 }
 
 json_mutval WriteLevelLocals(json_mutdoc &doc)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     json_add_optional(doc, obj, "time", level.time);
 
@@ -1109,7 +1037,7 @@ void ReadLevelLocals(json_doc &doc, json_val obj)
 
 json_mutval WriteEntityMoveInfo(json_mutdoc &doc, const moveinfo_t &info)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     json_add_optional(doc, obj, "start_origin", info.start_origin);
     json_add_optional(doc, obj, "start_angles", info.start_angles);
@@ -1143,10 +1071,10 @@ json_mutval WriteEntityMoveInfo(json_mutdoc &doc, const moveinfo_t &info)
     json_add_optional(doc, obj, "curve_ref", info.curve_ref);
     if (!info.curve_positions.empty())
     {
-        json_mutval arr = doc.arr();
+        json_mutval arr = doc.val_arr();
 
         for (uint i = 0; i < info.curve_positions.size(); i++)
-            arr.arr_append(doc.real(info.curve_positions[i]));
+            arr.arr_append(doc.val(info.curve_positions[i]));
 
         json_add_optional(doc, obj, "curve_positions", arr);
     }
@@ -1214,7 +1142,7 @@ void ReadEntityMoveInfo(json_doc &doc, json_val obj, moveinfo_t &info)
 
 json_mutval WriteEntityMonsterInfo(json_mutdoc &doc, const monsterinfo_t &info)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     json_add_optional(doc, obj, "active_move", reflect_name_of_global<mmove_t>(info.active_move));
     json_add_optional(doc, obj, "next_move", reflect_name_of_global<mmove_t>(info.next_move));
@@ -1434,7 +1362,7 @@ void ReadEntityMonsterInfo(json_doc &doc, json_val obj, monsterinfo_t &info)
 
 json_mutval WriteEntity(json_mutdoc &doc, ASEntity &ent)
 {
-    json_mutval obj = doc.obj();
+    json_mutval obj = doc.val_obj();
 
     edict_t @e = ent.e;
 
@@ -1808,9 +1736,9 @@ void WriteLevel(bool transition, json_mutdoc &doc)
 	// use gamemap to test EOU
 	G_UpdateLevelEntry();
 
-    json_mutval root = doc.obj();
+    json_mutval root = doc.val_obj();
 
-    root.obj_add("as_save_version", doc.int_(SAVE_FORMAT_VERSION));
+    root.obj_add("as_save_version", doc.val(SAVE_FORMAT_VERSION));
 
 	// write level
     json_mutval locals = WriteLevelLocals(doc);
@@ -1818,7 +1746,7 @@ void WriteLevel(bool transition, json_mutdoc &doc)
     if (locals.valid && locals.obj_size != 0)
         root.obj_add("level", locals);
 
-    json_mutval ents = doc.obj();
+    json_mutval ents = doc.val_obj();
     root.obj_add("entities", ents);
 
 	// write entities
@@ -1928,7 +1856,6 @@ void ReadLevel(json_doc &doc)
 		upgrade_edict(doc, val, asent, save_version);
 		gi_linkentity(ent);
 	}
-    internal::allow_value_assign = false;
 
 	// mark all clients as unconnected
 	for (uint i = 0; i < max_clients; i++)
@@ -1958,6 +1885,7 @@ void ReadLevel(json_doc &doc)
 		if (ent.classname == "target_crosslevel_target" || ent.classname == "target_crossunit_target")
 			ent.nextthink = level.time + time_sec(ent.delay);
 	}
+    internal::allow_value_assign = false;
 
 	G_PrecacheInventoryItems();
 

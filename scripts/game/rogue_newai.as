@@ -759,7 +759,7 @@ void M_MonsterDodge(ASEntity &self, ASEntity &attacker, gtime_t eta, const trace
 
 void monster_duck_down(ASEntity &self)
 {
-	self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags & ~ai_flags_t::DUCKED);
+	self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::DUCKED);
 
 	self.e.maxs[2] = self.monsterinfo.base_height - 32;
 	self.takedamage = true;

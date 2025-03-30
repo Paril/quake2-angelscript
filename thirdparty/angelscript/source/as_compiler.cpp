@@ -934,10 +934,12 @@ int asCCompiler::CompileFunction(asCBuilder *in_builder, asCScriptCode *in_scrip
 
 #ifdef AS_DEBUG
 	// DEBUG: output byte code
+	asCString id;
+	id.Format("%i", outFunc->id);
 	if( outFunc->objectType )
-		byteCode.DebugOutput(("__" + outFunc->objectType->name + "_" + outFunc->name + ".txt").AddressOf(), in_outFunc);
+		byteCode.DebugOutput(("__" + outFunc->objectType->name + "_" + outFunc->name + "_" + id + ".txt").AddressOf(), in_outFunc);
 	else
-		byteCode.DebugOutput(("__" + outFunc->name + ".txt").AddressOf(), in_outFunc);
+		byteCode.DebugOutput(("__" + outFunc->name + "_" + id + ".txt").AddressOf(), in_outFunc);
 #endif
 
 	return 0;
@@ -7317,9 +7319,9 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 		cost = asCC_FLOAT_TO_INT_CONV;
 	else if ((to.IsFloatType() || to.IsDoubleType()) && (ctx->type.dataType.IsIntegerType() || ctx->type.dataType.IsUnsignedType()))
 		cost = asCC_INT_TO_FLOAT_CONV;
-	else if (ctx->type.dataType.IsEnumType() && (to.IsIntegerType() || to.IsUnsignedType() || to.IsEnumType()) && to.GetSizeInMemoryBytes() == ctx->type.dataType.GetSizeInMemoryBytes() )
+	else if (ctx->type.dataType.IsEnumType() && ((ctx->type.dataType.IsIntegerType() && to.IsIntegerType()) || (ctx->type.dataType.IsUnsignedType() && to.IsUnsignedType())) && to.GetSizeInMemoryBytes() == ctx->type.dataType.GetSizeInMemoryBytes() )
 		cost = asCC_ENUM_SAME_SIZE_CONV;
-	else if (ctx->type.dataType.IsEnumType() && (to.IsIntegerType() || to.IsUnsignedType() || to.IsEnumType()) && to.GetSizeInMemoryBytes() != ctx->type.dataType.GetSizeInMemoryBytes())
+	else if (ctx->type.dataType.IsEnumType() && ((ctx->type.dataType.IsIntegerType() && to.IsIntegerType()) || (ctx->type.dataType.IsUnsignedType() && to.IsUnsignedType())) && to.GetSizeInMemoryBytes() != ctx->type.dataType.GetSizeInMemoryBytes())
 		cost = asCC_ENUM_DIFF_SIZE_CONV;
 	else if( to.IsUnsignedType() && ctx->type.dataType.IsIntegerType() )
 		cost = asCC_SIGNED_TO_UNSIGNED_CONV;
