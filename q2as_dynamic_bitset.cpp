@@ -1,4 +1,5 @@
 #include "q2as_local.h"
+#include "q2as_dynamic_bitset.h"
 
 void Q2AS_RegisterDynamicBitset(q2as_registry& registry)
 {
@@ -19,7 +20,7 @@ void Q2AS_RegisterDynamicBitset(q2as_registry& registry)
 			{ "void resize(uint)", asMETHODPR(dynamic_bitset, resize, (unsigned int), void), asCALL_THISCALL },
 			{ "uint get_size() const property", asMETHODPR(dynamic_bitset, size, () const, unsigned int), asCALL_THISCALL },
 
-			{ "void set_all()", asMETHODPR(dynamic_bitset, set_all, (bool), void), asCALL_THISCALL },
+			{ "void set_all(bool value)", asMETHODPR(dynamic_bitset, set_all, (bool), void), asCALL_THISCALL },
 			{ "void flip_all()", asMETHODPR(dynamic_bitset, flip_all, (), void), asCALL_THISCALL },
 
 
@@ -27,6 +28,6 @@ void Q2AS_RegisterDynamicBitset(q2as_registry& registry)
 			{ "bool all() const", asMETHODPR(dynamic_bitset, all, () const, bool), asCALL_THISCALL },
 			{ "bool none() const", asMETHODPR(dynamic_bitset, none, () const, bool), asCALL_THISCALL },
 
-			{ "bool opEquals(const dynamic_bitset &in)", asMETHODPR(dynamic_bitset, operator==, (const dynamic_bitset &), bool), asCALL_THISCALL },
+			{ "bool opEquals(const dynamic_bitset &in) const", asMETHODPR(dynamic_bitset, operator==, (const dynamic_bitset &) const, bool), asCALL_THISCALL },
 		});
 }

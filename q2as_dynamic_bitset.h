@@ -118,6 +118,8 @@ struct dynamic_bitset
                 break;
             }
         }
+
+        return result;
     }
 
     // return true if all bits are 0
@@ -133,10 +135,12 @@ struct dynamic_bitset
                 break;
             }
         }
+
+        return result;
     }
 
     // return true if sizes match and bits are equal
-    bool operator==(const dynamic_bitset& in)
+    bool operator==(const dynamic_bitset& in) const
     {
         if (_bitset.size() != in._bitset.size())
         {

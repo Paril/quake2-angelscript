@@ -194,7 +194,6 @@ LerpAngle
 }
 
 #include "q_vec3.h"
-#include "q2as_dynamic_bitset.h"
 
 //=============================================
 
