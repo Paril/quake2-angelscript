@@ -231,42 +231,12 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
 }
 
 // get wrappers
-void json_get_optional(json_doc &doc, json_val obj, string &out value)
-{
-    obj.get(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, uint64 &out value)
-{
-    obj.get(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, int64 &out value)
-{
-    obj.get(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, double &out value)
-{
-    obj.get(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, float &out value)
-{
-    obj.get(value);
-}
-
 void json_get_optional(json_doc &doc, json_val obj, float &out value, const float &in defaultValue)
 {
     if (!obj.valid)
         value = defaultValue;
     else
         obj.get(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, bool &out value)
-{
-    obj.get(value);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, gtime_t &out value)
@@ -281,7 +251,6 @@ void json_get_optional(json_doc &doc, json_val obj, spawnflags_t &out value)
     uint32 u32;
     obj.get(u32);
     value = spawnflag_dec(u32);
-
 }
 
 void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v)
@@ -343,111 +312,6 @@ void json_get_optional(json_doc &doc, json_val obj, ASEntity @&out value)
         @value = null;
 }
 
-void json_get_optional(json_doc &doc, json_val obj, handedness_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, item_id_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, pmtype_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, weaponstate_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, water_level_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, anim_priority_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, move_state_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, ai_attack_state_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, combat_style_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, renderfx_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, effects_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, solid_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, ai_flags_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, svflags_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, contents_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, movetype_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, plat2flags_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, bmodel_animstyle_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, mod_id_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, pmflags_t &out value)
-{
-    obj.get_enum(value);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, ent_flags_t &out value)
-{
-    obj.get_enum(value);
-}
-
 json_mutval WriteGameLocals(json_mutdoc &doc)
 {
     json_mutval obj = doc.val_obj();
@@ -472,17 +336,17 @@ void ReadGameLocals(json_doc &doc, json_val obj)
     if (!obj.is_obj)
         return;
 
-    json_get_optional(doc, obj.obj_get("helpmessage1"), game.helpmessage1);
-    json_get_optional(doc, obj.obj_get("helpmessage2"), game.helpmessage2);
-    json_get_optional(doc, obj.obj_get("help1changed"), game.help1changed);
-    json_get_optional(doc, obj.obj_get("help2changed"), game.help2changed);
+    obj["helpmessage1"].get(game.helpmessage1);
+    obj["helpmessage2"].get(game.helpmessage2);
+    obj["help1changed"].get(game.help1changed);
+    obj["help2changed"].get(game.help2changed);
 
-    json_get_optional(doc, obj.obj_get("spawnpoint"), game.spawnpoint);
+    obj["spawnpoint"].get(game.spawnpoint);
 
-    json_get_optional(doc, obj.obj_get("cross_level_flags"), game.cross_level_flags);
-    json_get_optional(doc, obj.obj_get("cross_unit_flags"), game.cross_unit_flags);
+    obj["cross_level_flags"].get(game.cross_level_flags);
+    obj["cross_unit_flags"].get(game.cross_unit_flags);
 
-    json_get_optional(doc, obj.obj_get("autosaved"), game.autosaved);
+    obj["autosaved"].get(game.autosaved);
 }
 
 json_mutval WriteClientPersistent(json_mutdoc &doc, client_persistant_t &p)
@@ -534,16 +398,16 @@ void ReadClientPersistent(json_doc &doc, json_val obj, client_persistant_t &p)
     if (!obj.is_obj)
         return;
 
-    json_get_optional(doc, obj.obj_get("userinfo"), p.userinfo);
-    json_get_optional(doc, obj.obj_get("social_id"), p.social_id);
-    json_get_optional(doc, obj.obj_get("netname"), p.netname);
-    json_get_optional(doc, obj.obj_get("hand"), p.hand);
-    json_get_optional(doc, obj.obj_get("health"), p.health);
-    json_get_optional(doc, obj.obj_get("max_health"), p.max_health);
-    json_get_optional(doc, obj.obj_get("savedFlags"), p.savedFlags);
-    json_get_optional(doc, obj.obj_get("selected_item"), p.selected_item);
+    obj["userinfo"].get(p.userinfo);
+    obj["social_id"].get(p.social_id);
+    obj["netname"].get(p.netname);
+    obj["hand"].get_enum(p.hand);
+    obj["health"].get(p.health);
+    obj["max_health"].get(p.max_health);
+    obj["savedFlags"].get_enum(p.savedFlags);
+    obj["selected_item"].get_enum(p.selected_item);
     {
-        json_val arr = obj.obj_get("inventory");
+        json_val arr = obj["inventory"];
 
         if (arr.is_arr)
         {
@@ -553,13 +417,13 @@ void ReadClientPersistent(json_doc &doc, json_val obj, client_persistant_t &p)
             while (iter.has_next)
             {
                 json_val v = iter.next;
-                p.inventory[i] = int(v.is_int ? v.int_ : v.is_uint ? v.int_ : v.num);
+                p.inventory[i] = v.get_int32();
                 i++;
             }
         }
     }
     {
-        json_val arr = obj.obj_get("max_ammo");
+        json_val arr = obj["max_ammo"];
 
         if (arr.is_arr)
         {
@@ -569,27 +433,27 @@ void ReadClientPersistent(json_doc &doc, json_val obj, client_persistant_t &p)
             while (iter.has_next)
             {
                 json_val v = iter.next;
-                p.max_ammo[i] = int16(v.is_int ? v.int_ : v.is_uint ? v.int_ : v.num);
+                p.max_ammo[i] = v.get_int16();
                 i++;
             }
         }
     }
-    json_get_optional(doc, obj.obj_get("weapon"), p.weapon);
-    json_get_optional(doc, obj.obj_get("lastweapon"), p.lastweapon);
-    json_get_optional(doc, obj.obj_get("power_cubes"), p.power_cubes);
-    json_get_optional(doc, obj.obj_get("score"), p.score);
-    json_get_optional(doc, obj.obj_get("game_help1changed"), p.game_help1changed);
-    json_get_optional(doc, obj.obj_get("game_help2changed"), p.game_help2changed);
-    json_get_optional(doc, obj.obj_get("helpchanged"), p.helpchanged);
-    json_get_optional(doc, obj.obj_get("help_time"), p.help_time);
-    json_get_optional(doc, obj.obj_get("spectator"), p.spectator);
-    json_get_optional(doc, obj.obj_get("bob_skip"), p.bob_skip);
+    json_get_optional(doc, obj["weapon"], p.weapon);
+    json_get_optional(doc, obj["lastweapon"], p.lastweapon);
+    obj["power_cubes"].get(p.power_cubes);
+    obj["score"].get(p.score);
+    obj["game_help1changed"].get(p.game_help1changed);
+    obj["game_help2changed"].get(p.game_help2changed);
+    obj["helpchanged"].get(p.helpchanged);
+    json_get_optional(doc, obj["help_time"], p.help_time);
+    obj["spectator"].get(p.spectator);
+    obj["bob_skip"].get(p.bob_skip);
     // AS_TODO wanted_fog
     // AS_TODO wanted_heightfog
-    json_get_optional(doc, obj.obj_get("megahealth_time"), p.megahealth_time);
-    json_get_optional(doc, obj.obj_get("lives"), p.lives);
-    json_get_optional(doc, obj.obj_get("n64_crouch_warn_times"), p.n64_crouch_warn_times);
-    json_get_optional(doc, obj.obj_get("n64_crouch_warning"), p.n64_crouch_warning);
+    json_get_optional(doc, obj["megahealth_time"], p.megahealth_time);
+    obj["lives"].get(p.lives);
+    obj["n64_crouch_warn_times"].get(p.n64_crouch_warn_times);
+    json_get_optional(doc, obj["n64_crouch_warning"], p.n64_crouch_warning);
 }
 
 json_mutval WriteClient(json_mutdoc &doc, ASEntity &ent)
@@ -714,25 +578,25 @@ void ReadClient(json_doc &doc, json_val obj, ASEntity &ent)
     gclient_t @gcl = ent.e.client;
 
     // ps.pmove
-    json_get_optional(doc, obj.obj_get("ps.pmove.pm_type"), gcl.ps.pmove.pm_type);
-    json_get_optional(doc, obj.obj_get("ps.pmove.origin"), gcl.ps.pmove.origin);
-    json_get_optional(doc, obj.obj_get("ps.pmove.velocity"), gcl.ps.pmove.velocity);
-    json_get_optional(doc, obj.obj_get("ps.pmove.pm_flags"), gcl.ps.pmove.pm_flags);
-    json_get_optional(doc, obj.obj_get("ps.pmove.pm_time"), gcl.ps.pmove.pm_time);
-    json_get_optional(doc, obj.obj_get("ps.pmove.gravity"), gcl.ps.pmove.gravity);
-    json_get_optional(doc, obj.obj_get("ps.pmove.delta_angles"), gcl.ps.pmove.delta_angles);
-    json_get_optional(doc, obj.obj_get("ps.pmove.viewheight"), gcl.ps.pmove.viewheight);
+    obj["ps.pmove.pm_type"].get_enum(gcl.ps.pmove.pm_type);
+    json_get_optional(doc, obj["ps.pmove.origin"], gcl.ps.pmove.origin);
+    json_get_optional(doc, obj["ps.pmove.velocity"], gcl.ps.pmove.velocity);
+    obj["ps.pmove.pm_flags"].get_enum(gcl.ps.pmove.pm_flags);
+    obj["ps.pmove.pm_time"].get(gcl.ps.pmove.pm_time);
+    obj["ps.pmove.gravity"].get(gcl.ps.pmove.gravity);
+    json_get_optional(doc, obj["ps.pmove.delta_angles"], gcl.ps.pmove.delta_angles);
+    obj["ps.pmove.viewheight"].get(gcl.ps.pmove.viewheight);
 
     // ps
-    json_get_optional(doc, obj.obj_get("ps.viewangles"), gcl.ps.viewangles);
-    json_get_optional(doc, obj.obj_get("ps.viewoffset"), gcl.ps.viewoffset);
-    json_get_optional(doc, obj.obj_get("ps.gunangles"), gcl.ps.gunangles);
-    json_get_optional(doc, obj.obj_get("ps.gunoffset"), gcl.ps.gunoffset);
-    json_get_optional(doc, obj.obj_get("ps.gunindex"), gcl.ps.gunindex);
-    json_get_optional(doc, obj.obj_get("ps.gunframe"), gcl.ps.gunframe);
-    json_get_optional(doc, obj.obj_get("ps.gunskin"), gcl.ps.gunskin);
+    json_get_optional(doc, obj["ps.viewangles"], gcl.ps.viewangles);
+    json_get_optional(doc, obj["ps.viewoffset"], gcl.ps.viewoffset);
+    json_get_optional(doc, obj["ps.gunangles"], gcl.ps.gunangles);
+    json_get_optional(doc, obj["ps.gunoffset"], gcl.ps.gunoffset);
+    obj["ps.gunindex"].get(gcl.ps.gunindex);
+    obj["ps.gunframe"].get(gcl.ps.gunframe);
+    obj["ps.gunskin"].get(gcl.ps.gunskin);
     {
-        v = obj.obj_get("ps.stats");
+        v = obj["ps.stats"];
 
         if (v.is_arr)
         {
@@ -742,91 +606,90 @@ void ReadClient(json_doc &doc, json_val obj, ASEntity &ent)
             while (iter.has_next)
             {
                 v = iter.next;
-                // AS_TODO typed versions of num
-                gcl.ps.stats[i] = int16(v.num);
+                gcl.ps.stats[i] = v.get_int16();
                 i++;
             }
         }
     }
 
     // pers
-    ReadClientPersistent(doc, obj.obj_get("pers"), cl.pers);
+    ReadClientPersistent(doc, obj["pers"], cl.pers);
 
     // resp.coop_respawn
-    ReadClientPersistent(doc, obj.obj_get("resp.coop_respawn"), cl.resp.coop_respawn);
+    ReadClientPersistent(doc, obj["resp.coop_respawn"], cl.resp.coop_respawn);
 
     // resp
-    json_get_optional(doc, obj.obj_get("resp.entertime"), cl.resp.entertime);
-    json_get_optional(doc, obj.obj_get("resp.score"), cl.resp.score);
-    json_get_optional(doc, obj.obj_get("resp.cmd_angles"), cl.resp.cmd_angles);
-    json_get_optional(doc, obj.obj_get("resp.spectator"), cl.resp.spectator);
+    json_get_optional(doc, obj["resp.entertime"], cl.resp.entertime);
+    obj["resp.score"].get(cl.resp.score);
+    json_get_optional(doc, obj["resp.cmd_angles"], cl.resp.cmd_angles);
+    obj["resp.spectator"].get(cl.resp.spectator);
 
     // ASClient
-    json_get_optional(doc, obj.obj_get("newweapon"), cl.newweapon);
-    json_get_optional(doc, obj.obj_get("killer_yaw"), cl.killer_yaw);
-    json_get_optional(doc, obj.obj_get("weaponstate"), cl.weaponstate);
-    json_get_optional(doc, obj.obj_get("kick.angles"), cl.kick.angles);
-    json_get_optional(doc, obj.obj_get("kick.origin"), cl.kick.origin);
-    json_get_optional(doc, obj.obj_get("kick.total"), cl.kick.total);
-    json_get_optional(doc, obj.obj_get("kick.time"), cl.kick.time);
-    json_get_optional(doc, obj.obj_get("quake_time"), cl.quake_time);
-    json_get_optional(doc, obj.obj_get("v_dmg_roll"), cl.v_dmg_roll);
-    json_get_optional(doc, obj.obj_get("v_dmg_pitch"), cl.v_dmg_pitch);
-    json_get_optional(doc, obj.obj_get("v_dmg_time"), cl.v_dmg_time);
-    json_get_optional(doc, obj.obj_get("fall_time"), cl.fall_time);
-    json_get_optional(doc, obj.obj_get("fall_value"), cl.fall_value);
-    json_get_optional(doc, obj.obj_get("damage_alpha"), cl.damage_alpha);
-    json_get_optional(doc, obj.obj_get("bonus_alpha"), cl.bonus_alpha);
-    json_get_optional(doc, obj.obj_get("damage_blend"), cl.damage_blend);
-    json_get_optional(doc, obj.obj_get("v_angle"), cl.v_angle);
-    json_get_optional(doc, obj.obj_get("bobtime"), cl.bobtime);
-    json_get_optional(doc, obj.obj_get("oldviewangles"), cl.oldviewangles);
-    json_get_optional(doc, obj.obj_get("oldvelocity"), cl.oldvelocity);
-    json_get_optional(doc, obj.obj_get("oldgroundentity"), cl.oldgroundentity);
-    json_get_optional(doc, obj.obj_get("next_drown_time"), cl.next_drown_time);
-    json_get_optional(doc, obj.obj_get("old_waterlevel"), cl.old_waterlevel);
-    json_get_optional(doc, obj.obj_get("breather_sound"), cl.breather_sound);
-    json_get_optional(doc, obj.obj_get("machinegun_shots"), cl.machinegun_shots);
-    json_get_optional(doc, obj.obj_get("anim_end"), cl.anim_end);
-    json_get_optional(doc, obj.obj_get("anim_priority"), cl.anim_priority);
-    json_get_optional(doc, obj.obj_get("anim_duck"), cl.anim_duck);
-    json_get_optional(doc, obj.obj_get("anim_run"), cl.anim_run);
-    json_get_optional(doc, obj.obj_get("quad_time"), cl.quad_time);
-    json_get_optional(doc, obj.obj_get("invincible_time"), cl.invincible_time);
-    json_get_optional(doc, obj.obj_get("breather_time"), cl.breather_time);
-    json_get_optional(doc, obj.obj_get("enviro_time"), cl.enviro_time);
-    json_get_optional(doc, obj.obj_get("invisible_time"), cl.invisible_time);
-    json_get_optional(doc, obj.obj_get("grenade_blew_up"), cl.grenade_blew_up);
-    json_get_optional(doc, obj.obj_get("grenade_time"), cl.grenade_time);
-    json_get_optional(doc, obj.obj_get("grenade_finished_time"), cl.grenade_finished_time);
-    json_get_optional(doc, obj.obj_get("quadfire_time"), cl.quadfire_time);
-    json_get_optional(doc, obj.obj_get("silencer_shots"), cl.silencer_shots);
-    json_get_optional(doc, obj.obj_get("weapon_sound"), cl.weapon_sound);
-    json_get_optional(doc, obj.obj_get("pickup_msg_time"), cl.pickup_msg_time);
-    json_get_optional(doc, obj.obj_get("respawn_time"), cl.respawn_time);
-    json_get_optional(doc, obj.obj_get("double_time"), cl.double_time);
-    json_get_optional(doc, obj.obj_get("ir_time"), cl.ir_time);
-    json_get_optional(doc, obj.obj_get("nuke_time"), cl.nuke_time);
-    json_get_optional(doc, obj.obj_get("tracker_pain_time"), cl.tracker_pain_time);
-    json_get_optional(doc, obj.obj_get("empty_click_sound"), cl.empty_click_sound);
-    json_get_optional(doc, obj.obj_get("trail_head"), cl.trail_head);
-    json_get_optional(doc, obj.obj_get("trail_tail"), cl.trail_tail);
-    json_get_optional(doc, obj.obj_get("landmark_name"), cl.landmark_name);
-    json_get_optional(doc, obj.obj_get("landmark_rel_pos"), cl.landmark_rel_pos);
-    json_get_optional(doc, obj.obj_get("landmark_free_fall"), cl.landmark_free_fall);
-    json_get_optional(doc, obj.obj_get("landmark_noise_time"), cl.landmark_noise_time);
-    json_get_optional(doc, obj.obj_get("invisibility_fade_time"), cl.invisibility_fade_time);
-    json_get_optional(doc, obj.obj_get("last_ladder_pos"), cl.last_ladder_pos);
-    json_get_optional(doc, obj.obj_get("last_ladder_sound"), cl.last_ladder_sound);
-    json_get_optional(doc, obj.obj_get("sight_entity"), cl.sight_entity);
-    json_get_optional(doc, obj.obj_get("sight_entity_time"), cl.sight_entity_time);
-    json_get_optional(doc, obj.obj_get("sound_entity"), cl.sound_entity);
-    json_get_optional(doc, obj.obj_get("sound_entity_time"), cl.sound_entity_time);
-    json_get_optional(doc, obj.obj_get("sound2_entity"), cl.sound2_entity);
-    json_get_optional(doc, obj.obj_get("sound2_entity_time"), cl.sound2_entity_time);
-    json_get_optional(doc, obj.obj_get("last_firing_time"), cl.last_firing_time);
-    json_get_optional(doc, obj.obj_get("mynoise"), cl.mynoise);
-    json_get_optional(doc, obj.obj_get("mynoise2"), cl.mynoise2);
+    json_get_optional(doc, obj["newweapon"], cl.newweapon);
+    obj["killer_yaw"].get(cl.killer_yaw);
+    obj["weaponstate"].get_enum(cl.weaponstate);
+    json_get_optional(doc, obj["kick.angles"], cl.kick.angles);
+    json_get_optional(doc, obj["kick.origin"], cl.kick.origin);
+    json_get_optional(doc, obj["kick.total"], cl.kick.total);
+    json_get_optional(doc, obj["kick.time"], cl.kick.time);
+    json_get_optional(doc, obj["quake_time"], cl.quake_time);
+    obj["v_dmg_roll"].get(cl.v_dmg_roll);
+    obj["v_dmg_pitch"].get(cl.v_dmg_pitch);
+    json_get_optional(doc, obj["v_dmg_time"], cl.v_dmg_time);
+    json_get_optional(doc, obj["fall_time"], cl.fall_time);
+    obj["fall_value"].get(cl.fall_value);
+    obj["damage_alpha"].get(cl.damage_alpha);
+    obj["bonus_alpha"].get(cl.bonus_alpha);
+    json_get_optional(doc, obj["damage_blend"], cl.damage_blend);
+    json_get_optional(doc, obj["v_angle"], cl.v_angle);
+    obj["bobtime"].get(cl.bobtime);
+    json_get_optional(doc, obj["oldviewangles"], cl.oldviewangles);
+    json_get_optional(doc, obj["oldvelocity"], cl.oldvelocity);
+    json_get_optional(doc, obj["oldgroundentity"], cl.oldgroundentity);
+    json_get_optional(doc, obj["next_drown_time"], cl.next_drown_time);
+    obj["old_waterlevel"].get_enum(cl.old_waterlevel);
+    obj["breather_sound"].get(cl.breather_sound);
+    obj["machinegun_shots"].get(cl.machinegun_shots);
+    obj["anim_end"].get(cl.anim_end);
+    obj["anim_priority"].get_enum(cl.anim_priority);
+    obj["anim_duck"].get(cl.anim_duck);
+    obj["anim_run"].get(cl.anim_run);
+    json_get_optional(doc, obj["quad_time"], cl.quad_time);
+    json_get_optional(doc, obj["invincible_time"], cl.invincible_time);
+    json_get_optional(doc, obj["breather_time"], cl.breather_time);
+    json_get_optional(doc, obj["enviro_time"], cl.enviro_time);
+    json_get_optional(doc, obj["invisible_time"], cl.invisible_time);
+    obj["grenade_blew_up"].get(cl.grenade_blew_up);
+    json_get_optional(doc, obj["grenade_time"], cl.grenade_time);
+    json_get_optional(doc, obj["grenade_finished_time"], cl.grenade_finished_time);
+    json_get_optional(doc, obj["quadfire_time"], cl.quadfire_time);
+    obj["silencer_shots"].get(cl.silencer_shots);
+    obj["weapon_sound"].get(cl.weapon_sound);
+    json_get_optional(doc, obj["pickup_msg_time"], cl.pickup_msg_time);
+    json_get_optional(doc, obj["respawn_time"], cl.respawn_time);
+    json_get_optional(doc, obj["double_time"], cl.double_time);
+    json_get_optional(doc, obj["ir_time"], cl.ir_time);
+    json_get_optional(doc, obj["nuke_time"], cl.nuke_time);
+    json_get_optional(doc, obj["tracker_pain_time"], cl.tracker_pain_time);
+    json_get_optional(doc, obj["empty_click_sound"], cl.empty_click_sound);
+    json_get_optional(doc, obj["trail_head"], cl.trail_head);
+    json_get_optional(doc, obj["trail_tail"], cl.trail_tail);
+    obj["landmark_name"].get(cl.landmark_name);
+    json_get_optional(doc, obj["landmark_rel_pos"], cl.landmark_rel_pos);
+    obj["landmark_free_fall"].get(cl.landmark_free_fall);
+    json_get_optional(doc, obj["landmark_noise_time"], cl.landmark_noise_time);
+    json_get_optional(doc, obj["invisibility_fade_time"], cl.invisibility_fade_time);
+    json_get_optional(doc, obj["last_ladder_pos"], cl.last_ladder_pos);
+    json_get_optional(doc, obj["last_ladder_sound"], cl.last_ladder_sound);
+    json_get_optional(doc, obj["sight_entity"], cl.sight_entity);
+    json_get_optional(doc, obj["sight_entity_time"], cl.sight_entity_time);
+    json_get_optional(doc, obj["sound_entity"], cl.sound_entity);
+    json_get_optional(doc, obj["sound_entity_time"], cl.sound_entity_time);
+    json_get_optional(doc, obj["sound2_entity"], cl.sound2_entity);
+    json_get_optional(doc, obj["sound2_entity_time"], cl.sound2_entity_time);
+    json_get_optional(doc, obj["last_firing_time"], cl.last_firing_time);
+    json_get_optional(doc, obj["mynoise"], cl.mynoise);
+    json_get_optional(doc, obj["mynoise2"], cl.mynoise2);
 }
 
 void WriteGame(bool autosave, json_mutdoc &doc)
@@ -865,7 +728,7 @@ void ReadGame(json_doc &doc)
     // validate max_edicts & max_clients
 
     // if we have no version tag it's bad/not Q2AS
-    json_val v = root.obj_get("as_save_version");
+    json_val v = root["as_save_version"];
     if (!v.is_num)
         gi_Com_Error("incompatible save version");
 
@@ -892,10 +755,10 @@ void ReadGame(json_doc &doc)
     // properly or not here.
 
 	// read game
-    ReadGameLocals(doc, root.obj_get("game"));
+    ReadGameLocals(doc, root["game"]);
 
 	// read clients
-    json_arr_iter iter(root.obj_get("clients"));
+    json_arr_iter iter(root["clients"]);
     int i = 0;
 
     while (iter.has_next)
@@ -978,61 +841,61 @@ void ReadLevelLocals(json_doc &doc, json_val obj)
     if (!obj.is_obj)
         return;
 
-    json_get_optional(doc, obj.obj_get("time"), level.time);
+    json_get_optional(doc, obj["time"], level.time);
 
-    json_get_optional(doc, obj.obj_get("level_name"), level.level_name);
-    json_get_optional(doc, obj.obj_get("mapname"), level.mapname);
-    json_get_optional(doc, obj.obj_get("nextmap"), level.nextmap);
+    obj["level_name"].get(level.level_name);
+    obj["mapname"].get(level.mapname);
+    obj["nextmap"].get(level.nextmap);
 
-    json_get_optional(doc, obj.obj_get("intermissiontime"), level.intermissiontime);
-    json_get_optional(doc, obj.obj_get("changemap"), level.changemap);
-    json_get_optional(doc, obj.obj_get("achievement"), level.achievement);
-    json_get_optional(doc, obj.obj_get("exitintermission"), level.exitintermission);
-    json_get_optional(doc, obj.obj_get("intermission_clear"), level.intermission_clear);
-    json_get_optional(doc, obj.obj_get("intermission_origin"), level.intermission_origin);
-    json_get_optional(doc, obj.obj_get("intermission_angle"), level.intermission_angle);
+    json_get_optional(doc, obj["intermissiontime"], level.intermissiontime);
+    obj["changemap"].get(level.changemap);
+    obj["achievement"].get(level.achievement);
+    obj["exitintermission"].get(level.exitintermission);
+    obj["intermission_clear"].get(level.intermission_clear);
+    json_get_optional(doc, obj["intermission_origin"], level.intermission_origin);
+    json_get_optional(doc, obj["intermission_angle"], level.intermission_angle);
 
-    json_get_optional(doc, obj.obj_get("total_secrets"), level.total_secrets);
-    json_get_optional(doc, obj.obj_get("found_secrets"), level.found_secrets);
+    obj["total_secrets"].get(level.total_secrets);
+    obj["found_secrets"].get(level.found_secrets);
 
-    json_get_optional(doc, obj.obj_get("total_goals"), level.total_goals);
-    json_get_optional(doc, obj.obj_get("found_goals"), level.found_goals);
+    obj["total_goals"].get(level.total_goals);
+    obj["found_goals"].get(level.found_goals);
 
-    json_get_optional(doc, obj.obj_get("total_monsters"), level.total_monsters);
+    obj["total_monsters"].get(level.total_monsters);
     // AS_TODO monsters_registered
-    json_get_optional(doc, obj.obj_get("killed_monsters"), level.killed_monsters);
+    obj["killed_monsters"].get(level.killed_monsters);
 
-    json_get_optional(doc, obj.obj_get("body_que"), level.body_que);
+    obj["body_que"].get(level.body_que);
 
-    json_get_optional(doc, obj.obj_get("power_cubes"), level.power_cubes);
+    obj["power_cubes"].get(level.power_cubes);
 
-    json_get_optional(doc, obj.obj_get("disguise_violator"), level.disguise_violator);
-    json_get_optional(doc, obj.obj_get("disguise_violation_time"), level.disguise_violation_time);
+    json_get_optional(doc, obj["disguise_violator"], level.disguise_violator);
+    json_get_optional(doc, obj["disguise_violation_time"], level.disguise_violation_time);
 
-    json_get_optional(doc, obj.obj_get("coop_level_restart_time"), level.coop_level_restart_time);
+    json_get_optional(doc, obj["coop_level_restart_time"], level.coop_level_restart_time);
 
-    json_get_optional(doc, obj.obj_get("goals"), level.goals);
-    json_get_optional(doc, obj.obj_get("goal_num"), level.goal_num);
-    json_get_optional(doc, obj.obj_get("vwep_offset"), level.vwep_offset);
+    obj["goals"].get(level.goals);
+    obj["goal_num"].get(level.goal_num);
+    obj["vwep_offset"].get(level.vwep_offset);
 
-    json_get_optional(doc, obj.obj_get("valid_poi"), level.valid_poi);
-    json_get_optional(doc, obj.obj_get("current_poi"), level.current_poi);
-    json_get_optional(doc, obj.obj_get("current_poi_stage"), level.current_poi_stage);
-    json_get_optional(doc, obj.obj_get("current_poi_image"), level.current_poi_image);
-    json_get_optional(doc, obj.obj_get("current_dynamic_poi"), level.current_dynamic_poi);
+    obj["valid_poi"].get(level.valid_poi);
+    json_get_optional(doc, obj["current_poi"], level.current_poi);
+    obj["current_poi_stage"].get(level.current_poi_stage);
+    obj["current_poi_image"].get(level.current_poi_image);
+    json_get_optional(doc, obj["current_dynamic_poi"], level.current_dynamic_poi);
 
-    json_get_optional(doc, obj.obj_get("start_items"), level.start_items);
-    json_get_optional(doc, obj.obj_get("no_grapple"), level.no_grapple);
-    json_get_optional(doc, obj.obj_get("gravity"), level.gravity);
-    json_get_optional(doc, obj.obj_get("health_bar_entities[0]"), level.health_bar_entities[0]);
-    json_get_optional(doc, obj.obj_get("health_bar_entities[1]"), level.health_bar_entities[1]);
-    json_get_optional(doc, obj.obj_get("intermission_server_frame"), level.intermission_server_frame);
-    json_get_optional(doc, obj.obj_get("story_active"), level.story_active);
-    json_get_optional(doc, obj.obj_get("next_auto_save"), level.next_auto_save);
-    json_get_optional(doc, obj.obj_get("primary_objective_string"), level.primary_objective_string);
-    json_get_optional(doc, obj.obj_get("secondary_objective_string"), level.secondary_objective_string);
-    json_get_optional(doc, obj.obj_get("primary_objective_title"), level.primary_objective_title);
-    json_get_optional(doc, obj.obj_get("secondary_objective_title"), level.secondary_objective_title);
+    obj["start_items"].get(level.start_items);
+    obj["no_grapple"].get(level.no_grapple);
+    obj["gravity"].get(level.gravity);
+    json_get_optional(doc, obj["health_bar_entities[0]"], level.health_bar_entities[0]);
+    json_get_optional(doc, obj["health_bar_entities[1]"], level.health_bar_entities[1]);
+    obj["intermission_server_frame"].get(level.intermission_server_frame);
+    obj["story_active"].get(level.story_active);
+    json_get_optional(doc, obj["next_auto_save"], level.next_auto_save);
+    obj["primary_objective_string"].get(level.primary_objective_string);
+    obj["secondary_objective_string"].get(level.secondary_objective_string);
+    obj["primary_objective_title"].get(level.primary_objective_title);
+    obj["secondary_objective_title"].get(level.secondary_objective_title);
 }
 
 json_mutval WriteEntityMoveInfo(json_mutdoc &doc, const moveinfo_t &info)
@@ -1091,37 +954,37 @@ void ReadEntityMoveInfo(json_doc &doc, json_val obj, moveinfo_t &info)
     if (!obj.is_obj)
         return;
 
-    json_get_optional(doc, obj.obj_get("start_origin"), info.start_origin);
-    json_get_optional(doc, obj.obj_get("start_angles"), info.start_angles);
-    json_get_optional(doc, obj.obj_get("end_origin"), info.end_origin);
-    json_get_optional(doc, obj.obj_get("end_angles"), info.end_angles);
-    json_get_optional(doc, obj.obj_get("end_angles_reversed"), info.end_angles_reversed);
+    json_get_optional(doc, obj["start_origin"], info.start_origin);
+    json_get_optional(doc, obj["start_angles"], info.start_angles);
+    json_get_optional(doc, obj["end_origin"], info.end_origin);
+    json_get_optional(doc, obj["end_angles"], info.end_angles);
+    json_get_optional(doc, obj["end_angles_reversed"], info.end_angles_reversed);
 
-    json_get_optional(doc, obj.obj_get("sound_start"), info.sound_start);
-    json_get_optional(doc, obj.obj_get("sound_middle"), info.sound_middle);
-    json_get_optional(doc, obj.obj_get("sound_end"), info.sound_end);
+    obj["sound_start"].get(info.sound_start);
+    obj["sound_middle"].get(info.sound_middle);
+    obj["sound_end"].get(info.sound_end);
 
-    json_get_optional(doc, obj.obj_get("accel"), info.accel);
-    json_get_optional(doc, obj.obj_get("speed"), info.speed);
-    json_get_optional(doc, obj.obj_get("decel"), info.decel);
-    json_get_optional(doc, obj.obj_get("distance"), info.distance);
+    obj["accel"].get(info.accel);
+    obj["speed"].get(info.speed);
+    obj["decel"].get(info.decel);
+    obj["distance"].get(info.distance);
 
-    json_get_optional(doc, obj.obj_get("wait"), info.wait);
+    obj["wait"].get(info.wait);
 
-    json_get_optional(doc, obj.obj_get("state"), info.state);
-    json_get_optional(doc, obj.obj_get("reversing"), info.reversing);
-    json_get_optional(doc, obj.obj_get("dir"), info.dir);
-    json_get_optional(doc, obj.obj_get("dest"), info.dest);
-    json_get_optional(doc, obj.obj_get("current_speed"), info.current_speed);
-    json_get_optional(doc, obj.obj_get("move_speed"), info.move_speed);
-    json_get_optional(doc, obj.obj_get("next_speed"), info.next_speed);
-    json_get_optional(doc, obj.obj_get("remaining_distance"), info.remaining_distance);
-    json_get_optional(doc, obj.obj_get("decel_distance"), info.decel_distance);
-    reflect_global_from_name<endfunc_f>(obj.obj_get("endfunc").str, info.endfunc);
-    reflect_global_from_name<blocked_f>(obj.obj_get("blocked").str, info.blocked);
+    obj["state"].get_enum(info.state);
+    obj["reversing"].get(info.reversing);
+    json_get_optional(doc, obj["dir"], info.dir);
+    json_get_optional(doc, obj["dest"], info.dest);
+    obj["current_speed"].get(info.current_speed);
+    obj["move_speed"].get(info.move_speed);
+    obj["next_speed"].get(info.next_speed);
+    obj["remaining_distance"].get(info.remaining_distance);
+    obj["decel_distance"].get(info.decel_distance);
+    reflect_global_from_name<endfunc_f>(obj["endfunc"].str, info.endfunc);
+    reflect_global_from_name<blocked_f>(obj["blocked"].str, info.blocked);
 
-    json_get_optional(doc, obj.obj_get("curve_ref"), info.curve_ref);
-    json_val arr = obj.obj_get("curve_positions");
+    json_get_optional(doc, obj["curve_ref"], info.curve_ref);
+    json_val arr = obj["curve_positions"];
     if (arr.is_arr)
     {
         info.curve_positions.resize(arr.length);
@@ -1130,14 +993,14 @@ void ReadEntityMoveInfo(json_doc &doc, json_val obj, moveinfo_t &info)
 
         while (iter.has_next)
         {
-            info.curve_positions[i] = iter.next.num;
+            info.curve_positions[i] = iter.next.get_float();
             i++;
         }
     }
-    json_get_optional(doc, obj.obj_get("curve_frame"), info.curve_frame);
-    json_get_optional(doc, obj.obj_get("subframe"), info.subframe);
-    json_get_optional(doc, obj.obj_get("num_subframes"), info.num_subframes);
-    json_get_optional(doc, obj.obj_get("num_frames_done"), info.num_frames_done);
+    obj["curve_frame"].get(info.curve_frame);
+    obj["subframe"].get(info.subframe);
+    obj["num_subframes"].get(info.num_subframes);
+    obj["num_frames_done"].get(info.num_frames_done);
 }
 
 json_mutval WriteEntityMonsterInfo(json_mutdoc &doc, const monsterinfo_t &info)
@@ -1255,106 +1118,106 @@ void ReadEntityMonsterInfo(json_doc &doc, json_val obj, monsterinfo_t &info)
     if (!obj.is_obj)
         return;
 
-    reflect_global_from_name<const mmove_t>(obj.obj_get("active_move").str, info.active_move);
-    reflect_global_from_name<const mmove_t>(obj.obj_get("next_move").str, info.next_move);
-    json_get_optional(doc, obj.obj_get("aiflags"), info.aiflags);
-    json_get_optional(doc, obj.obj_get("nextframe"), info.nextframe);
-    json_get_optional(doc, obj.obj_get("scale"), info.scale);
+    reflect_global_from_name<const mmove_t>(obj["active_move"].str, info.active_move);
+    reflect_global_from_name<const mmove_t>(obj["next_move"].str, info.next_move);
+    obj["aiflags"].get_enum(info.aiflags);
+    obj["nextframe"].get(info.nextframe);
+    obj["scale"].get(info.scale);
 
-    reflect_global_from_name<monsterinfo_stand_f>(obj.obj_get("stand").str, info.stand);
-    reflect_global_from_name<monsterinfo_idle_f>(obj.obj_get("idle").str, info.idle);
-    reflect_global_from_name<monsterinfo_search_f>(obj.obj_get("search").str, info.search);
-    reflect_global_from_name<monsterinfo_walk_f>(obj.obj_get("walk").str, info.walk);
-    reflect_global_from_name<monsterinfo_run_f>(obj.obj_get("run").str, info.run);
-    reflect_global_from_name<monsterinfo_dodge_f>(obj.obj_get("dodge").str, info.dodge);
-    reflect_global_from_name<monsterinfo_attack_f>(obj.obj_get("attack").str, info.attack);
-    reflect_global_from_name<monsterinfo_melee_f>(obj.obj_get("melee").str, info.melee);
-    reflect_global_from_name<monsterinfo_sight_f>(obj.obj_get("sight").str, info.sight);
-    reflect_global_from_name<monsterinfo_checkattack_f>(obj.obj_get("checkattack").str, info.checkattack);
-    reflect_global_from_name<monsterinfo_setskin_f>(obj.obj_get("setskin").str, info.setskin);
+    reflect_global_from_name<monsterinfo_stand_f>(obj["stand"].str, info.stand);
+    reflect_global_from_name<monsterinfo_idle_f>(obj["idle"].str, info.idle);
+    reflect_global_from_name<monsterinfo_search_f>(obj["search"].str, info.search);
+    reflect_global_from_name<monsterinfo_walk_f>(obj["walk"].str, info.walk);
+    reflect_global_from_name<monsterinfo_run_f>(obj["run"].str, info.run);
+    reflect_global_from_name<monsterinfo_dodge_f>(obj["dodge"].str, info.dodge);
+    reflect_global_from_name<monsterinfo_attack_f>(obj["attack"].str, info.attack);
+    reflect_global_from_name<monsterinfo_melee_f>(obj["melee"].str, info.melee);
+    reflect_global_from_name<monsterinfo_sight_f>(obj["sight"].str, info.sight);
+    reflect_global_from_name<monsterinfo_checkattack_f>(obj["checkattack"].str, info.checkattack);
+    reflect_global_from_name<monsterinfo_setskin_f>(obj["setskin"].str, info.setskin);
 
-    json_get_optional(doc, obj.obj_get("pausetime"), info.pausetime);
-    json_get_optional(doc, obj.obj_get("attack_finished"), info.attack_finished);
-    json_get_optional(doc, obj.obj_get("fire_wait"), info.fire_wait);
+    json_get_optional(doc, obj["pausetime"], info.pausetime);
+    json_get_optional(doc, obj["attack_finished"], info.attack_finished);
+    json_get_optional(doc, obj["fire_wait"], info.fire_wait);
 
-    json_get_optional(doc, obj.obj_get("saved_goal"), info.saved_goal);
-    json_get_optional(doc, obj.obj_get("search_time"), info.search_time);
-    json_get_optional(doc, obj.obj_get("trail_time"), info.trail_time);
-    json_get_optional(doc, obj.obj_get("last_sighting"), info.last_sighting);
-    json_get_optional(doc, obj.obj_get("attack_state"), info.attack_state);
-    json_get_optional(doc, obj.obj_get("lefty"), info.lefty);
-    json_get_optional(doc, obj.obj_get("idle_time"), info.idle_time);
+    json_get_optional(doc, obj["saved_goal"], info.saved_goal);
+    json_get_optional(doc, obj["search_time"], info.search_time);
+    json_get_optional(doc, obj["trail_time"], info.trail_time);
+    json_get_optional(doc, obj["last_sighting"], info.last_sighting);
+    obj["attack_state"].get_enum(info.attack_state);
+    obj["lefty"].get(info.lefty);
+    json_get_optional(doc, obj["idle_time"], info.idle_time);
 
-    json_get_optional(doc, obj.obj_get("power_armor_type"), info.power_armor_type);
-    json_get_optional(doc, obj.obj_get("power_armor_power"), info.power_armor_power);
-    json_get_optional(doc, obj.obj_get("initial_power_armor_type"), info.initial_power_armor_type);
-    json_get_optional(doc, obj.obj_get("max_power_armor_power"), info.max_power_armor_power);
-    json_get_optional(doc, obj.obj_get("weapon_sound"), info.weapon_sound);
-    json_get_optional(doc, obj.obj_get("engine_sound"), info.engine_sound);
+    obj["power_armor_type"].get_enum(info.power_armor_type);
+    obj["power_armor_power"].get(info.power_armor_power);
+    obj["initial_power_armor_type"].get_enum(info.initial_power_armor_type);
+    obj["max_power_armor_power"].get(info.max_power_armor_power);
+    obj["weapon_sound"].get(info.weapon_sound);
+    obj["engine_sound"].get(info.engine_sound);
     
-    reflect_global_from_name<monsterinfo_blocked_f>(obj.obj_get("blocked").str, info.blocked);
-    json_get_optional(doc, obj.obj_get("medicTries"), info.medicTries);
-    json_get_optional(doc, obj.obj_get("badMedic1"), info.badMedic1);
-    json_get_optional(doc, obj.obj_get("badMedic2"), info.badMedic2);
-    json_get_optional(doc, obj.obj_get("healer"), info.healer);
-    reflect_global_from_name<monsterinfo_duck_f>(obj.obj_get("duck").str, info.duck);
-    reflect_global_from_name<monsterinfo_unduck_f>(obj.obj_get("unduck").str, info.unduck);
-    reflect_global_from_name<monsterinfo_sidestep_f>(obj.obj_get("sidestep").str, info.sidestep);
-    json_get_optional(doc, obj.obj_get("base_height"), info.base_height);
-    json_get_optional(doc, obj.obj_get("next_duck_time"), info.next_duck_time);
-    json_get_optional(doc, obj.obj_get("duck_wait_time"), info.duck_wait_time);
-    json_get_optional(doc, obj.obj_get("last_player_enemy"), info.last_player_enemy);
-    json_get_optional(doc, obj.obj_get("blindfire"), info.blindfire);
-    json_get_optional(doc, obj.obj_get("can_jump"), info.can_jump);
-    json_get_optional(doc, obj.obj_get("had_visibility"), info.had_visibility);
-    json_get_optional(doc, obj.obj_get("drop_height"), info.drop_height);
-    json_get_optional(doc, obj.obj_get("jump_height"), info.jump_height);
-    json_get_optional(doc, obj.obj_get("blind_fire_delay"), info.blind_fire_delay);
-    json_get_optional(doc, obj.obj_get("blind_fire_target"), info.blind_fire_target);
-    json_get_optional(doc, obj.obj_get("slots_from_commander"), info.slots_from_commander);
-    json_get_optional(doc, obj.obj_get("monster_slots"), info.monster_slots);
-    json_get_optional(doc, obj.obj_get("monster_used"), info.monster_used);
-    json_get_optional(doc, obj.obj_get("commander"), info.commander);
-    json_get_optional(doc, obj.obj_get("quad_time"), info.quad_time);
-    json_get_optional(doc, obj.obj_get("invincible_time"), info.invincible_time);
-    json_get_optional(doc, obj.obj_get("double_time"), info.double_time);
+    reflect_global_from_name<monsterinfo_blocked_f>(obj["blocked"].str, info.blocked);
+    obj["medicTries"].get(info.medicTries);
+    json_get_optional(doc, obj["badMedic1"], info.badMedic1);
+    json_get_optional(doc, obj["badMedic2"], info.badMedic2);
+    json_get_optional(doc, obj["healer"], info.healer);
+    reflect_global_from_name<monsterinfo_duck_f>(obj["duck"].str, info.duck);
+    reflect_global_from_name<monsterinfo_unduck_f>(obj["unduck"].str, info.unduck);
+    reflect_global_from_name<monsterinfo_sidestep_f>(obj["sidestep"].str, info.sidestep);
+    obj["base_height"].get(info.base_height);
+    json_get_optional(doc, obj["next_duck_time"], info.next_duck_time);
+    json_get_optional(doc, obj["duck_wait_time"], info.duck_wait_time);
+    json_get_optional(doc, obj["last_player_enemy"], info.last_player_enemy);
+    obj["blindfire"].get(info.blindfire);
+    obj["can_jump"].get(info.can_jump);
+    obj["had_visibility"].get(info.had_visibility);
+    obj["drop_height"].get(info.drop_height);
+    obj["jump_height"].get(info.jump_height);
+    json_get_optional(doc, obj["blind_fire_delay"], info.blind_fire_delay);
+    json_get_optional(doc, obj["blind_fire_target"], info.blind_fire_target);
+    obj["slots_from_commander"].get(info.slots_from_commander);
+    obj["monster_slots"].get(info.monster_slots);
+    obj["monster_used"].get(info.monster_used);
+    json_get_optional(doc, obj["commander"], info.commander);
+    json_get_optional(doc, obj["quad_time"], info.quad_time);
+    json_get_optional(doc, obj["invincible_time"], info.invincible_time);
+    json_get_optional(doc, obj["double_time"], info.double_time);
 
-    json_get_optional(doc, obj.obj_get("surprise_time"), info.surprise_time);
-    json_get_optional(doc, obj.obj_get("armor_type"), info.armor_type);
-    json_get_optional(doc, obj.obj_get("armor_power"), info.armor_power);
-    json_get_optional(doc, obj.obj_get("close_sight_tripped"), info.close_sight_tripped);
-    json_get_optional(doc, obj.obj_get("melee_debounce_time"), info.melee_debounce_time);
-    json_get_optional(doc, obj.obj_get("strafe_check_time"), info.strafe_check_time);
-    json_get_optional(doc, obj.obj_get("base_health"), info.base_health);
-    json_get_optional(doc, obj.obj_get("health_scaling"), info.health_scaling);
-    json_get_optional(doc, obj.obj_get("next_move_time"), info.next_move_time);
-    json_get_optional(doc, obj.obj_get("bad_move_time"), info.bad_move_time);
-    json_get_optional(doc, obj.obj_get("bump_time"), info.bump_time);
-    json_get_optional(doc, obj.obj_get("random_change_time"), info.random_change_time);
-    json_get_optional(doc, obj.obj_get("path_blocked_counter"), info.path_blocked_counter);
-    json_get_optional(doc, obj.obj_get("path_wait_time"), info.path_wait_time);
-    json_get_optional(doc, obj.obj_get("combat_style"), info.combat_style);
+    json_get_optional(doc, obj["surprise_time"], info.surprise_time);
+    obj["armor_type"].get_enum(info.armor_type);
+    obj["armor_power"].get(info.armor_power);
+    obj["close_sight_tripped"].get(info.close_sight_tripped);
+    json_get_optional(doc, obj["melee_debounce_time"], info.melee_debounce_time);
+    json_get_optional(doc, obj["strafe_check_time"], info.strafe_check_time);
+    obj["base_health"].get(info.base_health);
+    obj["health_scaling"].get(info.health_scaling);
+    json_get_optional(doc, obj["next_move_time"], info.next_move_time);
+    json_get_optional(doc, obj["bad_move_time"], info.bad_move_time);
+    json_get_optional(doc, obj["bump_time"], info.bump_time);
+    json_get_optional(doc, obj["random_change_time"], info.random_change_time);
+    json_get_optional(doc, obj["path_blocked_counter"], info.path_blocked_counter);
+    json_get_optional(doc, obj["path_wait_time"], info.path_wait_time);
+    obj["combat_style"].get_enum(info.combat_style);
     
-    json_get_optional(doc, obj.obj_get("fly_max_distance"), info.fly_max_distance);
-    json_get_optional(doc, obj.obj_get("fly_min_distance"), info.fly_min_distance);
-    json_get_optional(doc, obj.obj_get("fly_acceleration"), info.fly_acceleration);
-    json_get_optional(doc, obj.obj_get("fly_speed"), info.fly_speed);
-    json_get_optional(doc, obj.obj_get("fly_ideal_position"), info.fly_ideal_position);
-    json_get_optional(doc, obj.obj_get("fly_position_time"), info.fly_position_time);
-    json_get_optional(doc, obj.obj_get("fly_buzzard"), info.fly_buzzard);
-    json_get_optional(doc, obj.obj_get("fly_above"), info.fly_above);
-    json_get_optional(doc, obj.obj_get("fly_pinned"), info.fly_pinned);
-    json_get_optional(doc, obj.obj_get("fly_thrusters"), info.fly_thrusters);
-    json_get_optional(doc, obj.obj_get("fly_recovery_time"), info.fly_recovery_time);
-    json_get_optional(doc, obj.obj_get("fly_recovery_dir"), info.fly_recovery_dir);
+    obj["fly_max_distance"].get(info.fly_max_distance);
+    obj["fly_min_distance"].get(info.fly_min_distance);
+    obj["fly_acceleration"].get(info.fly_acceleration);
+    obj["fly_speed"].get(info.fly_speed);
+    json_get_optional(doc, obj["fly_ideal_position"], info.fly_ideal_position);
+    json_get_optional(doc, obj["fly_position_time"], info.fly_position_time);
+    obj["fly_buzzard"].get(info.fly_buzzard);
+    obj["fly_above"].get(info.fly_above);
+    obj["fly_pinned"].get(info.fly_pinned);
+    obj["fly_thrusters"].get(info.fly_thrusters);
+    json_get_optional(doc, obj["fly_recovery_time"], info.fly_recovery_time);
+    json_get_optional(doc, obj["fly_recovery_dir"], info.fly_recovery_dir);
     
-    json_get_optional(doc, obj.obj_get("checkattack_time"), info.checkattack_time);
-    json_get_optional(doc, obj.obj_get("start_frame"), info.start_frame);
-    json_get_optional(doc, obj.obj_get("dodge_time"), info.dodge_time);
-    json_get_optional(doc, obj.obj_get("move_block_counter"), info.move_block_counter);
-    json_get_optional(doc, obj.obj_get("move_block_change_time"), info.move_block_change_time);
-    json_get_optional(doc, obj.obj_get("react_to_damage_time"), info.react_to_damage_time);
-    json_get_optional(doc, obj.obj_get("jump_time"), info.jump_time);
+    json_get_optional(doc, obj["checkattack_time"], info.checkattack_time);
+    obj["start_frame"].get(info.start_frame);
+    json_get_optional(doc, obj["dodge_time"], info.dodge_time);
+    obj["move_block_counter"].get(info.move_block_counter);
+    json_get_optional(doc, obj["move_block_change_time"], info.move_block_change_time);
+    json_get_optional(doc, obj["react_to_damage_time"], info.react_to_damage_time);
+    json_get_optional(doc, obj["jump_time"], info.jump_time);
 
     // AS_TODO reinforcements
     // AS_TODO chosen_reinforcements
@@ -1513,8 +1376,6 @@ json_mutval WriteEntity(json_mutdoc &doc, ASEntity &ent)
     json_add_optional(doc, obj, "beam", ent.beam);
     json_add_optional(doc, obj, "beam2", ent.beam2);
     json_add_optional(doc, obj, "proboscus", ent.proboscus);
-    json_add_optional(doc, obj, "disintegrator", ent.disintegrator);
-    json_add_optional(doc, obj, "disintegrator_time", ent.disintegrator_time);
     json_add_optional(doc, obj, "hackflags", ent.hackflags);
 
     // AS_TODO fog, heightfog
@@ -1551,183 +1412,181 @@ void ReadEntity(json_doc &doc, json_val obj, ASEntity &ent)
 {
     edict_t @e = ent.e;
 
-    json_get_optional(doc, obj.obj_get("s.origin"), e.s.origin);
-    json_get_optional(doc, obj.obj_get("s.angles"), e.s.angles);
-    json_get_optional(doc, obj.obj_get("s.old_origin"), e.s.old_origin);
-    json_get_optional(doc, obj.obj_get("s.modelindex"), e.s.modelindex);
-    json_get_optional(doc, obj.obj_get("s.modelindex2"), e.s.modelindex2);
-    json_get_optional(doc, obj.obj_get("s.modelindex3"), e.s.modelindex3);
-    json_get_optional(doc, obj.obj_get("s.modelindex4"), e.s.modelindex4);
-    json_get_optional(doc, obj.obj_get("s.frame"), e.s.frame);
-    json_get_optional(doc, obj.obj_get("s.skinnum"), e.s.skinnum);
-    json_get_optional(doc, obj.obj_get("s.effects"), e.s.effects);
-    json_get_optional(doc, obj.obj_get("s.renderfx"), e.s.renderfx);
-    json_get_optional(doc, obj.obj_get("s.sound"), e.s.sound);
-    json_get_optional(doc, obj.obj_get("s.alpha"), e.s.alpha);
-    json_get_optional(doc, obj.obj_get("s.scale"), e.s.scale);
-    json_get_optional(doc, obj.obj_get("s.loop_volume"), e.s.loop_volume);
-    json_get_optional(doc, obj.obj_get("s.loop_attenuation"), e.s.loop_attenuation);
+    json_get_optional(doc, obj["s.origin"], e.s.origin);
+    json_get_optional(doc, obj["s.angles"], e.s.angles);
+    json_get_optional(doc, obj["s.old_origin"], e.s.old_origin);
+    obj["s.modelindex"].get(e.s.modelindex);
+    obj["s.modelindex2"].get(e.s.modelindex2);
+    obj["s.modelindex3"].get(e.s.modelindex3);
+    obj["s.modelindex4"].get(e.s.modelindex4);
+    obj["s.frame"].get(e.s.frame);
+    obj["s.skinnum"].get(e.s.skinnum);
+    obj["s.effects"].get_enum(e.s.effects);
+    obj["s.renderfx"].get_enum(e.s.renderfx);
+    obj["s.sound"].get(e.s.sound);
+    obj["s.alpha"].get(e.s.alpha);
+    obj["s.scale"].get(e.s.scale);
+    obj["s.loop_volume"].get(e.s.loop_volume);
+    obj["s.loop_attenuation"].get(e.s.loop_attenuation);
 
-    json_get_optional(doc, obj.obj_get("svflags"), e.svflags);
-    json_get_optional(doc, obj.obj_get("mins"), e.mins);
-    json_get_optional(doc, obj.obj_get("maxs"), e.maxs);
-    json_get_optional(doc, obj.obj_get("solid"), e.solid);
-    json_get_optional(doc, obj.obj_get("clipmask"), e.clipmask);
-    json_get_optional(doc, obj.obj_get("owner"), e.owner);
+    obj["svflags"].get_enum(e.svflags);
+    json_get_optional(doc, obj["mins"], e.mins);
+    json_get_optional(doc, obj["maxs"], e.maxs);
+    obj["solid"].get_enum(e.solid);
+    obj["clipmask"].get_enum(e.clipmask);
+    json_get_optional(doc, obj["owner"], e.owner);
 
-    json_get_optional(doc, obj.obj_get("spawn_count"), ent.spawn_count);
-    json_get_optional(doc, obj.obj_get("movetype"), ent.movetype);
-    json_get_optional(doc, obj.obj_get("flags"), ent.flags);
+    obj["spawn_count"].get_enum(ent.spawn_count);
+    obj["movetype"].get_enum(ent.movetype);
+    obj["flags"].get_enum(ent.flags);
 
-    json_get_optional(doc, obj.obj_get("model"), ent.model);
-    json_get_optional(doc, obj.obj_get("freetime"), ent.freetime);
-    json_get_optional(doc, obj.obj_get("message"), ent.message);
-    json_get_optional(doc, obj.obj_get("classname"), ent.classname);
-    json_get_optional(doc, obj.obj_get("spawnflags"), ent.spawnflags);
+    obj["model"].get(ent.model);
+    json_get_optional(doc, obj["freetime"], ent.freetime);
+    obj["message"].get(ent.message);
+    obj["classname"].get(ent.classname);
+    json_get_optional(doc, obj["spawnflags"], ent.spawnflags);
 
-    json_get_optional(doc, obj.obj_get("timestamp"), ent.timestamp);
+    json_get_optional(doc, obj["timestamp"], ent.timestamp);
 
-    json_get_optional(doc, obj.obj_get("angle"), ent.angle);
-    json_get_optional(doc, obj.obj_get("target"), ent.target);
-    json_get_optional(doc, obj.obj_get("targetname"), ent.targetname);
-    json_get_optional(doc, obj.obj_get("killtarget"), ent.killtarget);
-    json_get_optional(doc, obj.obj_get("team"), ent.team);
-    json_get_optional(doc, obj.obj_get("pathtarget"), ent.pathtarget);
-    json_get_optional(doc, obj.obj_get("deathtarget"), ent.deathtarget);
-    json_get_optional(doc, obj.obj_get("healthtarget"), ent.healthtarget);
-    json_get_optional(doc, obj.obj_get("itemtarget"), ent.itemtarget);
-    json_get_optional(doc, obj.obj_get("combattarget"), ent.combattarget);
-    json_get_optional(doc, obj.obj_get("target_ent"), ent.target_ent);
+    obj["angle"].get(ent.angle);
+    obj["target"].get(ent.target);
+    obj["targetname"].get(ent.targetname);
+    obj["killtarget"].get(ent.killtarget);
+    obj["team"].get(ent.team);
+    obj["pathtarget"].get(ent.pathtarget);
+    obj["deathtarget"].get(ent.deathtarget);
+    obj["healthtarget"].get(ent.healthtarget);
+    obj["itemtarget"].get(ent.itemtarget);
+    obj["combattarget"].get(ent.combattarget);
+    json_get_optional(doc, obj["target_ent"], ent.target_ent);
 
-    json_get_optional(doc, obj.obj_get("speed"), ent.speed);
-    json_get_optional(doc, obj.obj_get("accel"), ent.accel);
-    json_get_optional(doc, obj.obj_get("decel"), ent.decel);
-    json_get_optional(doc, obj.obj_get("movedir"), ent.movedir);
-    json_get_optional(doc, obj.obj_get("pos1"), ent.pos1);
-    json_get_optional(doc, obj.obj_get("pos2"), ent.pos2);
-    json_get_optional(doc, obj.obj_get("pos3"), ent.pos3);
+    obj["speed"].get(ent.speed);
+    obj["accel"].get(ent.accel);
+    obj["decel"].get(ent.decel);
+    json_get_optional(doc, obj["movedir"], ent.movedir);
+    json_get_optional(doc, obj["pos1"], ent.pos1);
+    json_get_optional(doc, obj["pos2"], ent.pos2);
+    json_get_optional(doc, obj["pos3"], ent.pos3);
 
-    json_get_optional(doc, obj.obj_get("velocity"), ent.velocity);
-    json_get_optional(doc, obj.obj_get("avelocity"), ent.avelocity);
-    json_get_optional(doc, obj.obj_get("mass"), ent.mass);
-    json_get_optional(doc, obj.obj_get("air_finished"), ent.air_finished);
-    json_get_optional(doc, obj.obj_get("gravity"), ent.gravity, 1.0f);
+    json_get_optional(doc, obj["velocity"], ent.velocity);
+    json_get_optional(doc, obj["avelocity"], ent.avelocity);
+    obj["mass"].get(ent.mass);
+    json_get_optional(doc, obj["air_finished"], ent.air_finished);
+    json_get_optional(doc, obj["gravity"], ent.gravity, 1.0f);
 
-    json_get_optional(doc, obj.obj_get("goalentity"), ent.goalentity);
-    json_get_optional(doc, obj.obj_get("movetarget"), ent.movetarget);
-    json_get_optional(doc, obj.obj_get("yaw_speed"), ent.yaw_speed);
-    json_get_optional(doc, obj.obj_get("ideal_yaw"), ent.ideal_yaw);
+    json_get_optional(doc, obj["goalentity"], ent.goalentity);
+    json_get_optional(doc, obj["movetarget"], ent.movetarget);
+    obj["yaw_speed"].get(ent.yaw_speed);
+    obj["ideal_yaw"].get(ent.ideal_yaw);
 
-    json_get_optional(doc, obj.obj_get("nextthink"), ent.nextthink);
-    reflect_global_from_name<prethink_f>(obj.obj_get("prethink").str, ent.prethink);
-    reflect_global_from_name<postthink_f>(obj.obj_get("postthink").str, ent.postthink);
-    reflect_global_from_name<think_f>(obj.obj_get("think").str, ent.think);
-    reflect_global_from_name<touch_f>(obj.obj_get("touch").str, ent.touch);
-    reflect_global_from_name<use_f>(obj.obj_get("use").str, ent.use);
-    reflect_global_from_name<pain_f>(obj.obj_get("pain").str, ent.pain);
-    reflect_global_from_name<die_f>(obj.obj_get("die").str, ent.die);
+    json_get_optional(doc, obj["nextthink"], ent.nextthink);
+    reflect_global_from_name<prethink_f>(obj["prethink"].str, ent.prethink);
+    reflect_global_from_name<postthink_f>(obj["postthink"].str, ent.postthink);
+    reflect_global_from_name<think_f>(obj["think"].str, ent.think);
+    reflect_global_from_name<touch_f>(obj["touch"].str, ent.touch);
+    reflect_global_from_name<use_f>(obj["use"].str, ent.use);
+    reflect_global_from_name<pain_f>(obj["pain"].str, ent.pain);
+    reflect_global_from_name<die_f>(obj["die"].str, ent.die);
 
-    json_get_optional(doc, obj.obj_get("touch_debounce_time"), ent.touch_debounce_time);
-    json_get_optional(doc, obj.obj_get("pain_debounce_time"), ent.pain_debounce_time);
-    json_get_optional(doc, obj.obj_get("damage_debounce_time"), ent.damage_debounce_time);
-    json_get_optional(doc, obj.obj_get("fly_sound_debounce_time"), ent.fly_sound_debounce_time);
-    json_get_optional(doc, obj.obj_get("last_move_time"), ent.last_move_time);
+    json_get_optional(doc, obj["touch_debounce_time"], ent.touch_debounce_time);
+    json_get_optional(doc, obj["pain_debounce_time"], ent.pain_debounce_time);
+    json_get_optional(doc, obj["damage_debounce_time"], ent.damage_debounce_time);
+    json_get_optional(doc, obj["fly_sound_debounce_time"], ent.fly_sound_debounce_time);
+    json_get_optional(doc, obj["last_move_time"], ent.last_move_time);
 
-    json_get_optional(doc, obj.obj_get("health"), ent.health);
-    json_get_optional(doc, obj.obj_get("max_health"), ent.max_health);
-    json_get_optional(doc, obj.obj_get("gib_health"), ent.gib_health);
-    json_get_optional(doc, obj.obj_get("deadflag"), ent.deadflag);
-    json_get_optional(doc, obj.obj_get("show_hostile"), ent.show_hostile);
+    obj["health"].get(ent.health);
+    obj["max_health"].get(ent.max_health);
+    obj["gib_health"].get(ent.gib_health);
+    obj["deadflag"].get(ent.deadflag);
+    json_get_optional(doc, obj["show_hostile"], ent.show_hostile);
 
-    json_get_optional(doc, obj.obj_get("powerarmor_time"), ent.powerarmor_time);
+    json_get_optional(doc, obj["powerarmor_time"], ent.powerarmor_time);
 
-    json_get_optional(doc, obj.obj_get("map"), ent.map);
+    obj["map"].get(ent.map);
 
-    json_get_optional(doc, obj.obj_get("viewheight"), ent.viewheight);
-    json_get_optional(doc, obj.obj_get("takedamage"), ent.takedamage);
-    json_get_optional(doc, obj.obj_get("dmg"), ent.dmg);
-    json_get_optional(doc, obj.obj_get("radius_dmg"), ent.radius_dmg);
-    json_get_optional(doc, obj.obj_get("dmg_radius"), ent.dmg_radius);
-    json_get_optional(doc, obj.obj_get("sounds"), ent.sounds);
-    json_get_optional(doc, obj.obj_get("count"), ent.count);
+    obj["viewheight"].get(ent.viewheight);
+    obj["takedamage"].get(ent.takedamage);
+    obj["dmg"].get(ent.dmg);
+    obj["radius_dmg"].get(ent.radius_dmg);
+    obj["dmg_radius"].get(ent.dmg_radius);
+    obj["sounds"].get(ent.sounds);
+    obj["count"].get(ent.count);
 
-    json_get_optional(doc, obj.obj_get("chain"), ent.chain);
-    json_get_optional(doc, obj.obj_get("enemy"), ent.enemy);
-    json_get_optional(doc, obj.obj_get("oldenemy"), ent.oldenemy);
-    json_get_optional(doc, obj.obj_get("activator"), ent.activator);
-    json_get_optional(doc, obj.obj_get("groundentity"), ent.groundentity);
-    json_get_optional(doc, obj.obj_get("groundentity_linkcount"), ent.groundentity_linkcount);
-    json_get_optional(doc, obj.obj_get("teamchain"), ent.teamchain);
-    json_get_optional(doc, obj.obj_get("teammaster"), ent.teammaster);
+    json_get_optional(doc, obj["chain"], ent.chain);
+    json_get_optional(doc, obj["enemy"], ent.enemy);
+    json_get_optional(doc, obj["oldenemy"], ent.oldenemy);
+    json_get_optional(doc, obj["activator"], ent.activator);
+    json_get_optional(doc, obj["groundentity"], ent.groundentity);
+    obj["groundentity_linkcount"].get(ent.groundentity_linkcount);
+    json_get_optional(doc, obj["teamchain"], ent.teamchain);
+    json_get_optional(doc, obj["teammaster"], ent.teammaster);
 
-    json_get_optional(doc, obj.obj_get("noise_index"), ent.noise_index);
-    json_get_optional(doc, obj.obj_get("noise_index2"), ent.noise_index2);
-    json_get_optional(doc, obj.obj_get("volume"), ent.volume);
-    json_get_optional(doc, obj.obj_get("attenuation"), ent.attenuation);
+    obj["noise_index"].get(ent.noise_index);
+    obj["noise_index2"].get(ent.noise_index2);
+    obj["volume"].get(ent.volume);
+    obj["attenuation"].get(ent.attenuation);
 
-    json_get_optional(doc, obj.obj_get("wait"), ent.wait);
-    json_get_optional(doc, obj.obj_get("delay"), ent.delay);
-    json_get_optional(doc, obj.obj_get("random"), ent.random);
+    obj["wait"].get(ent.wait);
+    obj["delay"].get(ent.delay);
+    obj["random"].get(ent.random);
 
-    json_get_optional(doc, obj.obj_get("teleport_time"), ent.teleport_time);
+    json_get_optional(doc, obj["teleport_time"], ent.teleport_time);
 
-    json_get_optional(doc, obj.obj_get("watertype"), ent.watertype);
-    json_get_optional(doc, obj.obj_get("waterlevel"), ent.waterlevel);
+    obj["watertype"].get_enum(ent.watertype);
+    obj["waterlevel"].get_enum(ent.waterlevel);
 
-    json_get_optional(doc, obj.obj_get("move_origin"), ent.move_origin);
-    json_get_optional(doc, obj.obj_get("move_angles"), ent.move_angles);
+    json_get_optional(doc, obj["move_origin"], ent.move_origin);
+    json_get_optional(doc, obj["move_angles"], ent.move_angles);
 
-    json_get_optional(doc, obj.obj_get("style"), ent.style);
-    json_get_optional(doc, obj.obj_get("style_on"), ent.style_on);
-    json_get_optional(doc, obj.obj_get("style_off"), ent.style_off);
+    obj["style"].get(ent.style);
+    obj["style_on"].get(ent.style_on);
+    obj["style_off"].get(ent.style_off);
 
-    json_get_optional(doc, obj.obj_get("item"), ent.item);
-    json_get_optional(doc, obj.obj_get("crosslevel_flags"), ent.crosslevel_flags);
-    json_get_optional(doc, obj.obj_get("no_gravity_time"), ent.no_gravity_time);
+    json_get_optional(doc, obj["item"], ent.item);
+    obj["crosslevel_flags"].get(ent.crosslevel_flags);
+    json_get_optional(doc, obj["no_gravity_time"], ent.no_gravity_time);
 
-    ReadEntityMoveInfo(doc, obj.obj_get("moveinfo"), ent.moveinfo);
-    ReadEntityMonsterInfo(doc, obj.obj_get("monsterinfo"), ent.monsterinfo);
+    ReadEntityMoveInfo(doc, obj["moveinfo"], ent.moveinfo);
+    ReadEntityMonsterInfo(doc, obj["monsterinfo"], ent.monsterinfo);
 
-    json_get_optional(doc, obj.obj_get("plat2flags"), ent.plat2flags);
-    json_get_optional(doc, obj.obj_get("offset"), ent.offset);
-    json_get_optional(doc, obj.obj_get("gravityVector"), ent.gravityVector, { 0, 0, -1});
-    json_get_optional(doc, obj.obj_get("bad_area"), ent.bad_area);
+    obj["plat2flags"].get_enum(ent.plat2flags);
+    json_get_optional(doc, obj["offset"], ent.offset);
+    json_get_optional(doc, obj["gravityVector"], ent.gravityVector, { 0, 0, -1});
+    json_get_optional(doc, obj["bad_area"], ent.bad_area);
 
-    json_get_optional(doc, obj.obj_get("clock_message"), ent.clock_message);
-    json_get_optional(doc, obj.obj_get("dead_time"), ent.dead_time);
-    json_get_optional(doc, obj.obj_get("beam"), ent.beam);
-    json_get_optional(doc, obj.obj_get("beam2"), ent.beam2);
-    json_get_optional(doc, obj.obj_get("proboscus"), ent.proboscus);
-    json_get_optional(doc, obj.obj_get("disintegrator"), ent.disintegrator);
-    json_get_optional(doc, obj.obj_get("disintegrator_time"), ent.disintegrator_time);
-    json_get_optional(doc, obj.obj_get("hackflags"), ent.hackflags);
+    obj["clock_message"].get(ent.clock_message);
+    json_get_optional(doc, obj["dead_time"], ent.dead_time);
+    json_get_optional(doc, obj["beam"], ent.beam);
+    json_get_optional(doc, obj["beam2"], ent.beam2);
+    json_get_optional(doc, obj["proboscus"], ent.proboscus);
+    obj["hackflags"].get(ent.hackflags);
 
     // AS_TODO fog, heightfog
     // AS_TODO item_picked_up_by
 
-    json_get_optional(doc, obj.obj_get("slime_debounce_time"), ent.slime_debounce_time);
+    json_get_optional(doc, obj["slime_debounce_time"], ent.slime_debounce_time);
 
-    json_get_optional(doc, obj.obj_get("bmodel_anim.start"), ent.bmodel_anim.start);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.end"), ent.bmodel_anim.end);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.style"), ent.bmodel_anim.style);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.speed"), ent.bmodel_anim.speed);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.nowrap"), ent.bmodel_anim.nowrap);
+    obj["bmodel_anim.start"].get(ent.bmodel_anim.start);
+    obj["bmodel_anim.end"].get(ent.bmodel_anim.end);
+    obj["bmodel_anim.style"].get_enum(ent.bmodel_anim.style);
+    obj["bmodel_anim.speed"].get(ent.bmodel_anim.speed);
+    obj["bmodel_anim.nowrap"].get(ent.bmodel_anim.nowrap);
 
-    json_get_optional(doc, obj.obj_get("bmodel_anim.alt_start"), ent.bmodel_anim.alt_start);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.alt_end"), ent.bmodel_anim.alt_end);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.alt_style"), ent.bmodel_anim.alt_style);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.alt_speed"), ent.bmodel_anim.alt_speed);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.alt_nowrap"), ent.bmodel_anim.alt_nowrap);
+    obj["bmodel_anim.alt_start"].get(ent.bmodel_anim.alt_start);
+    obj["bmodel_anim.alt_end"].get(ent.bmodel_anim.alt_end);
+    obj["bmodel_anim.alt_style"].get_enum(ent.bmodel_anim.alt_style);
+    obj["bmodel_anim.alt_speed"].get(ent.bmodel_anim.alt_speed);
+    obj["bmodel_anim.alt_nowrap"].get(ent.bmodel_anim.alt_nowrap);
 
-    json_get_optional(doc, obj.obj_get("bmodel_anim.enabled"), ent.bmodel_anim.enabled);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.alternate"), ent.bmodel_anim.alternate);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.currently_alternate"), ent.bmodel_anim.currently_alternate);
-    json_get_optional(doc, obj.obj_get("bmodel_anim.next_tick"), ent.bmodel_anim.next_tick);
+    obj["bmodel_anim.enabled"].get(ent.bmodel_anim.enabled);
+    obj["bmodel_anim.alternate"].get(ent.bmodel_anim.alternate);
+    obj["bmodel_anim.currently_alternate"].get(ent.bmodel_anim.currently_alternate);
+    json_get_optional(doc, obj["bmodel_anim.next_tick"], ent.bmodel_anim.next_tick);
 
-    json_get_optional(doc, obj.obj_get("lastMOD.id"), ent.lastMOD.id);
-    json_get_optional(doc, obj.obj_get("lastMOD.friendly_fire"), ent.lastMOD.friendly_fire);
+    obj["lastMOD.id"].get_enum(ent.lastMOD.id);
+    obj["lastMOD.friendly_fire"].get(ent.lastMOD.friendly_fire);
 
-    json_get_optional(doc, obj.obj_get("vision_cone"), ent.vision_cone);
+    obj["vision_cone"].get(ent.vision_cone);
 }
 
 void WriteLevel(bool transition, json_mutdoc &doc)
@@ -1812,7 +1671,7 @@ void ReadLevel(json_doc &doc)
     uint save_version = uint(v.num);
 
 	// read level
-    ReadLevelLocals(doc, root.obj_get("level"));
+    ReadLevelLocals(doc, root["level"]);
 	upgrade_level(doc, root, save_version);
 
     v = root.obj_get("entities");

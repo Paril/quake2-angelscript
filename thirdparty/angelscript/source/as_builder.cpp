@@ -11,15 +11,15 @@
    redistribute it freely, subject to the following restrictions:
 
    1. The origin of this software must not be misrepresented; you
-	  must not claim that you wrote the original software. If you use
-	  this software in a product, an acknowledgment in the product
-	  documentation would be appreciated but is not required.
+      must not claim that you wrote the original software. If you use
+      this software in a product, an acknowledgment in the product
+      documentation would be appreciated but is not required.
 
    2. Altered source versions must be plainly marked as such, and
-	  must not be misrepresented as being the original software.
+      must not be misrepresented as being the original software.
 
    3. This notice may not be removed or altered from any source
-	  distribution.
+      distribution.
 
    The original version of this library can be located at:
    http://www.angelcode.com/angelscript/
@@ -2271,8 +2271,8 @@ int asCBuilder::RegisterUsingNamespace(asCScriptNode *node, asCScriptCode *file,
 
 	while (n->next)
 	{
-		n = n->next;
-		name += "::" + asCString(&file->code[n->tokenPos], n->tokenLength);
+	    n = n->next;
+	    name += "::" + asCString(&file->code[n->tokenPos], n->tokenLength);
 	}
 
 	asSNameSpace* visibleNamespace = engine->AddNameSpace(name.AddressOf());
@@ -2305,7 +2305,7 @@ int asCBuilder::RegisterMixinClass(asCScriptNode *node, asCScriptCode *file, asS
 	// Skip potential decorator tokens
 	while( n->tokenType == ttIdentifier &&
 		   (file->TokenEquals(n->tokenPos, n->tokenLength, FINAL_TOKEN) ||
-			file->TokenEquals(n->tokenPos, n->tokenLength, SHARED_TOKEN) ||
+		    file->TokenEquals(n->tokenPos, n->tokenLength, SHARED_TOKEN) ||
 			file->TokenEquals(n->tokenPos, n->tokenLength, ABSTRACT_TOKEN) ||
 			file->TokenEquals(n->tokenPos, n->tokenLength, EXTERNAL_TOKEN)) )
 	{
@@ -3255,56 +3255,8 @@ void asCBuilder::DetermineTypeRelations()
 				continue;
 			}
 
-			bool ok = true;
-			asCArray<asSNameSpace*> pendingNamespaces;
-			asCArray<asSNameSpace*> visitedNamespaces;
-			bool checkAmbiguousSymbols = !isExplicitNs;
-			asSNameSpace* parentNs = engine->GetParentNameSpace(ns);
-
-			// TODO: using: Can't this use symbol lookup?
-			// Find the object type for the interface
-			asCObjectType *objType = 0;
-			while (ns)
-			{
-				if (!visitedNamespaces.Exists(ns))
-				{
-					visitedNamespaces.PushLast(ns);
-
-					if (!checkAmbiguousSymbols)
-					{
-						objType = GetObjectType(name.AddressOf(), ns);
-						if (objType)
-							break;
-					}
-					else
-					{
-						asCObjectType* ot = GetObjectType(name.AddressOf(), ns);
-
-						if (objType && ot)
-						{
-							asCString msg;
-							msg.Format(TXT_AMBIGUOUS_SYMBOL_NAME_s, name.AddressOf());
-							WriteError(msg, intfDecl->script, node);
-							objType = 0;
-							ok = false;
-							break;
-						}
-
-						objType = ot;
-					}
-				}
-
-				AddVisibleNamespaces(ns, visitedNamespaces, pendingNamespaces);
-				ns = FindNextVisibleNamespace(visitedNamespaces, pendingNamespaces, parentNs, &checkAmbiguousSymbols);
-				if (ns == parentNs)
-				{
-					// Only move to the parent namespace if the object type hasn't been found yet
-					if (objType)
-						break;
-
-					parentNs = engine->GetParentNameSpace(ns);
-				}
-			}
+			asCObjectType* objType = 0;
+			bool ok = FindObjectTypeOrMixinInNsHierarchy(name, ns, isExplicitNs, node, intfDecl->script, &objType, 0);
 
 			// Check that the object type is an interface
 			if (ok)
@@ -3385,7 +3337,6 @@ void asCBuilder::DetermineTypeRelations()
 		{
 			asSNameSpace *ns;
 			asCString name;
-			bool ok = true;
 			bool isExplicitNs = false;
 			if (GetNamespaceAndNameFromNode(node, file, decl->typeInfo->nameSpace, ns, name, &isExplicitNs) < 0)
 			{
@@ -3397,64 +3348,8 @@ void asCBuilder::DetermineTypeRelations()
 			asCObjectType *objType = 0;
 			sMixinClass *mixin = 0;
 			asSNameSpace *origNs = ns;
-			
-			asCArray<asSNameSpace*> pendingNamespaces;
-			asCArray<asSNameSpace*> visitedNamespaces;
 
-			bool checkAmbiguousTypes = !isExplicitNs;
-			asSNameSpace* parentNs = engine->GetParentNameSpace(ns);
-			
-			// TODO: clean up: Can't this use symbol lookup?
-			while (ns)
-			{
-				if (!visitedNamespaces.Exists(ns))
-				{
-					visitedNamespaces.PushLast(ns);
-
-					if (!checkAmbiguousTypes)
-					{
-						objType = GetObjectType(name.AddressOf(), ns);
-						if (objType == 0)
-							mixin = GetMixinClass(name.AddressOf(), ns);
-
-						if (objType || mixin)
-							break;
-					}
-					else
-					{
-						asCObjectType* resultObjType = GetObjectType(name.AddressOf(), ns);
-						sMixinClass* resultMixin = 0;
-
-						if (resultObjType == 0)
-							resultMixin = GetMixinClass(name.AddressOf(), ns);
-
-						if ((objType || mixin) && resultObjType)
-						{
-							asCString msg;
-							msg.Format(TXT_AMBIGUOUS_SYMBOL_NAME_s, name.AddressOf());
-							WriteError(msg, file, node);
-							ok = false;
-							objType = 0;
-							mixin = 0;
-							break;
-						}
-
-						objType = resultObjType;
-						mixin = resultMixin;
-					}
-				}
-
-				AddVisibleNamespaces(ns, visitedNamespaces, pendingNamespaces);
-				ns = FindNextVisibleNamespace(visitedNamespaces, pendingNamespaces, parentNs, &checkAmbiguousTypes);
-				if (ns == parentNs)
-				{
-					// Only move to the parent namespace if the object type hasn't been found yet
-					if (objType || mixin)
-						break;
-
-					parentNs = engine->GetParentNameSpace(ns);
-				}
-			}
+			bool ok = FindObjectTypeOrMixinInNsHierarchy(name, ns, isExplicitNs, node, file, &objType, &mixin);
 
 			if (ok)
 			{
@@ -5037,7 +4932,7 @@ int asCBuilder::RegisterTypedef(asCScriptNode *node, asCScriptCode *file, asSNam
 	name.Assign(&file->code[tmp->tokenPos], tmp->tokenLength);
 
 	// If the name is not already in use add it
-	int r = CheckNameConflict(name.AddressOf(), tmp, file, ns, true, false, false);
+ 	int r = CheckNameConflict(name.AddressOf(), tmp, file, ns, true, false, false);
 
 	asCTypedefType *st = 0;
 	if( asSUCCESS == r )
@@ -5753,7 +5648,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 			{
 				// The copy constructor needs to be marked for easy finding
 				if( parameterTypes.GetLength() == 1 && 
-					parameterTypes[0].GetTypeInfo() == objType && 
+				    parameterTypes[0].GetTypeInfo() == objType && 
 					(parameterTypes[0].IsReference() || parameterTypes[0].IsObjectHandle()) )
 				{
 					// Verify that there are not multiple options matching the copy constructor
@@ -6256,6 +6151,72 @@ asCString asCBuilder::GetScopeFromNode(asCScriptNode *node, asCScriptCode *scrip
 	return scope;
 }
 
+bool asCBuilder::FindObjectTypeOrMixinInNsHierarchy(const asCString& name, asSNameSpace* startNs, bool isExplicitNs, asCScriptNode *errNode, asCScriptCode *script, asCObjectType **outObjType, sMixinClass **outMixin)
+{
+	if (outObjType) *outObjType = 0;
+	if (outMixin) *outMixin = 0;
+
+	asSNameSpace* ns = startNs;
+
+	// If not explicit scope, then search the visible namespaces, then search the parent namespaces
+	asCArray<asSNameSpace*> pendingNamespaces;
+	asCArray<asSNameSpace*> visitedNamespaces;
+	bool checkAmbiguousSymbols = !isExplicitNs;
+	asSNameSpace* parentNs = engine->GetParentNameSpace(ns);
+
+	asCObjectType* objType = 0;
+	sMixinClass* mixin = 0;
+	while (ns)
+	{
+		if (!visitedNamespaces.Exists(ns))
+		{
+			visitedNamespaces.PushLast(ns);
+
+			if (!checkAmbiguousSymbols)
+			{
+				objType = GetObjectType(name.AddressOf(), ns);
+				if (objType == 0 && outMixin)
+					mixin = GetMixinClass(name.AddressOf(), ns);
+
+				if (objType || mixin)
+					break;
+			}
+			else
+			{
+				asCObjectType* ot = GetObjectType(name.AddressOf(), ns);
+				sMixinClass* m = 0;
+				if (ot == 0 && outMixin)
+					m = GetMixinClass(name.AddressOf(), ns);
+				if ((objType || mixin) && (ot || m))
+				{
+					asCString msg;
+					msg.Format(TXT_AMBIGUOUS_SYMBOL_NAME_s, name.AddressOf());
+					WriteError(msg, script, errNode);
+					return false;
+				}
+
+				objType = ot;
+				mixin = m;
+			}
+		}
+
+		AddVisibleNamespaces(ns, visitedNamespaces, pendingNamespaces);
+		ns = FindNextVisibleNamespace(visitedNamespaces, pendingNamespaces, parentNs, &checkAmbiguousSymbols);
+		if (ns == parentNs)
+		{
+			// Only move to the parent namespace if the object type hasn't been found yet
+			if (objType || mixin)
+				break;
+
+			parentNs = engine->GetParentNameSpace(ns);
+		}
+	}
+
+	if (outObjType) *outObjType = objType;
+	if (outMixin) *outMixin = mixin;
+	return true;
+}
+
 asSNameSpace *asCBuilder::GetNameSpaceFromNode(asCScriptNode *node, asCScriptCode *script, asSNameSpace *implicitNs, asCScriptNode **next, asCObjectType **objType, bool *isExplicitNs)
 {
 	if (objType)
@@ -6306,8 +6267,11 @@ asSNameSpace *asCBuilder::GetNameSpaceFromNode(asCScriptNode *node, asCScriptCod
 				ns = engine->FindNameSpace(scope.AddressOf());
 
 			asCString templateName(&script->code[sn->tokenPos], sn->tokenLength);
-			asCObjectType *templateType = GetObjectType(templateName.AddressOf(), ns);
-			if (templateType == 0 || (templateType->flags & asOBJ_TEMPLATE) == 0)
+
+			asCObjectType* templateType = 0;
+			bool ok = FindObjectTypeOrMixinInNsHierarchy(templateName, ns, scope != "", sn->next, script, &templateType, 0);
+
+			if (!ok || templateType == 0 || (templateType->flags & asOBJ_TEMPLATE) == 0)
 			{
 				// TODO: child funcdef: Report error
 				return ns;
@@ -6562,7 +6526,7 @@ asCDataType asCBuilder::CreateDataTypeFromNode(asCScriptNode *node, asCScriptCod
 									return asCDataType::CreatePrimitive(ttInt, false);
 								}
 							}
-							else if( n && n->next && n->next->nodeType == snDataType && !(node->parent && node->parent->nodeType == snEnum) )
+							else if (n && n->next && n->next->nodeType == snDataType && !(node->parent && node->parent->nodeType == snEnum))
 							{
 								if (reportError)
 								{

@@ -1833,6 +1833,8 @@ class json_val
 	json_val arr_get_first() const;
 	json_val arr_get_last() const;
 	json_val obj_get(const string &in) const;
+    json_val opIndex(const string &in) const;
+    json_val opIndex(uint64) const;
 }
 class json_doc
 {

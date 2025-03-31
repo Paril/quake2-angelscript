@@ -5699,7 +5699,7 @@ asEContextState asCContext::GetState() const
 }
 
 // interface
-int asCContext::SetLineCallback(asSFuncPtr callback, void *obj, int callConv)
+int asCContext::SetLineCallback(const asSFuncPtr &callback, void *obj, int callConv)
 {
 	// First turn off the line callback to avoid a second thread
 	// attempting to call it while the new one is still being set
@@ -5743,7 +5743,7 @@ void asCContext::CallLineCallback()
 }
 
 // interface
-int asCContext::SetExceptionCallback(asSFuncPtr callback, void *obj, int callConv)
+int asCContext::SetExceptionCallback(const asSFuncPtr &callback, void *obj, int callConv)
 {
 	m_exceptionCallback = true;
 	m_exceptionCallbackObj = obj;
@@ -5773,7 +5773,7 @@ void asCContext::CallExceptionCallback()
 }
 
 // interface
-int asCContext::SetFunctionCallback(asSFuncPtr callback, void *obj, int callConv)
+int asCContext::SetFunctionCallback(const asSFuncPtr &callback, void *obj, int callConv)
 {
 	m_functionCallback = true;
 	m_functionCallbackObj = obj;

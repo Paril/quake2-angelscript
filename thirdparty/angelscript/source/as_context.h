@@ -1,6 +1,6 @@
 /*
    AngelCode Scripting Library
-   Copyright (c) 2003-2024 Andreas Jonsson
+   Copyright (c) 2003-2025 Andreas Jonsson
 
    This software is provided 'as-is', without any express or implied
    warranty. In no event will the authors be held liable for any
@@ -104,12 +104,12 @@ public:
 	asIScriptFunction *GetExceptionFunction();
 	const char *       GetExceptionString();
 	bool               WillExceptionBeCaught();
-	int                SetExceptionCallback(asSFuncPtr callback, void *obj, int callConv);
+	int                SetExceptionCallback(const asSFuncPtr &callback, void *obj, int callConv);
 	void               ClearExceptionCallback();
 
 	// Debugging
-	int                SetLineCallback(asSFuncPtr callback, void *obj, int callConv);
-	int                SetFunctionCallback(asSFuncPtr callback, void *obj, int callConv);
+	int                SetLineCallback(const asSFuncPtr &callback, void *obj, int callConv);
+	int                SetFunctionCallback(const asSFuncPtr &callback, void *obj, int callConv);
 	void               ClearLineCallback();
     void               ClearFunctionCallback();
 	asUINT             GetCallstackSize() const;

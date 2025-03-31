@@ -373,7 +373,7 @@ static int StringCmp(const string &a, const string &b)
 static int StringFindFirst(const string &sub, asUINT start, const string &str)
 {
 	// We don't register the method directly because the argument types change between 32bit and 64bit platforms
-	return (int)str.find(sub, (size_t)(start));
+	return (int)str.find(sub, (size_t)(start < 0 ? string::npos : start));
 }
 
 // This function returns the index of the first position that matches the regular expression
@@ -430,7 +430,7 @@ static int StringRegexFind(const string& rex, asUINT start, asUINT& outLengthOfM
 static int StringFindFirstOf(const string &sub, asUINT start, const string &str)
 {
 	// We don't register the method directly because the argument types change between 32bit and 64bit platforms
-	return (int)str.find_first_of(sub, (size_t)(start));
+	return (int)str.find_first_of(sub, (size_t)(start < 0 ? string::npos : start));
 }
 
 // This function returns the index of the last position where the one of the bytes in substring
@@ -442,7 +442,7 @@ static int StringFindFirstOf(const string &sub, asUINT start, const string &str)
 static int StringFindLastOf(const string &sub, asUINT start, const string &str)
 {
 	// We don't register the method directly because the argument types change between 32bit and 64bit platforms
-	return (int)str.find_last_of(sub, (size_t)(start));
+	return (int)str.find_last_of(sub, (size_t)(start < 0 ? string::npos : start));
 }
 
 // This function returns the index of the first position where a byte other than those in substring
@@ -453,7 +453,7 @@ static int StringFindLastOf(const string &sub, asUINT start, const string &str)
 static int StringFindFirstNotOf(const string &sub, asUINT start, const string &str)
 {
 	// We don't register the method directly because the argument types change between 32bit and 64bit platforms
-	return (int)str.find_first_not_of(sub, (size_t)(start));
+	return (int)str.find_first_not_of(sub, (size_t)(start < 0 ? string::npos : start));
 }
 
 // This function returns the index of the last position where a byte other than those in substring
@@ -464,7 +464,7 @@ static int StringFindFirstNotOf(const string &sub, asUINT start, const string &s
 static int StringFindLastNotOf(const string &sub, asUINT start, const string &str)
 {
 	// We don't register the method directly because the argument types change between 32bit and 64bit platforms
-	return (int)str.find_last_not_of(sub, (size_t)(start));
+	return (int)str.find_last_not_of(sub, (size_t)(start < 0 ? string::npos : start));
 }
 
 // This function returns the index of the last position where the substring

@@ -275,13 +275,13 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "bool get_valid() const property", asMETHOD(q2as_yyjson_val, get_valid), asCALL_THISCALL },
             { "string to_string() const",        asMETHOD(q2as_yyjson_val, as_string), asCALL_THISCALL },
     
-            { "bool get_is_obj() const property",   asMETHOD(q2as_yyjson_val,   is_obj), asCALL_THISCALL },
-            { "bool get_is_arr() const property",   asMETHOD(q2as_yyjson_val,   is_arr), asCALL_THISCALL },
-            { "bool get_is_ctn() const property",   asMETHOD(q2as_yyjson_val,   is_ctn), asCALL_THISCALL },
-            { "bool get_is_true() const property",  asMETHOD(q2as_yyjson_val,  is_true), asCALL_THISCALL },
+            { "bool get_is_obj() const property",   asMETHOD(q2as_yyjson_val, is_obj), asCALL_THISCALL },
+            { "bool get_is_arr() const property",   asMETHOD(q2as_yyjson_val, is_arr), asCALL_THISCALL },
+            { "bool get_is_ctn() const property",   asMETHOD(q2as_yyjson_val, is_ctn), asCALL_THISCALL },
+            { "bool get_is_true() const property",  asMETHOD(q2as_yyjson_val, is_true), asCALL_THISCALL },
             { "bool get_is_false() const property", asMETHOD(q2as_yyjson_val, is_false), asCALL_THISCALL },
-            { "bool get_is_bool() const property",  asMETHOD(q2as_yyjson_val,  is_bool), asCALL_THISCALL },
-            { "bool get_is_str() const property",   asMETHOD(q2as_yyjson_val,   is_str), asCALL_THISCALL },
+            { "bool get_is_bool() const property",  asMETHOD(q2as_yyjson_val, is_bool), asCALL_THISCALL },
+            { "bool get_is_str() const property",   asMETHOD(q2as_yyjson_val, is_str), asCALL_THISCALL },
 
             { "bool get_is_uint8() const property",  asMETHOD(q2as_yyjson_val, is_uint8),  asCALL_THISCALL },
             { "bool get_is_uint16() const property", asMETHOD(q2as_yyjson_val, is_uint16), asCALL_THISCALL },
@@ -294,12 +294,12 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "bool get_is_float() const property",  asMETHOD(q2as_yyjson_val, is_float),  asCALL_THISCALL },
             { "bool get_is_double() const property", asMETHOD(q2as_yyjson_val, is_double), asCALL_THISCALL },
 
-            { "bool get_is_int() const property",  asMETHOD(q2as_yyjson_val,   is_int), asCALL_THISCALL },
-            { "bool get_is_uint() const property", asMETHOD(q2as_yyjson_val,  is_uint), asCALL_THISCALL },
-            { "bool get_is_sint() const property", asMETHOD(q2as_yyjson_val,  is_sint), asCALL_THISCALL },
-            { "bool get_is_real() const property", asMETHOD(q2as_yyjson_val,  is_real), asCALL_THISCALL },
-            { "bool get_is_null() const property", asMETHOD(q2as_yyjson_val,  is_null), asCALL_THISCALL },
-            { "bool get_is_num() const property",  asMETHOD(q2as_yyjson_val,   is_num), asCALL_THISCALL },
+            { "bool get_is_int() const property",  asMETHOD(q2as_yyjson_val, is_int), asCALL_THISCALL },
+            { "bool get_is_uint() const property", asMETHOD(q2as_yyjson_val, is_uint), asCALL_THISCALL },
+            { "bool get_is_sint() const property", asMETHOD(q2as_yyjson_val, is_sint), asCALL_THISCALL },
+            { "bool get_is_real() const property", asMETHOD(q2as_yyjson_val, is_real), asCALL_THISCALL },
+            { "bool get_is_null() const property", asMETHOD(q2as_yyjson_val, is_null), asCALL_THISCALL },
+            { "bool get_is_num() const property",  asMETHOD(q2as_yyjson_val, is_num), asCALL_THISCALL },
     
             { "bool get_bool_() const property", asMETHOD(q2as_yyjson_val,    get_bool), asCALL_THISCALL },
 
@@ -360,7 +360,10 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "json_val arr_get_first() const", asMETHOD(q2as_yyjson_val, arr_get_first), asCALL_THISCALL },
             { "json_val arr_get_last() const",  asMETHOD(q2as_yyjson_val, arr_get_last),  asCALL_THISCALL },
 
-            { "json_val obj_get(const string &in) const", asMETHOD(q2as_yyjson_val, obj_get), asCALL_THISCALL }
+            { "json_val obj_get(const string &in) const", asMETHOD(q2as_yyjson_val, obj_get), asCALL_THISCALL },
+
+            { "json_val opIndex(const string &in) const", asMETHOD(q2as_yyjson_val, obj_get), asCALL_THISCALL },
+            { "json_val opIndex(uint64) const",           asMETHOD(q2as_yyjson_val, arr_get), asCALL_THISCALL }
         });
     
     // immutable JSON doc

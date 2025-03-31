@@ -1203,14 +1203,14 @@ const char *asCScriptEngine::GetDefaultNamespace() const
 	return defaultNamespace->name.AddressOf();
 }
 
-// interface
-int asCScriptEngine::SetDefaultNamespace(const char *nameSpace)
+// internal
+int asCScriptEngine::ParseNamespace(const char* nameSpace, asCArray<asCString>& nsStrings) const
 {
-	if( nameSpace == 0 )
-		return ConfigError(asINVALID_ARG, "SetDefaultNamespace", nameSpace, 0);
+	if (nameSpace == 0)
+		return asINVALID_ARG;
 
 	asCString ns = nameSpace;
-	if( ns != "" )
+	if (ns != "")
 	{
 		// Make sure the namespace is composed of alternating identifier and ::
 		size_t pos = 0;
@@ -1218,25 +1218,39 @@ int asCScriptEngine::SetDefaultNamespace(const char *nameSpace)
 		size_t len;
 		eTokenType t = ttIdentifier;
 
-		for( ; pos < ns.GetLength(); pos += len)
+		for (; pos < ns.GetLength(); pos += len)
 		{
 			t = tok.GetToken(ns.AddressOf() + pos, ns.GetLength() - pos, &len);
-			if( (expectIdentifier && t != ttIdentifier) || (!expectIdentifier && t != ttScope) )
-				return ConfigError(asINVALID_DECLARATION, "SetDefaultNamespace", nameSpace, 0);
+			if ((expectIdentifier && t != ttIdentifier) || (!expectIdentifier && t != ttScope))
+				return asINVALID_DECLARATION;
 
 			// Make sure parent namespaces are registred in case of nested namespaces
 			if (expectIdentifier)
-				AddNameSpace(ns.SubString(0, pos + len).AddressOf());
+				nsStrings.PushLast(ns.SubString(0, pos + len));
 
 			expectIdentifier = !expectIdentifier;
 		}
 
 		// If the namespace ends with :: then strip it off
-		if( t == ttScope )
-			ns.SetLength(ns.GetLength()-2);
+		if (t == ttScope)
+			ns.SetLength(ns.GetLength() - 2);
 	}
 
-	defaultNamespace = AddNameSpace(ns.AddressOf());
+	nsStrings.PushLast(ns);
+
+	return asSUCCESS;
+}
+
+// interface
+int asCScriptEngine::SetDefaultNamespace(const char *nameSpace)
+{
+	asCArray<asCString> nsStrings;
+	int r = ParseNamespace(nameSpace, nsStrings);
+	if( r < 0 )
+		return ConfigError(r, "SetDefaultNamespace", nameSpace, 0);
+
+	for( asUINT n = 0; n < nsStrings.GetLength(); n++ )
+		defaultNamespace = AddNameSpace(nsStrings[n].AddressOf());
 
 	return 0;
 }
@@ -1294,10 +1308,28 @@ void *asCScriptEngine::GetUserData(asPWORD type) const
 }
 
 // interface
+int asCScriptEngine::GetMessageCallback(asSFuncPtr* callback, void** obj, asDWORD* callConv)
+{
+	if (!msgCallback)
+		return asNO_FUNCTION;
+
+	if (callback)
+		*callback = msgCallbackOriginalFuncPtr;
+	if (obj) 
+		*obj = msgCallbackObj;
+	if (callConv)
+		*callConv = msgCallbackOriginalCallConv;
+
+	return asSUCCESS;
+}
+
+// interface
 int asCScriptEngine::SetMessageCallback(const asSFuncPtr &callback, void *obj, asDWORD callConv)
 {
 	msgCallback = true;
 	msgCallbackObj = obj;
+	msgCallbackOriginalFuncPtr = callback;
+	msgCallbackOriginalCallConv = callConv;
 	bool isObj = false;
 	if( (unsigned)callConv == asCALL_GENERIC || (unsigned)callConv == asCALL_THISCALL_OBJFIRST || (unsigned)callConv == asCALL_THISCALL_OBJLAST )
 	{
@@ -4732,6 +4764,11 @@ void *asCScriptEngine::CallGlobalFunctionRetPtr(asSSystemFunctionInterface *i, a
 		func_t f = (func_t)(i->func);
 		return f();
 	}
+	else if (i->callConv == ICC_CDECL_OBJFIRST || i->callConv == ICC_CDECL_OBJLAST)
+	{
+		void* (*f)(void*) = (void* (*)(void*))(i->func);
+		return f(i->auxiliary);
+	}
 	else
 	{
 		asCGeneric gen(const_cast<asCScriptEngine*>(this), s, 0, 0);
@@ -4753,6 +4790,16 @@ void *asCScriptEngine::CallGlobalFunctionRetPtr(asSSystemFunctionInterface *i, a
 		typedef void *(STDCALL *func_t)(void *);
 		func_t f = (func_t)(i->func);
 		return f(param1);
+	}
+	else if (i->callConv == ICC_CDECL_OBJFIRST )
+	{
+		void* (*f)(void*,void*) = (void* (*)(void*,void*))(i->func);
+		return f(i->auxiliary,param1);
+	}
+	else if (i->callConv == ICC_CDECL_OBJLAST)
+	{
+		void* (*f)(void*,void*) = (void* (*)(void*,void*))(i->func);
+		return f(param1,i->auxiliary);
 	}
 	else
 	{
@@ -6715,7 +6762,7 @@ void asCScriptEngine::SetScriptObjectUserDataCleanupCallback(asCLEANSCRIPTOBJECT
 }
 
 // interface
-int asCScriptEngine::SetTranslateAppExceptionCallback(asSFuncPtr callback, void *param, int callConv)
+int asCScriptEngine::SetTranslateAppExceptionCallback(const asSFuncPtr &callback, void *param, int callConv)
 {
 #ifdef AS_NO_EXCEPTIONS
 	return asNOT_SUPPORTED;
