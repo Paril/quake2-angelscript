@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <vector>
 
+// TODO: use optimized uint32-backed bitset
 struct dynamic_bitset
 {
     std::vector<bool> _bitset;
@@ -14,9 +15,9 @@ struct dynamic_bitset
     }
 
     // pre-allocate for n bits
-    dynamic_bitset(unsigned int n)
+    explicit dynamic_bitset(uint32_t n)
     {
-        _bitset.reserve(n);
+        _bitset.resize(n);
     }
 
     // Copy
@@ -38,14 +39,14 @@ struct dynamic_bitset
     }
 
     // resize internal array for n bits
-    void resize(unsigned int n)
+    void resize(uint32_t n)
     {
         _bitset.resize(n);
     }
 
 
     // return internal array size in bits
-    unsigned int size() const
+    uint32_t size() const
     {
         return _bitset.size();
     }
@@ -66,13 +67,13 @@ struct dynamic_bitset
     }
 
     // fetch bit
-    bool get_bit(unsigned int i) const
+    bool get_bit(uint32_t i) const
     {
         return _bitset[i];
     }
 
     // set bit, resizing if necessary
-    void set_bit(unsigned int i, bool v)
+    void set_bit(uint32_t i, bool v)
     {
         if (i >= _bitset.size())
         {
@@ -83,7 +84,7 @@ struct dynamic_bitset
     }
 
     // fetch bit (index operator)
-    bool operator[](unsigned int i) const
+    bool operator[](uint32_t i) const
     {
         return _bitset[i];
     }
