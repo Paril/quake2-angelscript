@@ -250,6 +250,7 @@
     <ClCompile Include="debugger\as_debugger_dap.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="q2as_dynamic_bitset.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
@@ -562,6 +563,7 @@
     <ClInclude Include="debugger\as_debugger_dap.h">
       <Filter>debugger</Filter>
     </ClInclude>
+    <ClInclude Include="q2as_dynamic_bitset.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
