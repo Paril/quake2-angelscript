@@ -146,3 +146,5 @@ struct q2as_dbg_state_t
 };
 
 extern q2as_dbg_state_t debugger_state;
+
+std::string Q2AS_ScriptPath();

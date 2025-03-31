@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include "q2as_predefined.h"
+#include "q2as_local.h"
 
 static std::string TypeToTypeName(asIScriptEngine *engine, int typeId, asETypeModifiers modifiers, bool variadic, std::string_view right_name)
 {
@@ -472,7 +473,7 @@ struct NamespaceInfo
 template<size_t N>
 static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, const char *filename)
 {
-	std::ofstream of(filename, std::ios_base::binary | std::ios_base::out);
+	std::ofstream of(std::filesystem::path(Q2AS_ScriptPath()).parent_path() / filename, std::ios_base::binary | std::ios_base::out);
 
 	std::map<std::string, NamespaceInfo> namespaces;
 

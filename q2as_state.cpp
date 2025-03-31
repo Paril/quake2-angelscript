@@ -271,7 +271,7 @@ static std::string Q2AS_ScriptPathFromBaseDir()
     return path.generic_string();
 }
 
-static std::string Q2AS_ScriptPath()
+std::string Q2AS_ScriptPath()
 {
     cvar_t *cv = (gi.cvar ? gi.cvar : cgi.cvar)("q2as_path", "", CVAR_NOFLAGS);
 
