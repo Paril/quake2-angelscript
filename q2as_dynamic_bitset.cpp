@@ -13,7 +13,7 @@ void Q2AS_RegisterDynamicBitset(q2as_registry& registry)
 		.behaviors({
 			{ asBEHAVE_CONSTRUCT, "void f()",						   asFUNCTION(Q2AS_init_construct<dynamic_bitset>),		 asCALL_CDECL_OBJLAST },
 			{ asBEHAVE_CONSTRUCT, "void f(const dynamic_bitset &in)",  asFUNCTION(Q2AS_init_construct_copy<dynamic_bitset>), asCALL_CDECL_OBJLAST },
-			{ asBEHAVE_CONSTRUCT, "void f(uint count)",                asFUNCTION(Q2AS_bitset_construct),                    asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f(uint count) explicit",       asFUNCTION(Q2AS_bitset_construct),                    asCALL_CDECL_OBJLAST },
 			{ asBEHAVE_DESTRUCT,  "void f()",						   asFUNCTION(Q2AS_destruct<dynamic_bitset>),			 asCALL_CDECL_OBJLAST }
 		})
 		.methods({

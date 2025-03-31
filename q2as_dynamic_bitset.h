@@ -21,13 +21,13 @@ struct dynamic_bitset
     }
 
     // Copy
-    dynamic_bitset(const dynamic_bitset& in)
+    dynamic_bitset(const dynamic_bitset &in)
     {
         _bitset = in._bitset;
     }
 
     // copy-assign
-    dynamic_bitset& operator=(const dynamic_bitset& in)
+    dynamic_bitset &operator=(const dynamic_bitset &in)
     {
         _bitset = in._bitset;
     }
@@ -77,7 +77,7 @@ struct dynamic_bitset
     {
         if (i >= _bitset.size())
         {
-            _bitset.resize(i + 1);
+            _bitset.resize((size_t) i + 1);
         }
 
         _bitset[i] = v;
@@ -141,7 +141,7 @@ struct dynamic_bitset
     }
 
     // return true if sizes match and bits are equal
-    bool operator==(const dynamic_bitset& in) const
+    bool operator==(const dynamic_bitset &in) const
     {
         if (_bitset.size() != in._bitset.size())
         {

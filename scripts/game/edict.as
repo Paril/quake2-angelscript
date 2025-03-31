@@ -771,9 +771,8 @@ class ASEntity : IASEntity
 	height_fog_t heightfog_off;
 
 	// instanced coop items
-	// AS_TODO
-	//std::bitset<MAX_CLIENTS>	item_picked_up_by;
-	gtime_t						slime_debounce_time;
+	dynamic_bitset  item_picked_up_by;
+	gtime_t			slime_debounce_time;
 
 	// [Paril-KEX]
 	bmodel_anim_t bmodel_anim;

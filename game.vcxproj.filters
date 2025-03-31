@@ -921,6 +921,7 @@
     <None Include="scripts\game\boss31.as">
       <Filter>scripts\game</Filter>
     </None>
+    <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm">

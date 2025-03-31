@@ -1046,6 +1046,16 @@ void Drop_PowerArmor(ASEntity &ent, const gitem_t &item)
 	Drop_General(ent, item);
 }
 
+//======================================================================
+
+bool Entity_IsVisibleToPlayer(edict_t @ent, edict_t @player)
+{
+	if ((ent.svflags & svflags_t::INSTANCED) != 0)
+		return !cast<ASEntity>(ent.as_obj).item_picked_up_by[player.number - 1];
+
+	return true;
+}
+
 /*
 ===============
 Touch_Item
@@ -1064,11 +1074,8 @@ void Touch_Item(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool other
 
 	// already got this instanced item
 	if (coop.integer != 0 && P_UseCoopInstancedItems())
-	{
-        // AS_TODO
-		//if (ent.item_picked_up_by[other.s.number - 1])
-		//	return;
-	}
+		if (ent.item_picked_up_by[other.e.number - 1])
+            return;
 
 	// ZOID
 	if (CTFMatchSetup())
@@ -1100,13 +1107,12 @@ void Touch_Item(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool other
 			gi_sound(other.e, soundchan_t::ITEM, ent.noise_index, 1, ATTN_NORM, 0);
 		else if (!ent.item.pickup_sound.empty())
 			gi_sound(other.e, soundchan_t::ITEM, gi_soundindex(ent.item.pickup_sound), 1, ATTN_NORM, 0);
-		
-        // AS_TODO
-		/*int32 player_number = other.e.s.number - 1;
+
+		uint32 player_number = other.e.s.number - 1;
 
 		if (coop.integer != 0 && P_UseCoopInstancedItems() && !ent.item_picked_up_by[player_number])
 		{
-			ent.item_picked_up_by[player_number] = true;
+			ent.item_picked_up_by.set_bit(player_number, true);
 
 			// [Paril-KEX] this is to fix a coop quirk where items
 			// that send a message on pick up will only print on the
@@ -1114,9 +1120,9 @@ void Touch_Item(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool other
 			// when instanced items are enabled we don't need to limit
 			// ourselves to this, but it does mean that relays that trigger
 			// messages won't work, so we'll have to fix those
-			if (ent.message)
+			if (!ent.message.empty())
 				G_PrintActivationMessage(ent, other, false);
-		}*/
+		}
 	}
 
 	if (!ent.spawnflags.has(spawnflags::item::TARGETS_USED))
@@ -1209,6 +1215,7 @@ ASEntity @Drop_Item(ASEntity &ent, const gitem_t &item)
 	dropped.movetype = movetype_t::TOSS;
 	@dropped.touch = drop_temp_touch;
 	@dropped.owner = ent;
+    dropped.item_picked_up_by.resize(max_clients);
 
 	if (ent.client !is null)
 	{
@@ -1611,6 +1618,7 @@ void SpawnItem(ASEntity &ent, const gitem_t @item, const spawn_temp_t &in st)
 	ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx | renderfx_t::NO_LOD);
 	if (!ent.model.empty())
 		gi_modelindex(ent.model);
+    ent.item_picked_up_by.resize(max_clients);
 
 	if (ent.spawnflags.has(spawnflags::item::TRIGGER_SPAWN))
 		SetTriggeredSpawn(ent);

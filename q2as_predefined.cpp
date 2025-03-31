@@ -163,6 +163,12 @@ static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *
 		f += " property";
 	if (func->IsNoDiscard())
 		f += " nodiscard";
+	if (func->IsExplicit())
+		f += " explicit";
+	if (func->IsOverride())
+		f += " override";
+	if (func->IsFinal())
+		f += " final";
 
 	f += ";";
 	
@@ -360,6 +366,9 @@ static void GetObjectInfo(ObjectInfo &obj, asIScriptEngine *engine, asITypeInfo 
 					decl.erase(s + 1, (i - s) - 1);
 			}
 		}
+
+		if (func->IsExplicit())
+			decl += " explicit";
 
 		decl = decl + ";";
 		

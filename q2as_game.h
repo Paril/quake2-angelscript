@@ -45,6 +45,7 @@ struct q2as_sv_state_t : q2as_state_t
     asIScriptFunction *Bot_GetItemID = nullptr;
     asIScriptFunction *Edict_ForceLookAtPoint = nullptr;
     asIScriptFunction *Bot_PickedUpItem = nullptr;
+    asIScriptFunction *Entity_IsVisibleToPlayer = nullptr;
 
     cvar_t *instrumentation;
     bool instrumenting = false;

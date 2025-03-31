@@ -84,6 +84,7 @@ void q2as_sv_state_t::LoadFunctions()
     Bot_GetItemID = mainModule->GetFunctionByDecl("int Bot_GetItemID( const string &in )");
     Edict_ForceLookAtPoint = mainModule->GetFunctionByDecl("void Edict_ForceLookAtPoint( edict_t @, const vec3_t &in )");
     Bot_PickedUpItem = mainModule->GetFunctionByDecl("bool Bot_PickedUpItem( edict_t @, edict_t @ )");
+    Entity_IsVisibleToPlayer = mainModule->GetFunctionByDecl("bool Entity_IsVisibleToPlayer( edict_t @, edict_t @ )");
 }
 
 q2as_sv_state_t svas;
@@ -541,7 +542,16 @@ static bool    Q2AS_Bot_PickedUpItem(edict_t * botEdict, edict_t * itemEdict)
 
 static bool Q2AS_Entity_IsVisibleToPlayer(edict_t* ent, edict_t* player)
 {
-	return false;
+    if (q2as_state_t::CheckExceptionState())
+        return false;
+
+    auto ctx = svas.RequestContext();
+	ctx->Prepare(svas.Entity_IsVisibleToPlayer);
+    ctx->SetArgAddress(0, ent);
+    ctx->SetArgAddress(1, player);
+	ctx.Execute();
+
+    return ctx->GetReturnByte();
 }
 
 static void Q2AS_RegisterGameImports(q2as_registry &registry)

@@ -1057,7 +1057,7 @@ class array<T>
 	array(int&in list) { repeat T };
 	// factories
 	array();
-	array(uint32 length);
+	array(uint32 length) explicit;
 	array(uint32 length, const T &in value);
 	// methods
 	T &opIndex(uint32 index);
@@ -1102,9 +1102,9 @@ class any
 {
 	// factories
 	any();
-	any(? @&in);
-	any(const int64 &in);
-	any(const double &in);
+	any(? @&in) explicit;
+	any(const int64 &in) explicit;
+	any(const double &in) explicit;
 	// methods
 	any &opAssign(any &in);
 	void store(? @&in);
@@ -1198,7 +1198,7 @@ class weakref<T>
 	// behaviors
 	~weakref();
 	weakref();
-	weakref(T@);
+	weakref(T@) explicit;
 	// methods
 	T @opImplCast();
 	T @get() const;
@@ -1213,7 +1213,7 @@ class const_weakref<T>
 	// behaviors
 	~const_weakref();
 	const_weakref();
-	const_weakref(const T@);
+	const_weakref(const T@) explicit;
 	// methods
 	T @opImplCast() const;
 	T @get() const;
@@ -1268,6 +1268,27 @@ class vec3_t
 	vec3_t normalized(float &out) const;
 	float normalize();
 	vec3_t cross(const vec3_t &in) const;
+}
+class dynamic_bitset
+{
+	// behaviors
+	~dynamic_bitset();
+	dynamic_bitset();
+	dynamic_bitset(const dynamic_bitset&in);
+	dynamic_bitset(uint count) explicit;
+	// methods
+	bool opIndex(uint32) const;
+	bool get_bit(uint32) const;
+	void set_bit(uint32, bool);
+	void clear();
+	void resize(uint32);
+	uint32 get_size() const property;
+	void set_all(bool value);
+	void flip_all();
+	bool any() const;
+	bool all() const;
+	bool none() const;
+	bool opEquals(const dynamic_bitset &in) const;
 }
 class rgba_t
 {
@@ -1821,7 +1842,7 @@ class json_val
 	void get(float &out) const;
 	void get(double &out) const;
 	void get(string &out) const;
-	void get_enum(? &out) const;
+	void get_enum(? @&out) const;
 	uint64 get_uint_() const property;
 	int64 get_sint() const property;
 	int32 get_int_() const property;
@@ -1833,8 +1854,8 @@ class json_val
 	json_val arr_get_first() const;
 	json_val arr_get_last() const;
 	json_val obj_get(const string &in) const;
-    json_val opIndex(const string &in) const;
-    json_val opIndex(uint64) const;
+	json_val opIndex(const string &in) const;
+	json_val opIndex(uint64) const;
 }
 class json_doc
 {
