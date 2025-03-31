@@ -6,9 +6,9 @@ void Q2AS_RegisterDynamicBitset(q2as_registry& registry)
 	registry
 		.type("dynamic_bitset", sizeof(dynamic_bitset), asOBJ_VALUE | asOBJ_APP_CLASS_CDK)
 		.behaviors({
-			{ asBEHAVE_CONSTRUCT, "void f()",						  asFUNCTION(Q2AS_init_construct<dynamic_bitset>),		 asCALL_CDECL_OBJLAST },
+			{ asBEHAVE_CONSTRUCT, "void f()",						   asFUNCTION(Q2AS_init_construct<dynamic_bitset>),		 asCALL_CDECL_OBJLAST },
 			{ asBEHAVE_CONSTRUCT, "void f(const dynamic_bitset &in)", asFUNCTION(Q2AS_init_construct_copy<dynamic_bitset>),  asCALL_CDECL_OBJLAST },
-			{ asBEHAVE_CONSTRUCT, "void f()",						  asFUNCTION(Q2AS_destruct<dynamic_bitset>),			 asCALL_CDECL_OBJLAST }
+			{ asBEHAVE_DESTRUCT, "void f()",						   asFUNCTION(Q2AS_destruct<dynamic_bitset>),			 asCALL_CDECL_OBJLAST }
 		})
 		.methods({
 			// Index
