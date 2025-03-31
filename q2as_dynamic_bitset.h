@@ -10,7 +10,9 @@ struct dynamic_bitset
     std::vector<bool> _bitset;
 
     // zero-allocation
-    dynamic_bitset()
+    dynamic_bitset() = default;
+
+    ~dynamic_bitset()
     {
     }
 
@@ -21,16 +23,10 @@ struct dynamic_bitset
     }
 
     // Copy
-    dynamic_bitset(const dynamic_bitset &in)
-    {
-        _bitset = in._bitset;
-    }
+    dynamic_bitset(const dynamic_bitset &in) = default;
 
     // copy-assign
-    dynamic_bitset &operator=(const dynamic_bitset &in)
-    {
-        _bitset = in._bitset;
-    }
+    dynamic_bitset &operator=(const dynamic_bitset &in) = default;
 
     // resize internal array for 0 bits (no dealloc, like vector.clear())
     void clear()
