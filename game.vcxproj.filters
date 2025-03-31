@@ -474,7 +474,6 @@
     </ClInclude>
     <ClInclude Include="q2as_reg.h" />
     <ClInclude Include="q2as_stringex.h" />
-    <ClInclude Include="ctrack.hpp" />
     <ClInclude Include="q2as_cgame.h" />
     <ClInclude Include="q2as_fixedarray.h" />
     <ClInclude Include="q2as_game.h" />
@@ -564,6 +563,9 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="q2as_dynamic_bitset.h" />
+    <ClInclude Include="ctrack.hpp">
+      <Filter>thirdparty</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
