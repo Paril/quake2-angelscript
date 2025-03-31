@@ -411,20 +411,6 @@ extern std::mt19937 mt_rand;
 	return irandom(0, max_exclusive);
 }
 
-// uniform random index from given container
-template<typename T>
-[[nodiscard]] inline int32_t random_index(const T& container)
-{
-	return irandom(std::size(container));
-}
-
-// uniform random element from given container
-template<typename T>
-[[nodiscard]] inline auto random_element(T& container) -> decltype(*std::begin(container))
-{
-	return *(std::begin(container) + random_index(container));
-}
-
 // flip a coin
 [[nodiscard]] inline bool brandom()
 {

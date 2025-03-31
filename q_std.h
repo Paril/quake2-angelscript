@@ -88,25 +88,7 @@ template<typename S, typename... Args>
 	return std::string_view(g_fmt_data.string[g_fmt_data.istr], len);
 }
 
-// fmt::join replacement
-template<typename T>
-std::string join_strings(const T& cont, const char* separator)
-{
-	if (cont.empty())
-		return "";
-
-	return std::accumulate(++cont.begin(), cont.end(), *cont.begin(),
-		[separator](auto&& a, auto&& b) -> auto& {
-			a += separator;
-			a += b;
-			return a;
-		});
-}
-
 using byte = uint8_t;
-
-template<class T, std::size_t N>
-constexpr size_t q_countof(const T(&array)[N]) { return std::size<T, N>(array); }
 
 using std::max;
 using std::min;
@@ -197,14 +179,6 @@ LerpAngle
 
 //=============================================
 
-char* COM_ParseEx(const char** data_p, const char* seps, char* buffer = nullptr, size_t buffer_size = 0);
-
-// data is an in/out parm, returns a parsed out token
-inline char* COM_Parse(const char** data_p, char* buffer = nullptr, size_t buffer_size = 0)
-{
-	return COM_ParseEx(data_p, "\r\n\t ", buffer, buffer_size);
-}
-
 std::optional<std::string_view> COM_ParseView(std::string_view& data_p, const char* seps = "\r\n\t ");
 
 //=============================================
@@ -215,6 +189,5 @@ std::optional<std::string_view> COM_ParseView(std::string_view& data_p, const ch
 
 // BSD string utils - haleyjd
 size_t Q_strlcpy(char* dst, const char* src, size_t siz);
-size_t Q_strlcat(char* dst, const char* src, size_t siz);
 
 // EOF

@@ -1952,7 +1952,7 @@ static bool q2as_gi_GetPathToGoal(const PathRequest &in, q2as_PathInfo &out)
 	// just to be sure nobody does any fun nonsense...
 	// 256 should be more than enough.
 	static vec3_t points[256];
-	const_cast<PathRequest &>(in).pathPoints = { points, min((int64_t) q_countof(points), in.pathPoints.count) };
+	const_cast<PathRequest &>(in).pathPoints = { points, min((int64_t) std::extent_v<decltype(points)>, in.pathPoints.count) };
 
 	bool result = gi.GetPathToGoal(in, out.info);
 
