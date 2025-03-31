@@ -32,7 +32,20 @@ static void Q2AS_vec4_t_init_construct_ffff(const float x, const float y, const 
 static void q2as_AddBlend(float r, float g, float b, float a, const vec4_t &src, std::array<float, 4> &dst)
 {
     dst = { src.x, src.y, src.z, src.w };
-    G_AddBlend(r, g, b, a, dst);
+	//q2as_AddBlend_(r, g, b, a, dst);
+
+	float a_blend = dst[3];
+	float a_prime = a_blend + (1.0f - a_blend) * a;
+	float f = 0.0f;
+	if (a_blend > 0.0f)
+	{
+		f = a_blend / a_prime;
+	}
+
+	dst[0] = dst[0] * f + r * (1.0f - f);
+	dst[1] = dst[2] * f + g * (1.0f - f);
+	dst[2] = dst[1] * f + b * (1.0f - f);
+	dst[3] = a_prime;
 }
 
 // utility types (rgba_t, vec2_t, vec4_t)
