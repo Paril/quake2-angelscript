@@ -4,12 +4,12 @@
 
 namespace spawnflags::turret
 {
-    const spawnflags_t BREACH_FIRE = spawnflag_dec(65536);
+    const uint32 BREACH_FIRE = 65536;
 }
 
 namespace spawnflags::turret_brain
 {
-    const spawnflags_t IGNORE_SIGHT = spawnflag_dec(1);
+    const uint32 IGNORE_SIGHT = 1;
 }
 
 vec3_t AnglesNormalize(vec3_t vec)
@@ -189,7 +189,7 @@ void turret_breach_think(ASEntity &self)
 		diff = target_z - self.owner.e.s.origin[2];
 		self.owner.velocity[2] = diff * 1.0f / gi_frame_time_s;
 
-		if (self.spawnflags.has(spawnflags::turret::BREACH_FIRE))
+		if ((self.spawnflags & spawnflags::turret::BREACH_FIRE) != 0)
 		{
 			turret_breach_fire(self);
 			self.spawnflags &= ~spawnflags::turret::BREACH_FIRE;
@@ -507,7 +507,7 @@ void turret_brain_think(ASEntity &self)
 	endpos = self.enemy.e.absmax + self.enemy.e.absmin;
 	endpos *= 0.5f;
 
-	if (!self.spawnflags.has(spawnflags::turret_brain::IGNORE_SIGHT))
+	if ((self.spawnflags & spawnflags::turret_brain::IGNORE_SIGHT) == 0)
 	{
 		trace = gi_traceline(self.target_ent.e.s.origin, endpos, self.target_ent.e, contents_t::MASK_SHOT);
 		if (trace.fraction == 1 || trace.ent is self.enemy.e)

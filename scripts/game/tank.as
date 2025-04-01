@@ -326,8 +326,8 @@ namespace tank::sounds
 
 namespace spawnflags::tank
 {
-    const spawnflags_t COMMANDER_GUARDIAN = spawnflag_dec(8);
-    const spawnflags_t COMMANDER_HEAT_SEEKING = spawnflag_dec(16);
+    const uint32 COMMANDER_GUARDIAN = 8;
+    const uint32 COMMANDER_HEAT_SEEKING = 16;
 }
 
 //
@@ -692,7 +692,7 @@ void TankRocket(ASEntity &self)
 
 	if (self.speed != 0)
 		rocketSpeed = int(self.speed);
-	else if (self.spawnflags.has(spawnflags::tank::COMMANDER_HEAT_SEEKING))
+	else if ((self.spawnflags & spawnflags::tank::COMMANDER_HEAT_SEEKING) != 0)
 		rocketSpeed = 500;
 	else
 		rocketSpeed = 650;
@@ -744,7 +744,7 @@ void TankRocket(ASEntity &self)
 		// blindfire has different fail criteria for the trace
 		if (M_AdjustBlindfireTarget(self, start, vec, right, dir))
 		{
-			if (self.spawnflags.has(spawnflags::tank::COMMANDER_HEAT_SEEKING))
+			if ((self.spawnflags & spawnflags::tank::COMMANDER_HEAT_SEEKING) != 0)
 				monster_fire_heat(self, start, dir, 50, rocketSpeed, flash_number, self.accel);
 			else
 				monster_fire_rocket(self, start, dir, 50, rocketSpeed, flash_number);
@@ -756,7 +756,7 @@ void TankRocket(ASEntity &self)
 
 		if (trace.fraction > 0.5f || trace.ent.solid != solid_t::BSP)
 		{
-			if (self.spawnflags.has(spawnflags::tank::COMMANDER_HEAT_SEEKING))
+			if ((self.spawnflags & spawnflags::tank::COMMANDER_HEAT_SEEKING) != 0)
 				monster_fire_heat(self, start, dir, 50, rocketSpeed, flash_number, self.accel);
 			else
 				monster_fire_rocket(self, start, dir, 50, rocketSpeed, flash_number);
@@ -1342,7 +1342,7 @@ void SP_monster_tank(ASEntity &self)
 	self.monsterinfo.scale = tank::SCALE;
 
 	// [Paril-KEX] N64 tank commander is a chonky boy
-	if (self.spawnflags.has(spawnflags::tank::COMMANDER_GUARDIAN))
+	if ((self.spawnflags & spawnflags::tank::COMMANDER_GUARDIAN) != 0)
 	{
 		if (self.e.s.scale == 0)
 			self.e.s.scale = 1.5f;

@@ -35,13 +35,13 @@ namespace turret
 
 namespace spawnflags::turret
 {
-    const spawnflags_t BLASTER = spawnflag_dec(0x0008);
-    const spawnflags_t MACHINEGUN = spawnflag_dec(0x0010);
-    const spawnflags_t ROCKET = spawnflag_dec(0x0020);
-    const spawnflags_t HEATBEAM = spawnflag_dec(0x0040);
-    const spawnflags_t WEAPONCHOICE = HEATBEAM | ROCKET | MACHINEGUN | BLASTER;
-    const spawnflags_t WALL_UNIT = spawnflag_dec(0x0080);
-    const spawnflags_t NO_LASERSIGHT = spawnflag_bit(18);
+    const uint32 BLASTER = 0x0008;
+    const uint32 MACHINEGUN = 0x0010;
+    const uint32 ROCKET = 0x0020;
+    const uint32 HEATBEAM = 0x0040;
+    const uint32 WEAPONCHOICE = HEATBEAM | ROCKET | MACHINEGUN | BLASTER;
+    const uint32 WALL_UNIT = 0x0080;
+    const uint32 NO_LASERSIGHT = 1 << 18;
 }
 
 namespace turret::sounds
@@ -262,7 +262,7 @@ void TurretAim(ASEntity &self)
 		self.e.s.angles.yaw = anglemod(current + move);
 	}
 
-	if (self.spawnflags.has(spawnflags::turret::NO_LASERSIGHT))
+	if ((self.spawnflags & spawnflags::turret::NO_LASERSIGHT) != 0)
 		return;
 
 	// Paril: improved turrets; draw lasersight
@@ -419,14 +419,14 @@ void TurretFire(ASEntity &self)
 
 	chance = frandom();
 
-	if (self.spawnflags.has(spawnflags::turret::ROCKET))
+	if ((self.spawnflags & spawnflags::turret::ROCKET) != 0)
 		rocketSpeed = 650;
-	else if (self.spawnflags.has(spawnflags::turret::BLASTER))
+	else if ((self.spawnflags & spawnflags::turret::BLASTER) != 0)
 		rocketSpeed = 800;
 	else
 		rocketSpeed = 0;
 
-	if (self.spawnflags.has(spawnflags::turret::MACHINEGUN) || visible(self, self.enemy))
+	if ((self.spawnflags & spawnflags::turret::MACHINEGUN) != 0 || visible(self, self.enemy))
 	{
 		start = self.e.s.origin;
 
@@ -448,7 +448,7 @@ void TurretFire(ASEntity &self)
 		{
 			// on harder difficulties, randomly fire directly at enemy
 			// more often; makes them more unpredictable
-			if (self.spawnflags.has(spawnflags::turret::MACHINEGUN))
+			if ((self.spawnflags & spawnflags::turret::MACHINEGUN) != 0)
 				PredictAim(self, self.enemy, start, 0, true, 0.3f, dir, aimpoint);
 			else if (frandom() < skill.integer / 5.f)
 				PredictAim(self, self.enemy, start, float(rocketSpeed), true, (frandom(3.f - skill.integer) / 3.f) - frandom(0.05f * (3.f - skill.integer)), dir, aimpoint);
@@ -458,9 +458,9 @@ void TurretFire(ASEntity &self)
 		trace = gi_traceline(start, end, self.e, contents_t::MASK_PROJECTILE);
 		if (trace.ent is self.enemy.e || trace.ent is world.e)
 		{
-			if (self.spawnflags.has(spawnflags::turret::BLASTER))
+			if ((self.spawnflags & spawnflags::turret::BLASTER) != 0)
 				monster_fire_blaster(self, start, dir, TURRET_BLASTER_DAMAGE, rocketSpeed, monster_muzzle_t::TURRET_BLASTER, effects_t::BLASTER);
-			else if (self.spawnflags.has(spawnflags::turret::MACHINEGUN))
+			else if ((self.spawnflags & spawnflags::turret::MACHINEGUN) != 0)
 			{
 				if ((self.monsterinfo.aiflags & ai_flags_t::HOLD_FRAME) == 0)
 				{
@@ -482,7 +482,7 @@ void TurretFire(ASEntity &self)
 						self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags & ~ai_flags_t::HOLD_FRAME);
 				}
 			}
-			else if (self.spawnflags.has(spawnflags::turret::ROCKET))
+			else if ((self.spawnflags & spawnflags::turret::ROCKET) != 0)
 			{
 				if (dist * trace.fraction > 72)
 					monster_fire_rocket(self, start, dir, 40, rocketSpeed, monster_muzzle_t::TURRET_ROCKET);
@@ -511,9 +511,9 @@ void TurretFireBlind(ASEntity &self)
 	if (chance < 0.98f)
 		return;
 
-	if (self.spawnflags.has(spawnflags::turret::ROCKET))
+	if ((self.spawnflags & spawnflags::turret::ROCKET) != 0)
 		rocketSpeed = 650;
-	else if (self.spawnflags.has(spawnflags::turret::BLASTER))
+	else if ((self.spawnflags & spawnflags::turret::BLASTER) != 0)
 		rocketSpeed = 800;
 	else
 		rocketSpeed = 0;
@@ -530,9 +530,9 @@ void TurretFireBlind(ASEntity &self)
 
 	dir.normalize();
 
-	if (self.spawnflags.has(spawnflags::turret::BLASTER))
+	if ((self.spawnflags & spawnflags::turret::BLASTER) != 0)
 		monster_fire_blaster(self, start, dir, TURRET_BLASTER_DAMAGE, rocketSpeed, monster_muzzle_t::TURRET_BLASTER, effects_t::BLASTER);
-	else if (self.spawnflags.has(spawnflags::turret::ROCKET))
+	else if ((self.spawnflags & spawnflags::turret::ROCKET) != 0)
 		monster_fire_rocket(self, start, dir, 40, rocketSpeed, monster_muzzle_t::TURRET_ROCKET);
 }
 // pmm
@@ -753,11 +753,11 @@ void turret_wake(ASEntity &ent)
     spawn_temp_t st;
 	stationarymonster_start(ent, st);
 
-	if (ent.spawnflags.has(spawnflags::turret::MACHINEGUN))
+	if ((ent.spawnflags & spawnflags::turret::MACHINEGUN) != 0)
 	{
 		ent.e.s.skinnum = 1;
 	}
-	else if (ent.spawnflags.has(spawnflags::turret::ROCKET))
+	else if ((ent.spawnflags & spawnflags::turret::ROCKET) != 0)
 	{
 		ent.e.s.skinnum = 2;
 	}
@@ -890,12 +890,12 @@ bool turret_checkattack(ASEntity &self)
 
 	gtime_t nexttime;
 
-	if (self.spawnflags.has(spawnflags::turret::ROCKET))
+	if ((self.spawnflags & spawnflags::turret::ROCKET) != 0)
 	{
 		chance = 0.10f;
 		nexttime = (time_sec(1.8) - (time_sec(0.2) * skill.integer));
 	}
-	else if (self.spawnflags.has(spawnflags::turret::BLASTER))
+	else if ((self.spawnflags & spawnflags::turret::BLASTER) != 0)
 	{
 		chance = 0.35f;
 		nexttime = (time_sec(1.2) - (time_sec(0.2) * skill.integer));
@@ -972,16 +972,16 @@ void SP_monster_turret(ASEntity &self)
 	@self.die = turret_die;
 
 	// map designer didn't specify weapon type. set it now.
-	if (!self.spawnflags.has(spawnflags::turret::WEAPONCHOICE))
+	if ((self.spawnflags & spawnflags::turret::WEAPONCHOICE) == 0)
 		self.spawnflags |= spawnflags::turret::BLASTER;
 
-	if (self.spawnflags.has(spawnflags::turret::HEATBEAM))
+	if ((self.spawnflags & spawnflags::turret::HEATBEAM) != 0)
 	{
 		self.spawnflags &= ~spawnflags::turret::HEATBEAM;
 		self.spawnflags |= spawnflags::turret::BLASTER;
 	}
 
-	if (!self.spawnflags.has(spawnflags::turret::WALL_UNIT))
+	if ((self.spawnflags & spawnflags::turret::WALL_UNIT) == 0)
 	{
 		@self.monsterinfo.stand = turret_stand;
 		@self.monsterinfo.walk = turret_walk;
@@ -1033,7 +1033,7 @@ void SP_monster_turret(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::turret::WALL_UNIT))
+	if ((self.spawnflags & spawnflags::turret::WALL_UNIT) != 0)
 	{
 		if (self.targetname.empty())
 		{
@@ -1057,7 +1057,7 @@ void SP_monster_turret(ASEntity &self)
 		stationarymonster_start(self, ED_GetSpawnTemp());
 	}
 
-	if (self.spawnflags.has(spawnflags::turret::MACHINEGUN))
+	if ((self.spawnflags & spawnflags::turret::MACHINEGUN) != 0)
 	{
 		gi_soundindex("infantry/infatck1.wav");
 		gi_soundindex("weapons/chngnu1a.wav");
@@ -1066,7 +1066,7 @@ void SP_monster_turret(ASEntity &self)
 		self.spawnflags &= ~spawnflags::turret::WEAPONCHOICE;
 		self.spawnflags |= spawnflags::turret::MACHINEGUN;
 	}
-	else if (self.spawnflags.has(spawnflags::turret::ROCKET))
+	else if ((self.spawnflags & spawnflags::turret::ROCKET) != 0)
 	{
 		gi_soundindex("weapons/rockfly.wav");
 		gi_modelindex("models/objects/rocket/tris.md2");
@@ -1089,6 +1089,6 @@ void SP_monster_turret(ASEntity &self)
 	// PMM  - turrets don't get mad at monsters, and visa versa
 	self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::IGNORE_SHOTS);
 	// PMM - blindfire
-	if (self.spawnflags.has(spawnflags::turret::ROCKET | spawnflags::turret::BLASTER))
+	if ((self.spawnflags & (spawnflags::turret::ROCKET | spawnflags::turret::BLASTER)) != 0)
 		self.monsterinfo.blindfire = true;
 }

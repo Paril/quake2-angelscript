@@ -1,12 +1,12 @@
 namespace spawnflags::trigger
 {
 // PGM - some of these are mine, some id's. I added the define's.
-    const spawnflags_t MONSTER = spawnflag_dec(0x01);
-    const spawnflags_t NOT_PLAYER = spawnflag_dec(0x02);
-    const spawnflags_t TRIGGERED = spawnflag_dec(0x04);
-    const spawnflags_t TOGGLE = spawnflag_dec(0x08);
-    const spawnflags_t LATCHED = spawnflag_dec(0x10);
-    const spawnflags_t CLIP = spawnflag_dec(0x20);
+    const uint32 MONSTER = 0x01;
+    const uint32 NOT_PLAYER = 0x02;
+    const uint32 TRIGGERED = 0x04;
+    const uint32 TOGGLE = 0x08;
+    const uint32 LATCHED = 0x10;
+    const uint32 CLIP = 0x20;
 // PGM
 }
 
@@ -59,7 +59,7 @@ void multi_trigger(ASEntity &ent)
 void Use_Multi(ASEntity &ent, ASEntity &other, ASEntity @activator)
 {
 	// PGM
-	if (ent.spawnflags.has(spawnflags::trigger::TOGGLE))
+	if ((ent.spawnflags & spawnflags::trigger::TOGGLE) != 0)
 	{
 		if (ent.e.solid == solid_t::TRIGGER)
 			ent.e.solid = solid_t::NOT;
@@ -79,18 +79,18 @@ void Touch_Multi(ASEntity &self, ASEntity &other, const trace_t &in tr, bool oth
 {
 	if (other.client !is null)
 	{
-		if (self.spawnflags.has(spawnflags::trigger::NOT_PLAYER))
+		if ((self.spawnflags & spawnflags::trigger::NOT_PLAYER) != 0)
 			return;
 	}
 	else if ((other.e.svflags & svflags_t::MONSTER) != 0)
 	{
-		if (!self.spawnflags.has(spawnflags::trigger::MONSTER))
+		if ((self.spawnflags & spawnflags::trigger::MONSTER) == 0)
 			return;
 	}
 	else
 		return;
 
-	if (self.spawnflags.has(spawnflags::trigger::CLIP))
+	if ((self.spawnflags & spawnflags::trigger::CLIP) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -140,12 +140,12 @@ BoxEdictsResult_t latched_trigger_filter(edict_t @ent, any @const data)
 
 	if (other.client !is null)
 	{
-		if (self.spawnflags.has(spawnflags::trigger::NOT_PLAYER))
+		if ((self.spawnflags & spawnflags::trigger::NOT_PLAYER) != 0)
 			return BoxEdictsResult_t::Skip;
 	}
 	else if ((other.e.svflags & svflags_t::MONSTER) != 0)
 	{
-		if (!self.spawnflags.has(spawnflags::trigger::MONSTER))
+		if ((self.spawnflags & spawnflags::trigger::MONSTER) == 0)
 			return BoxEdictsResult_t::Skip;
 	}
 	else
@@ -196,9 +196,9 @@ void SP_trigger_multiple(ASEntity &ent)
 
 	InitTrigger(ent);
 
-	if (ent.spawnflags.has(spawnflags::trigger::LATCHED))
+	if ((ent.spawnflags & spawnflags::trigger::LATCHED) != 0)
 	{
-		if (ent.spawnflags.has(spawnflags::trigger::TRIGGERED | spawnflags::trigger::TOGGLE))
+		if (ent.spawnflags & (spawnflags::trigger::TRIGGERED | spawnflags::trigger::TOGGLE) != 0)
 			gi_Com_Print("{}: latched and triggered/toggle are not supported\n", ent);
 
 		@ent.think = latched_trigger_think;
@@ -210,7 +210,7 @@ void SP_trigger_multiple(ASEntity &ent)
 		@ent.touch = Touch_Multi;
 
 	// PGM
-	if (ent.spawnflags.has(spawnflags::trigger::TRIGGERED | spawnflags::trigger::TOGGLE))
+	if (ent.spawnflags & (spawnflags::trigger::TRIGGERED | spawnflags::trigger::TOGGLE) != 0)
 	// PGM
 	{
 		ent.e.solid = solid_t::NOT;
@@ -224,7 +224,7 @@ void SP_trigger_multiple(ASEntity &ent)
 
 	gi_linkentity(ent.e);
 
-	if (ent.spawnflags.has(spawnflags::trigger::CLIP))
+	if ((ent.spawnflags & spawnflags::trigger::CLIP) != 0)
 		ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::HULL);
 }
 
@@ -247,7 +247,7 @@ void SP_trigger_once(ASEntity &ent)
 {
 	// make old maps work because I messed up on flag assignments here
 	// triggered was on bit 1 when it should have been on bit 4
-	if (ent.spawnflags.has(spawnflags::trigger::MONSTER))
+	if ((ent.spawnflags & spawnflags::trigger::MONSTER) != 0)
 	{
 		ent.spawnflags &= ~spawnflags::trigger::MONSTER;
 		ent.spawnflags |= spawnflags::trigger::TRIGGERED;
@@ -263,7 +263,7 @@ This fixed size trigger cannot be touched, it can only be fired by other events.
 */
 namespace spawnflags::trigger_relay
 {
-    const spawnflags_t NO_SOUND = spawnflag_dec(1);
+    const uint32 NO_SOUND = 1;
 }
 
 void trigger_relay_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -278,7 +278,7 @@ void SP_trigger_relay(ASEntity &self)
 {
 	@self.use = trigger_relay_use;
 
-	if (self.spawnflags.has(spawnflags::trigger_relay::NO_SOUND))
+	if ((self.spawnflags & spawnflags::trigger_relay::NO_SOUND) != 0)
 		self.noise_index = -1;
 }
 
@@ -292,7 +292,7 @@ trigger_key
 
 namespace spawnflags::trigger_key
 {
-    const spawnflags_t BECOME_RELAY = spawnflag_dec(1);
+    const uint32 BECOME_RELAY = 1;
 }
 
 /*QUAKED trigger_key (.5 .5 .5) (-8 -8 -8) (8 8 8)
@@ -378,7 +378,7 @@ void trigger_key_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 
 	G_UseTargets(self, activator);
 
-	if (self.spawnflags.has(spawnflags::trigger_key::BECOME_RELAY))
+	if ((self.spawnflags & spawnflags::trigger_key::BECOME_RELAY) != 0)
 		@self.use = trigger_relay_use;
 	else
 		@self.use = null;
@@ -431,7 +431,7 @@ After the counter has been triggered "count" times (default 2), it will fire all
 
 namespace spawnflags::counter
 {
-    const spawnflags_t NOMESSAGE = spawnflag_dec(1);
+    const uint32 NOMESSAGE = 1;
 }
 
 void trigger_counter_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -443,7 +443,7 @@ void trigger_counter_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 
 	if (self.count != 0)
 	{
-		if (!self.spawnflags.has(spawnflags::counter::NOMESSAGE))
+		if ((self.spawnflags & spawnflags::counter::NOMESSAGE) == 0)
 		{
 			gi_LocCenter_Print(activator.e, "$g_more_to_go", self.count);
 			gi_sound(activator.e, soundchan_t::AUTO, gi_soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
@@ -451,7 +451,7 @@ void trigger_counter_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		return;
 	}
 
-	if (!self.spawnflags.has(spawnflags::counter::NOMESSAGE))
+	if ((self.spawnflags & spawnflags::counter::NOMESSAGE) == 0)
 	{
 		gi_LocCenter_Print(activator.e, "$g_sequence_completed");
 		gi_sound(activator.e, soundchan_t::AUTO, gi_soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
@@ -499,12 +499,12 @@ trigger_push
 // PGM
 namespace spawnflags::push
 {
-    const spawnflags_t ONCE = spawnflag_dec(0x01);
-    const spawnflags_t PLUS = spawnflag_dec(0x02);
-    const spawnflags_t SILENT = spawnflag_dec(0x04);
-    const spawnflags_t START_OFF = spawnflag_dec(0x08);
-    const spawnflags_t CLIP = spawnflag_dec(0x10);
-    const spawnflags_t ADDITIVE = spawnflag_dec(0x20);
+    const uint32 ONCE = 0x01;
+    const uint32 PLUS = 0x02;
+    const uint32 SILENT = 0x04;
+    const uint32 START_OFF = 0x08;
+    const uint32 CLIP = 0x10;
+    const uint32 ADDITIVE = 0x20;
 }
 // PGM
 
@@ -512,7 +512,7 @@ cached_soundindex windsound("misc/windfly.wav");
 
 void trigger_push_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
 {
-	if (self.spawnflags.has(spawnflags::push::CLIP))
+	if ((self.spawnflags & spawnflags::push::CLIP) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -523,7 +523,7 @@ void trigger_push_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, b
 	if (other.classname == "grenade" || other.health > 0)
 	{
 		// [Paril-KEX]
-		if (self.spawnflags.has(spawnflags::push::ADDITIVE))
+		if ((self.spawnflags & spawnflags::push::ADDITIVE) != 0)
 		{
 			vec3_t velocity_in_dir = other.velocity.scaled(self.movedir);
 			float max_speed = (self.speed * 10);
@@ -544,7 +544,7 @@ void trigger_push_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, b
 			other.client.oldvelocity = other.velocity;
 			@other.client.oldgroundentity = other.groundentity;
 			if (
-				!self.spawnflags.has(spawnflags::push::SILENT) &&
+				(self.spawnflags & spawnflags::push::SILENT) == 0 &&
 				(other.fly_sound_debounce_time < level.time))
 			{
 				other.fly_sound_debounce_time = level.time + time_sec(1.5);
@@ -553,7 +553,7 @@ void trigger_push_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, b
 		}
 	}
 
-	if (self.spawnflags.has(spawnflags::push::ONCE))
+	if ((self.spawnflags & spawnflags::push::ONCE) != 0)
 		G_FreeEdict(self);
 }
 
@@ -637,12 +637,12 @@ SILENT - doesn't make wind noise
 void SP_trigger_push(ASEntity &self)
 {
 	InitTrigger(self);
-	if (!self.spawnflags.has(spawnflags::push::SILENT))
+	if ((self.spawnflags & spawnflags::push::SILENT) == 0)
 		windsound.precache();
 	@self.touch = trigger_push_touch;
 
 	// RAFAEL
-	if (self.spawnflags.has(spawnflags::push::PLUS))
+	if ((self.spawnflags & spawnflags::push::PLUS) != 0)
 	{
 		if (self.wait == 0)
 			self.wait = 10;
@@ -660,10 +660,10 @@ void SP_trigger_push(ASEntity &self)
 	if (!self.targetname.empty()) // toggleable
 	{
 		@self.use = trigger_push_use;
-		if (self.spawnflags.has(spawnflags::push::START_OFF))
+		if ((self.spawnflags & spawnflags::push::START_OFF) != 0)
 			self.e.solid = solid_t::NOT;
 	}
-	else if (self.spawnflags.has(spawnflags::push::START_OFF))
+	else if ((self.spawnflags & spawnflags::push::START_OFF) != 0)
 	{
 		gi_Com_Print("{} is START_OFF but not targeted.\n", self);
 		self.e.svflags = svflags_t::NONE;
@@ -675,7 +675,7 @@ void SP_trigger_push(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::push::CLIP))
+	if ((self.spawnflags & spawnflags::push::CLIP) != 0)
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::HULL);
 }
 
@@ -703,15 +703,15 @@ NO_PROTECTION	*nothing* stops the damage
 
 namespace spawnflags::hurt
 {
-    const spawnflags_t START_OFF = spawnflag_dec(1);
-    const spawnflags_t TOGGLE = spawnflag_dec(2);
-    const spawnflags_t SILENT = spawnflag_dec(4);
-    const spawnflags_t NO_PROTECTION = spawnflag_dec(8);
-    const spawnflags_t SLOW = spawnflag_dec(16);
-    const spawnflags_t NO_PLAYERS = spawnflag_dec(32);
-    const spawnflags_t NO_MONSTERS = spawnflag_dec(64);
-    const spawnflags_t CLIPPED = spawnflag_dec(128);
-    const spawnflags_t PASSIVE = spawnflag_bit(16);
+    const uint32 START_OFF = 1;
+    const uint32 TOGGLE = 2;
+    const uint32 SILENT = 4;
+    const uint32 NO_PROTECTION = 8;
+    const uint32 SLOW = 16;
+    const uint32 NO_PLAYERS = 32;
+    const uint32 NO_MONSTERS = 64;
+    const uint32 CLIPPED = 128;
+    const uint32 PASSIVE = 1 << 16;
 }
 
 void hurt_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -722,14 +722,14 @@ void hurt_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		self.e.solid = solid_t::NOT;
 	gi_linkentity(self.e);
 
-	if (!self.spawnflags.has(spawnflags::hurt::TOGGLE))
+	if ((self.spawnflags & spawnflags::hurt::TOGGLE) == 0)
 		@self.use = null;
 
-	if (self.spawnflags.has(spawnflags::hurt::PASSIVE))
+	if ((self.spawnflags & spawnflags::hurt::PASSIVE) != 0)
 	{
 		if (self.e.solid == solid_t::TRIGGER)
 		{
-			if (self.spawnflags.has(spawnflags::hurt::SLOW))
+			if ((self.spawnflags & spawnflags::hurt::SLOW) != 0)
 				self.nextthink = level.time + time_sec(1);
 			else
 				self.nextthink = level.time + time_hz(10);
@@ -757,12 +757,12 @@ BoxEdictsResult_t hurt_filter(edict_t @other_handle, any @const ptr)
 		return BoxEdictsResult_t::Skip;
 	else if ((other.e.svflags & svflags_t::MONSTER) == 0 && (other.flags & ent_flags_t::DAMAGEABLE) == 0 && (other.client is null) && other.classname != "misc_explobox")
 		return BoxEdictsResult_t::Skip;
-	else if (self.spawnflags.has(spawnflags::hurt::NO_MONSTERS) && (other.e.svflags & svflags_t::MONSTER) != 0)
+	else if ((self.spawnflags & spawnflags::hurt::NO_MONSTERS) != 0 && (other.e.svflags & svflags_t::MONSTER) != 0)
 		return BoxEdictsResult_t::Skip;
-	else if (self.spawnflags.has(spawnflags::hurt::NO_PLAYERS) && (other.client !is null))
+	else if ((self.spawnflags & spawnflags::hurt::NO_PLAYERS) != 0 && (other.client !is null))
 		return BoxEdictsResult_t::Skip;
 
-	if (self.spawnflags.has(spawnflags::hurt::CLIPPED))
+	if ((self.spawnflags & spawnflags::hurt::CLIPPED) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -783,14 +783,14 @@ void hurt_think(ASEntity &self)
 	
 	damageflags_t dflags;
 
-	if (self.spawnflags.has(spawnflags::hurt::NO_PROTECTION))
+	if ((self.spawnflags & spawnflags::hurt::NO_PROTECTION) != 0)
 		dflags = damageflags_t::NO_PROTECTION;
 	else
 		dflags = damageflags_t::NONE;
 
 	foreach (ASEntity @other : data.hurt)
 	{
-		if (!self.spawnflags.has(spawnflags::hurt::SILENT))
+		if ((self.spawnflags & spawnflags::hurt::SILENT) == 0)
 		{
 			if (self.fly_sound_debounce_time < level.time)
 			{
@@ -802,7 +802,7 @@ void hurt_think(ASEntity &self)
 		T_Damage(other, self, self, vec3_origin, other.e.s.origin, vec3_origin, self.dmg, self.dmg, dflags, mod_id_t::TRIGGER_HURT);
 	}
 
-	if (self.spawnflags.has(spawnflags::hurt::SLOW))
+	if ((self.spawnflags & spawnflags::hurt::SLOW) != 0)
 		self.nextthink = level.time + time_sec(1);
 	else
 		self.nextthink = level.time + time_hz(10);
@@ -814,15 +814,15 @@ void hurt_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, bool oth
 		return;
 	else if ((other.e.svflags & svflags_t::MONSTER) == 0 && (other.flags & ent_flags_t::DAMAGEABLE) == 0 && (other.client  is null) && (other.classname != "misc_explobox"))
 		return;
-	else if (self.spawnflags.has(spawnflags::hurt::NO_MONSTERS) && (other.e.svflags & svflags_t::MONSTER) != 0)
+	else if ((self.spawnflags & spawnflags::hurt::NO_MONSTERS) != 0 && (other.e.svflags & svflags_t::MONSTER) != 0)
 		return;
-	else if (self.spawnflags.has(spawnflags::hurt::NO_PLAYERS) && (other.client !is null))
+	else if ((self.spawnflags & spawnflags::hurt::NO_PLAYERS) != 0 && (other.client !is null))
 		return;
 
 	if (self.timestamp > level.time)
 		return;
 
-	if (self.spawnflags.has(spawnflags::hurt::CLIPPED))
+	if ((self.spawnflags & spawnflags::hurt::CLIPPED) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -830,12 +830,12 @@ void hurt_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, bool oth
 			return;
 	}
 
-	if (self.spawnflags.has(spawnflags::hurt::SLOW))
+	if ((self.spawnflags & spawnflags::hurt::SLOW) != 0)
 		self.timestamp = level.time + time_sec(1);
 	else
 		self.timestamp = level.time + time_hz(10);
 
-	if (!self.spawnflags.has(spawnflags::hurt::SILENT))
+	if ((self.spawnflags & spawnflags::hurt::SILENT) == 0)
 	{
 		if (self.fly_sound_debounce_time < level.time)
 		{
@@ -846,7 +846,7 @@ void hurt_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, bool oth
 
 	damageflags_t dflags;
 
-	if (self.spawnflags.has(spawnflags::hurt::NO_PROTECTION))
+	if ((self.spawnflags & spawnflags::hurt::NO_PROTECTION) != 0)
 		dflags = damageflags_t::NO_PROTECTION;
 	else
 		dflags = damageflags_t::NONE;
@@ -860,13 +860,13 @@ void SP_trigger_hurt(ASEntity &self)
 
 	self.noise_index = gi_soundindex("world/electro.wav");
 
-	if (self.spawnflags.has(spawnflags::hurt::PASSIVE))
+	if ((self.spawnflags & spawnflags::hurt::PASSIVE) != 0)
 	{
 		@self.think = hurt_think;
 
-		if (!self.spawnflags.has(spawnflags::hurt::START_OFF))
+		if ((self.spawnflags & spawnflags::hurt::START_OFF) == 0)
 		{
-			if (self.spawnflags.has(spawnflags::hurt::SLOW))
+			if ((self.spawnflags & spawnflags::hurt::SLOW) != 0)
 				self.nextthink = level.time + time_sec(1);
 			else
 				self.nextthink = level.time + time_hz(10);
@@ -878,17 +878,17 @@ void SP_trigger_hurt(ASEntity &self)
 	if (self.dmg == 0)
 		self.dmg = 5;
 
-	if (self.spawnflags.has(spawnflags::hurt::START_OFF))
+	if ((self.spawnflags & spawnflags::hurt::START_OFF) != 0)
 		self.e.solid = solid_t::NOT;
 	else
 		self.e.solid = solid_t::TRIGGER;
 
-	if (self.spawnflags.has(spawnflags::hurt::TOGGLE))
+	if ((self.spawnflags & spawnflags::hurt::TOGGLE) != 0)
 		@self.use = hurt_use;
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::hurt::CLIPPED))
+	if ((self.spawnflags & spawnflags::hurt::CLIPPED) != 0)
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::HULL);
 }
 
@@ -911,9 +911,9 @@ START_OFF - trigger_gravity starts turned off (implies TOGGLE)
 
 namespace spawnflags::gravity
 {
-    const spawnflags_t TOGGLE = spawnflag_dec(1);
-    const spawnflags_t START_OFF = spawnflag_dec(2);
-    const spawnflags_t CLIPPED = spawnflag_dec(4);
+    const uint32 TOGGLE = 1;
+    const uint32 START_OFF = 2;
+    const uint32 CLIPPED = 4;
 }
 
 // PGM
@@ -929,7 +929,7 @@ void trigger_gravity_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 
 void trigger_gravity_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
 {
-	if (self.spawnflags.has(spawnflags::gravity::CLIPPED))
+	if ((self.spawnflags & spawnflags::gravity::CLIPPED) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -956,10 +956,10 @@ void SP_trigger_gravity(ASEntity &self)
 	// PGM
 	self.gravity = parseFloat(st.gravity);
 
-	if (self.spawnflags.has(spawnflags::gravity::TOGGLE))
+	if ((self.spawnflags & spawnflags::gravity::TOGGLE) != 0)
 		@self.use = trigger_gravity_use;
 
-	if (self.spawnflags.has(spawnflags::gravity::START_OFF))
+	if ((self.spawnflags & spawnflags::gravity::START_OFF) != 0)
 	{
 		@self.use = trigger_gravity_use;
 		self.e.solid = solid_t::NOT;
@@ -970,7 +970,7 @@ void SP_trigger_gravity(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::gravity::CLIPPED))
+	if ((self.spawnflags & spawnflags::gravity::CLIPPED) != 0)
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::HULL);
 }
 
@@ -993,9 +993,9 @@ START_OFF - trigger_monsterjump starts turned off (implies TOGGLE)
 
 namespace spawnflags::monsterjump
 {
-    const spawnflags_t TOGGLE = spawnflag_dec(1);
-    const spawnflags_t START_OFF = spawnflag_dec(2);
-    const spawnflags_t CLIPPED = spawnflag_dec(4);
+    const uint32 TOGGLE = 1;
+    const uint32 START_OFF = 2;
+    const uint32 CLIPPED = 4;
 }
 
 void trigger_monsterjump_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -1016,7 +1016,7 @@ void trigger_monsterjump_touch(ASEntity &self, ASEntity &other, const trace_t &i
 	if ((other.e.svflags & svflags_t::MONSTER) == 0)
 		return;
 
-	if (self.spawnflags.has(spawnflags::monsterjump::CLIPPED))
+	if ((self.spawnflags & spawnflags::monsterjump::CLIPPED) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -1050,10 +1050,10 @@ void SP_trigger_monsterjump(ASEntity &self)
 	@self.touch = trigger_monsterjump_touch;
 	self.movedir[2] = height;
 
-	if (self.spawnflags.has(spawnflags::monsterjump::TOGGLE))
+	if ((self.spawnflags & spawnflags::monsterjump::TOGGLE) != 0)
 		@self.use = trigger_monsterjump_use;
 
-	if (self.spawnflags.has(spawnflags::monsterjump::START_OFF))
+	if ((self.spawnflags & spawnflags::monsterjump::START_OFF) != 0)
 	{
 		@self.use = trigger_monsterjump_use;
 		self.e.solid = solid_t::NOT;
@@ -1061,7 +1061,7 @@ void SP_trigger_monsterjump(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::monsterjump::CLIPPED))
+	if ((self.spawnflags & spawnflags::monsterjump::CLIPPED) != 0)
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::HULL);
 }
 
@@ -1081,7 +1081,7 @@ Players moving against this trigger will have their flashlight turned on or off.
 
 namespace spawnflags::flashlight
 {
-    const spawnflags_t CLIPPED = spawnflag_dec(1);
+    const uint32 CLIPPED = 1;
 }
 
 void trigger_flashlight_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
@@ -1089,7 +1089,7 @@ void trigger_flashlight_touch(ASEntity &self, ASEntity &other, const trace_t &in
 	if (other.client is null)
 		return;
 
-	if (self.spawnflags.has(spawnflags::flashlight::CLIPPED))
+	if ((self.spawnflags & spawnflags::flashlight::CLIPPED) != 0)
 	{
 		trace_t clip = gi_clip(self.e, other.e.s.origin, other.e.mins, other.e.maxs, other.e.s.origin, G_GetClipMask(other));
 
@@ -1122,7 +1122,7 @@ void SP_trigger_flashlight(ASEntity &self)
 	@self.touch = trigger_flashlight_touch;
 	self.movedir[2] = st.height;
 
-	if (self.spawnflags.has(spawnflags::flashlight::CLIPPED))
+	if ((self.spawnflags & spawnflags::flashlight::CLIPPED) != 0)
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::HULL);
 	gi_linkentity(self.e);
 }
@@ -1168,11 +1168,11 @@ with respect to angles.
 */
 namespace spawnflags::fog
 {
-    const spawnflags_t AFFECT_FOG = spawnflag_dec(1);
-    const spawnflags_t AFFECT_HEIGHTFOG = spawnflag_dec(2);
-    const spawnflags_t INSTANTANEOUS = spawnflag_dec(4);
-    const spawnflags_t FORCE = spawnflag_dec(8);
-    const spawnflags_t BLEND = spawnflag_dec(16);
+    const uint32 AFFECT_FOG = 1;
+    const uint32 AFFECT_HEIGHTFOG = 2;
+    const uint32 INSTANTANEOUS = 4;
+    const uint32 FORCE = 8;
+    const uint32 BLEND = 16;
 }
 
 void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
@@ -1190,12 +1190,12 @@ void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, b
 	if (self.movetarget !is null)
 		@fog_value_storage = self.movetarget;
 
-	if (self.spawnflags.has(spawnflags::fog::INSTANTANEOUS))
+	if ((self.spawnflags & spawnflags::fog::INSTANTANEOUS) != 0)
 		other.client.pers.fog_transition_time = time_zero;
 	else
 		other.client.pers.fog_transition_time = time_sec(fog_value_storage.delay);
 
-	if (self.spawnflags.has(spawnflags::fog::BLEND))
+	if ((self.spawnflags & spawnflags::fog::BLEND) != 0)
 	{
 		vec3_t center = (self.e.absmin + self.e.absmax) * 0.5f;
 		vec3_t half_size = (self.e.size * 0.5f) + (other.e.size * 0.5f);
@@ -1207,7 +1207,7 @@ void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, b
 		dist /= (start - end).length();
 		dist = clamp(dist, 0.f, 1.f);
 
-		if (self.spawnflags.has(spawnflags::fog::AFFECT_FOG))
+		if ((self.spawnflags & spawnflags::fog::AFFECT_FOG) != 0)
 		{
             auto @wanted = other.client.pers.wanted_fog;
             auto @off = fog_value_storage.fog_off;
@@ -1219,7 +1219,7 @@ void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, b
 			wanted.skyfactor =	lerp(off.skyfactor, on.skyfactor, dist);
 		}
 
-		if (self.spawnflags.has(spawnflags::fog::AFFECT_HEIGHTFOG))
+		if ((self.spawnflags & spawnflags::fog::AFFECT_HEIGHTFOG) != 0)
 		{
             auto @wanted = other.client.pers.wanted_heightfog;
             auto @off = fog_value_storage.heightfog_off;
@@ -1241,7 +1241,7 @@ void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, b
 
 	bool use_on = true;
 
-	if (!self.spawnflags.has(spawnflags::fog::FORCE))
+	if ((self.spawnflags & spawnflags::fog::FORCE) == 0)
 	{
 		float len;
 		vec3_t forward = other.velocity.normalized(len);
@@ -1254,7 +1254,7 @@ void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, b
 		use_on = forward.dot(self.movedir) > 0;
 	}
 
-	if (self.spawnflags.has(spawnflags::fog::AFFECT_FOG))
+	if ((self.spawnflags & spawnflags::fog::AFFECT_FOG) != 0)
 	{
 		if (use_on)
             other.client.pers.wanted_fog = fog_value_storage.fog;
@@ -1262,7 +1262,7 @@ void trigger_fog_touch (ASEntity &self, ASEntity &other, const trace_t &in tr, b
             other.client.pers.wanted_fog = fog_value_storage.fog_off;
 	}
 
-	if (self.spawnflags.has(spawnflags::fog::AFFECT_HEIGHTFOG))
+	if ((self.spawnflags & spawnflags::fog::AFFECT_HEIGHTFOG) != 0)
 	{
 		if (use_on)
 			other.client.pers.wanted_heightfog = fog_value_storage.heightfog;
@@ -1278,7 +1278,7 @@ void SP_trigger_fog(ASEntity &self)
 
 	InitTrigger(self);
 
-	if (!self.spawnflags.has(spawnflags::fog::AFFECT_FOG | spawnflags::fog::AFFECT_HEIGHTFOG))
+	if (self.spawnflags & (spawnflags::fog::AFFECT_FOG | spawnflags::fog::AFFECT_HEIGHTFOG) == 0)
 		gi_Com_Print("WARNING: {} with no fog spawnflags set\n", self);
 
 	if (!self.target.empty())
@@ -1313,7 +1313,7 @@ requiring to be fired by something else. Frees itself after firing.
 
 namespace spawnflags::coop_relay
 {
-    const spawnflags_t AUTO_FIRE = spawnflag_dec(1);
+    const uint32 AUTO_FIRE = 1;
 }
 
 bool trigger_coop_relay_filter(ASEntity &player)
@@ -1416,7 +1416,7 @@ void trigger_coop_relay_think(ASEntity &self)
 
 void SP_trigger_coop_relay(ASEntity &self)
 {
-	if (!self.targetname.empty() && self.spawnflags.has(spawnflags::coop_relay::AUTO_FIRE))
+	if (!self.targetname.empty() && (self.spawnflags & spawnflags::coop_relay::AUTO_FIRE) != 0)
 		gi_Com_Print("{}: targetname and auto-fire are mutually exclusive\n", self);
 
 	InitTrigger(self);
@@ -1430,7 +1430,7 @@ void SP_trigger_coop_relay(ASEntity &self)
 	if (self.wait == 0)
 		self.wait = 1;
 
-	if (self.spawnflags.has(spawnflags::coop_relay::AUTO_FIRE))
+	if ((self.spawnflags & spawnflags::coop_relay::AUTO_FIRE) != 0)
 	{
 		@self.think = trigger_coop_relay_think;
 		self.nextthink = level.time + time_sec(self.wait);

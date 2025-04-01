@@ -249,12 +249,12 @@ bool Pickup_Weapon(ASEntity &ent, ASEntity &other)
 	bool is_new = other.client.pers.inventory[index] == 0;
 
 	if (G_WeaponShouldStay() && !is_new)
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER))
+		if ((ent.spawnflags & (spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER)) == 0)
 			return false; // leave the weapon for others to pickup
 
 	other.client.pers.inventory[index]++;
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED))
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 	{
 		// give them some ammo with it
 		// PGM -- IF APPROPRIATE!
@@ -276,7 +276,7 @@ bool Pickup_Weapon(ASEntity &ent, ASEntity &other)
 			}
 		}
 
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED_PLAYER))
+		if ((ent.spawnflags & spawnflags::item::DROPPED_PLAYER) == 0)
 		{
 			if (deathmatch.integer != 0)
 			{

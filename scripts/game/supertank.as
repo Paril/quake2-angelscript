@@ -273,9 +273,9 @@ namespace supertank
 
 namespace spawnflags::supertank
 {
-    const spawnflags_t POWERSHIELD = spawnflag_dec(8);
+    const uint32 POWERSHIELD = 8;
     // n64
-    const spawnflags_t LONG_DEATH = spawnflag_dec(16);
+    const uint32 LONG_DEATH = 16;
 }
 
 namespace supertank::sounds
@@ -514,7 +514,7 @@ const mmove_t supertank_move_pain1 = mmove_t(supertank::frames::pain1_1, superta
 
 void BossLoop(ASEntity &self)
 {
-	if (!self.spawnflags.has(spawnflags::supertank::LONG_DEATH))
+	if ((self.spawnflags & spawnflags::supertank::LONG_DEATH) == 0)
 		return;
 
 	if (self.count != 0)
@@ -731,7 +731,7 @@ void supertankRocket(ASEntity &self)
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
 
-	if (self.spawnflags.has(spawnflags::supertank::POWERSHIELD))
+	if ((self.spawnflags & spawnflags::supertank::POWERSHIELD) != 0)
 	{
 		vec = self.enemy.e.s.origin;
 		vec[2] += self.enemy.viewheight;
@@ -838,7 +838,7 @@ void supertank_gib(ASEntity &self)
 void supertank_dead(ASEntity &self)
 {
 	// no blowy on deady
-	if (self.spawnflags.has(spawnflags::monsters::DEAD))
+	if ((self.spawnflags & spawnflags::monsters::DEAD) != 0)
 	{
 		self.deadflag = false;
 		self.takedamage = true;
@@ -850,7 +850,7 @@ void supertank_dead(ASEntity &self)
 
 void supertank_die(ASEntity &self, ASEntity &inflictor, ASEntity &attacker, int damage, const vec3_t &in point, const mod_t &in mod)
 {
-	if (self.spawnflags.has(spawnflags::monsters::DEAD))
+	if ((self.spawnflags & spawnflags::monsters::DEAD) != 0)
 	{
 		// check for gib
 		if (M_CheckGib(self, mod))
@@ -954,7 +954,7 @@ void SP_monster_supertank(ASEntity &self)
 	self.monsterinfo.scale = supertank::SCALE;
 
 	// RAFAEL
-	if (self.spawnflags.has(spawnflags::supertank::POWERSHIELD))
+	if ((self.spawnflags & spawnflags::supertank::POWERSHIELD) != 0)
 	{
 		if (!st.was_key_specified("power_armor_type"))
 			self.monsterinfo.power_armor_type = item_id_t::ITEM_POWER_SHIELD;

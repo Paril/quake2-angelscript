@@ -900,7 +900,7 @@ void float_set_fly_parameters(ASEntity &self)
 
 namespace spawnflags::floater
 {
-    const spawnflags_t DISGUISE = spawnflag_dec(8);
+    const uint32 DISGUISE = 8;
 }
 
 /*QUAKED monster_floater (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight Disguise
@@ -956,7 +956,7 @@ void SP_monster_floater(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::floater::DISGUISE))
+	if ((self.spawnflags & spawnflags::floater::DISGUISE) != 0)
 		M_SetAnimation(self, floater_move_disguise);
 	else if (frandom() <= 0.5f)
 		M_SetAnimation(self, floater_move_stand1);

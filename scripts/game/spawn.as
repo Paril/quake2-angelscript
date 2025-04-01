@@ -280,6 +280,12 @@ bool ED_LoadUInt(tokenizer_t &tokenizer, uint32 &out v)
     return true;
 }
 
+bool ED_LoadUInt(tokenizer_t &tokenizer, int64 &out v)
+{
+    v = tokenizer.as_int64();
+    return true;
+}
+
 bool ED_LoadUInt(tokenizer_t &tokenizer, uint64 &out v)
 {
     v = tokenizer.as_uint64();
@@ -318,12 +324,6 @@ bool ED_LoadBmodelAnimStyle(tokenizer_t &tokenizer, bmodel_animstyle_t &out v)
     val = clamp(val, int(bmodel_animstyle_t::FORWARDS), int(bmodel_animstyle_t::RANDOM));
     v = bmodel_animstyle_t(val);
 
-    return true;
-}
-
-bool ED_LoadSpawnflags(tokenizer_t &tokenizer, spawnflags_t &out v)
-{
-    v = spawnflag_dec(tokenizer.as_uint32());
     return true;
 }
 
@@ -417,7 +417,7 @@ funcdef bool parse_ent_f(tokenizer_t &, ASEntity &);
 const dictionary ent_fields = {
     { "classname", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadString(tokenizer, ent.classname); }) },
     { "model", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadString(tokenizer, ent.model); }) },
-    { "spawnflags", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadSpawnflags(tokenizer, ent.spawnflags); }) },
+    { "spawnflags", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadInt(tokenizer, ent.spawnflags); }) },
     { "speed", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadFloat(tokenizer, ent.speed); }) },
     { "accel", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadFloat(tokenizer, ent.accel); }) },
     { "decel", cast<parse_ent_f>(function(tokenizer, ent) { return ED_LoadFloat(tokenizer, ent.decel); }) },
@@ -613,17 +613,17 @@ namespace spawnflags
 {
     // these spawnflags affect every entity. note that items are a bit special
     // because these 8 bits are instead used for power cube bits.
-    const spawnflags_t  NONE = spawnflag_dec(0),
-                        NOT_EASY = spawnflag_dec(0x00000100),
-                        NOT_MEDIUM = spawnflag_dec(0x00000200),
-                        NOT_HARD = spawnflag_dec(0x00000400),
-                        NOT_DEATHMATCH = spawnflag_dec(0x00000800),
-                        NOT_COOP = spawnflag_dec(0x00001000),
-                        RESERVED1 = spawnflag_dec(0x00002000),
-                        COOP_ONLY = spawnflag_dec(0x00004000),
-                        RESERVED2 = spawnflag_dec(0x00008000);
+    const uint32  NONE = 0,
+                        NOT_EASY = 0x00000100,
+                        NOT_MEDIUM = 0x00000200,
+                        NOT_HARD = 0x00000400,
+                        NOT_DEATHMATCH = 0x00000800,
+                        NOT_COOP = 0x00001000,
+                        RESERVED1 = 0x00002000,
+                        COOP_ONLY = 0x00004000,
+                        RESERVED2 = 0x00008000;
 
-    const spawnflags_t EDITOR_MASK = (NOT_EASY | NOT_MEDIUM | NOT_HARD | NOT_DEATHMATCH |
+    const uint32 EDITOR_MASK = (NOT_EASY | NOT_MEDIUM | NOT_HARD | NOT_DEATHMATCH |
                                 NOT_COOP | RESERVED1 | COOP_ONLY | RESERVED2);
 }
 
@@ -655,7 +655,7 @@ void G_FixTeams()
 			continue;
 		if (e.team.empty())
 			continue;
-		if (e.classname == "func_train" && e.spawnflags.has(spawnflags::train::MOVE_TEAMCHAIN))
+		if (e.classname == "func_train" && (e.spawnflags & spawnflags::train::MOVE_TEAMCHAIN) != 0)
 		{
 			if ((e.flags & ent_flags_t::TEAMSLAVE) != 0)
 			{
@@ -750,18 +750,18 @@ bool G_InhibitEntity(ASEntity &ent)
 {
 	// dm-only
 	if (deathmatch.integer != 0)
-		return ent.spawnflags.has(spawnflags::NOT_DEATHMATCH);
+		return (ent.spawnflags & spawnflags::NOT_DEATHMATCH) != 0;
 
 	// coop flags
-	if (coop.integer != 0 && ent.spawnflags.has(spawnflags::NOT_COOP))
+	if (coop.integer != 0 && (ent.spawnflags & spawnflags::NOT_COOP) != 0)
 		return true;
-	else if (coop.integer == 0 && ent.spawnflags.has(spawnflags::COOP_ONLY))
+	else if (coop.integer == 0 && (ent.spawnflags & spawnflags::COOP_ONLY) != 0)
 		return true;
 
 	// skill
-	return ((skill.integer == 0) && ent.spawnflags.has(spawnflags::NOT_EASY)) ||
-		   ((skill.integer == 1) && ent.spawnflags.has(spawnflags::NOT_MEDIUM)) ||
-		   ((skill.integer >= 2) && ent.spawnflags.has(spawnflags::NOT_HARD));
+	return ((skill.integer == 0) && (ent.spawnflags & spawnflags::NOT_EASY) != 0) ||
+		   ((skill.integer == 1) && (ent.spawnflags & spawnflags::NOT_MEDIUM) != 0) ||
+		   ((skill.integer >= 2) && (ent.spawnflags & spawnflags::NOT_HARD) != 0);
 }
 
 // [Paril-KEX]

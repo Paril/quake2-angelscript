@@ -1025,7 +1025,7 @@ void parasite_setskin(ASEntity &self)
 
 namespace spawnflags::parasite
 {
-    const spawnflags_t NOJUMPING = spawnflag_dec(8);
+    const uint32 NOJUMPING = 8;
 }
 
 /*QUAKED monster_parasite (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight NoJumping
@@ -1087,7 +1087,7 @@ void SP_monster_parasite(ASEntity &self)
 	M_SetAnimation(self, parasite_move_stand);
 	self.monsterinfo.scale = parasite::SCALE;
 	self.yaw_speed = 30;
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::parasite::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::parasite::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 256;
 	self.monsterinfo.jump_height = 68;
 

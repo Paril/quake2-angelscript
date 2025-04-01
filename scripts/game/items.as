@@ -1,16 +1,16 @@
 // item spawnflags
 namespace spawnflags::item
 {
-    const spawnflags_t TRIGGER_SPAWN = spawnflag_bit(0);
-    const spawnflags_t NO_TOUCH = spawnflag_bit(1);
-    const spawnflags_t TOSS_SPAWN = spawnflag_bit(2);
-    const spawnflags_t NO_DROP = spawnflag_bit(3);
-    const spawnflags_t MAX = spawnflag_bit(4);
+    const uint32 TRIGGER_SPAWN = 1 << 0;
+    const uint32 NO_TOUCH = 1 << 1;
+    const uint32 TOSS_SPAWN = 1 << 2;
+    const uint32 NO_DROP = 1 << 3;
+    const uint32 MAX = 1 << 4;
 // 8 bits reserved for editor flags & power cube bits
 // (see SPAWNFLAG_NOT_EASY)
-    const spawnflags_t DROPPED = spawnflag_bit(16);
-    const spawnflags_t DROPPED_PLAYER = spawnflag_bit(17);
-    const spawnflags_t TARGETS_USED = spawnflag_bit(18);
+    const uint32 DROPPED = 1 << 16;
+    const uint32 DROPPED_PLAYER = 1 << 17;
+    const uint32 TARGETS_USED = 1 << 18;
 }
 
 // gitem_t.flags
@@ -383,7 +383,7 @@ bool Pickup_Bandolier(ASEntity &ent, ASEntity &other)
 	G_AddAmmoAndCapQuantity(other, ammo_t::BULLETS);
 	G_AddAmmoAndCapQuantity(other, ammo_t::SHELLS);
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED) && deathmatch.integer != 0)
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0 && deathmatch.integer != 0)
 		SetRespawn(ent, time_sec(ent.item.quantity));
 
 	return true;
@@ -417,7 +417,7 @@ bool Pickup_Pack(ASEntity &ent, ASEntity &other)
 	G_AddAmmoAndCapQuantity(other, ammo_t::DISRUPTOR);
 	// ROGUE
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED) && deathmatch.integer != 0)
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0 && deathmatch.integer != 0)
 		SetRespawn(ent, time_sec(ent.item.quantity));
 
 	return true;
@@ -617,7 +617,7 @@ bool Pickup_Ammo(ASEntity &ent, ASEntity &other)
 	if (weapon)
 		G_CheckAutoSwitch(other, ent.item, oldcount == 0);
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER) && deathmatch.integer != 0)
+	if ((ent.spawnflags & (spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER)) == 0 && deathmatch.integer != 0)
 		SetRespawn(ent, time_sec(30));
 	return true;
 }
@@ -654,7 +654,7 @@ bool Pickup_Powerup(ASEntity &ent, ASEntity &other)
 
 	other.client.pers.inventory[ent.item.id]++;
 
-	bool is_dropped_from_death = ent.spawnflags.has(spawnflags::item::DROPPED_PLAYER) && !ent.spawnflags.has(spawnflags::item::DROPPED);
+	bool is_dropped_from_death = (ent.spawnflags & spawnflags::item::DROPPED_PLAYER) != 0 && (ent.spawnflags & spawnflags::item::DROPPED) == 0;
 
 	if (IsInstantItemsEnabled() ||
 		((ent.item.use is Use_Quad) && is_dropped_from_death) ||
@@ -671,7 +671,7 @@ bool Pickup_Powerup(ASEntity &ent, ASEntity &other)
 
 	if (deathmatch.integer != 0)
 	{
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED) && !is_dropped_from_death)
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0 && !is_dropped_from_death)
 			SetRespawn(ent, time_sec(ent.item.quantity));
 	}
 
@@ -687,7 +687,7 @@ bool Pickup_General(ASEntity &ent, ASEntity &other)
 
 	if (deathmatch.integer != 0)
 	{
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED))
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 			SetRespawn(ent, time_sec(ent.item.quantity));
 	}
 
@@ -722,7 +722,7 @@ bool Pickup_LegacyHead(ASEntity &ent, ASEntity &other)
 	other.max_health += 5;
 	other.health += 5;
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED) && deathmatch.integer != 0)
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0 && deathmatch.integer != 0)
 		SetRespawn(ent, time_sec(ent.item.quantity));
 
 	return true;
@@ -772,7 +772,7 @@ void MegaHealth_Think(ASEntity &self)
 		return;
 	}
 
-	if (!self.spawnflags.has(spawnflags::item::DROPPED) && deathmatch.integer != 0)
+	if ((self.spawnflags & spawnflags::item::DROPPED) == 0 && deathmatch.integer != 0)
 		SetRespawn(self, time_sec(20));
 	else
 		G_FreeEdict(self);
@@ -830,7 +830,7 @@ bool Pickup_Health(ASEntity &ent, ASEntity &other)
 	}
 	else
 	{
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED) && deathmatch.integer != 0)
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0 && deathmatch.integer != 0)
 			SetRespawn(ent, time_sec(30));
 	}
 
@@ -932,7 +932,7 @@ bool Pickup_Armor(ASEntity &ent, ASEntity &other)
 		}
 	}
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED) && deathmatch.integer != 0)
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0 && deathmatch.integer != 0)
 		SetRespawn(ent, time_sec(20));
 
 	return true;
@@ -1027,7 +1027,7 @@ bool Pickup_PowerArmor(ASEntity &ent, ASEntity &other)
 
 	if (deathmatch.integer != 0)
 	{
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED))
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 			SetRespawn(ent, time_sec(ent.item.quantity));
 		// auto-use for DM only if we didn't already have one
 		if (quantity == 0)
@@ -1125,7 +1125,7 @@ void Touch_Item(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool other
 		}
 	}
 
-	if (!ent.spawnflags.has(spawnflags::item::TARGETS_USED))
+	if ((ent.spawnflags & spawnflags::item::TARGETS_USED) == 0)
 	{
 		// [Paril-KEX] see above msg; this also disables the message in DM
 		// since there's no need to print pickup messages in DM (this wasn't
@@ -1156,14 +1156,14 @@ void Touch_Item(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool other
 			// in coop with instanced items, *only* dropped 
 			// player items will ever get deleted permanently.
 			if (P_UseCoopInstancedItems())
-				should_remove = ent.spawnflags.has(spawnflags::item::DROPPED_PLAYER);
+				should_remove = (ent.spawnflags & spawnflags::item::DROPPED_PLAYER) != 0;
 			// in coop without instanced items, IF_STAY_COOP items remain
 			// if not dropped
 			else
-				should_remove = ent.spawnflags.has(spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER) || (ent.item.flags & item_flags_t::STAY_COOP) == 0;
+				should_remove = (ent.spawnflags & (spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER)) != 0 || (ent.item.flags & item_flags_t::STAY_COOP) == 0;
 		}
 		else
-			should_remove = deathmatch.integer == 0 || ent.spawnflags.has(spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER);
+			should_remove = deathmatch.integer == 0 || (ent.spawnflags & (spawnflags::item::DROPPED | spawnflags::item::DROPPED_PLAYER)) != 0;
 
 		if (should_remove)
 		{
@@ -1254,7 +1254,7 @@ void Use_Item(ASEntity &ent, ASEntity &other, ASEntity @activator)
 	ent.e.svflags = svflags_t(ent.e.svflags & ~svflags_t::NOCLIENT);
 	@ent.use = null;
 
-	if (ent.spawnflags.has(spawnflags::item::NO_TOUCH))
+	if ((ent.spawnflags & spawnflags::item::NO_TOUCH) != 0)
 	{
 		ent.e.solid = solid_t::BBOX;
 		@ent.touch = null;
@@ -1299,7 +1299,7 @@ void droptofloor(ASEntity &ent)
 	ent.e.solid = solid_t::TRIGGER;
 	@ent.touch = Touch_Item;
 
-	if (!ent.spawnflags.has(spawnflags::item::NO_DROP))
+	if ((ent.spawnflags & spawnflags::item::NO_DROP) == 0)
 	{
 		ent.movetype = movetype_t::TOSS;
 		dest = ent.e.s.origin + vec3_t(0, 0, -128);
@@ -1343,7 +1343,7 @@ void droptofloor(ASEntity &ent)
 		}
 	}
 
-	if (ent.spawnflags.has(spawnflags::item::NO_TOUCH))
+	if ((ent.spawnflags & spawnflags::item::NO_TOUCH) != 0)
 	{
 		ent.e.solid = solid_t::BBOX;
 		@ent.touch = null;
@@ -1351,7 +1351,7 @@ void droptofloor(ASEntity &ent)
 		ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx & ~renderfx_t::GLOW);
 	}
 
-	if (ent.spawnflags.has(spawnflags::item::TRIGGER_SPAWN))
+	if ((ent.spawnflags & spawnflags::item::TRIGGER_SPAWN) != 0)
 	{
 		ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCLIENT);
 		ent.e.solid = solid_t::NOT;
@@ -1432,13 +1432,13 @@ void SpawnItem(ASEntity &ent, const gitem_t @item, const spawn_temp_t &in st)
 	// a few different times)
 	if ((item.flags & item_flags_t::KEY) != 0)
 	{
-		if (ent.spawnflags.has(spawnflags::item::TRIGGER_SPAWN))
+		if ((ent.spawnflags & spawnflags::item::TRIGGER_SPAWN) != 0)
 		{
 			ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCLIENT);
 			ent.e.solid = solid_t::NOT;
 			@ent.use = Use_Item;
 		}
-		if (ent.spawnflags.has(spawnflags::item::NO_TOUCH))
+		if ((ent.spawnflags & spawnflags::item::NO_TOUCH) != 0)
 		{
 			ent.e.solid = solid_t::BBOX;
 			@ent.touch = null;
@@ -1597,7 +1597,7 @@ void SpawnItem(ASEntity &ent, const gitem_t @item, const spawn_temp_t &in st)
 
 	if (coop.integer != 0 && (item.id == item_id_t::KEY_POWER_CUBE || item.id == item_id_t::KEY_EXPLOSIVE_CHARGES))
 	{
-		ent.spawnflags |= spawnflag_dec(1 << (8 + level.power_cubes));
+		ent.spawnflags |= 1 << (8 + level.power_cubes);
 		level.power_cubes++;
 	}
 
@@ -1620,7 +1620,7 @@ void SpawnItem(ASEntity &ent, const gitem_t @item, const spawn_temp_t &in st)
 		gi_modelindex(ent.model);
     ent.item_picked_up_by.resize(max_clients);
 
-	if (ent.spawnflags.has(spawnflags::item::TRIGGER_SPAWN))
+	if ((ent.spawnflags & spawnflags::item::TRIGGER_SPAWN) != 0)
 		SetTriggeredSpawn(ent);
 
 	// ZOID

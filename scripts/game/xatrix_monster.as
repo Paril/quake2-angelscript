@@ -97,13 +97,13 @@ void dabeam_update(ASEntity &self, bool damage)
 
 namespace spawnflags::dabeam
 {
-    const spawnflags_t SECONDARY = spawnflag_dec(1);
-    const spawnflags_t SPAWNED = spawnflag_dec(2);
+    const uint32 SECONDARY = 1;
+    const uint32 SPAWNED = 2;
 }
 
 void beam_think(ASEntity &self)
 {
-	if (self.spawnflags.has(spawnflags::dabeam::SECONDARY))
+	if ((self.spawnflags & spawnflags::dabeam::SECONDARY) != 0)
 		@self.owner.beam2 = null;
 	else
 		@self.owner.beam = null;

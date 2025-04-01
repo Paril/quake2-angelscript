@@ -1646,7 +1646,7 @@ bool gunner_sidestep(ASEntity &self)
 
 namespace spawnflags::gunner
 {
-    const spawnflags_t NOJUMPING = spawnflag_dec(8);
+    const uint32 NOJUMPING = 8;
 }
 
 /*QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight NoJumping
@@ -1715,7 +1715,7 @@ void SP_monster_gunner(ASEntity &self)
 
 	// PMM
 	self.monsterinfo.blindfire = true;
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::gunner::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::gunner::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 192;
 	self.monsterinfo.jump_height = 40;
 

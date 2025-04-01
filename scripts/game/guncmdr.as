@@ -10,7 +10,7 @@ GUNNER COMMANDER
 
 namespace spawnflags::guncmdr
 {
-    const spawnflags_t NOJUMPING = spawnflag_dec(8);
+    const uint32 NOJUMPING = 8;
 }
 
 namespace guncmdr::sounds
@@ -1458,7 +1458,7 @@ void SP_monster_guncmdr(ASEntity &self)
 
 	// PMM
 	//self.monsterinfo.blindfire = true;
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::guncmdr::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::guncmdr::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 192;
 	self.monsterinfo.jump_height = 40;
 

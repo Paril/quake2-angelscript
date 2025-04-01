@@ -201,7 +201,7 @@ namespace boss2
 namespace spawnflags::boss2
 {
     // [Paril-KEX]
-    const spawnflags_t N64 = spawnflag_dec(8);
+    const uint32 N64 = 8;
 }
 
 namespace boss2::sounds
@@ -680,16 +680,16 @@ void boss2_attack(ASEntity &self)
 	range = vec.length();
 
 	if (range <= 125 || frandom() <= 0.6f)
-		M_SetAnimation(self, self.spawnflags.has(spawnflags::boss2::N64) ? boss2_move_attack_hb : boss2_move_attack_pre_mg);
+		M_SetAnimation(self, (self.spawnflags & spawnflags::boss2::N64) != 0 ? boss2_move_attack_hb : boss2_move_attack_pre_mg);
 	else
-		M_SetAnimation(self, self.spawnflags.has(spawnflags::boss2::N64) ? boss2_move_attack_rocket2 : boss2_move_attack_rocket);
+		M_SetAnimation(self, (self.spawnflags & spawnflags::boss2::N64) != 0 ? boss2_move_attack_rocket2 : boss2_move_attack_rocket);
 
 	boss2_set_fly_parameters(self, true);
 }
 
 void boss2_attack_mg(ASEntity &self)
 {
-	M_SetAnimation(self, self.spawnflags.has(spawnflags::boss2::N64) ? boss2_move_attack_hb : boss2_move_attack_mg);
+	M_SetAnimation(self, (self.spawnflags & spawnflags::boss2::N64) != 0 ? boss2_move_attack_hb : boss2_move_attack_mg);
 }
 
 void boss2_reattack_mg(ASEntity &self)
@@ -769,7 +769,7 @@ void boss2_gib(ASEntity &self)
 void boss2_dead(ASEntity &self)
 {
 	// no blowy on deady
-	if (self.spawnflags.has(spawnflags::monsters::DEAD))
+	if ((self.spawnflags & spawnflags::monsters::DEAD) != 0)
 	{
 		self.deadflag = false;
 		self.takedamage = true;
@@ -781,7 +781,7 @@ void boss2_dead(ASEntity &self)
 
 void boss2_die(ASEntity &self, ASEntity &inflictor, ASEntity &attacker, int damage, const vec3_t &in point, const mod_t &in mod)
 {
-	if (self.spawnflags.has(spawnflags::monsters::DEAD))
+	if ((self.spawnflags & spawnflags::monsters::DEAD) != 0)
 	{
 		// check for gib
 		if (M_CheckGib(self, mod))
@@ -832,7 +832,7 @@ void SP_monster_boss2(ASEntity &self)
 
 	gi_soundindex("tank/rocket.wav");
 
-	if (self.spawnflags.has(spawnflags::boss2::N64))
+	if ((self.spawnflags & spawnflags::boss2::N64) != 0)
 		gi_soundindex("flyer/flyatck3.wav");
 	else
 		gi_soundindex("infantry/infatck1.wav");

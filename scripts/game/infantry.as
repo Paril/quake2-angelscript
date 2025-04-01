@@ -1126,7 +1126,7 @@ void InfantryPrecache()
 
 namespace spawnflags::infantry
 {
-    const spawnflags_t NOJUMPING = spawnflag_dec(8);
+    const uint32 NOJUMPING = 8;
 }
 
 /*QUAKED monster_infantry (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight NoJumping
@@ -1186,7 +1186,7 @@ void SP_monster_infantry(ASEntity &self)
 
 	M_SetAnimation(self, infantry_move_stand);
 	self.monsterinfo.scale = infantry::SCALE;
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::infantry::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::infantry::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 192;
 	self.monsterinfo.jump_height = 40;
 

@@ -38,17 +38,17 @@ Normal sounds play each time the target is used.  The reliable flag can be set f
 
 namespace spawnflags::speaker
 {
-    const spawnflags_t LOOPED_ON = spawnflag_dec(1);
-    const spawnflags_t LOOPED_OFF = spawnflag_dec(2);
-    const spawnflags_t RELIABLE = spawnflag_dec(4);
-    const spawnflags_t NO_STEREO = spawnflag_dec(8);
+    const uint32 LOOPED_ON = 1;
+    const uint32 LOOPED_OFF = 2;
+    const uint32 RELIABLE = 4;
+    const uint32 NO_STEREO = 8;
 }
 
 void Use_Target_Speaker(ASEntity &ent, ASEntity &other, ASEntity @activator)
 {
 	soundchan_t chan;
 
-	if (ent.spawnflags.has(spawnflags::speaker::LOOPED_ON | spawnflags::speaker::LOOPED_OFF))
+	if ((ent.spawnflags & (spawnflags::speaker::LOOPED_ON | spawnflags::speaker::LOOPED_OFF)) != 0)
 	{ // looping sound toggles
 		if (ent.e.s.sound != 0)
 			ent.e.s.sound = 0; // turn it off
@@ -57,7 +57,7 @@ void Use_Target_Speaker(ASEntity &ent, ASEntity &other, ASEntity @activator)
 	}
 	else
 	{ // normal sound
-		if (ent.spawnflags.has(spawnflags::speaker::RELIABLE))
+		if ((ent.spawnflags & spawnflags::speaker::RELIABLE) != 0)
 			chan = soundchan_t(soundchan_t::VOICE | soundchan_t::RELIABLE);
 		else
 			chan = soundchan_t::VOICE;
@@ -87,14 +87,14 @@ void SP_target_speaker(ASEntity &ent)
 
 	if (ent.attenuation == 0)
 	{
-		if (ent.spawnflags.has(spawnflags::speaker::LOOPED_OFF | spawnflags::speaker::LOOPED_ON))
+		if ((ent.spawnflags & (spawnflags::speaker::LOOPED_OFF | spawnflags::speaker::LOOPED_ON)) != 0)
 			ent.attenuation = ATTN_STATIC;
 		else
 			ent.attenuation = ATTN_NORM;
 	}
 	else if (ent.attenuation == -1) // use -1 so 0 defaults to 1
 	{
-		if (ent.spawnflags.has(spawnflags::speaker::LOOPED_OFF | spawnflags::speaker::LOOPED_ON))
+		if ((ent.spawnflags & (spawnflags::speaker::LOOPED_OFF | spawnflags::speaker::LOOPED_ON)) != 0)
 		{
 			ent.attenuation = ATTN_LOOP_NONE;
 			ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCULL);
@@ -106,10 +106,10 @@ void SP_target_speaker(ASEntity &ent)
 	ent.e.s.loop_attenuation = ent.attenuation;
 
 	// check for prestarted looping sound
-	if (ent.spawnflags.has(spawnflags::speaker::LOOPED_ON))
+	if ((ent.spawnflags & spawnflags::speaker::LOOPED_ON) != 0)
 		ent.e.s.sound = ent.noise_index;
 
-	if (ent.spawnflags.has(spawnflags::speaker::NO_STEREO))
+	if ((ent.spawnflags & spawnflags::speaker::NO_STEREO) != 0)
 		ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx | renderfx_t::NO_STEREO);
 
 	@ent.use = Use_Target_Speaker;
@@ -123,13 +123,13 @@ void SP_target_speaker(ASEntity &ent)
 
 namespace spawnflags::help
 {
-    const spawnflags_t HELP1 = spawnflag_dec(1);
-    const spawnflags_t SET_POI = spawnflag_dec(2);
+    const uint32 HELP1 = 1;
+    const uint32 SET_POI = 2;
 }
 
 void Use_Target_Help(ASEntity &ent, ASEntity &other, ASEntity @activator)
 {
-    if (ent.spawnflags.has(spawnflags::help::HELP1))
+    if ((ent.spawnflags & spawnflags::help::HELP1) != 0)
 	{
 		if (game.helpmessage1 != ent.message)
 		{
@@ -146,7 +146,7 @@ void Use_Target_Help(ASEntity &ent, ASEntity &other, ASEntity @activator)
 		}
 	}
 
-	if (ent.spawnflags.has(spawnflags::help::SET_POI))
+	if ((ent.spawnflags & spawnflags::help::SET_POI) != 0)
 	{
 		target_poi_use(ent, other, activator);
 	}
@@ -174,7 +174,7 @@ void SP_target_help(ASEntity &ent)
 
 	@ent.use = Use_Target_Help;
 
-	if (ent.spawnflags.has(spawnflags::help::SET_POI))
+	if ((ent.spawnflags & spawnflags::help::SET_POI) != 0)
 	{
 		if (!st.image.empty())
 			ent.noise_index = gi_imageindex(st.image);
@@ -310,7 +310,7 @@ These are single use targets.
 
 namespace spawnflags::goal
 {
-    const spawnflags_t KEEP_MUSIC = spawnflag_dec(1);
+    const uint32 KEEP_MUSIC = 1;
 }
 
 void use_target_goal(ASEntity &ent, ASEntity &other, ASEntity @activator)
@@ -319,7 +319,7 @@ void use_target_goal(ASEntity &ent, ASEntity &other, ASEntity @activator)
 
 	level.found_goals++;
 
-	if (level.found_goals == level.total_goals && !ent.spawnflags.has(spawnflags::goal::KEEP_MUSIC))
+	if (level.found_goals == level.total_goals && (ent.spawnflags & spawnflags::goal::KEEP_MUSIC) == 0)
 	{
 		if (ent.sounds != 0)
 			gi_configstring(configstring_id_t::CDTRACK, format("{}", ent.sounds));
@@ -413,10 +413,10 @@ Changes level to "map" when fired
 
 namespace spawnflags::changelevel
 {
-    const spawnflags_t CLEAR_INVENTORY = spawnflag_dec(8);
-    const spawnflags_t NO_END_OF_UNIT = spawnflag_dec(16);
-    const spawnflags_t FADE_OUT = spawnflag_dec(32);
-    const spawnflags_t IMMEDIATE_LEAVE = spawnflag_dec(64);
+    const uint32 CLEAR_INVENTORY = 8;
+    const uint32 NO_END_OF_UNIT = 16;
+    const uint32 FADE_OUT = 32;
+    const uint32 IMMEDIATE_LEAVE = 64;
 }
 
 void use_target_changelevel(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -607,17 +607,17 @@ speed	default is 1000
 
 namespace spawnflags::blaster
 {
-    const spawnflags_t NOTRAIL = spawnflag_dec(1);
-    const spawnflags_t NOEFFECTS = spawnflag_dec(2);
+    const uint32 NOTRAIL = 1;
+    const uint32 NOEFFECTS = 2;
 }
 
 void use_target_blaster(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
 	effects_t effect;
 
-	if (self.spawnflags.has(spawnflags::blaster::NOEFFECTS))
+	if ((self.spawnflags & spawnflags::blaster::NOEFFECTS) != 0)
 		effect = effects_t::NONE;
-	else if (self.spawnflags.has(spawnflags::blaster::NOTRAIL))
+	else if ((self.spawnflags & spawnflags::blaster::NOTRAIL) != 0)
 		effect = effects_t::HYPERBLASTER;
 	else
 		effect = effects_t::BLASTER;
@@ -694,18 +694,18 @@ WINDOWSTOP - stops at CONTENTS_WINDOW
 // PGM
 namespace spawnflags::laser
 {
-    const spawnflags_t ON = spawnflag_dec(0x0001);
-    const spawnflags_t RED = spawnflag_dec(0x0002);
-    const spawnflags_t GREEN = spawnflag_dec(0x0004);
-    const spawnflags_t BLUE = spawnflag_dec(0x0008);
-    const spawnflags_t YELLOW = spawnflag_dec(0x0010);
-    const spawnflags_t ORANGE = spawnflag_dec(0x0020);
-    const spawnflags_t FAT = spawnflag_dec(0x0040);
-    const spawnflags_t STOPWINDOW = spawnflag_dec(0x0080);
-    const spawnflags_t ZAP = spawnflag_dec(0x80000000);
-    const spawnflags_t LIGHTNING = spawnflag_dec(0x10000);
-    const spawnflags_t REACTOR = spawnflag_dec(0x20000); // PSX reactor effect instead of beam
-    const spawnflags_t NO_PROTECTION = spawnflag_dec(0x40000); // no protection
+    const uint32 ON = 0x0001;
+    const uint32 RED = 0x0002;
+    const uint32 GREEN = 0x0004;
+    const uint32 BLUE = 0x0008;
+    const uint32 YELLOW = 0x0010;
+    const uint32 ORANGE = 0x0020;
+    const uint32 FAT = 0x0040;
+    const uint32 STOPWINDOW = 0x0080;
+    const uint32 ZAP = 0x80000000;
+    const uint32 LIGHTNING = 0x10000;
+    const uint32 REACTOR = 0x20000; // PSX reactor effect instead of beam
+    const uint32 NO_PROTECTION = 0x40000; // no protection
 }
 // PGM
 //======
@@ -735,7 +735,7 @@ class laser_pierce_t : pierce_args_t
 			damaged_thing = true;
 			damageflags_t dmg = damageflags_t::ENERGY;
 
-			if (self.spawnflags.has(spawnflags::laser::NO_PROTECTION))
+			if ((self.spawnflags & spawnflags::laser::NO_PROTECTION) != 0)
 				dmg = damageflags_t(dmg | damageflags_t::NO_PROTECTION);
 
 			T_Damage(hit, self, self.activator, self.movedir, tr.endpos, vec3_origin, self.dmg, 1, dmg, mod_id_t::TARGET_LASER);
@@ -746,7 +746,7 @@ class laser_pierce_t : pierce_args_t
 		if ((tr.ent.svflags & svflags_t::MONSTER) == 0 && (tr.ent.client is null) && (hit.flags & ent_flags_t::DAMAGEABLE) == 0)
 		// ROGUE
 		{
-			if (self.spawnflags.has(spawnflags::laser::ZAP))
+			if ((self.spawnflags & spawnflags::laser::ZAP) != 0)
 			{
 				self.spawnflags &= ~spawnflags::laser::ZAP;
 				gi_WriteByte(svc_t::temp_entity);
@@ -772,7 +772,7 @@ void target_laser_think(ASEntity &self)
 {
 	int32 count;
 
-	if (self.spawnflags.has(spawnflags::laser::ZAP))
+	if ((self.spawnflags & spawnflags::laser::ZAP) != 0)
 		count = 8;
 	else
 		count = 4;
@@ -795,7 +795,7 @@ void target_laser_think(ASEntity &self)
 		count
     );
 
-	contents_t mask = self.spawnflags.has(spawnflags::laser::STOPWINDOW) ? contents_t::MASK_SHOT : contents_t(contents_t::SOLID | contents_t::MONSTER | contents_t::PLAYER | contents_t::DEADMONSTER);
+	contents_t mask = (self.spawnflags & spawnflags::laser::STOPWINDOW) != 0 ? contents_t::MASK_SHOT : contents_t(contents_t::SOLID | contents_t::MONSTER | contents_t::PLAYER | contents_t::DEADMONSTER);
 
 	if (self.dmg == 0)
 		mask = contents_t(mask & ~(contents_t::MONSTER | contents_t::PLAYER | contents_t::DEADMONSTER));
@@ -832,7 +832,7 @@ void target_laser_off(ASEntity &self)
 void target_laser_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
 	@self.activator = activator;
-	if (self.spawnflags.has(spawnflags::laser::ON))
+	if ((self.spawnflags & spawnflags::laser::ON) != 0)
 		target_laser_off(self);
 	else
 		target_laser_on(self);
@@ -851,7 +851,7 @@ void target_laser_start(ASEntity &self)
 	if (level.is_n64)
 	{
 		// Paril: fix for N64
-		if (self.spawnflags.has(spawnflags::laser::STOPWINDOW))
+		if ((self.spawnflags & spawnflags::laser::STOPWINDOW) != 0)
 		{
 			self.spawnflags &= ~spawnflags::laser::STOPWINDOW;
 			self.spawnflags |= spawnflags::laser::LIGHTNING;
@@ -863,22 +863,22 @@ void target_laser_start(ASEntity &self)
 	// before lightning/reactor check
 	if (self.e.s.skinnum == 0)
 	{
-		if (self.spawnflags.has(spawnflags::laser::RED))
+		if ((self.spawnflags & spawnflags::laser::RED) != 0)
 			self.e.s.skinnum = int(0xf2f2f0f0);
-		else if (self.spawnflags.has(spawnflags::laser::GREEN))
+		else if ((self.spawnflags & spawnflags::laser::GREEN) != 0)
 			self.e.s.skinnum = int(0xd0d1d2d3);
-		else if (self.spawnflags.has(spawnflags::laser::BLUE))
+		else if ((self.spawnflags & spawnflags::laser::BLUE) != 0)
 			self.e.s.skinnum = int(0xf3f3f1f1);
-		else if (self.spawnflags.has(spawnflags::laser::YELLOW))
+		else if ((self.spawnflags & spawnflags::laser::YELLOW) != 0)
 			self.e.s.skinnum = int(0xdcdddedf);
-		else if (self.spawnflags.has(spawnflags::laser::ORANGE))
+		else if ((self.spawnflags & spawnflags::laser::ORANGE) != 0)
 			self.e.s.skinnum = int(0xe0e1e2e3);
 	}
 
-	if (self.spawnflags.has(spawnflags::laser::REACTOR))
+	if ((self.spawnflags & spawnflags::laser::REACTOR) != 0)
 		self.spawnflags |= spawnflags::laser::LIGHTNING;
 
-	if (self.spawnflags.has(spawnflags::laser::LIGHTNING))
+	if ((self.spawnflags & spawnflags::laser::LIGHTNING) != 0)
 	{
 		self.e.s.renderfx = renderfx_t(self.e.s.renderfx | renderfx_t::BEAM_LIGHTNING); // tell renderer it is lightning
 
@@ -886,7 +886,7 @@ void target_laser_start(ASEntity &self)
 			self.e.s.skinnum = int(0xf3f3f1f1); // default lightning color
 	}
 	/*
-	else if (self.spawnflags.has(spawnflags::laser::REACTOR))
+	else if ((self.spawnflags & spawnflags::laser::REACTOR) != 0)
 	{
 		self.s.renderfx |= RF_BEAM_REACTOR;
 
@@ -908,7 +908,7 @@ void target_laser_start(ASEntity &self)
 
 				// N64 fix
 				// FIXME: which map was this for again? oops
-				if (level.is_n64 && self.enemy.classname == "func_train" && !(self.enemy.spawnflags.has(spawnflags::train::START_ON)))
+				if (level.is_n64 && self.enemy.classname == "func_train" && (self.enemy.spawnflags & spawnflags::train::START_ON) == 0)
 					self.enemy.use(self.enemy, self, self);
 			}
 		}
@@ -924,7 +924,7 @@ void target_laser_start(ASEntity &self)
 	self.e.maxs = { 8, 8, 8 };
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::laser::ON))
+	if ((self.spawnflags & spawnflags::laser::ON) != 0)
 		target_laser_on(self);
 	else
 		target_laser_off(self);
@@ -939,7 +939,7 @@ void SP_target_laser(ASEntity &self)
 	// [Paril-KEX] moved this here because st
 	if (!st.was_key_specified("frame"))
 	{
-		if (!level.is_n64 && self.spawnflags.has(spawnflags::laser::FAT))
+		if (!level.is_n64 && (self.spawnflags & spawnflags::laser::FAT) != 0)
 			self.e.s.frame = 16;
 		else
 			self.e.s.frame = 4;
@@ -947,7 +947,7 @@ void SP_target_laser(ASEntity &self)
 
 	// [Paril-KEX] upper 2 bytes of reactor laser are count
 	/*
-	if (self.spawnflags.has(spawnflags::laser::REACTOR))
+	if ((self.spawnflags & spawnflags::laser::REACTOR) != 0)
 	{
 		self.s.frame &= 0xFFFF;
 
@@ -974,7 +974,7 @@ message		two letters; starting lightlevel and ending lightlevel
 
 namespace spawnflags::lightramp
 {
-    const spawnflags_t TOGGLE = spawnflag_dec(1);
+    const uint32 TOGGLE = 1;
 }
 
 void target_lightramp_think(ASEntity &self)
@@ -989,7 +989,7 @@ void target_lightramp_think(ASEntity &self)
 	{
 		self.nextthink = level.time + FRAME_TIME_S;
 	}
-	else if (self.spawnflags.has(spawnflags::lightramp::TOGGLE))
+	else if ((self.spawnflags & spawnflags::lightramp::TOGGLE) != 0)
 	{
 		uint8 temp = uint8(self.movedir[0]);
 		self.movedir[0] = self.movedir[1];
@@ -1081,15 +1081,15 @@ All players are affected with a screen shake.
 
 namespace spawnflags::earthquake
 {
-    const spawnflags_t SILENT = spawnflag_dec(1);
-    const spawnflags_t TOGGLE = spawnflag_dec(2);
-    const spawnflags_t UNKNOWN_ROGUE = spawnflag_dec(4);
-    const spawnflags_t ONE_SHOT = spawnflag_dec(8);
+    const uint32 SILENT = 1;
+    const uint32 TOGGLE = 2;
+    const uint32 UNKNOWN_ROGUE = 4;
+    const uint32 ONE_SHOT = 8;
 }
 
 void target_earthquake_think(ASEntity &self)
 {
-	if (!self.spawnflags.has(spawnflags::earthquake::SILENT)) // PGM
+	if ((self.spawnflags & spawnflags::earthquake::SILENT) == 0) // PGM
 	{														// PGM
 		if (self.last_move_time < level.time)
 		{
@@ -1116,7 +1116,7 @@ void target_earthquake_think(ASEntity &self)
 
 void target_earthquake_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
-	if (self.spawnflags.has(spawnflags::earthquake::ONE_SHOT))
+	if ((self.spawnflags & spawnflags::earthquake::ONE_SHOT) != 0)
 	{
         for (uint i = 0; i < players.length(); i++)
         {
@@ -1136,7 +1136,7 @@ void target_earthquake_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 
 	self.timestamp = level.time + time_sec(self.count);
 
-	if (self.spawnflags.has(spawnflags::earthquake::TOGGLE))
+	if ((self.spawnflags & spawnflags::earthquake::TOGGLE) != 0)
 	{
 		if (self.style != 0)
 			self.nextthink = time_zero;
@@ -1175,7 +1175,7 @@ void SP_target_earthquake(ASEntity &self)
 	@self.think = target_earthquake_think;
 	@self.use = target_earthquake_use;
 
-	if (!self.spawnflags.has(spawnflags::earthquake::SILENT)) // PGM
+	if ((self.spawnflags & spawnflags::earthquake::SILENT) == 0) // PGM
 		self.noise_index = gi_soundindex("world/quake.wav");
 }
 
@@ -1528,9 +1528,9 @@ void SP_target_soundfx(ASEntity &self)
 
 namespace spawnflags::target_light
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
-    const spawnflags_t NO_LERP = spawnflag_dec(2); // not used in N64, but I'll use it for this
-    const spawnflags_t FLICKER = spawnflag_dec(4);
+    const uint32 START_ON = 1;
+    const uint32 NO_LERP = 2; // not used in N64, but I'll use it for this
+    const uint32 FLICKER = 4;
 }
 
 void target_light_flicker_think(ASEntity &self)
@@ -1544,7 +1544,7 @@ void target_light_flicker_think(ASEntity &self)
 // think function handles interpolation from start to finish.
 void target_light_think(ASEntity &self)
 {
-	if (self.spawnflags.has(spawnflags::target_light::FLICKER))
+	if ((self.spawnflags & spawnflags::target_light::FLICKER) != 0)
 		target_light_flicker_think(self);
 
 	string style = gi_get_configstring(configstring_id_t::LIGHTS + self.style);
@@ -1555,7 +1555,7 @@ void target_light_think(ASEntity &self)
 	float current_lerp = float(style_value - 'a') / float('z' - 'a');
 	float lerp;
 
-	if (!self.spawnflags.has(spawnflags::target_light::NO_LERP))
+	if ((self.spawnflags & spawnflags::target_light::NO_LERP) == 0)
 	{
 		int32 next_index = (index + 1) % style.length();
 		uint8 next_style_value = style[next_index];
@@ -1612,7 +1612,7 @@ void target_light_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		@self.think = target_light_think;
 		self.nextthink = level.time + time_hz(10);
 	}
-	else if (self.spawnflags.has(spawnflags::target_light::FLICKER))
+	else if ((self.spawnflags & spawnflags::target_light::FLICKER) != 0)
 	{
 		@self.think = target_light_flicker_think;
 		self.nextthink = level.time + time_hz(10);
@@ -1633,7 +1633,7 @@ void SP_target_light(ASEntity &self)
 	if (!self.target.empty())
 		@self.chain = G_PickTarget(self.target);
 
-	if (self.spawnflags.has(spawnflags::target_light::START_ON))
+	if ((self.spawnflags & spawnflags::target_light::START_ON) != 0)
 		target_light_use(self, self, self);
 	
 	if (self.speed == 0)
@@ -1686,10 +1686,10 @@ it is killed.
 */
 namespace spawnflags::poi
 {
-    const spawnflags_t NEAREST = spawnflag_dec(1);
-    const spawnflags_t DUMMY = spawnflag_dec(2);
-    const spawnflags_t DYNAMIC = spawnflag_dec(4);
-    const spawnflags_t DISABLED = spawnflag_dec(8);
+    const uint32 NEAREST = 1;
+    const uint32 DUMMY = 2;
+    const uint32 DYNAMIC = 4;
+    const uint32 DISABLED = 8;
 }
 
 float distance_to_poi(const vec3_t &in start, const vec3_t &in end)
@@ -1725,7 +1725,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 		gi_Com_Print("POI {} used by {}\n", ent, other);
 
 	// we were disabled, so remove the disable check
-	if (ent.spawnflags.has(spawnflags::poi::DISABLED))
+	if ((ent.spawnflags & spawnflags::poi::DISABLED) != 0)
 	{
 		ent.spawnflags &= ~spawnflags::poi::DISABLED;
 		if (debug)
@@ -1762,7 +1762,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 				gi_Com_Print("  - checking team member {}\n", poi);
 
 			// currently disabled
-			if (poi.spawnflags.has(spawnflags::poi::DISABLED))
+			if ((poi.spawnflags & spawnflags::poi::DISABLED) != 0)
 			{
 				if (debug)
 					gi_Com_Print("  - disabled, skipping\n");
@@ -1771,7 +1771,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 			}
 
 			// ignore dummy POI
-			if (poi.spawnflags.has(spawnflags::poi::DUMMY))
+			if ((poi.spawnflags & spawnflags::poi::DUMMY) != 0)
 			{
 				if (debug)
 					gi_Com_Print("  - dummy, skipping (but storing as fallback)\n");
@@ -1802,7 +1802,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 				gi_Com_Print("  - resolved distance as {} (used for nearest)\n", dist);
 
 			// we have one already and it's farther away, don't bother
-			if (poi_master.spawnflags.has(spawnflags::poi::NEAREST) &&
+			if ((poi_master.spawnflags & spawnflags::poi::NEAREST) != 0 &&
 				ent !is null &&
 				dist > best_distance)
 			{
@@ -1818,7 +1818,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 					gi_Com_Print("  - style {} < current best style {} - potentially better pick\n", poi.style, best_style);
 
 				// unless we weren't reachable...
-				if (poi_master.spawnflags.has(spawnflags::poi::NEAREST) && isinf(dist))
+				if ((poi_master.spawnflags & spawnflags::poi::NEAREST) != 0 && isinf(dist))
 				{
 					if (debug)
 						gi_Com_Print("  - not reachable; skipped\n");
@@ -1826,7 +1826,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 				}
 
 				best_style = poi.style;
-				if (poi_master.spawnflags.has(spawnflags::poi::NEAREST))
+				if ((poi_master.spawnflags & spawnflags::poi::NEAREST) != 0)
 					best_distance = dist;
 				@ent = poi;
 				if (debug)
@@ -1835,7 +1835,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 			}
 
 			// if we're picking by nearest, check distance
-			if (poi_master.spawnflags.has(spawnflags::poi::NEAREST))
+			if ((poi_master.spawnflags & spawnflags::poi::NEAREST) != 0)
 			{
 				if (dist < best_distance)
 				{
@@ -1859,7 +1859,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 		// some valid techniques may require this to happen.
 		if (ent is null)
 		{
-			if (dummy_fallback !is null && dummy_fallback.spawnflags.has(spawnflags::poi::DYNAMIC))
+			if (dummy_fallback !is null && (dummy_fallback.spawnflags & spawnflags::poi::DYNAMIC) != 0)
 			{
 				if (debug)
 					gi_Com_Print(" - no valid POI found, but we had a dummy fallback\n");
@@ -1907,7 +1907,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 	}
 
 	// dummy POI; not valid
-	if (ent.classname == "target_poi" && ent.spawnflags.has(spawnflags::poi::DUMMY) && !ent.spawnflags.has(spawnflags::poi::DYNAMIC))
+	if (ent.classname == "target_poi" && (ent.spawnflags & spawnflags::poi::DUMMY) != 0 && (ent.spawnflags & spawnflags::poi::DYNAMIC) == 0)
 	{
 		if (debug)
 			gi_Com_Print(" - POI is target_poi, dummy & not dynamic; not a valid POI\n");
@@ -1921,7 +1921,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 	if (debug)
 		gi_Com_Print(" - got valid POI!\n");
 
-	if (ent.classname == "target_poi" && ent.spawnflags.has(spawnflags::poi::DYNAMIC))
+	if (ent.classname == "target_poi" && (ent.spawnflags & spawnflags::poi::DYNAMIC) != 0)
 	{
 		@level.current_dynamic_poi = null;
 
@@ -1929,7 +1929,7 @@ void target_poi_use(ASEntity &ent_in, ASEntity &other, ASEntity @activator)
 		// FIXME maybe store the team string instead?
 
 		for (ASEntity @m = ent.teammaster; m !is null; @m = m.teamchain)
-			if (m.spawnflags.has(spawnflags::poi::DUMMY))
+			if ((m.spawnflags & spawnflags::poi::DUMMY) != 0)
 			{
 				@level.current_dynamic_poi = m;
 				if (debug)
@@ -1949,7 +1949,7 @@ void target_poi_setup(ASEntity &self)
 	if (!self.team.empty())
 	{
 		// copy dynamic/nearest over to all teammates
-		if (self.spawnflags.has((spawnflags::poi::NEAREST | spawnflags::poi::DYNAMIC)))
+		if (self.spawnflags & (spawnflags::poi::NEAREST | spawnflags::poi::DYNAMIC) != 0)
 			for (ASEntity @m = self.teammaster; m !is null; @m = m.teamchain)
 				m.spawnflags |= self.spawnflags & (spawnflags::poi::NEAREST | spawnflags::poi::DYNAMIC);
 
@@ -1983,9 +1983,9 @@ void SP_target_poi(ASEntity &self)
 
 	if (self.team.empty())
 	{
-		if (self.spawnflags.has(spawnflags::poi::NEAREST))
+		if ((self.spawnflags & spawnflags::poi::NEAREST) != 0)
 			gi_Com_Print("{} has useless spawnflag 'NEAREST'\n", self);
-		if (self.spawnflags.has(spawnflags::poi::DYNAMIC))
+		if ((self.spawnflags & spawnflags::poi::DYNAMIC) != 0)
 			gi_Com_Print("{} has useless spawnflag 'DYNAMIC'\n", self);
 	}
 }
@@ -2013,7 +2013,7 @@ void SP_target_music(ASEntity &self)
 
 namespace spawnflag::healthbar
 {
-    const spawnflags_t PVS_ONLY = spawnflag_dec(1);
+    const uint32 PVS_ONLY = 1;
 }
 
 const uint MAX_HEALTH_BARS = 2;
@@ -2039,7 +2039,7 @@ void use_target_healthbar(ASEntity &ent, ASEntity &other, ASEntity @activator)
 
 		@ent.enemy = target;
 		@level.health_bar_entities[i] = ent;
-		gi_configstring(configstring_id_t(game_configstring_id_t::HEALTH_BAR_NAME), ent.message);
+		gi_configstring(configstring_id_t(int(game_configstring_id_t::HEALTH_BAR_NAME)), ent.message);
 		return;
 	}
 

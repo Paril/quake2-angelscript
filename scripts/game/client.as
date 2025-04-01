@@ -573,7 +573,7 @@ void info_player_start_drop(ASEntity &self)
 
 namespace spawnflags::player_start
 {
-    spawnflags_t SPAWN_RIDE = spawnflag_dec(1);
+    const uint32 SPAWN_RIDE = 1;
 }
 
 /*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)
@@ -587,7 +587,7 @@ void SP_info_player_start(ASEntity &self)
 
 	// [Paril-KEX] on n64, since these can spawn riding elevators,
 	// allow them to "ride" the elevators so respawning works
-	if (level.is_n64 || level.is_psx || self.spawnflags.has(spawnflags::player_start::SPAWN_RIDE))
+	if (level.is_n64 || level.is_psx || (self.spawnflags & spawnflags::player_start::SPAWN_RIDE) != 0)
 	{
 		@self.think = info_player_start_drop;
 		self.nextthink = level.time + FRAME_TIME_S;
@@ -1963,7 +1963,7 @@ bool TryLandmarkSpawn(ASEntity &ent, const vec3_t &in spot_origin, vec3_t &out o
 
 	angles = ent.client.oldviewangles + landmark.e.s.angles;
 
-	if (landmark.spawnflags.has(spawnflags::landmark::KEEP_Z))
+	if ((landmark.spawnflags & spawnflags::landmark::KEEP_Z) != 0)
 		origin.z = spot_origin.z;
 
 	// sometimes, landmark spawns can cause slight inconsistencies in collision;

@@ -1960,20 +1960,6 @@ class PathInfo
 	PathInfo &opAssign(const PathInfo &in);
 	const vec3_t &getPathPoint(uint32 i) const;
 }
-class spawnflags_t
-{
-	// methods
-	spawnflags_t opCom() const;
-	spawnflags_t opAnd(spawnflags_t) const;
-	spawnflags_t opOr(spawnflags_t) const;
-	spawnflags_t opXor(spawnflags_t) const;
-	spawnflags_t &opAndAssign(spawnflags_t);
-	spawnflags_t &opOrAssign(spawnflags_t);
-	spawnflags_t &opXorAssign(spawnflags_t);
-	uint32 opConv() const;
-	bool has(spawnflags_t) const;
-	bool has_all(spawnflags_t) const;
-}
 class shadow_light_data_t
 {
 	// properties
@@ -2429,8 +2415,6 @@ void gi_Draw_Arrow(const vec3_t &in start, const vec3_t &in end, float size, con
 void SendToClipBoard(const string &in text);
 T @find_by_str<T>(T @from, const string &in member, const string &in value) nodiscard;
 bool gi_GetPathToGoal(const PathRequest &in, PathInfo &out);
-spawnflags_t spawnflag_dec(uint32);
-spawnflags_t spawnflag_bit(uint32);
 void gi_SetShadowLightData(uint32, const shadow_light_data_t &in);
 void gi_GetShadowLightData(uint32, shadow_light_data_t &out);
 void gi_RemoveShadowLightData(int32);

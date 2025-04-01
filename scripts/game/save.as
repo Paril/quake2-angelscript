@@ -175,12 +175,6 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
         obj.obj_add(key, doc.val(value.milliseconds));
 }
 
-void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const spawnflags_t &in value)
-{
-    if (uint(value) != 0)
-        obj.obj_add(key, doc.val(uint(value)));
-}
-
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const vec3_t &in v)
 {
     if (v)
@@ -244,13 +238,6 @@ void json_get_optional(json_doc &doc, json_val obj, gtime_t &out value)
     int64 i64;
     obj.get(i64);
     value = time_ms(i64);
-}
-
-void json_get_optional(json_doc &doc, json_val obj, spawnflags_t &out value)
-{
-    uint32 u32;
-    obj.get(u32);
-    value = spawnflag_dec(u32);
 }
 
 void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v)
@@ -1444,7 +1431,7 @@ void ReadEntity(json_doc &doc, json_val obj, ASEntity &ent)
     json_get_optional(doc, obj["freetime"], ent.freetime);
     obj["message"].get(ent.message);
     obj["classname"].get(ent.classname);
-    json_get_optional(doc, obj["spawnflags"], ent.spawnflags);
+    obj["spawnflags"].get(ent.spawnflags);
 
     json_get_optional(doc, obj["timestamp"], ent.timestamp);
 

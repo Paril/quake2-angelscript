@@ -9,13 +9,13 @@
 
 namespace spawnflags::rotating_light
 {
-    const spawnflags_t START_OFF = spawnflag_dec(1);
-    const spawnflags_t ALARM = spawnflag_dec(2);
+    const uint32 START_OFF = 1;
+    const uint32 ALARM = 2;
 }
 
 void rotating_light_alarm(ASEntity &self)
 {
-	if (self.spawnflags.has(spawnflags::rotating_light::START_OFF))
+	if ((self.spawnflags & spawnflags::rotating_light::START_OFF) != 0)
 	{
 		@self.think = null;
 		self.nextthink = time_zero;
@@ -46,12 +46,12 @@ void rotating_light_killed(ASEntity &self, ASEntity &inflictor, ASEntity &attack
 
 void rotating_light_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
-	if (self.spawnflags.has(spawnflags::rotating_light::START_OFF))
+	if ((self.spawnflags & spawnflags::rotating_light::START_OFF) != 0)
 	{
 		self.spawnflags &= ~spawnflags::rotating_light::START_OFF;
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::SPINNINGLIGHTS);
 
-		if (self.spawnflags.has(spawnflags::rotating_light::ALARM))
+		if ((self.spawnflags & spawnflags::rotating_light::ALARM) != 0)
 		{
 			@self.think = rotating_light_alarm;
 			self.nextthink = level.time + FRAME_TIME_S;
@@ -75,7 +75,7 @@ void SP_rotating_light(ASEntity &self)
 
 	@self.use = rotating_light_use;
 
-	if (self.spawnflags.has(spawnflags::rotating_light::START_OFF))
+	if ((self.spawnflags & spawnflags::rotating_light::START_OFF) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects & ~effects_t::SPINNINGLIGHTS);
 	else
 	{
@@ -102,7 +102,7 @@ void SP_rotating_light(ASEntity &self)
 		self.takedamage = true;
 	}
 
-	if (self.spawnflags.has(spawnflags::rotating_light::ALARM))
+	if ((self.spawnflags & spawnflags::rotating_light::ALARM) != 0)
 	{
 		self.moveinfo.sound_start = gi_soundindex("misc/alarm.wav");
 	}

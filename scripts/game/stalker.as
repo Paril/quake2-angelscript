@@ -1064,8 +1064,8 @@ Spider Monster
 
 namespace spawnflags::stalker
 {
-    const spawnflags_t ONROOF = spawnflag_dec(8);
-    const spawnflags_t NOJUMPING = spawnflag_dec(16);
+    const uint32 ONROOF = 8;
+    const uint32 NOJUMPING = 16;
 }
 
 void SP_monster_stalker(ASEntity &self)
@@ -1125,13 +1125,13 @@ void SP_monster_stalker(ASEntity &self)
 	M_SetAnimation(self, stalker_move_stand);
 	self.monsterinfo.scale = stalker::SCALE;
 
-	if (self.spawnflags.has(spawnflags::stalker::ONROOF))
+	if ((self.spawnflags & spawnflags::stalker::ONROOF) != 0)
 	{
 		self.e.s.angles[2] = 180;
 		self.gravityVector[2] = 1;
 	}
 
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::stalker::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::stalker::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 256;
 	self.monsterinfo.jump_height = 68;
 

@@ -269,7 +269,7 @@ void brain_search(ASEntity &self)
 
 namespace spawnflags::brain
 {
-    const spawnflags_t NO_LASERS = spawnflag_dec(8);
+    const uint32 NO_LASERS = 8;
 }
 
 //
@@ -810,10 +810,10 @@ void brain_attack(ASEntity &self)
 	{
 		if (frandom() < 0.5f)
 			M_SetAnimation(self, brain_move_attack3);
-		else if (!self.spawnflags.has(spawnflags::brain::NO_LASERS))
+		else if ((self.spawnflags & spawnflags::brain::NO_LASERS) == 0)
 			M_SetAnimation(self, brain_move_attack4);
 	}
-	else if (!self.spawnflags.has(spawnflags::brain::NO_LASERS))
+	else if ((self.spawnflags & spawnflags::brain::NO_LASERS) == 0)
 		M_SetAnimation(self, brain_move_attack4);
 }
 // RAFAEL

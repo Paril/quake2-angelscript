@@ -895,7 +895,7 @@ void BossExplode_think(ASEntity &self)
 void BossExplode(ASEntity &self)
 {
 	// no blowy on deady
-	if (self.spawnflags.has(spawnflags::monsters::DEAD))
+	if ((self.spawnflags & spawnflags::monsters::DEAD) != 0)
 		return;
 
 	ASEntity @exploder = G_Spawn();

@@ -175,7 +175,7 @@ namespace mutant
 
 namespace spawnflags::mutant
 {
-    const spawnflags_t NOJUMPING = spawnflag_dec(8);
+    const uint32 NOJUMPING = 8;
 }
 
 namespace mutant::sounds
@@ -588,7 +588,7 @@ bool mutant_checkattack(ASEntity &self)
 		return true;
 	}
 
-	if (!self.spawnflags.has(spawnflags::mutant::NOJUMPING) && mutant_check_jump(self))
+	if ((self.spawnflags & spawnflags::mutant::NOJUMPING) == 0 && mutant_check_jump(self))
 	{
 		self.monsterinfo.attack_state = ai_attack_state_t::MISSILE;
 		return true;
@@ -906,7 +906,7 @@ void SP_monster_mutant(ASEntity &self)
 	self.monsterinfo.combat_style = combat_style_t::MELEE;
 
 	self.monsterinfo.scale = mutant::SCALE;
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::mutant::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::mutant::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 256;
 	self.monsterinfo.jump_height = 68;
 

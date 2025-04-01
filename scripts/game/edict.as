@@ -598,7 +598,6 @@ class no_value_assign
         return this;
     }
 };
-
 class ASEntity : IASEntity
 {
     no_value_assign nva;
@@ -640,9 +639,9 @@ class ASEntity : IASEntity
 	//
 	// only used locally in game, not by server
 	//
-	string          message;
-	string          classname;
-	spawnflags_t	spawnflags;
+	string  message;
+	string  classname;
+	uint32	spawnflags;
 
 	gtime_t timestamp;
 

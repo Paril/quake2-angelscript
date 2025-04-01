@@ -11,15 +11,15 @@ SECRET DOORS
 
 namespace spawnflags::secret_door
 {
-    const spawnflags_t OPEN_ONCE = spawnflag_dec(1); // stays open
+    const uint32 OPEN_ONCE = 1; // stays open
     // unused
     // const uint32_t FIRST_LEFT		= 2;         // 1st move is left of arrow
-    const spawnflags_t FIRST_DOWN = spawnflag_dec(4); // 1st move is down from arrow
+    const uint32 FIRST_DOWN = 4; // 1st move is down from arrow
     // unused
     // const uint32_t NO_SHOOT		= 8;         // only opened by trigger
-    const spawnflags_t YES_SHOOT = spawnflag_dec(16); // shootable even if targeted
-    const spawnflags_t MOVE_RIGHT = spawnflag_dec(32);
-    const spawnflags_t MOVE_FORWARD = spawnflag_dec(64);
+    const uint32 YES_SHOOT = 16; // shootable even if targeted
+    const uint32 MOVE_RIGHT = 32;
+    const uint32 MOVE_FORWARD = 64;
 }
 
 void fd_secret_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -59,7 +59,7 @@ void fd_secret_move2(ASEntity &self)
 // Wait here until time to go back...
 void fd_secret_move3(ASEntity &self)
 {
-	if (!self.spawnflags.has(spawnflags::secret_door::OPEN_ONCE))
+	if ((self.spawnflags & spawnflags::secret_door::OPEN_ONCE) == 0)
 	{
 		self.nextthink = level.time + time_sec(self.wait);
 		@self.think = fd_secret_move4;
@@ -86,7 +86,7 @@ void fd_secret_move6(ASEntity &self)
 
 void fd_secret_done(ASEntity &self)
 {
-	if (self.targetname.empty() || self.spawnflags.has(spawnflags::secret_door::YES_SHOOT))
+	if (self.targetname.empty() || (self.spawnflags & spawnflags::secret_door::YES_SHOOT) != 0)
 	{
 		self.health = 1;
 		self.takedamage = true;
@@ -178,17 +178,17 @@ void SP_func_door_secret2(ASEntity &ent)
 		return;
 	}
 
-	if (ent.spawnflags.has(spawnflags::secret_door::MOVE_FORWARD))
+	if ((ent.spawnflags & spawnflags::secret_door::MOVE_FORWARD) != 0)
 		forward *= fbSize;
 	else
 		forward *= fbSize * -1;
 
-	if (ent.spawnflags.has(spawnflags::secret_door::MOVE_RIGHT))
+	if ((ent.spawnflags & spawnflags::secret_door::MOVE_RIGHT) != 0)
 		right *= lrSize;
 	else
 		right *= lrSize * -1;
 
-	if (ent.spawnflags.has(spawnflags::secret_door::FIRST_DOWN))
+	if ((ent.spawnflags & spawnflags::secret_door::FIRST_DOWN) != 0)
 	{
 		ent.moveinfo.start_origin = ent.e.s.origin + forward;
 		ent.moveinfo.end_origin = ent.moveinfo.start_origin + right;
@@ -206,7 +206,7 @@ void SP_func_door_secret2(ASEntity &ent)
 	ent.moveinfo.accel = 50;
 	ent.moveinfo.decel = 50;
 
-	if (ent.targetname.empty() || ent.spawnflags.has(spawnflags::secret_door::YES_SHOOT))
+	if (ent.targetname.empty() || (ent.spawnflags & spawnflags::secret_door::YES_SHOOT) != 0)
 	{
 		ent.health = 1;
 		ent.max_health = ent.health;
@@ -223,7 +223,7 @@ void SP_func_door_secret2(ASEntity &ent)
 
 namespace spawnflags::forcewall
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
+    const uint32 START_ON = 1;
 }
 
 void force_wall_think(ASEntity &self)
@@ -302,7 +302,7 @@ void SP_func_force_wall(ASEntity &ent)
 	ent.movetype = movetype_t::NONE;
 	ent.wait = 1;
 
-	if (ent.spawnflags.has(spawnflags::forcewall::START_ON))
+	if ((ent.spawnflags & spawnflags::forcewall::START_ON) != 0)
 	{
 		ent.e.solid = solid_t::BSP;
 		@ent.think = force_wall_think;

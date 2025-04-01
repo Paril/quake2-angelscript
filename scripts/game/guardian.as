@@ -307,7 +307,7 @@ const mmove_t guardian_move_stand = mmove_t(guardian::frames::idle1, guardian::f
 
 namespace spawnflags::guardian
 {
-    const spawnflags_t SLEEPY = spawnflag_dec(8);
+    const uint32 SLEEPY = 8;
 }
 
 /*
@@ -341,7 +341,7 @@ const mmove_t guardian_move_sleep = mmove_t(guardian::frames::sleep1, guardian::
 
 void guardian_stand(ASEntity &self)
 {
-	if (self.spawnflags.has(spawnflags::guardian::SLEEPY))
+	if ((self.spawnflags & spawnflags::guardian::SLEEPY) != 0)
 		M_SetAnimation(self, guardian_move_sleep);
 	else
 		M_SetAnimation(self, guardian_move_stand);
@@ -593,7 +593,7 @@ const array<vec3_t> laser_positions = {
 
 void guardian_fire_update(ASEntity &laser)
 {
-	if (!laser.spawnflags.has(spawnflags::dabeam::SPAWNED))
+	if ((laser.spawnflags & spawnflags::dabeam::SPAWNED) == 0)
 	{
 		ASEntity @self = laser.owner;
 
@@ -601,7 +601,7 @@ void guardian_fire_update(ASEntity &laser)
 		vec3_t start;
 
 		AngleVectors(self.e.s.angles, forward, right);
-		start = M_ProjectFlashSource(self, laser_positions[laser.spawnflags.has(spawnflags::dabeam::SECONDARY) ? 1 : 0], forward, right);
+		start = M_ProjectFlashSource(self, laser_positions[(laser.spawnflags & spawnflags::dabeam::SECONDARY) != 0 ? 1 : 0], forward, right);
 		PredictAim(self, self.enemy, start, 0, false, 0.3f, forward, target);
 
 		laser.e.s.origin = start;

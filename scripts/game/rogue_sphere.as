@@ -14,13 +14,13 @@ namespace spawnflags::sphere
     const uint HUNTER_VALUE = 0x0002;
     const uint VENGEANCE_VALUE = 0x0004;
 
-    const spawnflags_t DEFENDER = spawnflag_dec(DEFENDER_VALUE);
-    const spawnflags_t HUNTER = spawnflag_dec(HUNTER_VALUE);
-    const spawnflags_t VENGEANCE = spawnflag_dec(VENGEANCE_VALUE);
-    const spawnflags_t DOPPLEGANGER = spawnflag_dec(0x10000);
+    const uint32 DEFENDER = DEFENDER_VALUE;
+    const uint32 HUNTER = HUNTER_VALUE;
+    const uint32 VENGEANCE = VENGEANCE_VALUE;
+    const uint32 DOPPLEGANGER = 0x10000;
 
-    const spawnflags_t MASK_TYPE = DEFENDER | HUNTER | VENGEANCE;
-    const spawnflags_t MASK_FLAGS = DOPPLEGANGER;
+    const uint32 MASK_TYPE = DEFENDER | HUNTER | VENGEANCE;
+    const uint32 MASK_FLAGS = DOPPLEGANGER;
 }
 
 const gtime_t DEFENDER_LIFESPAN = time_sec(30);
@@ -36,7 +36,7 @@ const gtime_t MINIMUM_FLY_TIME = time_sec(15);
 // =================
 void sphere_think_explode(ASEntity &self)
 {
-	if (self.owner !is null && self.owner.client !is null && !self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if (self.owner !is null && self.owner.client !is null && (self.spawnflags & spawnflags::sphere::DOPPLEGANGER) == 0)
 	{
 		@self.owner.client.owned_sphere = null;
 	}
@@ -179,7 +179,7 @@ void sphere_chase(ASEntity &self, bool stupidChase)
 // =================
 void sphere_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, const mod_t &in mod)
 {
-	if (self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if ((self.spawnflags & spawnflags::sphere::DOPPLEGANGER) != 0)
 	{
 		if (other is self.teammaster)
 			return;
@@ -223,7 +223,7 @@ void sphere_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, const m
 // =================
 void vengeance_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
 {
-	if (self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if ((self.spawnflags & spawnflags::sphere::DOPPLEGANGER) != 0)
 		sphere_touch(self, other, tr, mod_id_t::DOPPLE_VENGEANCE);
 	else
 		sphere_touch(self, other, tr, mod_id_t::VENGEANCE_SPHERE);
@@ -251,7 +251,7 @@ void hunter_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool ot
 		}
 	}
 
-	if (self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if ((self.spawnflags & spawnflags::sphere::DOPPLEGANGER) != 0)
 		sphere_touch(self, other, tr, mod_id_t::DOPPLE_HUNTER);
 	else
 		sphere_touch(self, other, tr, mod_id_t::HUNTER_SPHERE);
@@ -314,7 +314,7 @@ void hunter_pain(ASEntity &self, ASEntity &other, float kick, int damage, const 
 
 	@owner = self.owner;
 
-	if (!self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if ((self.spawnflags & spawnflags::sphere::DOPPLEGANGER) == 0)
 	{
 		if (owner !is null && (owner.health > 0))
 			return;
@@ -338,7 +338,7 @@ void hunter_pain(ASEntity &self, ASEntity &other, float kick, int damage, const 
 
 	// if we're not owned by a player, no sam raimi
 	// if we're spawned by a doppleganger, no sam raimi
-	if (self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER) || !(owner !is null && owner.client !is null))
+	if ((self.spawnflags & spawnflags::sphere::DOPPLEGANGER) != 0 || !(owner !is null && owner.client !is null))
 		return;
 
 	// sam raimi cam is disabled if FORCE_RESPAWN is set.
@@ -400,7 +400,7 @@ void vengeance_pain(ASEntity &self, ASEntity &other, float kick, int damage, con
 	if (self.enemy !is null)
 		return;
 
-	if (!self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if ((self.spawnflags & spawnflags::sphere::DOPPLEGANGER) == 0)
 	{
 		if (self.owner !is null && self.owner.health >= 25)
 			return;
@@ -480,7 +480,7 @@ void hunter_think(ASEntity &self)
 
 	ASEntity @owner = self.owner;
 
-	if (owner is null && !self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if (owner is null && (self.spawnflags & spawnflags::sphere::DOPPLEGANGER) == 0)
 	{
 		G_FreeEdict(self);
 		return;
@@ -541,7 +541,7 @@ void vengeance_think(ASEntity &self)
 		return;
 	}
 
-	if (self.owner is null && !self.spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if (self.owner is null && (self.spawnflags & spawnflags::sphere::DOPPLEGANGER) == 0)
 	{
 		G_FreeEdict(self);
 		return;
@@ -563,7 +563,7 @@ void vengeance_think(ASEntity &self)
 // monsterinfo_t
 // =================
 // =================
-ASEntity @Sphere_Spawn(ASEntity &owner, const spawnflags_t &in spawnflags)
+ASEntity @Sphere_Spawn(ASEntity &owner, const uint32 &in spawnflags)
 {
 	ASEntity @sphere;
 
@@ -576,7 +576,7 @@ ASEntity @Sphere_Spawn(ASEntity &owner, const spawnflags_t &in spawnflags)
 	sphere.e.renderfx = renderfx_t(renderfx_t::FULLBRIGHT | renderfx_t::IR_VISIBLE);
 	sphere.movetype = movetype_t::FLYMISSILE;
 
-	if (spawnflags.has(spawnflags::sphere::DOPPLEGANGER))
+	if ((spawnflags & spawnflags::sphere::DOPPLEGANGER) != 0)
 		@sphere.teammaster = owner.teammaster;
 	else
 		@sphere.owner = owner;

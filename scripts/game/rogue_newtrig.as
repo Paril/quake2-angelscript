@@ -13,7 +13,7 @@ namespace spawnflags::teleport
 	// constexpr uint32_t SPAWNFLAG_TELEPORT_SILENT		= 2;
 	// unused
 	// constexpr uint32_t SPAWNFLAG_TELEPORT_CTF_ONLY		= 4;
-	const spawnflags_t START_ON = spawnflag_dec(8);
+	const uint32 START_ON = 8;
 }
 
 /*QUAKED trigger_teleport (.5 .5 .5) ? player_only silent ctf_only start_on
@@ -109,7 +109,7 @@ void SP_trigger_teleport(ASEntity &self)
 	if (!self.targetname.empty())
 	{
 		@self.use = trigger_teleport_use;
-		if (!self.spawnflags.has(spawnflags::teleport::START_ON))
+		if ((self.spawnflags & spawnflags::teleport::START_ON) == 0)
 			self.delay = 1;
 	}
 
@@ -142,16 +142,16 @@ REMOVE - field removes the disguise
 namespace spawnflags::disguise
 {
     // unused
-    // const spawnflags_t TOGGLE = spawnflag_dec(1);
-    const spawnflags_t START_ON = spawnflag_dec(2);
-    const spawnflags_t REMOVE = spawnflag_dec(4);
+    // const uint32 TOGGLE = 1;
+    const uint32 START_ON = 2;
+    const uint32 REMOVE = 4;
 }
 
 void trigger_disguise_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
 {
 	if (other.client !is null)
 	{
-		if (self.spawnflags.has(spawnflags::disguise::REMOVE))
+		if ((self.spawnflags & spawnflags::disguise::REMOVE) != 0)
 			other.flags = ent_flags_t(other.flags & ~ent_flags_t::DISGUISED);
 		else
 			other.flags = ent_flags_t(other.flags | ent_flags_t::DISGUISED);
@@ -174,7 +174,7 @@ void SP_trigger_disguise(ASEntity &self)
 	if (level.disguise_icon == 0)
 		level.disguise_icon = gi_imageindex("i_disguise");
 
-	if (self.spawnflags.has(spawnflags::disguise::START_ON))
+	if ((self.spawnflags & spawnflags::disguise::START_ON) != 0)
 		self.e.solid = solid_t::TRIGGER;
 	else
 		self.e.solid = solid_t::NOT;

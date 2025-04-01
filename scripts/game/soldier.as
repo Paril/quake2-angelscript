@@ -1150,7 +1150,7 @@ void soldier_fire(ASEntity &self, int flash_number, bool angle_limited)
 
 	if (flash_number == 5 || flash_number == 6) // he's dead
 	{
-		if (self.spawnflags.has(spawnflags::monsters::DEAD))
+		if ((self.spawnflags & spawnflags::monsters::DEAD) != 0)
 			return;
 
 		aim = forward;
@@ -2404,7 +2404,7 @@ void soldier_blind(ASEntity &self)
 
 namespace spawnflags::soldier
 {
-    const spawnflags_t BLIND = spawnflag_dec(8);
+    const uint32 BLIND = 8;
 }
 
 void SP_monster_soldier_x(ASEntity &self)
@@ -2447,7 +2447,7 @@ void SP_monster_soldier_x(ASEntity &self)
 	@self.monsterinfo.unduck = monster_duck_up;
 	@self.monsterinfo.sidestep = soldier_sidestep;
 
-	if (self.spawnflags.has(spawnflags::soldier::BLIND)) // blind
+	if ((self.spawnflags & spawnflags::soldier::BLIND) != 0) // blind
 		@self.monsterinfo.stand = soldier_blind;
 	// ROGUE
 	//=====

@@ -200,7 +200,7 @@ void G_UseTargets(ASEntity &ent, ASEntity @activator)
 			// [Paril-KEX] if we killtarget a monster, clean up properly
 			if ((t.e.svflags & svflags_t::MONSTER) != 0)
 			{
-				if (!t.deadflag && (t.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && !t.spawnflags.has(spawnflags::monsters::DEAD))
+				if (!t.deadflag && (t.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && (t.spawnflags & spawnflags::monsters::DEAD) == 0)
 					G_MonsterKilled(t);
 			}
 

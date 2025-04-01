@@ -588,8 +588,8 @@ void plat_blocked(ASEntity &self, ASEntity &other)
 
 namespace spawnflags::plat
 {
-    const spawnflags_t LOW_TRIGGER = spawnflag_dec(1);
-    const spawnflags_t NO_MONSTER = spawnflag_dec(2);
+    const uint32 LOW_TRIGGER = 1;
+    const uint32 NO_MONSTER = 2;
 }
 
 void Use_Plat(ASEntity &ent, ASEntity &other, ASEntity @activator)
@@ -597,7 +597,7 @@ void Use_Plat(ASEntity &ent, ASEntity &other, ASEntity @activator)
 	//======
 	// ROGUE
 	// if a monster is using us, then allow the activity when stopped.
-	if ((other.e.svflags & svflags_t::MONSTER) != 0 && !ent.spawnflags.has(spawnflags::plat::NO_MONSTER))
+	if ((other.e.svflags & svflags_t::MONSTER) != 0 && (ent.spawnflags & spawnflags::plat::NO_MONSTER) == 0)
 	{
 		if (ent.moveinfo.state == move_state_t::TOP)
 			plat_go_down(ent);
@@ -656,7 +656,7 @@ ASEntity @plat_spawn_inside_trigger(ASEntity &ent)
 
 	tmin.z = tmax.z - (ent.pos1.z - ent.pos2.z + st.lip);
 
-	if (ent.spawnflags.has(spawnflags::plat::LOW_TRIGGER))
+	if ((ent.spawnflags & spawnflags::plat::LOW_TRIGGER) != 0)
 		tmax.z = tmin.z + 8;
 
 	if (tmax.x - tmin.x <= 0)
@@ -771,15 +771,15 @@ void SP_func_plat(ASEntity &ent)
 // is a reserved editor flag.
 namespace spawnflags::rotating
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
-    const spawnflags_t REVERSE = spawnflag_dec(2);
-    const spawnflags_t X_AXIS = spawnflag_dec(4);
-    const spawnflags_t Y_AXIS = spawnflag_dec(8);
-    const spawnflags_t TOUCH_PAIN = spawnflag_dec(16);
-    const spawnflags_t STOP = spawnflag_dec(32);
-    const spawnflags_t ANIMATED = spawnflag_dec(64);
-    const spawnflags_t ANIMATED_FAST = spawnflag_dec(128);
-    const spawnflags_t ACCEL = spawnflag_dec(0x00010000);
+    const uint32 START_ON = 1;
+    const uint32 REVERSE = 2;
+    const uint32 X_AXIS = 4;
+    const uint32 Y_AXIS = 8;
+    const uint32 TOUCH_PAIN = 16;
+    const uint32 STOP = 32;
+    const uint32 ANIMATED = 64;
+    const uint32 ANIMATED_FAST = 128;
+    const uint32 ACCEL = 0x00010000;
 }
 
 /*QUAKED func_rotating (0 .5 .8) ? START_ON REVERSE X_AXIS Y_AXIS TOUCH_PAIN STOP ANIMATED ANIMATED_FAST NOT_EASY NOT_MEDIUM NOT_HARD NOT_DM NOT_COOP RESERVED1 COOP_ONLY RESERVED2 ACCEL
@@ -863,7 +863,7 @@ void rotating_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 	{
 		self.e.s.sound = 0;
 		// PGM
-		if (self.spawnflags.has(spawnflags::rotating::ACCEL)) // Decelerate
+		if ((self.spawnflags & spawnflags::rotating::ACCEL) != 0) // Decelerate
 			rotating_decel(self);
 		else
 		{
@@ -877,14 +877,14 @@ void rotating_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 	{
 		self.e.s.sound = self.moveinfo.sound_middle;
 		// PGM
-		if (self.spawnflags.has(spawnflags::rotating::ACCEL)) // accelerate
+		if ((self.spawnflags & spawnflags::rotating::ACCEL) != 0) // accelerate
 			rotating_accel(self);
 		else
 		{
 			self.avelocity = self.movedir * self.speed;
 			G_UseTargets(self, self);
 		}
-		if (self.spawnflags.has(spawnflags::rotating::TOUCH_PAIN))
+		if ((self.spawnflags & spawnflags::rotating::TOUCH_PAIN) != 0)
 			@self.touch = rotating_touch;
 		// PGM
 	}
@@ -895,7 +895,7 @@ void SP_func_rotating(ASEntity &ent)
 	const spawn_temp_t @st = ED_GetSpawnTemp();
 
 	ent.e.solid = solid_t::BSP;
-	if (ent.spawnflags.has(spawnflags::rotating::STOP))
+	if ((ent.spawnflags & spawnflags::rotating::STOP) != 0)
 		ent.movetype = movetype_t::STOP;
 	else
 		ent.movetype = movetype_t::PUSH;
@@ -923,15 +923,15 @@ void SP_func_rotating(ASEntity &ent)
 
 	// set the axis of rotation
 	ent.movedir = vec3_origin;
-	if (ent.spawnflags.has(spawnflags::rotating::X_AXIS))
+	if ((ent.spawnflags & spawnflags::rotating::X_AXIS) != 0)
 		ent.movedir.z = 1.0;
-	else if (ent.spawnflags.has(spawnflags::rotating::Y_AXIS))
+	else if ((ent.spawnflags & spawnflags::rotating::Y_AXIS) != 0)
 		ent.movedir.x = 1.0;
 	else // Z_AXIS
 		ent.movedir.y = 1.0;
 
 	// check for reverse rotation
-	if (ent.spawnflags.has(spawnflags::rotating::REVERSE))
+	if ((ent.spawnflags & spawnflags::rotating::REVERSE) != 0)
 		ent.movedir = -ent.movedir;
 
 	if (ent.speed == 0)
@@ -943,16 +943,16 @@ void SP_func_rotating(ASEntity &ent)
 	if (ent.dmg != 0)
 		@ent.moveinfo.blocked = rotating_blocked;
 
-	if (ent.spawnflags.has(spawnflags::rotating::START_ON))
+	if ((ent.spawnflags & spawnflags::rotating::START_ON) != 0)
 		ent.use(ent, world, null);
 
-	if (ent.spawnflags.has(spawnflags::rotating::ANIMATED))
+	if ((ent.spawnflags & spawnflags::rotating::ANIMATED) != 0)
 		ent.e.s.effects = effects_t(ent.e.s.effects | effects_t::ANIM_ALL);
-	if (ent.spawnflags.has(spawnflags::rotating::ANIMATED_FAST))
+	if ((ent.spawnflags & spawnflags::rotating::ANIMATED_FAST) != 0)
 		ent.e.s.effects = effects_t(ent.e.s.effects | effects_t::ANIM_ALLFAST);
 
 	// PGM
-	if (ent.spawnflags.has(spawnflags::rotating::ACCEL)) // Accelerate / Decelerate
+	if ((ent.spawnflags & spawnflags::rotating::ACCEL) != 0) // Accelerate / Decelerate
 	{
 		if (ent.accel == 0)
 			ent.accel = 1;
@@ -1198,13 +1198,13 @@ void SP_func_button(ASEntity &ent)
 
 namespace spawnflags::door
 {
-    const spawnflags_t START_OPEN = spawnflag_dec(1);
-    const spawnflags_t REVERSE = spawnflag_dec(2);
-    const spawnflags_t CRUSHER = spawnflag_dec(4);
-    const spawnflags_t NOMONSTER = spawnflag_dec(8);
-    const spawnflags_t ANIMATED = spawnflag_dec(16);
-    const spawnflags_t TOGGLE = spawnflag_dec(32);
-    const spawnflags_t ANIMATED_FAST = spawnflag_dec(64);
+    const uint32 START_OPEN = 1;
+    const uint32 REVERSE = 2;
+    const uint32 CRUSHER = 4;
+    const uint32 NOMONSTER = 8;
+    const uint32 ANIMATED = 16;
+    const uint32 TOGGLE = 32;
+    const uint32 ANIMATED_FAST = 64;
 }
 
 
@@ -1298,7 +1298,7 @@ void door_hit_top(ASEntity &self)
 	}
 	self.e.s.sound = 0;
 	self.moveinfo.state = move_state_t::TOP;
-	if (self.spawnflags.has(spawnflags::door::TOGGLE))
+	if ((self.spawnflags & spawnflags::door::TOGGLE) != 0)
 		return;
 	if (self.moveinfo.wait >= 0)
 	{
@@ -1306,7 +1306,7 @@ void door_hit_top(ASEntity &self)
 		self.nextthink = level.time + time_sec(self.moveinfo.wait);
 	}
 
-	if (self.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((self.spawnflags & spawnflags::door::START_OPEN) != 0)
 		door_use_areaportals(self, false);
 }
 
@@ -1320,7 +1320,7 @@ void door_hit_bottom(ASEntity &self)
 	self.e.s.sound = 0;
 	self.moveinfo.state = move_state_t::BOTTOM;
 
-	if (!self.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((self.spawnflags & spawnflags::door::START_OPEN) == 0)
 		door_use_areaportals(self, false);
 }
 
@@ -1348,7 +1348,7 @@ void door_go_down(ASEntity &self)
 	else if (self.classname == "func_door_rotating")
 		AngleMove_Calc(self, door_hit_bottom);
 
-	if (self.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((self.spawnflags & spawnflags::door::START_OPEN) != 0)
 		door_use_areaportals(self, true);
 }
 
@@ -1382,7 +1382,7 @@ void door_go_up(ASEntity &self, ASEntity @activator)
 
 	G_UseTargets(self, activator);
 
-	if (!self.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((self.spawnflags & spawnflags::door::START_OPEN) == 0)
 		door_use_areaportals(self, true);
 }
 
@@ -1487,7 +1487,7 @@ void door_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 	if ((self.flags & ent_flags_t::TEAMSLAVE) != 0)
 		return;
 
-	if (activator !is null && self.classname == "func_door_rotating" && self.spawnflags.has(spawnflags::door_rotating::SAFE_OPEN) &&
+	if (activator !is null && self.classname == "func_door_rotating" && (self.spawnflags & spawnflags::door_rotating::SAFE_OPEN) != 0 &&
 		(self.moveinfo.state == move_state_t::BOTTOM || self.moveinfo.state == move_state_t::DOWN))
 	{
 		if (self.moveinfo.dir)
@@ -1497,7 +1497,7 @@ void door_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		}
 	}
 
-	if (self.spawnflags.has(spawnflags::door::TOGGLE))
+	if ((self.spawnflags & spawnflags::door::TOGGLE) != 0)
 	{
 		if (self.moveinfo.state == move_state_t::UP || self.moveinfo.state == move_state_t::TOP)
 		{
@@ -1516,7 +1516,7 @@ void door_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 	//  smart water is different
 	center = self.e.mins + self.e.maxs;
 	center *= 0.5f;
-	if ((self.classname == "func_water") && (gi_pointcontents(center) & contents_t::MASK_WATER) != 0 && self.spawnflags.has(spawnflags::water::SMART))
+	if ((self.classname == "func_water") && (gi_pointcontents(center) & contents_t::MASK_WATER) != 0 && (self.spawnflags & spawnflags::water::SMART) != 0)
 	{
 		self.message = "";
 		@self.touch = null;
@@ -1545,11 +1545,11 @@ void Touch_DoorTrigger(ASEntity &self, ASEntity &other, const trace_t &in tr, bo
 
 	if ((other.e.svflags & svflags_t::MONSTER) != 0)
 	{
-		if (self.owner.spawnflags.has(spawnflags::door::NOMONSTER))
+		if ((self.owner.spawnflags & spawnflags::door::NOMONSTER) != 0)
 			return;
 		// [Paril-KEX] this is for PSX; the scale is so small that monsters walking
 		// around to path_corners often initiate doors unintentionally.
-		else if (other.spawnflags.has(spawnflags::monsters::NO_IDLE_DOORS) && other.enemy is null)
+		else if ((other.spawnflags & spawnflags::monsters::NO_IDLE_DOORS) != 0 && other.enemy is null)
 			return;
 	}
 
@@ -1656,7 +1656,7 @@ void door_blocked(ASEntity &self, ASEntity &other)
 	}
 
 	// [Paril-KEX] don't allow wait -1 doors to return
-	if (self.spawnflags.has(spawnflags::door::CRUSHER) || self.wait == -1)
+	if ((self.spawnflags & spawnflags::door::CRUSHER) != 0 || self.wait == -1)
 		return;
 
 	// if a door has a negative wait, it would never come back if blocked,
@@ -1774,7 +1774,7 @@ void SP_func_door(ASEntity &ent)
 	ent.pos2 = ent.pos1 + (ent.movedir * ent.moveinfo.distance);
 
 	// if it starts open, switch the positions
-	if (ent.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((ent.spawnflags & spawnflags::door::START_OPEN) != 0)
 	{
 		ent.e.s.origin = ent.pos2;
 		ent.pos2 = ent.pos1;
@@ -1808,9 +1808,9 @@ void SP_func_door(ASEntity &ent)
 	ent.moveinfo.end_origin = ent.pos2;
 	ent.moveinfo.end_angles = ent.e.s.angles;
 
-	if (ent.spawnflags.has(spawnflags::door::ANIMATED))
+	if ((ent.spawnflags & spawnflags::door::ANIMATED) != 0)
 		ent.e.s.effects = effects_t(ent.e.s.effects | effects_t::ANIM_ALL);
-	if (ent.spawnflags.has(spawnflags::door::ANIMATED_FAST))
+	if ((ent.spawnflags & spawnflags::door::ANIMATED_FAST) != 0)
 		ent.e.s.effects = effects_t(ent.e.s.effects | effects_t::ANIM_ALLFAST);
 
 	// to simplify logic elsewhere, make non-teamed doors into a team of one
@@ -1821,7 +1821,7 @@ void SP_func_door(ASEntity &ent)
 
 	ent.nextthink = level.time + FRAME_TIME_S;
 	
-	if (ent.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((ent.spawnflags & spawnflags::door::START_OPEN) != 0)
 		@ent.think = Think_DoorActivateAreaPortal;
 	else if (ent.health != 0 || !ent.targetname.empty())
 		@ent.think = Think_CalcMoveSpeed;
@@ -1883,31 +1883,31 @@ SAFE_OPEN will cause the door to open in reverse if you are on the `angles` side
 
 namespace spawnflags::door_rotating
 {
-    const spawnflags_t X_AXIS = spawnflag_dec(64);
-    const spawnflags_t Y_AXIS = spawnflag_dec(128);
-    const spawnflags_t INACTIVE = spawnflag_dec(0x10000); // Paril: moved to non-reserved
-    const spawnflags_t SAFE_OPEN = spawnflag_dec(0x20000);
-    const spawnflags_t NO_COLLISION = spawnflag_dec(0x40000);
+    const uint32 X_AXIS = 64;
+    const uint32 Y_AXIS = 128;
+    const uint32 INACTIVE = 0x10000; // Paril: moved to non-reserved
+    const uint32 SAFE_OPEN = 0x20000;
+    const uint32 NO_COLLISION = 0x40000;
 }
 
 void SP_func_door_rotating(ASEntity &ent)
 {
-	if (ent.spawnflags.has(spawnflags::door_rotating::SAFE_OPEN))
+	if ((ent.spawnflags & spawnflags::door_rotating::SAFE_OPEN) != 0)
 		G_SetMovedir(ent, ent.moveinfo.dir);
 
 	ent.e.s.angles = vec3_origin;
 
 	// set the axis of rotation
 	ent.movedir = vec3_origin;
-	if (ent.spawnflags.has(spawnflags::door_rotating::X_AXIS))
+	if ((ent.spawnflags & spawnflags::door_rotating::X_AXIS) != 0)
 		ent.movedir.z = 1.0;
-	else if (ent.spawnflags.has(spawnflags::door_rotating::Y_AXIS))
+	else if ((ent.spawnflags & spawnflags::door_rotating::Y_AXIS) != 0)
 		ent.movedir.x = 1.0;
 	else // Z_AXIS
 		ent.movedir.y = 1.0;
 
 	// check for reverse rotation
-	if (ent.spawnflags.has(spawnflags::door::REVERSE))
+	if ((ent.spawnflags & spawnflags::door::REVERSE) != 0)
 		ent.movedir = -ent.movedir;
 
 	const spawn_temp_t @st = ED_GetSpawnTemp();
@@ -1966,9 +1966,9 @@ void SP_func_door_rotating(ASEntity &ent)
 	}
 
 	// if it starts open, switch the positions
-	if (ent.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((ent.spawnflags & spawnflags::door::START_OPEN) != 0)
 	{
-		if (ent.spawnflags.has(spawnflags::door_rotating::SAFE_OPEN))
+		if ((ent.spawnflags & spawnflags::door_rotating::SAFE_OPEN) != 0)
 		{
 			ent.spawnflags &= ~spawnflags::door_rotating::SAFE_OPEN;
 			gi_Com_Print("{}: SAFE_OPEN is not compatible with START_OPEN\n", ent);
@@ -1980,7 +1980,7 @@ void SP_func_door_rotating(ASEntity &ent)
 		ent.movedir = -ent.movedir;
 	}
 
-	if (ent.spawnflags.has(spawnflags::door_rotating::NO_COLLISION))
+	if ((ent.spawnflags & spawnflags::door_rotating::NO_COLLISION) != 0)
 		ent.e.clipmask = contents_t::AREAPORTAL; // just because zero is automatic
 
 	if (ent.health != 0)
@@ -2007,7 +2007,7 @@ void SP_func_door_rotating(ASEntity &ent)
 	ent.moveinfo.end_angles = ent.pos2;
 	ent.moveinfo.end_angles_reversed = ent.pos3;
 
-	if (ent.spawnflags.has(spawnflags::door::ANIMATED))
+	if ((ent.spawnflags & spawnflags::door::ANIMATED) != 0)
 		ent.e.s.effects = effects_t(ent.e.s.effects | effects_t::ANIM_ALL);
 
 	// to simplify logic elsewhere, make non-teamed doors into a team of one
@@ -2023,7 +2023,7 @@ void SP_func_door_rotating(ASEntity &ent)
 		@ent.think = Think_SpawnDoorTrigger;
 
 	// PGM
-	if (ent.spawnflags.has(spawnflags::door_rotating::INACTIVE))
+	if ((ent.spawnflags & spawnflags::door_rotating::INACTIVE) != 0)
 	{
 		ent.takedamage = false;
 		@ent.die = null;
@@ -2072,7 +2072,7 @@ SMART causes the water to adjust its speed depending on distance to player.
 
 namespace spawnflags::water
 {
-    const spawnflags_t SMART = spawnflag_dec(2);
+    const uint32 SMART = 2;
 }
 
 void SP_func_water(ASEntity &self)
@@ -2109,7 +2109,7 @@ void SP_func_water(ASEntity &self)
 	self.pos2 = self.pos1 + (self.movedir * self.moveinfo.distance);
 
 	// if it starts open, switch the positions
-	if (self.spawnflags.has(spawnflags::door::START_OPEN))
+	if ((self.spawnflags & spawnflags::door::START_OPEN) != 0)
 	{
 		self.e.s.origin = self.pos2;
 		self.pos2 = self.pos1;
@@ -2128,7 +2128,7 @@ void SP_func_water(ASEntity &self)
 	self.moveinfo.accel = self.moveinfo.decel = self.moveinfo.speed = self.speed;
 
 	// ROGUE
-	if (self.spawnflags.has(spawnflags::water::SMART)) // smart water
+	if ((self.spawnflags & spawnflags::water::SMART) != 0) // smart water
 	{
 		// this is actually the divisor of the lowest player's distance to determine speed.
 		// self.speed then becomes the cap of the speed.
@@ -2152,12 +2152,12 @@ void SP_func_water(ASEntity &self)
 
 namespace spawnflags::train
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
-    const spawnflags_t TOGGLE = spawnflag_dec(2);
-    const spawnflags_t BLOCK_STOPS = spawnflag_dec(4);
-    const spawnflags_t MOVE_TEAMCHAIN = spawnflag_dec(8);
-    const spawnflags_t FIX_OFFSET = spawnflag_dec(16);
-    const spawnflags_t USE_ORIGIN = spawnflag_dec(32);
+    const uint32 START_ON = 1;
+    const uint32 TOGGLE = 2;
+    const uint32 BLOCK_STOPS = 4;
+    const uint32 MOVE_TEAMCHAIN = 8;
+    const uint32 FIX_OFFSET = 16;
+    const uint32 USE_ORIGIN = 32;
 }
 
 /*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS MOVE_TEAMCHAIN FIX_OFFSET USE_ORIGIN
@@ -2217,7 +2217,7 @@ void train_wait(ASEntity &self)
 			self.nextthink = level.time + time_sec(self.moveinfo.wait);
 			@self.think = train_next;
 		}
-		else if (self.spawnflags.has(spawnflags::train::TOGGLE)) // && wait < 0
+		else if ((self.spawnflags & spawnflags::train::TOGGLE) != 0) // && wait < 0
 		{
 			// PMM - clear target_ent, let train_next get called when we get used
 			//			train_next (self);
@@ -2273,7 +2273,7 @@ void train_next(ASEntity &self)
         self.target = ent.target;
 
         // check for a teleport path_corner
-        if (ent.spawnflags.has(spawnflags::path_corner::TELEPORT))
+        if ((ent.spawnflags & spawnflags::path_corner::TELEPORT) != 0)
         {
             if (!first)
             {
@@ -2282,13 +2282,13 @@ void train_next(ASEntity &self)
             }
             first = false;
 
-            if (self.spawnflags.has(spawnflags::train::USE_ORIGIN))
+            if ((self.spawnflags & spawnflags::train::USE_ORIGIN) != 0)
                 self.e.s.origin = ent.e.s.origin;
             else
             {
                 self.e.s.origin = ent.e.s.origin - self.e.mins;
 
-                if (self.spawnflags.has(spawnflags::train::FIX_OFFSET))
+                if ((self.spawnflags & spawnflags::train::FIX_OFFSET) != 0)
                     self.e.s.origin -= vec3_t(1.0f, 1.0f, 1.0f);
             }
 
@@ -2329,13 +2329,13 @@ void train_next(ASEntity &self)
 
 	self.e.s.sound = self.moveinfo.sound_middle;
 	
-	if (self.spawnflags.has(spawnflags::train::USE_ORIGIN))
+	if ((self.spawnflags & spawnflags::train::USE_ORIGIN) != 0)
 		dest = ent.e.s.origin;
 	else
 	{
 		dest = ent.e.s.origin - self.e.mins;
 
-		if (self.spawnflags.has(spawnflags::train::FIX_OFFSET))
+		if ((self.spawnflags & spawnflags::train::FIX_OFFSET) != 0)
 			dest -= vec3_t(1.0f, 1.0f, 1.0f);
 	}
 
@@ -2346,7 +2346,7 @@ void train_next(ASEntity &self)
 	self.spawnflags |= spawnflags::train::START_ON;
 
 	// PGM
-	if (self.spawnflags.has(spawnflags::train::MOVE_TEAMCHAIN))
+	if ((self.spawnflags & spawnflags::train::MOVE_TEAMCHAIN) != 0)
 	{
 		ASEntity @e;
 		vec3_t	 dir, dst;
@@ -2377,13 +2377,13 @@ void train_resume(ASEntity &self)
 
 	@ent = self.target_ent;
 	
-	if (self.spawnflags.has(spawnflags::train::USE_ORIGIN))
+	if ((self.spawnflags & spawnflags::train::USE_ORIGIN) != 0)
 		dest = ent.e.s.origin;
 	else
 	{
 		dest = ent.e.s.origin - self.e.mins;
 
-		if (self.spawnflags.has(spawnflags::train::FIX_OFFSET))
+		if ((self.spawnflags & spawnflags::train::FIX_OFFSET) != 0)
 			dest -= vec3_t(1.0f, 1.0f, 1.0f);
 	}
 
@@ -2430,13 +2430,13 @@ void func_train_find(ASEntity &self)
 	}
 	self.target = ent.target;
 
-	if (self.spawnflags.has(spawnflags::train::USE_ORIGIN))
+	if ((self.spawnflags & spawnflags::train::USE_ORIGIN) != 0)
 		self.e.s.origin = ent.e.s.origin;
 	else
 	{
 		self.e.s.origin = ent.e.s.origin - self.e.mins;
 
-		if (self.spawnflags.has(spawnflags::train::FIX_OFFSET))
+		if ((self.spawnflags & spawnflags::train::FIX_OFFSET) != 0)
 			self.e.s.origin -= vec3_t(1.0f, 1.0f, 1.0f);
 	}
 
@@ -2446,7 +2446,7 @@ void func_train_find(ASEntity &self)
 	if (self.targetname.empty())
 		self.spawnflags |= spawnflags::train::START_ON;
 
-	if (self.spawnflags.has(spawnflags::train::START_ON))
+	if ((self.spawnflags & spawnflags::train::START_ON) != 0)
 	{
 		self.nextthink = level.time + FRAME_TIME_S;
 		@self.think = train_next;
@@ -2458,9 +2458,9 @@ void train_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
 	@self.activator = activator;
 
-	if (self.spawnflags.has(spawnflags::train::START_ON))
+	if ((self.spawnflags & spawnflags::train::START_ON) != 0)
 	{
-		if (!self.spawnflags.has(spawnflags::train::TOGGLE))
+		if ((self.spawnflags & spawnflags::train::TOGGLE) == 0)
 			return;
 		self.spawnflags &= ~spawnflags::train::START_ON;
 		self.velocity = vec3_origin;
@@ -2482,7 +2482,7 @@ void SP_func_train(ASEntity &self)
 
 	self.e.s.angles = vec3_origin;
 	@self.moveinfo.blocked = train_blocked;
-	if (self.spawnflags.has(spawnflags::train::BLOCK_STOPS))
+	if ((self.spawnflags & spawnflags::train::BLOCK_STOPS) != 0)
 		self.dmg = 0;
 	else
 	{
@@ -2608,7 +2608,7 @@ These can used but not touched.
 
 namespace spawnflags::timer
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
+    const uint32 START_ON = 1;
 }
 
 void func_timer_think(ASEntity &self)
@@ -2650,7 +2650,7 @@ void SP_func_timer(ASEntity &self)
 		gi_Com_Print("{}: random >= wait\n", self);
 	}
 
-	if (self.spawnflags.has(spawnflags::timer::START_ON))
+	if ((self.spawnflags & spawnflags::timer::START_ON) != 0)
 	{
 		self.nextthink = level.time + time_sec(1) + time_sec(st.pausetime + self.delay + self.wait + crandom() * self.random);
 		@self.activator = self;
@@ -2667,13 +2667,13 @@ speed	default 100
 
 namespace spawnflags::conveyor
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
-    const spawnflags_t TOGGLE = spawnflag_dec(2);
+    const uint32 START_ON = 1;
+    const uint32 TOGGLE = 2;
 }
 
 void func_conveyor_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
-	if (self.spawnflags.has(spawnflags::conveyor::START_ON))
+	if ((self.spawnflags & spawnflags::conveyor::START_ON) != 0)
 	{
 		self.speed = 0;
 		self.spawnflags &= ~spawnflags::conveyor::START_ON;
@@ -2684,7 +2684,7 @@ void func_conveyor_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		self.spawnflags |= spawnflags::conveyor::START_ON;
 	}
 
-	if (!self.spawnflags.has(spawnflags::conveyor::TOGGLE))
+	if ((self.spawnflags & spawnflags::conveyor::TOGGLE) == 0)
 		self.count = 0;
 }
 
@@ -2693,7 +2693,7 @@ void SP_func_conveyor(ASEntity &self)
 	if (self.speed == 0)
 		self.speed = 100;
 
-	if (!self.spawnflags.has(spawnflags::conveyor::START_ON))
+	if ((self.spawnflags & spawnflags::conveyor::START_ON) == 0)
 	{
 		self.count = int(self.speed);
 		self.speed = 0;
@@ -2721,9 +2721,9 @@ always_shoot	door is shootebale even if targeted
 
 namespace spawnflags::door_secret
 {
-    const spawnflags_t ALWAYS_SHOOT = spawnflag_dec(1);
-    const spawnflags_t FIRST_LEFT = spawnflag_dec(2);
-    const spawnflags_t FIRST_DOWN = spawnflag_dec(4);
+    const uint32 ALWAYS_SHOOT = 1;
+    const uint32 FIRST_LEFT = 2;
+    const uint32 FIRST_DOWN = 4;
 }
 
 void door_secret_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -2773,7 +2773,7 @@ void door_secret_move6(ASEntity &self)
 
 void door_secret_done(ASEntity &self)
 {
-	if (self.targetname.empty() || self.spawnflags.has(spawnflags::door_secret::ALWAYS_SHOOT))
+	if (self.targetname.empty() || (self.spawnflags & spawnflags::door_secret::ALWAYS_SHOOT) != 0)
 	{
 		self.health = 0;
 		self.takedamage = true;
@@ -2825,7 +2825,7 @@ void SP_func_door_secret(ASEntity &ent)
 	@ent.moveinfo.blocked = door_secret_blocked;
 	@ent.use = door_secret_use;
 
-	if (ent.targetname.empty() || ent.spawnflags.has(spawnflags::door_secret::ALWAYS_SHOOT))
+	if (ent.targetname.empty() || (ent.spawnflags & spawnflags::door_secret::ALWAYS_SHOOT) != 0)
 	{
 		ent.health = 0;
 		ent.takedamage = true;
@@ -2846,13 +2846,13 @@ void SP_func_door_secret(ASEntity &ent)
 	// calculate positions
 	AngleVectors(ent.e.s.angles, forward, right, up);
 	ent.e.s.angles = vec3_origin;
-	side = 1.0f - (ent.spawnflags.has(spawnflags::door_secret::FIRST_LEFT) ? 2 : 0);
-	if (ent.spawnflags.has(spawnflags::door_secret::FIRST_DOWN))
+	side = 1.0f - ((ent.spawnflags & spawnflags::door_secret::FIRST_LEFT) != 0 ? 2 : 0);
+	if ((ent.spawnflags & spawnflags::door_secret::FIRST_DOWN) != 0)
 		width = abs(up.dot(ent.e.size));
 	else
 		width = abs(right.dot(ent.e.size));
 	length = abs(forward.dot(ent.e.size));
-	if (ent.spawnflags.has(spawnflags::door_secret::FIRST_DOWN))
+	if ((ent.spawnflags & spawnflags::door_secret::FIRST_DOWN) != 0)
 		ent.pos1 = ent.e.s.origin + (up * (-1 * width));
 	else
 		ent.pos1 = ent.e.s.origin + (right * (side * width));
@@ -2878,19 +2878,19 @@ Kills everything inside when fired, irrespective of protection.
 */
 namespace spawnflags::killbox
 {
-    const spawnflags_t DEADLY_COOP = spawnflag_dec(2);
-    const spawnflags_t EXACT_COLLISION = spawnflag_dec(4);
+    const uint32 DEADLY_COOP = 2;
+    const uint32 EXACT_COLLISION = 4;
 }
 
 void use_killbox(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
-	if (self.spawnflags.has(spawnflags::killbox::DEADLY_COOP))
+	if ((self.spawnflags & spawnflags::killbox::DEADLY_COOP) != 0)
 		level.deadly_kill_box = true;
 
 	self.e.solid = solid_t::TRIGGER;
 	gi_linkentity(self.e);
 
-	KillBox(self, false, mod_id_t::TELEFRAG, self.spawnflags.has(spawnflags::killbox::EXACT_COLLISION));
+	KillBox(self, false, mod_id_t::TELEFRAG, (self.spawnflags & spawnflags::killbox::EXACT_COLLISION) != 0);
 
 	self.e.solid = solid_t::NOT;
 	gi_linkentity(self.e);
@@ -2919,7 +2919,7 @@ the origin of the brush and using the entity's angles
 */
 namespace spawnflags::func_eye
 {
-    const spawnflags_t FIRED_TARGETS = spawnflag_bit(17); // internal use only
+    const uint32 FIRED_TARGETS = 1 << 17; // internal use only
 }
 
 void func_eye_think(ASEntity &self)
@@ -2961,7 +2961,7 @@ void func_eye_think(ASEntity &self)
 	
 	if (self.enemy !is null)
 	{
-		if (!self.spawnflags.has(spawnflags::func_eye::FIRED_TARGETS))
+		if ((self.spawnflags & spawnflags::func_eye::FIRED_TARGETS) == 0)
 		{
 			G_UseTargets(self, self.enemy);
 			self.spawnflags |= spawnflags::func_eye::FIRED_TARGETS;

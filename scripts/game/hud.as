@@ -212,9 +212,9 @@ void BeginIntermission(ASEntity &targ)
 
 	level.intermission_server_frame = gi_ServerFrame();
 	level.changemap = targ.map;
-	level.intermission_clear = targ.spawnflags.has(spawnflags::changelevel::CLEAR_INVENTORY);
+	level.intermission_clear = (targ.spawnflags & spawnflags::changelevel::CLEAR_INVENTORY) != 0;
 	level.intermission_eou = false;
-	level.intermission_fade = targ.spawnflags.has(spawnflags::changelevel::FADE_OUT);
+	level.intermission_fade = (targ.spawnflags & spawnflags::changelevel::FADE_OUT) != 0;
 
 	// destroy all player trails
 	PlayerTrail_Destroy(null);
@@ -248,9 +248,9 @@ void BeginIntermission(ASEntity &targ)
 		level.intermission_eou = true;
 
 		// "no end of unit" maps handle intermission differently
-		if (!targ.spawnflags.has(spawnflags::changelevel::NO_END_OF_UNIT))
+		if ((targ.spawnflags & spawnflags::changelevel::NO_END_OF_UNIT) == 0)
 			G_EndOfUnitMessage();
-		else if (targ.spawnflags.has(spawnflags::changelevel::IMMEDIATE_LEAVE) && deathmatch.integer == 0)
+		else if ((targ.spawnflags & spawnflags::changelevel::IMMEDIATE_LEAVE) != 0 && deathmatch.integer == 0)
 		{
 			level.exitintermission = true; // go immediately to the next level
 			return;
@@ -990,7 +990,7 @@ void G_SetStats(ASEntity &ent)
                     continue;
                 }
 			}
-			else if (e.spawnflags.has(spawnflag::healthbar::PVS_ONLY) && !gi_inPVS(ent.e.origin, e.enemy.e.origin, true))
+			else if ((e.spawnflags & spawnflag::healthbar::PVS_ONLY) != 0 && !gi_inPVS(ent.e.origin, e.enemy.e.origin, true))
 				continue;
             else
             {

@@ -2,10 +2,10 @@ namespace spawnflags::plat2
 {
 //====
 // PGM
-    const spawnflags_t TOGGLE = spawnflag_dec(2);
-    const spawnflags_t TOP = spawnflag_dec(4);
-    const spawnflags_t START_ACTIVE = spawnflag_dec(8);
-    const spawnflags_t BOX_LIFT = spawnflag_dec(32);
+    const uint32 TOGGLE = 2;
+    const uint32 TOP = 4;
+    const uint32 START_ACTIVE = 8;
+    const uint32 BOX_LIFT = 32;
 // PGM
 //====
 }
@@ -46,7 +46,7 @@ void plat2_hit_top(ASEntity &ent)
 	if ((ent.plat2flags & plat2flags_t::CALLED) != 0)
 	{
 		ent.plat2flags = plat2flags_t::WAITING;
-		if (!ent.spawnflags.has(spawnflags::plat2::TOGGLE))
+		if ((ent.spawnflags & spawnflags::plat2::TOGGLE) == 0)
 		{
 			@ent.think = plat2_go_down;
 			ent.nextthink = level.time + time_sec(ent.wait * 2.5f);
@@ -56,7 +56,7 @@ void plat2_hit_top(ASEntity &ent)
 		else
 			ent.last_move_time = level.time - time_sec(ent.wait);
 	}
-	else if (!ent.spawnflags.has(spawnflags::plat2::TOP) && !ent.spawnflags.has(spawnflags::plat2::TOGGLE))
+	else if ((ent.spawnflags & spawnflags::plat2::TOP) == 0 && (ent.spawnflags & spawnflags::plat2::TOGGLE) == 0)
 	{
 		ent.plat2flags = plat2flags_t::NONE;
 		@ent.think = plat2_go_down;
@@ -85,7 +85,7 @@ void plat2_hit_bottom(ASEntity &ent)
 	if ((ent.plat2flags & plat2flags_t::CALLED) != 0)
 	{
 		ent.plat2flags = plat2flags_t::WAITING;
-		if (!ent.spawnflags.has(spawnflags::plat2::TOGGLE))
+		if ((ent.spawnflags & spawnflags::plat2::TOGGLE) == 0)
 		{
 			@ent.think = plat2_go_up;
 			ent.nextthink = level.time + time_sec(ent.wait * 2.5f);
@@ -95,7 +95,7 @@ void plat2_hit_bottom(ASEntity &ent)
 		else
 			ent.last_move_time = level.time - time_sec(ent.wait);
 	}
-	else if (ent.spawnflags.has(spawnflags::plat2::TOP) && !ent.spawnflags.has(spawnflags::plat2::TOGGLE))
+	else if ((ent.spawnflags & spawnflags::plat2::TOP) != 0 && (ent.spawnflags & spawnflags::plat2::TOGGLE) == 0)
 	{
 		ent.plat2flags = plat2flags_t::NONE;
 		@ent.think = plat2_go_up;
@@ -167,7 +167,7 @@ void plat2_operate(ASEntity @ent, ASEntity &other)
 	if (ent.moveinfo.state == move_state_t::TOP)
 	{
 		otherState = move_state_t::TOP;
-		if (ent.spawnflags.has(spawnflags::plat2::BOX_LIFT))
+		if ((ent.spawnflags & spawnflags::plat2::BOX_LIFT) != 0)
 		{
 			if (platCenter > other.e.s.origin[2])
 				otherState = move_state_t::BOTTOM;
@@ -383,7 +383,7 @@ void SP_func_plat2(ASEntity &ent)
 
 	ent.moveinfo.state = move_state_t::TOP;
 
-	if (!ent.targetname.empty() && !ent.spawnflags.has(spawnflags::plat2::START_ACTIVE))
+	if (!ent.targetname.empty() && (ent.spawnflags & spawnflags::plat2::START_ACTIVE) == 0)
 	{
 		@ent.use = plat2_activate;
 	}
@@ -403,7 +403,7 @@ void SP_func_plat2(ASEntity &ent)
 
 		@trigger.touch = Touch_Plat_Center2; // Override trigger touch function
 
-		if (!ent.spawnflags.has(spawnflags::plat2::TOP))
+		if ((ent.spawnflags & spawnflags::plat2::TOP) == 0)
 		{
 			ent.e.s.origin = ent.pos2;
 			ent.moveinfo.state = move_state_t::BOTTOM;

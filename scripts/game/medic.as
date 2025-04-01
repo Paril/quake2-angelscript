@@ -512,7 +512,7 @@ bool finishHeal(ASEntity &self)
 	int32 old_power_armor_power = healee.monsterinfo.max_power_armor_power;
 	int32 old_base_health = healee.monsterinfo.base_health;
 	int32 old_health_scaling = healee.monsterinfo.health_scaling;
-	auto reinforcements = healee.monsterinfo.reinforcements;
+	auto @reinforcements = healee.monsterinfo.reinforcements;
 	int32 slots_from_commander = healee.monsterinfo.slots_from_commander;
 	int32 monster_slots = healee.monsterinfo.monster_slots;
 	int32 monster_used = healee.monsterinfo.monster_used;

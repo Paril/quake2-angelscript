@@ -215,7 +215,7 @@ void ai_stand(ASEntity &self, float dist)
         return;
     }
 
-    if (!(self.spawnflags.has(spawnflags::monsters::AMBUSH)) && self.monsterinfo.idle !is null &&
+    if ((self.spawnflags & spawnflags::monsters::AMBUSH) == 0 && self.monsterinfo.idle !is null &&
         (level.time > self.monsterinfo.idle_time))
     {
         if (self.monsterinfo.idle_time)
@@ -471,7 +471,7 @@ bool infront(ASEntity &self, ASEntity &other)
     {
         // [Paril-KEX] if we're an ambush monster, reduce our cone of
         // vision to not ruin surprises, unless we already had an enemy.
-        if (self.spawnflags.has(spawnflags::monsters::AMBUSH) && !self.monsterinfo.trail_time && self.enemy is null)
+        if ((self.spawnflags & spawnflags::monsters::AMBUSH) != 0 && !self.monsterinfo.trail_time && self.enemy is null)
             cone = 0.15f;
         else
             cone = -0.30f;
@@ -640,7 +640,7 @@ bool G_MonsterSourceVisible(ASEntity &self, ASEntity &client)
     // by players 'seen' and attacked at by other monsters
     // if they are close enough. they don't have to be visible.
     bool is_visible =
-        ((r <= RANGE_NEAR && client.show_hostile >= level.time && !self.spawnflags.has(spawnflags::monsters::AMBUSH)) ||
+        ((r <= RANGE_NEAR && client.show_hostile >= level.time && (self.spawnflags & spawnflags::monsters::AMBUSH) == 0) ||
             (visible(self, client) && (r <= RANGE_MELEE || (self.monsterinfo.aiflags & ai_flags_t::THIRD_EYE) != 0 || infront(self, client))));
 
     return is_visible;
@@ -717,7 +717,7 @@ bool FindTarget(ASEntity &self)
     {
         // check monsters that were alerted by players; we can only be alerted if we
         // can see them
-        if (!(self.spawnflags.has(spawnflags::monsters::AMBUSH)) && (@client = AI_GetMonsterAlertedByPlayers(self)) !is null)
+        if ((self.spawnflags & spawnflags::monsters::AMBUSH) == 0 && (@client = AI_GetMonsterAlertedByPlayers(self)) !is null)
         {
             // KEX_FIXME: when does this happen? 
             // [Paril-KEX] adjusted to clear the client
@@ -739,7 +739,7 @@ bool FindTarget(ASEntity &self)
             {
                 heardit = true;
             }
-            else if ((self.enemy is null) && !(self.spawnflags.has(spawnflags::monsters::AMBUSH)) &&
+            else if ((self.enemy is null) && (self.spawnflags & spawnflags::monsters::AMBUSH) == 0 &&
                 (@client = AI_GetSoundClient(self, false)) !is null)
             {
                 heardit = true;
@@ -809,7 +809,7 @@ bool FindTarget(ASEntity &self)
         // by players 'seen' and attacked at by other monsters
         // if they are close enough. they don't have to be visible.
         bool is_visible =
-            ((r <= RANGE_NEAR && client.show_hostile >= level.time && !(self.spawnflags.has(spawnflags::monsters::AMBUSH))) ||
+            ((r <= RANGE_NEAR && client.show_hostile >= level.time && (self.spawnflags & spawnflags::monsters::AMBUSH) == 0) ||
             (visible(self, client) && (r <= RANGE_MELEE || (self.monsterinfo.aiflags & ai_flags_t::THIRD_EYE) != 0 || infront(self, client))));
 
         if (!is_visible)
@@ -847,7 +847,7 @@ bool FindTarget(ASEntity &self)
     {
         vec3_t temp;
 
-        if (self.spawnflags.has(spawnflags::monsters::AMBUSH))
+        if ((self.spawnflags & spawnflags::monsters::AMBUSH) != 0)
         {
             if (!visible(self, client))
                 return false;

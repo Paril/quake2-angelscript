@@ -134,7 +134,7 @@ bool M_CheckBottom(ASEntity &ent)
 		return true; // we got out easy
 
 	contents_t mask = (ent.e.svflags & svflags_t::MONSTER) != 0 ? contents_t::MASK_MONSTERSOLID : contents_t(contents_t::MASK_SOLID | contents_t::MONSTER | contents_t::PLAYER);
-	return M_CheckBottom_Slow_Generic(ent.e.s.origin, ent.e.mins, ent.e.maxs, ent, mask, ent.gravityVector.z > 0, ent.spawnflags.has(spawnflags::monsters::SUPER_STEP));
+	return M_CheckBottom_Slow_Generic(ent.e.s.origin, ent.e.mins, ent.e.maxs, ent, mask, ent.gravityVector.z > 0, (ent.spawnflags & spawnflags::monsters::SUPER_STEP) != 0);
 }
 
 //============
@@ -637,7 +637,7 @@ bool SV_movestep(ASEntity &ent, vec3_t move, bool relink)
 	float stepsize;
 
 	// push down from a step height above the wished position
-	if (ent.spawnflags.has(spawnflags::monsters::SUPER_STEP) && ent.health > 0)
+	if ((ent.spawnflags & spawnflags::monsters::SUPER_STEP) != 0 && ent.health > 0)
 		stepsize = 64.0f;
 	else if ((ent.monsterinfo.aiflags & ai_flags_t::NOSTEP) == 0)
 		stepsize = STEPSIZE;
@@ -723,7 +723,7 @@ bool SV_movestep(ASEntity &ent, vec3_t move, bool relink)
 			return true;
 		}
 		// [Paril-KEX] allow dead monsters to "fall" off of edges in their death animation
-		else if (!ent.spawnflags.has(spawnflags::monsters::SUPER_STEP) && ent.health > 0)
+		else if ((ent.spawnflags & spawnflags::monsters::SUPER_STEP) == 0 && ent.health > 0)
 			return false; // walked off an edge
 	}
 	
@@ -816,7 +816,7 @@ bool SV_movestep(ASEntity &ent, vec3_t move, bool relink)
 		return false;
 	}
 
-	if (ent.spawnflags.has(spawnflags::monsters::SUPER_STEP) && ent.health > 0)
+	if ((ent.spawnflags & spawnflags::monsters::SUPER_STEP) != 0 && ent.health > 0)
 	{
 		if (ent.groundentity is null || ent.groundentity.e.solid == solid_t::BSP)
 		{

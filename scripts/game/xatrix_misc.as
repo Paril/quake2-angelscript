@@ -99,7 +99,7 @@ void SP_misc_transport(ASEntity &ent)
 	ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCLIENT);
 	ent.moveinfo.accel = ent.moveinfo.decel = ent.moveinfo.speed = ent.speed;
 
-	if (!ent.spawnflags.has(spawnflags::train::START_ON))
+	if ((ent.spawnflags & spawnflags::train::START_ON) == 0)
 		ent.spawnflags |= spawnflags::train::START_ON;
 
 	gi_linkentity(ent.e);

@@ -368,7 +368,7 @@ void ShamblerSaveLoc(ASEntity &self)
 namespace spawnflags::shambler
 {
     // FIXME: bad flag
-    const spawnflags_t PRECISE = spawnflag_dec(1);
+    const uint32 PRECISE = 1;
 }
 
 vec3_t FindShamblerOffset(ASEntity &self)
@@ -400,7 +400,7 @@ void ShamblerCastLightning(ASEntity &self)
 	start = M_ProjectFlashSource(self, offset, forward, right);
 
 	// calc direction to where we targted
-	PredictAim(self, self.enemy, start, 0, false, self.spawnflags.has(spawnflags::shambler::PRECISE) ? 0.f : 0.1f, dir, aimpt);
+	PredictAim(self, self.enemy, start, 0, false, (self.spawnflags & spawnflags::shambler::PRECISE) != 0 ? 0.f : 0.1f, dir, aimpt);
 
 	vec3_t end = start + (dir * 8192);
 	trace_t tr = gi_traceline(start, end, self.e, contents_t(contents_t::MASK_PROJECTILE | contents_t::SLIME | contents_t::LAVA));
@@ -689,7 +689,7 @@ void SP_monster_shambler(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::shambler::PRECISE))
+	if ((self.spawnflags & spawnflags::shambler::PRECISE) != 0)
 		self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::IGNORE_SHOTS);
 
 	M_SetAnimation(self, shambler_move_stand);

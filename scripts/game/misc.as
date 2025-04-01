@@ -277,7 +277,7 @@ void BecomeExplosion2(ASEntity &self)
 
 namespace spawnflags::path_corner
 {
-    const spawnflags_t TELEPORT = spawnflag_dec(1);
+    const uint32 TELEPORT = 1;
 }
 
 /*QUAKED path_corner (.5 .3 0) (-8 -8 -8) (8 8 8) TELEPORT
@@ -315,7 +315,7 @@ void path_corner_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bo
 		@next = null;
 
 	// [Paril-KEX] don't teleport to a point_combat, it means HOLD for them.
-	if (next !is null && next.classname == "path_corner" && next.spawnflags.has(spawnflags::path_corner::TELEPORT))
+	if (next !is null && next.classname == "path_corner" && (next.spawnflags & spawnflags::path_corner::TELEPORT) != 0)
 	{
 		v = next.e.s.origin;
 		v.z += next.e.mins.z;
@@ -372,7 +372,7 @@ void SP_path_corner(ASEntity &self)
 
 namespace spawnflags::point_combat
 {
-    const spawnflags_t HOLD = spawnflag_dec(1);
+    const uint32 HOLD = 1;
 }
 
 /*QUAKED point_combat (0.5 0.3 0) (-8 -8 -8) (8 8 8) Hold
@@ -399,7 +399,7 @@ void point_combat_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, b
 		// [Paril-KEX] allow them to be re-used
 		//self.target = null;
 	}
-	else if (self.spawnflags.has(spawnflags::point_combat::HOLD) && (other.flags & (ent_flags_t::SWIM | ent_flags_t::FLY)) == 0)
+	else if ((self.spawnflags & spawnflags::point_combat::HOLD) != 0 && (other.flags & (ent_flags_t::SWIM | ent_flags_t::FLY)) == 0)
 	{
 		// already standing
 		if ((other.monsterinfo.aiflags & ai_flags_t::STAND_GROUND) != 0)
@@ -415,7 +415,7 @@ void point_combat_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, b
 		// [Paril-KEX] if we're holding, keep movetarget set; we will
 		// use this to make sure we haven't moved too far from where
 		// we want to "guard".
-		if (!self.spawnflags.has(spawnflags::point_combat::HOLD))
+		if ((self.spawnflags & spawnflags::point_combat::HOLD) == 0)
 		{
 			other.target = "";
 			@other.movetarget = null;
@@ -486,13 +486,13 @@ Default _cone value is 10 (used to set size of light for spotlights)
 
 namespace spawnflags::light
 {
-    const spawnflags_t START_OFF = spawnflag_dec(1);
-    const spawnflags_t ALLOW_IN_DM = spawnflag_dec(2);
+    const uint32 START_OFF = 1;
+    const uint32 ALLOW_IN_DM = 2;
 }
 
 void light_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
-	if (self.spawnflags.has(spawnflags::light::START_OFF))
+	if ((self.spawnflags & spawnflags::light::START_OFF) != 0)
 	{
 		gi_configstring(configstring_id_t(configstring_id_t::LIGHTS + self.style), self.style_on);
 		self.spawnflags &= ~spawnflags::light::START_OFF;
@@ -622,7 +622,7 @@ void SP_dynamic_light(ASEntity &self)
 		@self.use = dynamic_light_use;
 	}
 	
-	if (self.spawnflags.has(spawnflags::light::START_OFF))
+	if ((self.spawnflags & spawnflags::light::START_OFF) != 0)
 	    self.e.svflags = svflags_t(self.e.svflags ^ svflags_t::NOCLIENT);
 }
 
@@ -631,7 +631,7 @@ void SP_light(ASEntity &self)
 	const spawn_temp_t @st = ED_GetSpawnTemp();
 
 	// no targeted lights in deathmatch, because they cause global messages
-	if((self.targetname.empty() || (deathmatch.integer != 0 && !self.spawnflags.has(spawnflags::light::ALLOW_IN_DM))) && st.sl.data.radius == 0) // [Sam-KEX]
+	if((self.targetname.empty() || (deathmatch.integer != 0 && (self.spawnflags & spawnflags::light::ALLOW_IN_DM) == 0)) && st.sl.data.radius == 0) // [Sam-KEX]
 	{
 		G_FreeEdict(self);
 		return;
@@ -650,7 +650,7 @@ void SP_light(ASEntity &self)
 		else if (self.style_off[0] >= '0' && self.style_off[0] <= '9')
 			self.style_off = gi_get_configstring(configstring_id_t(configstring_id_t::LIGHTS + parseInt(self.style_off)));
 
-		if (self.spawnflags.has(spawnflags::light::START_OFF))
+		if ((self.spawnflags & spawnflags::light::START_OFF) != 0)
 			gi_configstring(configstring_id_t(configstring_id_t::LIGHTS) + self.style, self.style_off);
 		else
 			gi_configstring(configstring_id_t(configstring_id_t::LIGHTS + self.style), self.style_on);
@@ -675,12 +675,12 @@ START_ON		only valid for TRIGGER_SPAWN walls
 
 namespace spawnflags::wall
 {
-    const spawnflags_t TRIGGER_SPAWN = spawnflag_dec(1);
-    const spawnflags_t TOGGLE = spawnflag_dec(2);
-    const spawnflags_t START_ON = spawnflag_dec(4);
-    const spawnflags_t ANIMATED = spawnflag_dec(8);
-    const spawnflags_t ANIMATED_FAST = spawnflag_dec(16);
-    const spawnflags_t SAFE_APPEAR = spawnflag_dec(32);
+    const uint32 TRIGGER_SPAWN = 1;
+    const uint32 TOGGLE = 2;
+    const uint32 START_ON = 4;
+    const uint32 ANIMATED = 8;
+    const uint32 ANIMATED_FAST = 16;
+    const uint32 SAFE_APPEAR = 32;
 }
 
 void func_wall_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -690,7 +690,7 @@ void func_wall_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		self.e.solid = solid_t::BSP;
 		self.e.svflags = svflags_t(self.e.svflags & ~svflags_t::NOCLIENT);
 		gi_linkentity(self.e);
-		KillBox(self, false, mod_id_t::TELEFRAG, true, self.spawnflags.has(spawnflags::wall::SAFE_APPEAR));
+		KillBox(self, false, mod_id_t::TELEFRAG, true, (self.spawnflags & spawnflags::wall::SAFE_APPEAR) != 0);
 	}
 	else
 	{
@@ -699,7 +699,7 @@ void func_wall_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 		gi_linkentity(self.e);
 	}
 
-	if (!self.spawnflags.has(spawnflags::wall::TOGGLE))
+	if ((self.spawnflags & spawnflags::wall::TOGGLE) == 0)
 		@self.use = null;
 }
 
@@ -708,13 +708,13 @@ void SP_func_wall(ASEntity &self)
 	self.movetype = movetype_t::PUSH;
 	gi_setmodel(self.e, self.model);
 
-	if (self.spawnflags.has(spawnflags::wall::ANIMATED))
+	if ((self.spawnflags & spawnflags::wall::ANIMATED) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::ANIM_ALL);
-	if (self.spawnflags.has(spawnflags::wall::ANIMATED_FAST))
+	if ((self.spawnflags & spawnflags::wall::ANIMATED_FAST) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::ANIM_ALLFAST);
 
 	// just a wall
-	if (!self.spawnflags.has(spawnflags::wall::TRIGGER_SPAWN | spawnflags::wall::TOGGLE | spawnflags::wall::START_ON))
+	if ((self.spawnflags & (spawnflags::wall::TRIGGER_SPAWN | spawnflags::wall::TOGGLE | spawnflags::wall::START_ON)) == 0)
 	{
 		self.e.solid = solid_t::BSP;
 		gi_linkentity(self.e);
@@ -722,13 +722,13 @@ void SP_func_wall(ASEntity &self)
 	}
 
 	// it must be TRIGGER_SPAWN
-	if (!self.spawnflags.has(spawnflags::wall::TRIGGER_SPAWN))
+	if ((self.spawnflags & spawnflags::wall::TRIGGER_SPAWN) == 0)
 		self.spawnflags |= spawnflags::wall::TRIGGER_SPAWN;
 
 	// yell if the spawnflags are odd
-	if (self.spawnflags.has(spawnflags::wall::START_ON))
+	if ((self.spawnflags & spawnflags::wall::START_ON) != 0)
 	{
-		if (!self.spawnflags.has(spawnflags::wall::TOGGLE))
+		if ((self.spawnflags & spawnflags::wall::TOGGLE) == 0)
 		{
 			gi_Com_Print("func_wall START_ON without TOGGLE\n");
 			self.spawnflags |= spawnflags::wall::TOGGLE;
@@ -736,7 +736,7 @@ void SP_func_wall(ASEntity &self)
 	}
 
 	@self.use = func_wall_use;
-	if (self.spawnflags.has(spawnflags::wall::START_ON))
+	if ((self.spawnflags & spawnflags::wall::START_ON) != 0)
 	{
 		self.e.solid = solid_t::BSP;
 	}
@@ -759,7 +759,7 @@ START_ON		will start in alterate animation
 
 namespace spawnflags::animation
 {
-    const spawnflags_t START_ON = spawnflag_dec(1);
+    const uint32 START_ON = 1;
 }
 
 void func_animation_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -781,7 +781,7 @@ void SP_func_animation(ASEntity &self)
 	self.e.solid = solid_t::BSP;
 
 	@self.use = func_animation_use;
-	self.bmodel_anim.alternate = self.spawnflags.has(spawnflags::animation::START_ON);
+	self.bmodel_anim.alternate = (self.spawnflags & spawnflags::animation::START_ON) != 0;
 
 	if (self.bmodel_anim.alternate)
 		self.e.s.frame = self.bmodel_anim.alt_start;
@@ -798,9 +798,9 @@ This is solid bmodel that will fall if it's support it removed.
 
 namespace spawnflags::object
 {
-    const spawnflags_t TRIGGER_SPAWN = spawnflag_dec(1);
-    const spawnflags_t ANIMATED = spawnflag_dec(2);
-    const spawnflags_t ANIMATED_FAST = spawnflag_dec(4);
+    const uint32 TRIGGER_SPAWN = 1;
+    const uint32 ANIMATED = 2;
+    const uint32 ANIMATED_FAST = 4;
 }
 
 void func_object_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
@@ -847,7 +847,7 @@ void SP_func_object(ASEntity &self)
 	if (self.dmg == 0)
 		self.dmg = 100;
 
-	if (!self.spawnflags.has(spawnflags::object::TRIGGER_SPAWN))
+	if ((self.spawnflags & spawnflags::object::TRIGGER_SPAWN) == 0)
 	{
 		self.e.solid = solid_t::BSP;
 		self.movetype = movetype_t::PUSH;
@@ -862,9 +862,9 @@ void SP_func_object(ASEntity &self)
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::NOCLIENT);
 	}
 
-	if (self.spawnflags.has(spawnflags::object::ANIMATED))
+	if ((self.spawnflags & spawnflags::object::ANIMATED) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::ANIM_ALL);
-	if (self.spawnflags.has(spawnflags::object::ANIMATED_FAST))
+	if ((self.spawnflags & spawnflags::object::ANIMATED_FAST) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::ANIM_ALLFAST);
 
 	self.e.clipmask = contents_t::MASK_MONSTERSOLID;
@@ -892,11 +892,11 @@ one small chunk per 25 of mass (up to 16).  So 800 gives the most.
 
 namespace spawnflags::explosive
 {
-    const spawnflags_t TRIGGER_SPAWN = spawnflag_dec(1);
-    const spawnflags_t ANIMATED = spawnflag_dec(2);
-    const spawnflags_t ANIMATED_FAST = spawnflag_dec(4);
-    const spawnflags_t INACTIVE = spawnflag_dec(8);
-    const spawnflags_t ALWAYS_SHOOTABLE = spawnflag_dec(16);
+    const uint32 TRIGGER_SPAWN = 1;
+    const uint32 ANIMATED = 2;
+    const uint32 ANIMATED_FAST = 4;
+    const uint32 INACTIVE = 8;
+    const uint32 ALWAYS_SHOOTABLE = 16;
 }
 
 void func_explosive_explode(ASEntity &self, ASEntity &inflictor, ASEntity &attacker, int damage, const vec3_t &in point, const mod_t &in mod)
@@ -1032,14 +1032,14 @@ void SP_func_explosive(ASEntity &self)
 
 	gi_setmodel(self.e, self.model);
 
-	if (self.spawnflags.has(spawnflags::explosive::TRIGGER_SPAWN))
+	if ((self.spawnflags & spawnflags::explosive::TRIGGER_SPAWN) != 0)
 	{
 		self.e.svflags = svflags_t(self.e.svflags | svflags_t::NOCLIENT);
 		self.e.solid = solid_t::NOT;
 		@self.use = func_explosive_spawn;
 	}
 	// PGM
-	else if (self.spawnflags.has(spawnflags::explosive::INACTIVE))
+	else if ((self.spawnflags & spawnflags::explosive::INACTIVE) != 0)
 	{
 		self.e.solid = solid_t::BSP;
 		if (!self.targetname.empty())
@@ -1053,13 +1053,13 @@ void SP_func_explosive(ASEntity &self)
 			@self.use = func_explosive_use;
 	}
 
-	if (self.spawnflags.has(spawnflags::explosive::ANIMATED))
+	if ((self.spawnflags & spawnflags::explosive::ANIMATED) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::ANIM_ALL);
-	if (self.spawnflags.has(spawnflags::explosive::ANIMATED_FAST))
+	if ((self.spawnflags & spawnflags::explosive::ANIMATED_FAST) != 0)
 		self.e.s.effects = effects_t(self.e.s.effects | effects_t::ANIM_ALLFAST);
 
 	// PGM
-	if (self.spawnflags.has(spawnflags::explosive::ALWAYS_SHOOTABLE) || ((self.use !is func_explosive_use) && (self.use !is func_explosive_activate)))
+	if ((self.spawnflags & spawnflags::explosive::ALWAYS_SHOOTABLE) != 0 || ((self.use !is func_explosive_use) && (self.use !is func_explosive_activate)))
 	// PGM
 	{
 		if (self.health == 0)
@@ -1173,7 +1173,7 @@ void barrel_start(ASEntity &self)
 
 namespace spawnflags::explobox
 {
-    const spawnflags_t NO_MOVE = spawnflag_dec(1);
+    const uint32 NO_MOVE = 1;
 }
 
 void SP_misc_explobox(ASEntity &self)
@@ -1208,7 +1208,7 @@ void SP_misc_explobox(ASEntity &self)
 	self.takedamage = true;
 	self.flags = ent_flags_t(self.flags | ent_flags_t::TRAP);
 
-	if (!self.spawnflags.has(spawnflags::explobox::NO_MOVE))
+	if ((self.spawnflags & spawnflags::explobox::NO_MOVE) == 0)
 		@self.touch = barrel_touch;
 	else
 		self.flags = ent_flags_t(self.flags | ent_flags_t::NO_KNOCKBACK);
@@ -1231,7 +1231,7 @@ model="models/objects/black/tris.md2"
 
 namespace spawnflags::blackhole
 {
-    const spawnflags_t AUTO_NOISE = spawnflag_dec(1);
+    const uint32 AUTO_NOISE = 1;
 }
 
 void misc_blackhole_use(ASEntity &ent, ASEntity &other, ASEntity @activator)
@@ -1255,7 +1255,7 @@ void misc_blackhole_think(ASEntity &self)
 		self.timestamp = level.time + time_hz(10);
 	}
 	
-	if (self.spawnflags.has(spawnflags::blackhole::AUTO_NOISE))
+	if ((self.spawnflags & spawnflags::blackhole::AUTO_NOISE) != 0)
 	{
 		self.e.s.angles.x += 50.0f * gi_frame_time_s;
 		self.e.s.angles.y += 50.0f * gi_frame_time_s;
@@ -1276,7 +1276,7 @@ void SP_misc_blackhole(ASEntity &ent)
 	@ent.think = misc_blackhole_think;
 	ent.nextthink = level.time + time_hz(20);
 
-	if (ent.spawnflags.has(spawnflags::blackhole::AUTO_NOISE))
+	if ((ent.spawnflags & spawnflags::blackhole::AUTO_NOISE) != 0)
 	{
 		ent.e.s.sound = gi_soundindex("world/blackhole.wav");
 		ent.e.s.loop_attenuation = ATTN_NORM;
@@ -1444,12 +1444,12 @@ This is the dead player model. Comes in 6 exciting different poses!
 
 namespace spawnflags::deadsoldier
 {
-    const spawnflags_t ON_BACK = spawnflag_dec(1);
-    const spawnflags_t ON_STOMACH = spawnflag_dec(2);
-    const spawnflags_t BACK_DECAP = spawnflag_dec(4);
-    const spawnflags_t FETAL_POS = spawnflag_dec(8);
-    const spawnflags_t SIT_DECAP = spawnflag_dec(16);
-    const spawnflags_t IMPALED = spawnflag_dec(32);
+    const uint32 ON_BACK = 1;
+    const uint32 ON_STOMACH = 2;
+    const uint32 BACK_DECAP = 4;
+    const uint32 FETAL_POS = 8;
+    const uint32 SIT_DECAP = 16;
+    const uint32 IMPALED = 32;
 }
 
 void misc_deadsoldier_die(ASEntity &self, ASEntity &inflictor, ASEntity &attacker, int damage, const vec3_t &in point, const mod_t &in mod)
@@ -1477,17 +1477,17 @@ void SP_misc_deadsoldier(ASEntity &ent)
 	ent.e.s.modelindex = gi_modelindex("models/deadbods/dude/tris.md2");
 
 	// Defaults to frame 0
-	if (ent.spawnflags.has(spawnflags::deadsoldier::ON_STOMACH))
+	if ((ent.spawnflags & spawnflags::deadsoldier::ON_STOMACH) != 0)
 		ent.e.s.frame = 1;
-	else if (ent.spawnflags.has(spawnflags::deadsoldier::BACK_DECAP))
+	else if ((ent.spawnflags & spawnflags::deadsoldier::BACK_DECAP) != 0)
 		ent.e.s.frame = 2;
-	else if (ent.spawnflags.has(spawnflags::deadsoldier::FETAL_POS))
+	else if ((ent.spawnflags & spawnflags::deadsoldier::FETAL_POS) != 0)
 		ent.e.s.frame = 3;
-	else if (ent.spawnflags.has(spawnflags::deadsoldier::SIT_DECAP))
+	else if ((ent.spawnflags & spawnflags::deadsoldier::SIT_DECAP) != 0)
 		ent.e.s.frame = 4;
-	else if (ent.spawnflags.has(spawnflags::deadsoldier::IMPALED))
+	else if ((ent.spawnflags & spawnflags::deadsoldier::IMPALED) != 0)
 		ent.e.s.frame = 5;
-	else if (ent.spawnflags.has(spawnflags::deadsoldier::ON_BACK))
+	else if ((ent.spawnflags & spawnflags::deadsoldier::ON_BACK) != 0)
 		ent.e.s.frame = 0;
 	else
 		ent.e.s.frame = 0;
@@ -1846,22 +1846,22 @@ If START_OFF, this entity must be used before it starts
 */
 namespace spawnflags::timer
 {
-    const spawnflags_t UP = spawnflag_dec(1);
-    const spawnflags_t DOWN = spawnflag_dec(2);
-    const spawnflags_t START_OFF = spawnflag_dec(4);
-    const spawnflags_t MULTI_USE = spawnflag_dec(8);
+    const uint32 UP = 1;
+    const uint32 DOWN = 2;
+    const uint32 START_OFF = 4;
+    const uint32 MULTI_USE = 8;
 }
 
 void func_clock_reset(ASEntity &self)
 {
 	@self.activator = null;
 
-	if (self.spawnflags.has(spawnflags::timer::UP))
+	if ((self.spawnflags & spawnflags::timer::UP) != 0)
 	{
 		self.health = 0;
 		self.wait = float(self.count);
 	}
-	else if (self.spawnflags.has(spawnflags::timer::DOWN))
+	else if ((self.spawnflags & spawnflags::timer::DOWN) != 0)
 	{
 		self.health = self.count;
 		self.wait = 0;
@@ -1899,12 +1899,12 @@ void func_clock_think(ASEntity &self)
 			return;
 	}
 
-	if (self.spawnflags.has(spawnflags::timer::UP))
+	if ((self.spawnflags & spawnflags::timer::UP) != 0)
 	{
 		func_clock_format_countdown(self);
 		self.health++;
 	}
-	else if (self.spawnflags.has(spawnflags::timer::DOWN))
+	else if ((self.spawnflags & spawnflags::timer::DOWN) != 0)
 	{
 		func_clock_format_countdown(self);
 		self.health--;
@@ -1920,8 +1920,8 @@ void func_clock_think(ASEntity &self)
 	self.enemy.message = self.clock_message;
 	self.enemy.use(self.enemy, self, self);
 
-	if ((self.spawnflags.has(spawnflags::timer::UP) && (self.health > self.wait)) ||
-		(self.spawnflags.has(spawnflags::timer::DOWN) && (self.health < self.wait)))
+	if (((self.spawnflags & spawnflags::timer::UP) != 0 && (self.health > self.wait)) ||
+		((self.spawnflags & spawnflags::timer::DOWN) != 0 && (self.health < self.wait)))
 	{
 		if (!self.pathtarget.empty())
 		{
@@ -1933,12 +1933,12 @@ void func_clock_think(ASEntity &self)
 			self.target = savetarget;
 		}
 
-		if (!self.spawnflags.has(spawnflags::timer::MULTI_USE))
+		if ((self.spawnflags & spawnflags::timer::MULTI_USE) == 0)
 			return;
 
 		func_clock_reset(self);
 
-		if (self.spawnflags.has(spawnflags::timer::START_OFF))
+		if ((self.spawnflags & spawnflags::timer::START_OFF) != 0)
 			return;
 	}
 
@@ -1947,7 +1947,7 @@ void func_clock_think(ASEntity &self)
 
 void func_clock_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
-	if (!self.spawnflags.has(spawnflags::timer::MULTI_USE))
+	if ((self.spawnflags & spawnflags::timer::MULTI_USE) == 0)
 		@self.use = null;
 	if (self.activator !is null)
 		return;
@@ -1964,21 +1964,21 @@ void SP_func_clock(ASEntity &self)
 		return;
 	}
 
-	if (self.spawnflags.has(spawnflags::timer::DOWN) && self.count == 0)
+	if ((self.spawnflags & spawnflags::timer::DOWN) != 0 && self.count == 0)
 	{
         gi_Com_Print("{} without a target\n", self);
 		G_FreeEdict(self);
 		return;
 	}
 
-	if (self.spawnflags.has(spawnflags::timer::UP) && (self.count == 0))
+	if ((self.spawnflags & spawnflags::timer::UP) != 0 && (self.count == 0))
 		self.count = 60 * 60;
 
 	func_clock_reset(self);
 
 	@self.think = func_clock_think;
 
-	if (self.spawnflags.has(spawnflags::timer::START_OFF))
+	if ((self.spawnflags & spawnflags::timer::START_OFF) != 0)
 		@self.use = func_clock_use;
 	else
 		self.nextthink = level.time + time_sec(1);
@@ -1988,8 +1988,8 @@ void SP_func_clock(ASEntity &self)
 
 namespace spawnflags::teleporter
 {
-    const spawnflags_t NO_SOUND = spawnflag_dec(1);
-    const spawnflags_t NO_TELEPORT_EFFECT = spawnflag_dec(2);
+    const uint32 NO_SOUND = 1;
+    const uint32 NO_TELEPORT_EFFECT = 2;
 }
 
 void teleporter_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
@@ -2022,7 +2022,7 @@ void teleporter_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, boo
 	other.e.client.ps.pmove.pm_flags = pmflags_t(other.e.client.ps.pmove.pm_flags | pmflags_t::TIME_TELEPORT);
 
 	// draw the teleport splash at source and on the player
-	if (!self.spawnflags.has(spawnflags::teleporter::NO_TELEPORT_EFFECT))
+	if ((self.spawnflags & spawnflags::teleporter::NO_TELEPORT_EFFECT) == 0)
 	{
 		self.owner.e.s.event = entity_event_t::PLAYER_TELEPORT;
 		other.e.s.event = entity_event_t::PLAYER_TELEPORT;
@@ -2062,7 +2062,7 @@ Stepping onto this disc will teleport players to the targeted misc_teleporter_de
 */
 namespace spawnflags::teleporter
 {
-    const spawnflags_t N64_EFFECT = spawnflag_dec(4);
+    const uint32 N64_EFFECT = 4;
 }
 
 void SP_misc_teleporter(ASEntity &ent)
@@ -2071,11 +2071,11 @@ void SP_misc_teleporter(ASEntity &ent)
 
 	gi_setmodel(ent.e, "models/objects/dmspot/tris.md2");
 	ent.e.s.skinnum = 1;
-	if (level.is_n64 || ent.spawnflags.has(spawnflags::teleporter::N64_EFFECT))
+	if (level.is_n64 || (ent.spawnflags & spawnflags::teleporter::N64_EFFECT) != 0)
 		ent.e.s.effects = effects_t::TELEPORTER2;
 	else
 		ent.e.s.effects = effects_t::TELEPORTER;
-	if (!ent.spawnflags.has(spawnflags::teleporter::NO_SOUND))
+	if ((ent.spawnflags & spawnflags::teleporter::NO_SOUND) == 0)
 		ent.e.s.sound = gi_soundindex("world/amb10.wav");
 	ent.e.solid = solid_t::BBOX;
 
@@ -2121,10 +2121,10 @@ Creates a flare seen in the N64 version.
 */
 namespace spawnflags::flare
 {
-    const spawnflags_t RED			= spawnflag_dec(1);
-    const spawnflags_t GREEN		= spawnflag_dec(2);
-    const spawnflags_t BLUE			= spawnflag_dec(4);
-    const spawnflags_t LOCK_ANGLE	= spawnflag_dec(8);
+    const uint32 RED			= 1;
+    const uint32 GREEN		= 2;
+    const uint32 BLUE			= 4;
+    const uint32 LOCK_ANGLE	= 8;
 }
 
 void misc_flare_use(ASEntity &ent, ASEntity &other, ASEntity @activator)
@@ -2142,16 +2142,16 @@ void SP_misc_flare(ASEntity &ent)
 	ent.e.solid = solid_t::NOT;
     ent.e.s.scale = st.radius;
 
-	if (ent.spawnflags.has(spawnflags::flare::RED))
+	if ((ent.spawnflags & spawnflags::flare::RED) != 0)
 		ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx | renderfx_t::SHELL_RED);
 
-	if (ent.spawnflags.has(spawnflags::flare::GREEN))
+	if ((ent.spawnflags & spawnflags::flare::GREEN) != 0)
 		ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx | renderfx_t::SHELL_GREEN);
 
-	if (ent.spawnflags.has(spawnflags::flare::BLUE))
+	if ((ent.spawnflags & spawnflags::flare::BLUE) != 0)
 		ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx | renderfx_t::SHELL_BLUE);
 
-	if (ent.spawnflags.has(spawnflags::flare::LOCK_ANGLE))
+	if ((ent.spawnflags & spawnflags::flare::LOCK_ANGLE) != 0)
 		ent.e.s.renderfx = renderfx_t(ent.e.s.renderfx | renderfx_t::FLARE_LOCK_ANGLE);
 
 	if (!st.image.empty())
@@ -2203,12 +2203,12 @@ probably did too.
 */
 namespace spawnflags::lavaball
 {
-    const spawnflags_t NO_EXPLODE = spawnflag_dec(1);
+    const uint32 NO_EXPLODE = 1;
 }
 
 void fire_touch(ASEntity &self, ASEntity &other, const trace_t &in tr, bool other_touching_self)
 {
-	if (self.spawnflags.has(spawnflags::lavaball::NO_EXPLODE))
+	if ((self.spawnflags & spawnflags::lavaball::NO_EXPLODE) != 0)
 	{
 		G_FreeEdict(self);
 		return;
@@ -2257,7 +2257,7 @@ void SP_misc_lavaball(ASEntity &self)
 
 namespace spawnflags::landmark
 {
-    const spawnflags_t KEEP_Z = spawnflag_dec(1);
+    const uint32 KEEP_Z = 1;
 }
 
 void SP_info_landmark(ASEntity &self)
@@ -2268,9 +2268,9 @@ void SP_info_landmark(ASEntity &self)
 
 namespace spawnflags::world_text
 {
-    const spawnflags_t START_OFF = spawnflag_dec(1);
-    const spawnflags_t TRIGGER_ONCE = spawnflag_dec(2);
-    const spawnflags_t REMOVE_ON_TRIGGER = spawnflag_dec(4);
+    const uint32 START_OFF = 1;
+    const uint32 TRIGGER_ONCE = 2;
+    const uint32 REMOVE_ON_TRIGGER = 4;
 }
 
 void info_world_text_use ( ASEntity & self, ASEntity & other, ASEntity @ activator ) {
@@ -2282,7 +2282,7 @@ void info_world_text_use ( ASEntity & self, ASEntity & other, ASEntity @ activat
 		@self.activator = null;
 	}
 
-	if (self.spawnflags.has(spawnflags::world_text::TRIGGER_ONCE)) {
+	if ((self.spawnflags & spawnflags::world_text::TRIGGER_ONCE) != 0) {
 		@self.use = null;
 	}
 
@@ -2295,7 +2295,7 @@ void info_world_text_use ( ASEntity & self, ASEntity & other, ASEntity @ activat
 		}
 	}
 
-	if (self.spawnflags.has(spawnflags::world_text::REMOVE_ON_TRIGGER)) {
+	if ((self.spawnflags & spawnflags::world_text::REMOVE_ON_TRIGGER) != 0) {
 		G_FreeEdict( self );
 	}
 }
@@ -2371,7 +2371,7 @@ void SP_info_world_text( ASEntity & self ) {
 	@self.use = info_world_text_use;
 	self.e.size[ 2 ] = st.radius != 0 ? st.radius : 0.2f;
 
-	if ( !self.spawnflags.has( spawnflags::world_text::START_OFF ) ) {
+	if ( ( self.spawnflags & spawnflags::world_text::START_OFF ) == 0 ) {
 		self.nextthink = level.time + FRAME_TIME_MS;
 		@self.activator = self;
 	}
@@ -2545,8 +2545,8 @@ void SP_misc_player_mannequin( ASEntity & self ) {
 
 namespace spawnflags::model
 {
-    const spawnflags_t TOGGLE = spawnflag_dec(1);
-    const spawnflags_t START_ON = spawnflag_dec(2);
+    const uint32 TOGGLE = 1;
+    const uint32 START_ON = 2;
 }
 
 void misc_model_use(ASEntity &self, ASEntity &other, ASEntity @activator)
@@ -2561,11 +2561,11 @@ void SP_misc_model(ASEntity &ent)
 	if (!ent.model.empty())
 		gi_setmodel(ent.e, ent.model);
 
-	if (ent.spawnflags.has(spawnflags::model::TOGGLE))
+	if ((ent.spawnflags & spawnflags::model::TOGGLE) != 0)
 	{
 		@ent.use = misc_model_use;
 
-		if (!ent.spawnflags.has(spawnflags::model::START_ON))
+		if ((ent.spawnflags & spawnflags::model::START_ON) == 0)
 			ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCLIENT);
 	}
 

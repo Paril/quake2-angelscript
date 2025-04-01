@@ -359,11 +359,11 @@ void takeoff_goal(ASEntity &self)
 
 namespace spawnflags::fixbot
 {
-    const spawnflags_t FIXIT = spawnflag_dec(4);
-    const spawnflags_t TAKEOFF = spawnflag_dec(8);
-    const spawnflags_t LANDING = spawnflag_dec(16);
-    const spawnflags_t WORKING = spawnflag_dec(32);
-    const spawnflags_t FLAGS = spawnflags::fixbot::FIXIT | spawnflags::fixbot::TAKEOFF | spawnflags::fixbot::LANDING | spawnflags::fixbot::WORKING;
+    const uint32 FIXIT = 4;
+    const uint32 TAKEOFF = 8;
+    const uint32 LANDING = 16;
+    const uint32 WORKING = 32;
+    const uint32 FLAGS = spawnflags::fixbot::FIXIT | spawnflags::fixbot::TAKEOFF | spawnflags::fixbot::LANDING | spawnflags::fixbot::WORKING;
 }
 
 void change_to_roam(ASEntity &self)
@@ -375,21 +375,21 @@ void change_to_roam(ASEntity &self)
 	fixbot_set_fly_parameters(self, false, false, true);
 	M_SetAnimation(self, fixbot_move_roamgoal);
 
-	if (self.spawnflags.has(spawnflags::fixbot::LANDING))
+	if ((self.spawnflags & spawnflags::fixbot::LANDING) != 0)
 	{
 		landing_goal(self);
 		M_SetAnimation(self, fixbot_move_landing);
 		self.spawnflags &= ~spawnflags::fixbot::FLAGS;
 		self.spawnflags |= spawnflags::fixbot::WORKING;
 	}
-	if (self.spawnflags.has(spawnflags::fixbot::TAKEOFF))
+	if ((self.spawnflags & spawnflags::fixbot::TAKEOFF) != 0)
 	{
 		takeoff_goal(self);
 		M_SetAnimation(self, fixbot_move_takeoff);
 		self.spawnflags &= ~spawnflags::fixbot::FLAGS;
 		self.spawnflags |= spawnflags::fixbot::WORKING;
 	}
-	if (self.spawnflags.has(spawnflags::fixbot::FIXIT))
+	if ((self.spawnflags & spawnflags::fixbot::FIXIT) != 0)
 	{
 		M_SetAnimation(self, fixbot_move_roamgoal);
 		self.spawnflags &= ~spawnflags::fixbot::FLAGS;
@@ -1192,7 +1192,7 @@ void weldstate(ASEntity &self)
 		}
 		else
 		{
-			if (!(self.spawnflags.has(spawnflags::monsters::SCENIC)))
+			if ((self.spawnflags & spawnflags::monsters::SCENIC) == 0)
 				self.goalentity.health -= 10;
 		}
 	}
@@ -1268,7 +1268,7 @@ void fixbot_fire_welder(ASEntity &self)
 	if (self.enemy is null)
 		return;
 
-	if (self.spawnflags.has(spawnflags::monsters::SCENIC))
+	if ((self.spawnflags & spawnflags::monsters::SCENIC) != 0)
 	{
 		if (self.timestamp >= level.time)
 			return;

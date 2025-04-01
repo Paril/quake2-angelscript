@@ -354,7 +354,7 @@ void Edict_UpdateState( ASEntity & edict ) {
 
 	// plats, movers, and doors use this to determine move state.
 	const bool isDoor = ( ( edict.e.svflags & svflags_t::DOOR ) != 0 );
-	const bool isReversedDoor = ( isDoor && edict.spawnflags.has( spawnflags::door::REVERSE ) );
+	const bool isReversedDoor = ( isDoor && ( edict.spawnflags & spawnflags::door::REVERSE ) != 0 );
 
 	// doors have their top/bottom states reversed from plats
 	// ( unless "reverse" spawnflag is set! )

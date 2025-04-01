@@ -482,8 +482,8 @@ ASEntity @fire_blaster(ASEntity &self, const vec3_t &in start, const vec3_t &in 
 
 namespace spawnflags::grenade
 {
-    const spawnflags_t HAND = spawnflag_dec(1);
-    const spawnflags_t HELD = spawnflag_dec(2);
+    const uint32 HAND = 1;
+    const uint32 HELD = 2;
 }
 
 /*
@@ -503,16 +503,16 @@ void Grenade_ExplodeReal(ASEntity &ent, ASEntity @other, const vec3_t &in normal
 	if (other !is null)
 	{
 		vec3_t dir = other.e.s.origin - ent.e.s.origin;
-		if (ent.spawnflags.has(spawnflags::grenade::HAND))
+		if ((ent.spawnflags & spawnflags::grenade::HAND) != 0)
 			mod = mod_id_t::HANDGRENADE;
 		else
 			mod = mod_id_t::GRENADE;
 		T_Damage(other, ent, ent.owner, dir, ent.e.s.origin, normal, ent.dmg, ent.dmg, mod.id == mod_id_t::HANDGRENADE ? damageflags_t::RADIUS : damageflags_t::NONE, mod);
 	}
 
-	if (ent.spawnflags.has(spawnflags::grenade::HELD))
+	if ((ent.spawnflags & spawnflags::grenade::HELD) != 0)
 		mod = mod_id_t::HELD_GRENADE;
-	else if (ent.spawnflags.has(spawnflags::grenade::HAND))
+	else if ((ent.spawnflags & spawnflags::grenade::HAND) != 0)
 		mod = mod_id_t::HG_SPLASH;
 	else
 		mod = mod_id_t::G_SPLASH;
@@ -558,7 +558,7 @@ void Grenade_Touch(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool ot
 
 	if (!other.takedamage)
 	{
-		if (ent.spawnflags.has(spawnflags::grenade::HAND))
+		if ((ent.spawnflags & spawnflags::grenade::HAND) != 0)
 		{
 			if (frandom() > 0.5f)
 				gi_sound(ent.e, soundchan_t::VOICE, gi_soundindex("weapons/hgrenb1a.wav"), 1, ATTN_NORM, 0);

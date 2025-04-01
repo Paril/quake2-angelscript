@@ -16,7 +16,7 @@ void target_mal_laser_on(ASEntity &self)
 void target_mal_laser_use(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
 	@self.activator = activator;
-	if (self.spawnflags.has(spawnflags::laser::ON))
+	if ((self.spawnflags & spawnflags::laser::ON) != 0)
 		target_laser_off(self);
 	else
 		target_mal_laser_on(self);
@@ -47,21 +47,21 @@ void SP_target_mal_laser(ASEntity &self)
 	self.flags = ent_flags_t(self.flags | ent_flags_t::TRAP_LASER_FIELD);
 
 	// set the beam diameter
-	if (self.spawnflags.has(spawnflags::laser::FAT))
+	if ((self.spawnflags & spawnflags::laser::FAT) != 0)
 		self.e.s.frame = 16;
 	else
 		self.e.s.frame = 4;
 
 	// set the color
-	if (self.spawnflags.has(spawnflags::laser::RED))
+	if ((self.spawnflags & spawnflags::laser::RED) != 0)
 		self.e.s.skinnum = int(0xf2f2f0f0);
-	else if (self.spawnflags.has(spawnflags::laser::GREEN))
+	else if ((self.spawnflags & spawnflags::laser::GREEN) != 0)
 		self.e.s.skinnum = int(0xd0d1d2d3);
-	else if (self.spawnflags.has(spawnflags::laser::BLUE))
+	else if ((self.spawnflags & spawnflags::laser::BLUE) != 0)
 		self.e.s.skinnum = int(0xf3f3f1f1);
-	else if (self.spawnflags.has(spawnflags::laser::YELLOW))
+	else if ((self.spawnflags & spawnflags::laser::YELLOW) != 0)
 		self.e.s.skinnum = int(0xdcdddedf);
-	else if (self.spawnflags.has(spawnflags::laser::ORANGE))
+	else if ((self.spawnflags & spawnflags::laser::ORANGE) != 0)
 		self.e.s.skinnum = int(0xe0e1e2e3);
 
 	G_SetMovedir(self, self.movedir);
@@ -85,7 +85,7 @@ void SP_target_mal_laser(ASEntity &self)
 
 	gi_linkentity(self.e);
 
-	if (self.spawnflags.has(spawnflags::laser::ON))
+	if ((self.spawnflags & spawnflags::laser::ON) != 0)
 		target_mal_laser_on(self);
 	else
 		target_laser_off(self);

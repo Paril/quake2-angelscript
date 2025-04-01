@@ -274,7 +274,7 @@ namespace berserk
 
 namespace spawnflags::berserk
 {
-    const spawnflags_t NOJUMPING = spawnflag_dec(8);
+    const uint32 NOJUMPING = 8;
 }
 
 namespace berserk::sounds
@@ -721,7 +721,7 @@ void berserk_attack(ASEntity &self)
 		berserk_melee(self);
 	// only jump if they are far enough away for it to make sense (otherwise
 	// it gets annoying to have them keep hopping over and over again)
-	else if (!self.spawnflags.has(spawnflags::berserk::NOJUMPING) && (self.timestamp < level.time && brandom()) && range_to(self, self.enemy) > 150.f)
+	else if ((self.spawnflags & spawnflags::berserk::NOJUMPING) == 0 && (self.timestamp < level.time && brandom()) && range_to(self, self.enemy) > 150.f)
 	{
 		M_SetAnimation(self, berserk_move_attack_strike);
 		// don't do this for a while, otherwise we just keep doing it
@@ -1101,7 +1101,7 @@ void SP_monster_berserk(ASEntity &self)
 	self.monsterinfo.scale = berserk::SCALE;
 
 	self.monsterinfo.combat_style = combat_style_t::MELEE;
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::berserk::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::berserk::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 256;
 	self.monsterinfo.jump_height = 40;
 

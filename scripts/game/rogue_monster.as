@@ -34,7 +34,7 @@ void stationarymonster_triggered_spawn(ASEntity &self)
 
 	stationarymonster_start_go(self);
 
-	if (self.enemy !is null && !(self.spawnflags.has(spawnflags::monsters::AMBUSH)) && (self.enemy.flags & ent_flags_t::NOTARGET) == 0)
+	if (self.enemy !is null && (self.spawnflags & spawnflags::monsters::AMBUSH) == 0 && (self.enemy.flags & ent_flags_t::NOTARGET) == 0)
 	{
 		if ((self.enemy.flags & ent_flags_t::DISGUISED) == 0) // PGM
 			FoundTarget(self);
@@ -73,7 +73,7 @@ void stationarymonster_start_go(ASEntity &self)
 
 	monster_start_go(self);
 
-	if (self.spawnflags.has(spawnflags::monsters::TRIGGER_SPAWN))
+	if ((self.spawnflags & spawnflags::monsters::TRIGGER_SPAWN) != 0)
 		stationarymonster_triggered_start(self);
 }
 

@@ -366,9 +366,9 @@ namespace gekk
 
 namespace spawnflags::gekk
 {
-    const spawnflags_t CHANT = spawnflag_dec(8);
-    const spawnflags_t NOJUMPING = spawnflag_dec(16);
-    const spawnflags_t NOSWIM = spawnflag_dec(32);
+    const uint32 CHANT = 8;
+    const uint32 NOJUMPING = 16;
+    const uint32 NOSWIM = 32;
 }
 
 namespace gekk::sounds
@@ -510,7 +510,7 @@ void gekk_search(ASEntity &self)
 {
 	float r;
 
-	if (self.spawnflags.has(spawnflags::gekk::CHANT))
+	if ((self.spawnflags & spawnflags::gekk::CHANT) != 0)
 	{
 		r = frandom();
 		if (r < 0.33f)
@@ -556,10 +556,10 @@ void gekk_face(ASEntity &self)
 
 void ai_stand_gekk(ASEntity &self, float dist)
 {
-	if (self.spawnflags.has(spawnflags::gekk::CHANT))
+	if ((self.spawnflags & spawnflags::gekk::CHANT) != 0)
 	{
 		ai_move(self, dist);
-		if (!self.spawnflags.has(spawnflags::monsters::AMBUSH) && (self.monsterinfo.idle !is null) && (level.time > self.monsterinfo.idle_time))
+		if ((self.spawnflags & spawnflags::monsters::AMBUSH) == 0 && (self.monsterinfo.idle !is null) && (level.time > self.monsterinfo.idle_time))
 		{
 			if (self.monsterinfo.idle_time)
 			{
@@ -897,7 +897,7 @@ const mmove_t gekk_move_chant = mmove_t(gekk::frames::idle_01, gekk::frames::idl
 
 void gekk_idle(ASEntity &self)
 {
-	if (self.spawnflags.has(spawnflags::gekk::NOSWIM) || self.waterlevel < water_level_t::WAIST)
+	if ((self.spawnflags & spawnflags::gekk::NOSWIM) != 0 || self.waterlevel < water_level_t::WAIST)
 		M_SetAnimation(self, gekk_move_idle);
 	else
 		M_SetAnimation(self, gekk_move_swim_start);
@@ -930,7 +930,7 @@ void gekk_walk(ASEntity &self)
 
 void gekk_run_start(ASEntity &self)
 {
-	if (!self.spawnflags.has(spawnflags::gekk::NOSWIM) && self.waterlevel >= water_level_t::WAIST)
+	if ((self.spawnflags & spawnflags::gekk::NOSWIM) == 0 && self.waterlevel >= water_level_t::WAIST)
 	{
 		M_SetAnimation(self, gekk_move_swim_start);
 	}
@@ -943,7 +943,7 @@ void gekk_run_start(ASEntity &self)
 void gekk_run(ASEntity &self)
 {
 
-	if (!self.spawnflags.has(spawnflags::gekk::NOSWIM) && self.waterlevel >= water_level_t::WAIST)
+	if ((self.spawnflags & spawnflags::gekk::NOSWIM) == 0 && self.waterlevel >= water_level_t::WAIST)
 	{
 		M_SetAnimation(self, gekk_move_swim_start);
 		return;
@@ -1161,7 +1161,7 @@ const mmove_t gekk_move_attack2 = mmove_t(gekk::frames::clawatk5_01, gekk::frame
 
 void gekk_check_underwater(ASEntity &self)
 {
-	if (!self.spawnflags.has(spawnflags::gekk::NOSWIM) && self.waterlevel >= water_level_t::WAIST)
+	if ((self.spawnflags & spawnflags::gekk::NOSWIM) == 0 && self.waterlevel >= water_level_t::WAIST)
 		land_to_water(self);
 }
 
@@ -1431,7 +1431,7 @@ void gekk_attack(ASEntity &self)
 		} else if (frandom() > 0.7f) {
 			M_SetAnimation(self, gekk_move_spit);
 		} else {
-			if (self.spawnflags.has(spawnflags::gekk::NOJUMPING) || frandom() > 0.7f) {
+			if ((self.spawnflags & spawnflags::gekk::NOJUMPING) != 0 || frandom() > 0.7f) {
 				M_SetAnimation(self, gekk_move_run_start);
 				self.monsterinfo.attack_finished = level.time + time_sec(1.4);
 			} else {
@@ -1493,7 +1493,7 @@ void gekk_pain(ASEntity &self, ASEntity &other, float kick, int damage, const mo
 {
 	float r;
 
-	if (self.spawnflags.has(spawnflags::gekk::CHANT))
+	if ((self.spawnflags & spawnflags::gekk::CHANT) != 0)
 	{
 		self.spawnflags &= ~spawnflags::gekk::CHANT;
 		return;
@@ -2011,10 +2011,10 @@ void SP_monster_gekk(ASEntity &self)
 	
 	walkmonster_start(self);
 
-	if (self.spawnflags.has(spawnflags::gekk::CHANT))
+	if ((self.spawnflags & spawnflags::gekk::CHANT) != 0)
 		M_SetAnimation(self, gekk_move_chant);
 
-	self.monsterinfo.can_jump = !self.spawnflags.has(spawnflags::gekk::NOJUMPING);
+	self.monsterinfo.can_jump = (self.spawnflags & spawnflags::gekk::NOJUMPING) == 0;
 	self.monsterinfo.drop_height = 256;
 	self.monsterinfo.jump_height = 68;
 	@self.monsterinfo.blocked = gekk_blocked;

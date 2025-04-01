@@ -700,7 +700,7 @@ void SV_Physics_Toss(ASEntity &ent)
 
 	// prevent softlocks from keys falling into slime/lava
 	if (isinwater && (ent.watertype & (contents_t::SLIME | contents_t::LAVA)) != 0 && (ent.item !is null) &&
-		(ent.item.flags & item_flags_t::KEY) != 0 && ent.spawnflags.has(spawnflags::item::DROPPED))
+		(ent.item.flags & item_flags_t::KEY) != 0 && (ent.spawnflags & spawnflags::item::DROPPED) != 0)
 		ent.velocity = { crandom_open() * 300, crandom_open() * 300, 300.f + (crandom_open() * 300.f) };
 
 	// move teamslaves

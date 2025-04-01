@@ -16,7 +16,7 @@ bool Pickup_Nuke(ASEntity &ent, ASEntity &other)
 
 	if (deathmatch.integer != 0)
 	{
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED))
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 			SetRespawn(ent, time_sec(ent.item.quantity));
 	}
 
@@ -95,7 +95,7 @@ bool Pickup_Doppleganger(ASEntity &ent, ASEntity &other)
 
 	other.client.pers.inventory[ent.item.id]++;
 
-	if (!ent.spawnflags.has(spawnflags::item::DROPPED))
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 		SetRespawn(ent, time_sec(ent.item.quantity));
 
 	return true;
@@ -122,7 +122,7 @@ bool Pickup_Sphere(ASEntity &ent, ASEntity &other)
 
 	if (deathmatch.integer != 0)
 	{
-		if (!ent.spawnflags.has(spawnflags::item::DROPPED))
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 			SetRespawn(ent, time_sec(ent.item.quantity));
 		if (g_dm_instant_items.integer != 0)
 		{
@@ -188,7 +188,7 @@ void Item_TriggeredSpawn(ASEntity &self, ASEntity &other, ASEntity @activator)
 	self.e.svflags = svflags_t(self.e.svflags & ~svflags_t::NOCLIENT);
 	@self.use = null;
 
-	if (self.spawnflags.has(spawnflags::item::TOSS_SPAWN))
+	if ((self.spawnflags & spawnflags::item::TOSS_SPAWN) != 0)
 	{
 		self.movetype = movetype_t::TOSS;
 		vec3_t forward, right;
@@ -200,7 +200,7 @@ void Item_TriggeredSpawn(ASEntity &self, ASEntity &other, ASEntity @activator)
 		self.velocity[2] = 300;
 	}
 	
-	if (!self.spawnflags.has(spawnflags::item::NO_DROP))
+	if ((self.spawnflags & spawnflags::item::NO_DROP) == 0)
 	{
 		if (self.item.id != item_id_t::KEY_POWER_CUBE && self.item.id != item_id_t::KEY_EXPLOSIVE_CHARGES) // leave them be on key_power_cube..
 			self.spawnflags &= spawnflags::item::NO_TOUCH;

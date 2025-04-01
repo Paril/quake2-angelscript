@@ -501,7 +501,7 @@ void CTFFragBonuses(ASEntity &targ, ASEntity &inflictor, ASEntity &attacker)
 	@flag = null;
 	while ((@flag = find_by_str<ASEntity>(flag, "classname", c)) !is null)
 	{
-		if (!(flag.spawnflags.has(spawnflags::item::DROPPED)))
+		if ((flag.spawnflags & spawnflags::item::DROPPED) == 0)
 			break;
 	}
 
@@ -603,7 +603,7 @@ void CTFResetFlag(ctfteam_t ctf_team)
 	@ent = null;
 	while ((@ent = find_by_str<ASEntity>(ent, "classname", c)) !is null)
 	{
-		if (ent.spawnflags.has(spawnflags::item::DROPPED))
+		if ((ent.spawnflags & spawnflags::item::DROPPED) != 0)
 			G_FreeEdict(ent);
 		else
 		{
@@ -652,7 +652,7 @@ bool CTFPickup_Flag(ASEntity &ent, ASEntity &other)
 
 	if (ctf_team == other.client.resp.ctf_team)
 	{
-		if (!(ent.spawnflags.has(spawnflags::item::DROPPED)))
+		if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 		{
 			// the flag is at home base.  if the player has the enemy
 			// flag, he's just won!
@@ -731,7 +731,7 @@ bool CTFPickup_Flag(ASEntity &ent, ASEntity &other)
 	// pick up the flag
 	// if it's not a dropped flag, we just make is disappear
 	// if it's dropped, it will be removed by the pickup caller
-	if (!(ent.spawnflags.has(spawnflags::item::DROPPED)))
+	if ((ent.spawnflags & spawnflags::item::DROPPED) == 0)
 	{
 		ent.flags = ent_flags_t(ent.flags | ent_flags_t::RESPAWN);
 		ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCLIENT);
@@ -1074,7 +1074,7 @@ void SetCTFStats(ASEntity &ent)
 					}
 				}
 			}
-			else if (e.spawnflags.has(spawnflags::item::DROPPED))
+			else if ((e.spawnflags & spawnflags::item::DROPPED) != 0)
 				p1 = imageindex_i_ctf1d; // must be dropped
 		}
 		p2 = imageindex_i_ctf2;
@@ -1109,7 +1109,7 @@ void SetCTFStats(ASEntity &ent)
 					}
 				}
 			}
-			else if (e.spawnflags.has(spawnflags::item::DROPPED))
+			else if ((e.spawnflags & spawnflags::item::DROPPED) != 0)
 				p2 = imageindex_i_ctf2d; // must be dropped
 		}
 
@@ -2107,7 +2107,7 @@ void misc_ctf_banner_think(ASEntity &ent)
 
 namespace spawnflags::ctf_banner
 {
-    const spawnflags_t BLUE = spawnflag_dec(1);
+    const uint32 BLUE = 1;
 }
 
 void SP_misc_ctf_banner(ASEntity &ent)
@@ -2115,7 +2115,7 @@ void SP_misc_ctf_banner(ASEntity &ent)
 	ent.movetype = movetype_t::NONE;
 	ent.e.solid = solid_t::NOT;
 	ent.e.modelindex = gi_modelindex("models/ctf/banner/tris.md2");
-	if (ent.spawnflags.has(spawnflags::ctf_banner::BLUE)) // team2
+	if ((ent.spawnflags & spawnflags::ctf_banner::BLUE) != 0) // team2
 		ent.e.skinnum = 1;
 
 	ent.e.frame = irandom(16);
@@ -2134,7 +2134,7 @@ void SP_misc_ctf_small_banner(ASEntity &ent)
 	ent.movetype = movetype_t::NONE;
 	ent.e.solid = solid_t::NOT;
 	ent.e.modelindex = gi_modelindex("models/ctf/banner/small.md2");
-	if (ent.spawnflags.has(spawnflags::ctf_banner::BLUE)) // team2
+	if ((ent.spawnflags & spawnflags::ctf_banner::BLUE) != 0) // team2
 		ent.e.skinnum = 1;
 
 	ent.e.frame = irandom(16);

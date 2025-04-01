@@ -365,7 +365,7 @@ bool M_droptofloor(ASEntity &ent)
 {
 	contents_t mask = G_GetClipMask(ent);
 
-	if (!ent.spawnflags.has(spawnflags::monsters::NO_DROP))
+	if ((ent.spawnflags & spawnflags::monsters::NO_DROP) == 0)
 	{
 		if (!M_droptofloor_generic(ent.e.s.origin, ent.e.mins, ent.e.maxs, ent.gravityVector.z > 0, ent, mask, true, ent.e.s.origin))
 			return false;
@@ -671,7 +671,7 @@ void M_ProcessPain(ASEntity &e)
 			if ((e.monsterinfo.aiflags & ai_flags_t::SPAWNED_COMMANDER) != 0 && (e.monsterinfo.aiflags & ai_flags_t::SPAWNED_NEEDS_GIB) == 0)
 				dead_commander_check = true;
 
-			if ((e.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && !e.spawnflags.has(spawnflags::monsters::DEAD))
+			if ((e.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && (e.spawnflags & spawnflags::monsters::DEAD) == 0)
 				G_MonsterKilled(e);
 		
 			@e.touch = null;
@@ -1035,7 +1035,7 @@ void monster_triggered_spawn(ASEntity &self)
 	// RAFAEL
 	if (self.classname == "monster_fixbot")
 	{
-		if (self.spawnflags.has(spawnflags::fixbot::LANDING | spawnflags::fixbot::TAKEOFF | spawnflags::fixbot::FIXIT))
+		if ((self.spawnflags & (spawnflags::fixbot::LANDING | spawnflags::fixbot::TAKEOFF | spawnflags::fixbot::FIXIT)) != 0)
 		{
 			@self.enemy = null;
 			return;
@@ -1043,7 +1043,7 @@ void monster_triggered_spawn(ASEntity &self)
 	}
 	// RAFAEL
 
-	if (self.enemy !is null && !(self.spawnflags.has(spawnflags::monsters::AMBUSH)) &&
+	if (self.enemy !is null && (self.spawnflags & spawnflags::monsters::AMBUSH) == 0 &&
         (self.enemy.flags & ent_flags_t::NOTARGET) == 0 && (self.monsterinfo.aiflags & ai_flags_t::GOOD_GUY) == 0)
 	{
 		// ROGUE
@@ -1070,14 +1070,14 @@ void monster_triggered_spawn_use(ASEntity &self, ASEntity &other, ASEntity @acti
 		@self.enemy = activator;
 	@self.use = monster_use;
 
-	if (self.spawnflags.has(spawnflags::monsters::SCENIC))
+	if ((self.spawnflags & spawnflags::monsters::SCENIC) != 0)
 	{
 		M_droptofloor(self);
 
 		self.nextthink = time_zero;
 		self.think(self);
 
-		if (self.spawnflags.has(spawnflags::monsters::AMBUSH))
+		if ((self.spawnflags & spawnflags::monsters::AMBUSH) != 0)
 			monster_use(self, other, activator);
 
 		for (int i = 0; i < 30; i++)
@@ -1213,15 +1213,15 @@ void G_Monster_CheckCoopHealthScaling()
 //============================================================================
 namespace spawnflags::monsters
 {
-    const spawnflags_t FUBAR = spawnflag_dec(4);
+    const uint32 FUBAR = 4;
 
-    const spawnflags_t AMBUSH = spawnflag_dec(1);
-    const spawnflags_t TRIGGER_SPAWN = spawnflag_dec(2);
-    const spawnflags_t DEAD = spawnflag_bit(16);
-    const spawnflags_t SUPER_STEP = spawnflag_bit(17);
-    const spawnflags_t NO_DROP = spawnflag_bit(18);
-    const spawnflags_t SCENIC = spawnflag_bit(19);
-    const spawnflags_t NO_IDLE_DOORS = spawnflag_bit(20);
+    const uint32 AMBUSH = 1;
+    const uint32 TRIGGER_SPAWN = 2;
+    const uint32 DEAD = 1 << 16;
+    const uint32 SUPER_STEP = 1 << 17;
+    const uint32 NO_DROP = 1 << 18;
+    const uint32 SCENIC = 1 << 19;
+    const uint32 NO_IDLE_DOORS = 1 << 20;
 }
 
 bool monster_start(ASEntity &self, const spawn_temp_t &in st)
@@ -1231,14 +1231,14 @@ bool monster_start(ASEntity &self, const spawn_temp_t &in st)
 		return false;
 	}
 
-	if (self.spawnflags.has(spawnflags::monsters::SCENIC))
+	if ((self.spawnflags & spawnflags::monsters::SCENIC) != 0)
 		self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::GOOD_GUY);
 
 	// [Paril-KEX] n64
 	if ((self.hackflags & (HACKFLAG_END_CUTSCENE | HACKFLAG_ATTACK_PLAYER)) != 0)
 		self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::DO_NOT_COUNT);
 
-	if (self.spawnflags.has(spawnflags::monsters::FUBAR) && (self.monsterinfo.aiflags & ai_flags_t::GOOD_GUY) == 0)
+	if ((self.spawnflags & spawnflags::monsters::FUBAR) != 0 && (self.monsterinfo.aiflags & ai_flags_t::GOOD_GUY) == 0)
 	{
 		self.spawnflags &= ~spawnflags::monsters::FUBAR;
 		self.spawnflags |= spawnflags::monsters::AMBUSH;
@@ -1249,7 +1249,7 @@ bool monster_start(ASEntity &self, const spawn_temp_t &in st)
 		self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::DO_NOT_COUNT);
 
 	// ROGUE
-	if ((self.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && !self.spawnflags.has(spawnflags::monsters::DEAD))
+	if ((self.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && (self.spawnflags & spawnflags::monsters::DEAD) == 0)
 	{
         // AS_TODO
 		//if (g_debug_monster_kills.integer != 0)
@@ -1486,7 +1486,7 @@ void monster_start_go(ASEntity &self)
 	}
 
 	// allow spawning dead
-	bool spawn_dead = self.spawnflags.has(spawnflags::monsters::DEAD);
+	bool spawn_dead = (self.spawnflags & spawnflags::monsters::DEAD) != 0;
 
 	if (!self.target.empty())
 	{
@@ -1582,7 +1582,7 @@ void walkmonster_start_go(ASEntity &self)
 	if (self.yaw_speed == 0)
 		self.yaw_speed = 20;
 
-    if (self.spawnflags.has(spawnflags::monsters::TRIGGER_SPAWN))
+    if ((self.spawnflags & spawnflags::monsters::TRIGGER_SPAWN) != 0)
 		monster_triggered_start(self);
 	else
 		monster_start_go(self);
@@ -1599,7 +1599,7 @@ void flymonster_start_go(ASEntity &self)
 	if (self.yaw_speed == 0)
 		self.yaw_speed = 30;
 
-	if (self.spawnflags.has(spawnflags::monsters::TRIGGER_SPAWN))
+	if ((self.spawnflags & spawnflags::monsters::TRIGGER_SPAWN) != 0)
 		monster_triggered_start(self);
 	else
 		monster_start_go(self);
@@ -1617,7 +1617,7 @@ void swimmonster_start_go(ASEntity &self)
 	if (self.yaw_speed == 0)
 		self.yaw_speed = 30;
 
-    if (self.spawnflags.has(spawnflags::monsters::TRIGGER_SPAWN))
+    if ((self.spawnflags & spawnflags::monsters::TRIGGER_SPAWN) != 0)
 		monster_triggered_start(self);
 	else
 		monster_start_go(self);
