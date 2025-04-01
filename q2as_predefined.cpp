@@ -603,8 +603,11 @@ static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, con
 
 #include "q2as_game.h"
 #include "q2as_cgame.h"
+#include "thirdparty/scripthelper/scripthelper.h"
 
 void WritePredefined()
 {
 	WritePredefinedEngines(std::array<asIScriptEngine *, 2>({ svas.engine, cgas.engine }), "as.predefined");
+
+	WriteConfigToFile(svas.engine, (Q2AS_GetModulePath().path.parent_path() / "engine.config").generic_string().c_str());
 }

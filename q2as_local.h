@@ -138,7 +138,7 @@ struct q2as_dbg_state_t
 {
     std::unique_ptr<asIDBDebugger>       debugger;
     asIDBWorkspace                       workspace;
-    struct cvar_t                        *debugger_cvar;
+    struct cvar_t                        *debugger_cvar, *attach_type;
     int                                  debugger_type; // active debugger type
 
     void CheckDebugger(asIScriptContext *ctx);

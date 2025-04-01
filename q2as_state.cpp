@@ -322,6 +322,8 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
     if (!debugger_state.debugger_cvar)
         debugger_state.debugger_cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
+    if (!debugger_state.attach_type)
+        debugger_state.attach_type = Cvar("q2as_debugger_wait_attach", "0", CVAR_NOFLAGS);
 
     return CreateEngine();
 }

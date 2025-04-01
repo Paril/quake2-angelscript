@@ -469,6 +469,15 @@ public:
     virtual bool HasWork() override
     {
         server->Tick();
+        
+        if (debugger_state.attach_type->integer)
+        {
+            while (!server->ClientConnected() || !asIDBDebugger::HasWork())
+            {
+                server->Tick();
+                std::this_thread::sleep_for(std::chrono::milliseconds(2));
+            }
+        }
 
         return server->ClientConnected() && asIDBDebugger::HasWork();
     }

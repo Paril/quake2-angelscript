@@ -220,17 +220,17 @@ stuck_result_t G_FixStuckObject_Generic(const vec3_t &in origin, const vec3_t &i
 
 class pml_t
 {
-	vec3_t origin = vec3_origin;	 // full float precision
-	vec3_t velocity = vec3_origin; // full float precision
+	vec3_t origin;	 // full float precision
+	vec3_t velocity; // full float precision
 
-	vec3_t forward = vec3_origin, right = vec3_origin, up = vec3_origin;
-	float  frametime = 0;
+	vec3_t forward, right, up;
+	float  frametime;
 
-	csurface_t @groundsurface = null;
-	contents_t	groundcontents = contents_t::NONE;
+	csurface_t @groundsurface;
+	contents_t	groundcontents;
 
-	vec3_t previous_origin = vec3_origin;
-	vec3_t start_velocity = vec3_origin;
+	vec3_t previous_origin;
+	vec3_t start_velocity;
 
     pml_t() { }
 };
