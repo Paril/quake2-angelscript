@@ -49,7 +49,7 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
 			{ "bool equals(const vec3_t &in, const float &in) const", asMETHODPR(vec3_t, equals, (const vec3_t &v, const float &epsilon) const, bool), asCALL_THISCALL },
 
 			// conversions
-			{ "bool opImplConv() const", asMETHODPR(vec3_t, operator bool, () const, bool), asCALL_THISCALL },
+			{ "bool opConv() const", asMETHODPR(vec3_t, operator bool, () const, bool), asCALL_THISCALL },
 
 			// basic methods
 			{ "float dot(const vec3_t &in) const",     asMETHODPR(vec3_t, dot, (const vec3_t &) const, float),     asCALL_THISCALL },
