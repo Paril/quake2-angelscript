@@ -221,14 +221,16 @@ struct vec3
 	}
 
 	float normalize() {
-		auto len = lengthSquared();
-		if (len > 0) {
-			len = 1 / sqrtf(len);
+		float len = length();
+		
+		float f = len;
+		if (len > 0.0f) {
+			f = 1.0f / len;
 		}
 
-		x *= len;
-		y *= len;
-		z *= len;
+		x *= f;
+		y *= f;
+		z *= f;
 
 		return len;
 	}
