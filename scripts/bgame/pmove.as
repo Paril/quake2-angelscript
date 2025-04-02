@@ -1601,11 +1601,11 @@ void PM_ScreenEffects()
 		pm.rdflags = refdef_flags_t(pm.rdflags & ~refdef_flags_t::UNDERWATER);
 
 	if ((contents & (contents_t::SOLID | contents_t::LAVA)) != 0)
-		G_AddBlend(1.0f, 0.3f, 0.0f, 0.6f, pm.screen_blend, pm.screen_blend);
+		pm.screen_blend.accum_blend(vec4_t(1.0f, 0.3f, 0.0f, 0.6f));
 	else if ((contents & contents_t::SLIME) != 0)
-		G_AddBlend(0.0f, 0.1f, 0.05f, 0.6f, pm.screen_blend, pm.screen_blend);
+		pm.screen_blend.accum_blend(vec4_t(0.0f, 0.1f, 0.05f, 0.6f));
 	else if ((contents & contents_t::WATER) != 0)
-		G_AddBlend(0.5f, 0.3f, 0.2f, 0.4f, pm.screen_blend, pm.screen_blend);
+		pm.screen_blend.accum_blend(vec4_t(0.5f, 0.3f, 0.2f, 0.4f));
 }
 
 /*

@@ -1088,9 +1088,6 @@ void Touch_Item(ASEntity &ent, ASEntity &other, const trace_t &in tr, bool other
 
 	if (taken)
 	{
-		// flash the screen
-		other.client.bonus_alpha = 0.25;
-
 		// show icon and name on status bar
 		other.e.client.ps.stats[player_stat_t::PICKUP_ICON] = gi_imageindex(ent.item.icon);
 		other.e.client.ps.stats[player_stat_t::PICKUP_STRING] = configstring_id_t::ITEMS + ent.item.id;

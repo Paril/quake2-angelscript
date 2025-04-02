@@ -186,19 +186,19 @@ void P_DamageFeedback(ASEntity &player, const vec3_t &in forward, const vec3_t &
 	}
 
 	// the total alpha of the blend is always proportional to count
-	if (client.damage_alpha < 0)
-		client.damage_alpha = 0;
+	if (client.damage_blend.a < 0)
+		client.damage_blend.a = 0;
 
 	// [Paril-KEX] tweak the values to rely less on this
 	// and more on damage indicators
-	if (client.damage_blood != 0 || (client.damage_alpha + count * 0.06f) < 0.15f)
+	if (client.damage_blood != 0 || (client.damage_blend.a + count * 0.06f) < 0.15f)
 	{
-		client.damage_alpha += count * 0.06f;
+		client.damage_blend.a += count * 0.06f;
 
-		if (client.damage_alpha < 0.06f)
-			client.damage_alpha = 0.06f;
-		if (client.damage_alpha > 0.4f)
-			client.damage_alpha = 0.4f; // don't go too saturated
+		if (client.damage_blend.a < 0.06f)
+			client.damage_blend.a = 0.06f;
+		if (client.damage_blend.a > 0.4f)
+			client.damage_blend.a = 0.4f; // don't go too saturated
 	}
 
 	// mix in colors
@@ -210,7 +210,7 @@ void P_DamageFeedback(ASEntity &player, const vec3_t &in forward, const vec3_t &
 		v += bcolor * max(15.0f, (client.damage_blood / realcount));
 	if (client.damage_armor != 0)
 		v += armor_color * (client.damage_armor / realcount);
-	client.damage_blend = v.normalized();
+	client.damage_blend.xyz() = v.normalized();
 
 	//
 	// calculate view angle kicks
@@ -569,7 +569,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("items/damage2.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(0, 0, 1, 0.08f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(0, 0, 1, 0.08f));
 	}
 	// RAFAEL
 	else if (ent.client.quadfire_time > level.time)
@@ -578,7 +578,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("items/quadfire2.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(1, 0.2f, 0.5f, 0.08f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(1, 0.2f, 0.5f, 0.08f));
 	}
 	// RAFAEL
 	// PMM - double damage
@@ -588,7 +588,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("misc/ddamage2.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(0.9f, 0.7f, 0, 0.08f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(0.9f, 0.7f, 0, 0.08f));
 	}
 	// PMM
 	else if (ent.client.invincible_time > level.time)
@@ -597,7 +597,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(1, 1, 0, 0.08f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(1, 1, 0, 0.08f));
 	}
 	else if (ent.client.invisible_time > level.time)
 	{
@@ -605,7 +605,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(0.8f, 0.8f, 0.8f, 0.08f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(0.8f, 0.8f, 0.8f, 0.08f));
 	}
 	else if (ent.client.enviro_time > level.time)
 	{
@@ -613,7 +613,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("items/airout.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(0, 1, 0, 0.08f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(0, 1, 0, 0.08f));
 	}
 	else if (ent.client.breather_time > level.time)
 	{
@@ -621,14 +621,14 @@ void SV_CalcBlend(ASEntity &ent)
 		if (remaining.milliseconds == 3000) // beginning to fade
 			gi_sound(ent.e, soundchan_t::ITEM, gi_soundindex("items/airout.wav"), 1, ATTN_NORM, 0);
 		if (G_PowerUpExpiringRelative(remaining))
-			G_AddBlend(0.4f, 1, 0.4f, 0.04f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(0.4f, 1, 0.4f, 0.04f));
 	}
 
 	// PGM
 	if (ent.client.nuke_time > level.time)
 	{
 		float brightness = (ent.client.nuke_time - level.time).secondsf() / 2.0f;
-		G_AddBlend(1, 1, 1, brightness, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+		ent.e.client.ps.screen_blend.accum_blend(vec4_t(1, 1, 1, brightness));
 	}
 	if (ent.client.ir_time > level.time)
 	{
@@ -636,7 +636,7 @@ void SV_CalcBlend(ASEntity &ent)
 		if (G_PowerUpExpiringRelative(remaining))
 		{
 			ent.e.client.ps.rdflags = refdef_flags_t(ent.e.client.ps.rdflags | refdef_flags_t::IRGOGGLES);
-			G_AddBlend(1, 0, 0, 0.2f, ent.e.client.ps.screen_blend, ent.e.client.ps.screen_blend);
+			ent.e.client.ps.screen_blend.accum_blend(vec4_t(1, 0, 0, 0.2f));
 		}
 		else
 			ent.e.client.ps.rdflags = refdef_flags_t(ent.e.client.ps.rdflags & ~refdef_flags_t::IRGOGGLES);
@@ -648,32 +648,21 @@ void SV_CalcBlend(ASEntity &ent)
 	// PGM
 
 	// add for damage
-	if (ent.client.damage_alpha > 0)
-		G_AddBlend(ent.client.damage_blend[0], ent.client.damage_blend[1], ent.client.damage_blend[2], ent.client.damage_alpha, ent.e.client.ps.damage_blend, ent.e.client.ps.damage_blend);
+	if (ent.client.damage_blend.a > 0)
+		ent.e.client.ps.damage_blend.accum_blend(ent.client.damage_blend);
 
 	// [Paril-KEX] drowning visual indicator
 	if (ent.air_finished < level.time + time_sec(9))
 	{
-		const vec3_t drown_color = { 0.1f, 0.1f, 0.2f };
 		const float max_drown_alpha = 0.75f;
-		float alpha = (ent.air_finished < level.time) ? 1 : (1.0f - ((ent.air_finished - level.time).secondsf() / 9.0f));
-		G_AddBlend(drown_color[0], drown_color[1], drown_color[2], min(alpha, max_drown_alpha), ent.e.client.ps.damage_blend, ent.e.client.ps.damage_blend);
+		vec4_t drown_color = { 0.1f, 0.1f, 0.2f, (ent.air_finished < level.time) ? 1 : (1.0f - ((ent.air_finished - level.time).secondsf() / 9.0f)) };
+		ent.e.client.ps.damage_blend.accum_blend(drown_color);
 	}
 
-/*
-	if (ent.client.bonus_alpha > 0)
-		G_AddBlend(0.85f, 0.7f, 0.3f, ent.client.bonus_alpha, ent.e.client.ps.damage_blend, ent.e.client.ps.damage_blend);
-*/
-
 	// drop the damage value
-	ent.client.damage_alpha -= gi_frame_time_s * 0.6f;
-	if (ent.client.damage_alpha < 0)
-		ent.client.damage_alpha = 0;
-
-	// drop the bonus value
-	ent.client.bonus_alpha -= gi_frame_time_s;
-	if (ent.client.bonus_alpha < 0)
-		ent.client.bonus_alpha = 0;
+	ent.client.damage_blend.a -= gi_frame_time_s * 0.6f;
+	if (ent.client.damage_blend.a < 0)
+		ent.client.damage_blend.a = 0;
 }
 
 /*

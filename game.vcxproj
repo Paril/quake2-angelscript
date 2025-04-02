@@ -46,11 +46,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)_x64</TargetName>
-    <OutDir>$(SolutionDir)build\</OutDir>
+    <OutDir>C:\Users\Paril\Saved Games\Nightdive Studios\Quake II\as\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>$(ProjectName)_x64</TargetName>
-    <OutDir>$(SolutionDir)build\</OutDir>
+    <OutDir>C:\Users\Paril\Saved Games\Nightdive Studios\Quake II\as\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

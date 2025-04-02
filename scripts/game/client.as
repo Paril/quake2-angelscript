@@ -422,9 +422,7 @@ class ASClient
 	gtime_t		  v_dmg_time; // damage kicks
 	gtime_t		  fall_time;
 	float		  fall_value; // for view drop on fall
-	float		  damage_alpha;
-	float		  bonus_alpha;
-	vec3_t		  damage_blend;
+	vec4_t		  damage_blend;
 	vec3_t		  v_angle, v_forward; // aiming direction
 	float		  bobtime;			  // so off-ground doesn't change it
 	vec3_t		  oldviewangles;

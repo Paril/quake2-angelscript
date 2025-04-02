@@ -1325,6 +1325,10 @@ class vec4_t
 	float y;
 	float z;
 	float w;
+	float r;
+	float g;
+	float b;
+	float a;
 	// behaviors
 	vec4_t(int&in) { repeat float };
 	vec4_t(float, float, float, float);
@@ -1333,6 +1337,10 @@ class vec4_t
 	const float &opIndex(uint32) const;
 	uint32 size() const;
 	bool opEquals(const vec4_t &in) const;
+    void accum_blend(const vec4_t &in color);
+    bool opImplConv() const;
+    vec3_t &xyz();
+    const vec3_t &xyz() const;
 }
 class mat3_t
 {
@@ -2304,7 +2312,6 @@ vec3_t G_ProjectSource(const vec3_t &in, const vec3_t &in, const vec3_t &in, con
 vec3_t G_ProjectSource2(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in) nodiscard;
 vec3_t slerp(const vec3_t &in, const vec3_t &in, float) nodiscard;
 vec3_t lerp(vec3_t, vec3_t, float) nodiscard;
-void G_AddBlend(float r, float g, float b, float a, const vec4_t &in, vec4_t &out);
 gtime_t time_ms(int64);
 gtime_t time_sec(int64);
 gtime_t time_sec(float);

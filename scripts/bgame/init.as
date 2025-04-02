@@ -12,8 +12,10 @@ bool Check() { return true; }
 
 void main(bool is_cgame)
 {
-    vec3_t(1, 2, 3);
-    vec3_t(1, 2, 3);
+    {
+        vec3_t(1, 2, 3);
+        vec3_t(1, 2, 3);
+    }
 
     {
         vec3_t test_a;

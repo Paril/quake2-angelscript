@@ -187,6 +187,19 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
     }
 }
 
+void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const vec4_t &in v)
+{
+    if (v)
+    {
+        json_mutval vector = doc.val_arr();
+        vector.arr_append(doc.val(v[0]));
+        vector.arr_append(doc.val(v[1]));
+        vector.arr_append(doc.val(v[2]));
+        vector.arr_append(doc.val(v[3]));
+        obj.obj_add(key, vector);
+    }
+}
+
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const vec3_t &in v, const vec3_t &in defaultValue)
 {
     if (v != defaultValue)
@@ -251,6 +264,22 @@ void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v)
     }
     else
         v = vec3_origin;
+}
+
+const vec4_t vec4_origin = { 0, 0, 0, 0 };
+
+void json_get_optional(json_doc &doc, json_val obj, vec4_t &out v)
+{
+    if (obj.is_arr && obj.length == 4)
+    {
+        json_arr_iter iter(obj);
+        iter.next.get(v.x);
+        iter.next.get(v.y);
+        iter.next.get(v.z);
+        iter.next.get(v.w);
+    }
+    else
+        v = vec4_origin;
 }
 
 void json_get_optional(json_doc &doc, json_val obj, vec3_t &out v, const vec3_t &in defaultValue)
@@ -501,8 +530,6 @@ json_mutval WriteClient(json_mutdoc &doc, ASEntity &ent)
     json_add_optional(doc, obj, "v_dmg_time", cl.v_dmg_time);
     json_add_optional(doc, obj, "fall_time", cl.fall_time);
     json_add_optional(doc, obj, "fall_value", cl.fall_value);
-    json_add_optional(doc, obj, "damage_alpha", cl.damage_alpha);
-    json_add_optional(doc, obj, "bonus_alpha", cl.bonus_alpha);
     json_add_optional(doc, obj, "damage_blend", cl.damage_blend);
     json_add_optional(doc, obj, "v_angle", cl.v_angle);
     json_add_optional(doc, obj, "bobtime", cl.bobtime);
@@ -625,8 +652,6 @@ void ReadClient(json_doc &doc, json_val obj, ASEntity &ent)
     json_get_optional(doc, obj["v_dmg_time"], cl.v_dmg_time);
     json_get_optional(doc, obj["fall_time"], cl.fall_time);
     obj["fall_value"].get(cl.fall_value);
-    obj["damage_alpha"].get(cl.damage_alpha);
-    obj["bonus_alpha"].get(cl.bonus_alpha);
     json_get_optional(doc, obj["damage_blend"], cl.damage_blend);
     json_get_optional(doc, obj["v_angle"], cl.v_angle);
     obj["bobtime"].get(cl.bobtime);

@@ -30,7 +30,7 @@ void MoveClientToIntermission(ASEntity &ent)
 	ent.e.client.ps.pmove.pm_type = pmtype_t::FREEZE;
 	ent.e.client.ps.gunindex = 0;
 	ent.e.client.ps.gunskin = 0;
-	ent.e.client.ps.damage_blend[3] = ent.e.client.ps.screen_blend[3] = 0;
+	ent.e.client.ps.damage_blend.a = ent.e.client.ps.screen_blend.a = 0;
 	ent.e.client.ps.rdflags = refdef_flags_t::NONE;
 
 	// clean up powerup info
