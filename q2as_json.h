@@ -81,7 +81,7 @@ bool q2as_type_in_range(SourceType value)
         if constexpr (std::is_same_v<TargetType, float>)
         {
             float f_value = static_cast<float>(value);
-            
+
             // Check for loss of precision.
             if (value != static_cast<double>(f_value))
             {
@@ -93,7 +93,7 @@ bool q2as_type_in_range(SourceType value)
         else
         {
             double d_value = static_cast<double>(value);
-            
+
             // Check for loss of precision.
             if (static_cast<SourceType>(static_cast<double>(value)) != value)
             {
@@ -113,7 +113,7 @@ bool q2as_type_in_range(SourceType value)
         }
 
         // Don't allow decimals
-        if (std::trunc(value) != value) 
+        if (std::trunc(value) != value)
         {
             return false;
         }
@@ -125,8 +125,8 @@ bool q2as_type_in_range(SourceType value)
 
             return value <= double_max && value >= double_min;
         }
-        
-        return value >= 0 && value <= static_cast<double>(max);    
+
+        return value >= 0 && value <= static_cast<double>(max);
     }
 
     // Should not hit this.
@@ -134,7 +134,7 @@ bool q2as_type_in_range(SourceType value)
 }
 
 template<typename T>
-bool q2as_type_can_be(yyjson_mut_val* val)
+bool q2as_type_can_be(yyjson_mut_val *val)
 {
     if (yyjson_mut_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT))
     {
@@ -153,7 +153,7 @@ bool q2as_type_can_be(yyjson_mut_val* val)
 }
 
 template<typename T>
-bool q2as_type_can_be(yyjson_val* val)
+bool q2as_type_can_be(yyjson_val *val)
 {
     if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT))
     {
@@ -172,19 +172,19 @@ bool q2as_type_can_be(yyjson_val* val)
 }
 
 template<typename T>
-T q2as_get_value(yyjson_val* val)
+T q2as_get_value(yyjson_val *val)
 {
     if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_UINT))
     {
-        return (T)(val->uni.u64);
+        return (T) (val->uni.u64);
     }
     else if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_SINT))
     {
-        return (T)(val->uni.i64);
+        return (T) (val->uni.i64);
     }
     else if (yyjson_get_tag(val) == (YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL))
     {
-        return (T)(val->uni.f64);
+        return (T) (val->uni.f64);
     }
 
     return 0;
@@ -219,36 +219,114 @@ struct q2as_yyjson_mut_val
     }
 
     bool check_expire_and_throw() const;
-    
+
     // type checking
-    bool is_obj() const { return get_valid() && yyjson_mut_is_obj(val); }
-    bool is_arr() const { return get_valid() && yyjson_mut_is_arr(val); }
-    bool is_ctn() const { return get_valid() && yyjson_mut_is_ctn(val); }
-    bool is_true() const { return get_valid() && yyjson_mut_is_true(val); }
-    bool is_false() const { return get_valid() && yyjson_mut_is_false(val); }
-    bool is_bool() const { return get_valid() && yyjson_mut_is_bool(val); }
-    bool is_str() const { return get_valid() && yyjson_mut_is_str(val); }
-    bool is_uint8() const { return get_valid() && q2as_type_can_be<uint8_t>(val); }
-    bool is_uint16() const { return get_valid() && q2as_type_can_be<uint16_t>(val);}
-    bool is_uint32() const { return get_valid() && q2as_type_can_be<uint32_t>(val); }
-    bool is_uint64() const { return get_valid() && q2as_type_can_be<uint64_t>(val); }
-    bool is_int8() const { return get_valid() && q2as_type_can_be<int8_t>(val); }
-    bool is_int16() const { return get_valid() && q2as_type_can_be<int16_t>(val); }
-    bool is_int32() const { return get_valid() && q2as_type_can_be<int32_t>(val); }
-    bool is_int64() const { return get_valid() && q2as_type_can_be<int64_t>(val); }
-    bool is_float() const { return get_valid() && q2as_type_can_be<float>(val); }
-    bool is_double() const { return get_valid() && q2as_type_can_be<double>(val); }
-    bool is_int() const { return get_valid() && yyjson_mut_is_int(val); }
-    bool is_sint() const { return get_valid() && yyjson_mut_is_sint(val); }
-    bool is_uint() const { return get_valid() && yyjson_mut_is_uint(val); }
-    bool is_real() const { return get_valid() && yyjson_mut_is_real(val); }
-    bool is_null() const { return get_valid() && yyjson_mut_is_null(val); }
-    bool is_num() const { return get_valid() && yyjson_mut_is_num(val); }
-    
-    // array stuff
-    bool arr_insert(q2as_yyjson_mut_val v, uint64_t index) { if (check_expire_and_throw()) return false; return yyjson_mut_arr_insert(val, v.val, index); }
-    bool arr_append(q2as_yyjson_mut_val v) { if (check_expire_and_throw()) return false; return yyjson_mut_arr_append(val, v.val); }
-    bool arr_prepend(q2as_yyjson_mut_val v) { if (check_expire_and_throw()) return false; return yyjson_mut_arr_prepend(val, v.val); }
+    bool is_obj() const
+    {
+        return get_valid() && yyjson_mut_is_obj(val);
+    }
+    bool is_arr() const
+    {
+        return get_valid() && yyjson_mut_is_arr(val);
+    }
+    bool is_ctn() const
+    {
+        return get_valid() && yyjson_mut_is_ctn(val);
+    }
+    bool is_true() const
+    {
+        return get_valid() && yyjson_mut_is_true(val);
+    }
+    bool is_false() const
+    {
+        return get_valid() && yyjson_mut_is_false(val);
+    }
+    bool is_bool() const
+    {
+        return get_valid() && yyjson_mut_is_bool(val);
+    }
+    bool is_str() const
+    {
+        return get_valid() && yyjson_mut_is_str(val);
+    }
+    bool is_uint8() const
+    {
+        return get_valid() && q2as_type_can_be<uint8_t>(val);
+    }
+    bool is_uint16() const
+    {
+        return get_valid() && q2as_type_can_be<uint16_t>(val);
+    }
+    bool is_uint32() const
+    {
+        return get_valid() && q2as_type_can_be<uint32_t>(val);
+    }
+    bool is_uint64() const
+    {
+        return get_valid() && q2as_type_can_be<uint64_t>(val);
+    }
+    bool is_int8() const
+    {
+        return get_valid() && q2as_type_can_be<int8_t>(val);
+    }
+    bool is_int16() const
+    {
+        return get_valid() && q2as_type_can_be<int16_t>(val);
+    }
+    bool is_int32() const
+    {
+        return get_valid() && q2as_type_can_be<int32_t>(val);
+    }
+    bool is_int64() const
+    {
+        return get_valid() && q2as_type_can_be<int64_t>(val);
+    }
+    bool is_float() const
+    {
+        return get_valid() && q2as_type_can_be<float>(val);
+    }
+    bool is_double() const
+    {
+        return get_valid() && q2as_type_can_be<double>(val);
+    }
+    bool is_int() const
+    {
+        return get_valid() && yyjson_mut_is_int(val);
+    }
+    bool is_sint() const
+    {
+        return get_valid() && yyjson_mut_is_sint(val);
+    }
+    bool is_uint() const
+    {
+        return get_valid() && yyjson_mut_is_uint(val);
+    }
+    bool is_real() const
+    {
+        return get_valid() && yyjson_mut_is_real(val);
+    }
+    bool is_null() const
+    {
+        return get_valid() && yyjson_mut_is_null(val);
+    }
+    bool is_num() const
+    {
+        return get_valid() && yyjson_mut_is_num(val);
+    }
+
+// array stuff
+    bool arr_insert(q2as_yyjson_mut_val v, uint64_t index)
+    {
+        if (check_expire_and_throw()) return false; return yyjson_mut_arr_insert(val, v.val, index);
+    }
+    bool arr_append(q2as_yyjson_mut_val v)
+    {
+        if (check_expire_and_throw()) return false; return yyjson_mut_arr_append(val, v.val);
+    }
+    bool arr_prepend(q2as_yyjson_mut_val v)
+    {
+        if (check_expire_and_throw()) return false; return yyjson_mut_arr_prepend(val, v.val);
+    }
     q2as_yyjson_mut_val arr_replace(uint64_t index, q2as_yyjson_mut_val v)
     {
         if (check_expire_and_throw()) return {};
@@ -390,31 +468,100 @@ struct q2as_yyjson_mut_doc : q2as_ref_t
     {
         yyjson_mut_doc_set_val_pool_size(doc.get(), len);
     }
-    
-    q2as_yyjson_mut_val mut_null() { return q2as_yyjson_mut_val(yyjson_mut_null(doc.get()), this); }
-    q2as_yyjson_mut_val mut_true() { return q2as_yyjson_mut_val(yyjson_mut_true(doc.get()), this); }
-    q2as_yyjson_mut_val mut_false() { return q2as_yyjson_mut_val(yyjson_mut_false(doc.get()), this); }
-    q2as_yyjson_mut_val mut_bool(bool v) { return q2as_yyjson_mut_val(yyjson_mut_bool(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_uint(uint64_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_sint(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_int(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_int(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_real(double v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
-    q2as_yyjson_mut_val mut_strl(const std::string &v, size_t len) { return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), min(len, v.size())), this); }
-    q2as_yyjson_mut_val mut_str(const std::string &v) { return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), v.size()), this); }
-    q2as_yyjson_mut_val mut_obj() { return q2as_yyjson_mut_val(yyjson_mut_obj(doc.get()), this); }
-    q2as_yyjson_mut_val mut_arr() { return q2as_yyjson_mut_val(yyjson_mut_arr(doc.get()), this); }
 
-    q2as_yyjson_mut_val val(bool v) { return q2as_yyjson_mut_val(yyjson_mut_bool(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(uint8_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(uint16_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(uint32_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(uint64_t v) { return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(int8_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(int16_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(int32_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(int64_t v) { return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(float v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
-    q2as_yyjson_mut_val val(double v) { return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this); }
+    q2as_yyjson_mut_val mut_null()
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_null(doc.get()), this);
+    }
+    q2as_yyjson_mut_val mut_true()
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_true(doc.get()), this);
+    }
+    q2as_yyjson_mut_val mut_false()
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_false(doc.get()), this);
+    }
+    q2as_yyjson_mut_val mut_bool(bool v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_bool(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val mut_uint(uint64_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val mut_sint(int64_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val mut_int(int64_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_int(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val mut_real(double v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val mut_strl(const std::string &v, size_t len)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), min(len, v.size())), this);
+    }
+    q2as_yyjson_mut_val mut_str(const std::string &v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_strncpy(doc.get(), v.data(), v.size()), this);
+    }
+    q2as_yyjson_mut_val mut_obj()
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_obj(doc.get()), this);
+    }
+    q2as_yyjson_mut_val mut_arr()
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_arr(doc.get()), this);
+    }
+
+    q2as_yyjson_mut_val val(bool v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_bool(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(uint8_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(uint16_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(uint32_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(uint64_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_uint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(int8_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(int16_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(int32_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(int64_t v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_sint(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(float v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this);
+    }
+    q2as_yyjson_mut_val val(double v)
+    {
+        return q2as_yyjson_mut_val(yyjson_mut_real(doc.get(), v), this);
+    }
 };
 
 struct q2as_yyjson_val
@@ -437,78 +584,264 @@ struct q2as_yyjson_val
     }
 
     bool check_expire_and_throw() const;
-    
+
     // type checking
-    bool is_obj() const { return get_valid() && yyjson_is_obj(val); }
-    bool is_arr() const { return get_valid() && yyjson_is_arr(val); }
-    bool is_ctn() const { return get_valid() && yyjson_is_ctn(val); }
-    bool is_true() const { return get_valid() && yyjson_is_true(val); }
-    bool is_false() const { return get_valid() && yyjson_is_false(val); }
-    bool is_bool() const { return get_valid() && yyjson_is_bool(val); }
-    bool is_str() const { return get_valid() && yyjson_is_str(val); }
-    bool is_uint8() const { return get_valid() && q2as_type_can_be<uint8_t>(val); }
-    bool is_uint16() const { return get_valid() && q2as_type_can_be<uint16_t>(val); }
-    bool is_uint32() const { return get_valid() && q2as_type_can_be<uint32_t>(val); }
-    bool is_uint64() const { return get_valid() && q2as_type_can_be<uint64_t>(val); }
-    bool is_int8() const { return get_valid() && q2as_type_can_be<int8_t>(val); }
-    bool is_int16() const { return get_valid() && q2as_type_can_be<int16_t>(val); }
-    bool is_int32() const { return get_valid() && q2as_type_can_be<int32_t>(val); }
-    bool is_int64() const { return get_valid() && q2as_type_can_be<int64_t>(val); }
-    bool is_float() const { return get_valid() && q2as_type_can_be<float>(val); }
-    bool is_double() const { return get_valid() && q2as_type_can_be<double>(val); }
-    bool is_int() const { return get_valid() && yyjson_is_int(val); }
-    bool is_sint() const { return get_valid() && yyjson_is_sint(val); }
-    bool is_uint() const { return get_valid() && yyjson_is_uint(val); }
-    bool is_real() const { return get_valid() && yyjson_is_real(val); }
-    bool is_null() const { return get_valid() && yyjson_is_null(val); }
-    bool is_num() const { return get_valid() && yyjson_is_num(val); }
+    bool is_obj() const
+    {
+        return get_valid() && yyjson_is_obj(val);
+    }
+    bool is_arr() const
+    {
+        return get_valid() && yyjson_is_arr(val);
+    }
+    bool is_ctn() const
+    {
+        return get_valid() && yyjson_is_ctn(val);
+    }
+    bool is_true() const
+    {
+        return get_valid() && yyjson_is_true(val);
+    }
+    bool is_false() const
+    {
+        return get_valid() && yyjson_is_false(val);
+    }
+    bool is_bool() const
+    {
+        return get_valid() && yyjson_is_bool(val);
+    }
+    bool is_str() const
+    {
+        return get_valid() && yyjson_is_str(val);
+    }
+    bool is_uint8() const
+    {
+        return get_valid() && q2as_type_can_be<uint8_t>(val);
+    }
+    bool is_uint16() const
+    {
+        return get_valid() && q2as_type_can_be<uint16_t>(val);
+    }
+    bool is_uint32() const
+    {
+        return get_valid() && q2as_type_can_be<uint32_t>(val);
+    }
+    bool is_uint64() const
+    {
+        return get_valid() && q2as_type_can_be<uint64_t>(val);
+    }
+    bool is_int8() const
+    {
+        return get_valid() && q2as_type_can_be<int8_t>(val);
+    }
+    bool is_int16() const
+    {
+        return get_valid() && q2as_type_can_be<int16_t>(val);
+    }
+    bool is_int32() const
+    {
+        return get_valid() && q2as_type_can_be<int32_t>(val);
+    }
+    bool is_int64() const
+    {
+        return get_valid() && q2as_type_can_be<int64_t>(val);
+    }
+    bool is_float() const
+    {
+        return get_valid() && q2as_type_can_be<float>(val);
+    }
+    bool is_double() const
+    {
+        return get_valid() && q2as_type_can_be<double>(val);
+    }
+    bool is_int() const
+    {
+        return get_valid() && yyjson_is_int(val);
+    }
+    bool is_sint() const
+    {
+        return get_valid() && yyjson_is_sint(val);
+    }
+    bool is_uint() const
+    {
+        return get_valid() && yyjson_is_uint(val);
+    }
+    bool is_real() const
+    {
+        return get_valid() && yyjson_is_real(val);
+    }
+    bool is_null() const
+    {
+        return get_valid() && yyjson_is_null(val);
+    }
+    bool is_num() const
+    {
+        return get_valid() && yyjson_is_num(val);
+    }
 
-    // "extended" integer api, because the original one is silly
+// "extended" integer api, because the original one is silly
 
 
-    // value fetch
-    bool get_bool() const { if (!get_valid()) return false; return yyjson_get_bool(val); }
-    uint8_t get_uint8() const   { if (!get_valid()) return 0; return q2as_get_value<uint8_t>(val); }
-    uint16_t get_uint16() const { if (!get_valid()) return 0; return q2as_get_value<uint16_t>(val); }
-    uint32_t get_uint32() const { if (!get_valid()) return 0; return q2as_get_value<uint32_t>(val); }
-    uint64_t get_uint64() const { if (!get_valid()) return 0; return q2as_get_value<uint64_t>(val); }
-    int8_t get_int8() const     { if (!get_valid()) return 0; return q2as_get_value<int8_t>(val); }
-    int16_t get_int16() const   { if (!get_valid()) return 0; return q2as_get_value<int16_t>(val); }
-    int32_t get_int32() const   { if (!get_valid()) return 0; return q2as_get_value<int32_t>(val); }
-    int64_t get_int64() const   { if (!get_valid()) return 0; return q2as_get_value<int64_t>(val); }
-    float get_float() const { if (!get_valid()) return 0; return q2as_get_value<float>(val); }
-    double get_double() const { if (!get_valid()) return 0; return q2as_get_value<double>(val); }
-    void get_uint8(uint8_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val); }
-    void get_uint16(uint16_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val); }
-    void get_uint32(uint32_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val); }
-    void get_uint64(uint64_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val); }
-    void get_int8(int8_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val); }
-    void get_int16(int16_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val); }
-    void get_int32(int32_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val); }
-    void get_int64(int64_t &out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
-    void get_float(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
-    void get_double(double &out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
-    uint64_t get_uint() const { if (!get_valid()) return 0; return yyjson_get_uint(val); }
-    int64_t get_sint() const { if (!get_valid()) return 0; return yyjson_get_sint(val); }
-    int32_t get_int() const { if (!get_valid()) return 0; return yyjson_get_int(val); }
-    double get_real() const { if (!get_valid()) return 0; return yyjson_get_real(val); }
-    double get_num() const { if (!get_valid()) return 0; return yyjson_get_num(val); }
-    std::string get_str() const { if (!get_valid() || !is_str()) return ""; return std::string(yyjson_get_str(val), get_length()); }
-    uint64_t get_length() const { if (!get_valid()) return 0; return yyjson_get_len(val); }
+// value fetch
+    bool get_bool() const
+    {
+        if (!get_valid()) return false; return yyjson_get_bool(val);
+    }
+    uint8_t get_uint8() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<uint8_t>(val);
+    }
+    uint16_t get_uint16() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<uint16_t>(val);
+    }
+    uint32_t get_uint32() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<uint32_t>(val);
+    }
+    uint64_t get_uint64() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<uint64_t>(val);
+    }
+    int8_t get_int8() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<int8_t>(val);
+    }
+    int16_t get_int16() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<int16_t>(val);
+    }
+    int32_t get_int32() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<int32_t>(val);
+    }
+    int64_t get_int64() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<int64_t>(val);
+    }
+    float get_float() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<float>(val);
+    }
+    double get_double() const
+    {
+        if (!get_valid()) return 0; return q2as_get_value<double>(val);
+    }
+    void get_uint8(uint8_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val);
+    }
+    void get_uint16(uint16_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val);
+    }
+    void get_uint32(uint32_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val);
+    }
+    void get_uint64(uint64_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val);
+    }
+    void get_int8(int8_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val);
+    }
+    void get_int16(int16_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val);
+    }
+    void get_int32(int32_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val);
+    }
+    void get_int64(int64_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val);
+    }
+    void get_float(float &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<float>(val);
+    }
+    void get_double(double &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<double>(val);
+    }
+    uint64_t get_uint() const
+    {
+        if (!get_valid()) return 0; return yyjson_get_uint(val);
+    }
+    int64_t get_sint() const
+    {
+        if (!get_valid()) return 0; return yyjson_get_sint(val);
+    }
+    int32_t get_int() const
+    {
+        if (!get_valid()) return 0; return yyjson_get_int(val);
+    }
+    double get_real() const
+    {
+        if (!get_valid()) return 0; return yyjson_get_real(val);
+    }
+    double get_num() const
+    {
+        if (!get_valid()) return 0; return yyjson_get_num(val);
+    }
+    std::string get_str() const
+    {
+        if (!get_valid() || !is_str()) return ""; return std::string(yyjson_get_str(val), get_length());
+    }
+    uint64_t get_length() const
+    {
+        if (!get_valid()) return 0; return yyjson_get_len(val);
+    }
 
-    void get(bool &out) const { if (!get_valid()) out = false; out = yyjson_get_bool(val); }
-    void get(uint8_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val); }
-    void get(uint16_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val); }
-    void get(uint32_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val); }
-    void get(uint64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val); }
-    void get(int8_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val); }
-    void get(int16_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val); }
-    void get(int32_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val); }
-    void get(int64_t& out) const { if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val); }
-    void get(float& out) const { if (!get_valid()) out = 0; out = q2as_get_value<float>(val); }
-    void get(double& out) const { if (!get_valid()) out = 0; out = q2as_get_value<double>(val); }
-    void get(void* ref, int refTypeId) const 
-    { 
+    void get(bool &out) const
+    {
+        if (!get_valid()) out = false; out = yyjson_get_bool(val);
+    }
+    void get(uint8_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint8_t>(val);
+    }
+    void get(uint16_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint16_t>(val);
+    }
+    void get(uint32_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint32_t>(val);
+    }
+    void get(uint64_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<uint64_t>(val);
+    }
+    void get(int8_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int8_t>(val);
+    }
+    void get(int16_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int16_t>(val);
+    }
+    void get(int32_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int32_t>(val);
+    }
+    void get(int64_t &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<int64_t>(val);
+    }
+    void get(float &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<float>(val);
+    }
+    void get(double &out) const
+    {
+        if (!get_valid()) out = 0; out = q2as_get_value<double>(val);
+    }
+    void get(void *ref, int refTypeId) const
+    {
         auto ctx = asGetActiveContext();
         auto type = ctx->GetEngine()->GetTypeInfoById(refTypeId);
 
@@ -520,33 +853,33 @@ struct q2as_yyjson_val
 
         switch (type->GetTypedefTypeId())
         {
-            case asTYPEID_INT8:
-                get(*(int8_t*)ref);
-                break;
-            case asTYPEID_UINT8:
-                get(*(uint8_t*)ref);
-                break;
-            case asTYPEID_INT16:
-                get(*(int16_t*)ref);
-                break;
-            case asTYPEID_UINT16:
-                get(*(uint16_t*)ref);
-                break;
-            case asTYPEID_INT32:
-                get(*(int32_t*)ref);
-                break;
-            case asTYPEID_UINT32:
-                get(*(uint32_t*)ref);
-                break;
-            case asTYPEID_INT64:
-                get(*(int64_t*)ref);
-                break;
-            case asTYPEID_UINT64:
-                get(*(uint64_t*)ref);
-                break;
-            default:
-                ctx->SetException("Unsupported type");
-                return;
+        case asTYPEID_INT8:
+        get(*(int8_t *) ref);
+        break;
+        case asTYPEID_UINT8:
+        get(*(uint8_t *) ref);
+        break;
+        case asTYPEID_INT16:
+        get(*(int16_t *) ref);
+        break;
+        case asTYPEID_UINT16:
+        get(*(uint16_t *) ref);
+        break;
+        case asTYPEID_INT32:
+        get(*(int32_t *) ref);
+        break;
+        case asTYPEID_UINT32:
+        get(*(uint32_t *) ref);
+        break;
+        case asTYPEID_INT64:
+        get(*(int64_t *) ref);
+        break;
+        case asTYPEID_UINT64:
+        get(*(uint64_t *) ref);
+        break;
+        default:
+        ctx->SetException("Unsupported type");
+        return;
         }
     }
 
@@ -556,14 +889,26 @@ struct q2as_yyjson_val
     // AS_TODO str equals?
 
     // array
-    q2as_yyjson_val arr_get(uint64_t index) const { if (!get_valid()) return {}; return { yyjson_arr_get(val, index), doc_ref }; }
-    q2as_yyjson_val arr_get_first() const { if (!get_valid()) return {}; return { yyjson_arr_get_first(val), doc_ref }; }
-    q2as_yyjson_val arr_get_last() const { if (!get_valid()) return {}; return { yyjson_arr_get_last(val), doc_ref }; }
+    q2as_yyjson_val arr_get(uint64_t index) const
+    {
+        if (!get_valid()) return {}; return { yyjson_arr_get(val, index), doc_ref };
+    }
+    q2as_yyjson_val arr_get_first() const
+    {
+        if (!get_valid()) return {}; return { yyjson_arr_get_first(val), doc_ref };
+    }
+    q2as_yyjson_val arr_get_last() const
+    {
+        if (!get_valid()) return {}; return { yyjson_arr_get_last(val), doc_ref };
+    }
 
-    // object
-    q2as_yyjson_val obj_get(const std::string &key) const { if (!get_valid()) return {}; return { yyjson_obj_getn(val, key.c_str(), key.size()), doc_ref }; }
-    
-    // stringify
+// object
+    q2as_yyjson_val obj_get(const std::string &key) const
+    {
+        if (!get_valid()) return {}; return { yyjson_obj_getn(val, key.c_str(), key.size()), doc_ref };
+    }
+
+// stringify
     std::string as_string();
 };
 
@@ -591,12 +936,21 @@ struct q2as_yyjson_doc : q2as_ref_t
     ~q2as_yyjson_doc()
     {
     }
-    
-    q2as_yyjson_val get_root() { return q2as_yyjson_val { yyjson_doc_get_root(doc.get()), this }; }
-    uint64_t get_read_size() const { return yyjson_doc_get_read_size(doc.get()); }
-    uint64_t get_val_count() const { return yyjson_doc_get_val_count(doc.get()); }
 
-    // stringify
+    q2as_yyjson_val get_root()
+    {
+        return q2as_yyjson_val { yyjson_doc_get_root(doc.get()), this };
+    }
+    uint64_t get_read_size() const
+    {
+        return yyjson_doc_get_read_size(doc.get());
+    }
+    uint64_t get_val_count() const
+    {
+        return yyjson_doc_get_val_count(doc.get());
+    }
+
+// stringify
     char *as_string(size_t *out_size) const;
     std::string as_string() const;
 };
@@ -614,7 +968,7 @@ struct q2as_yyjson_arr_iter
         iter(yyjson_arr_iter_with(arr.get_valid() ? arr.val : nullptr))
     {
     }
-    
+
     q2as_yyjson_arr_iter() = default;
     q2as_yyjson_arr_iter(const q2as_yyjson_arr_iter &) = default;
     q2as_yyjson_arr_iter(q2as_yyjson_arr_iter &&) = default;
@@ -651,7 +1005,7 @@ struct q2as_yyjson_obj_iter
         iter(yyjson_obj_iter_with(obj.get_valid() ? obj.val : nullptr))
     {
     }
-    
+
     q2as_yyjson_obj_iter() = default;
     q2as_yyjson_obj_iter(const q2as_yyjson_obj_iter &) = default;
     q2as_yyjson_obj_iter(q2as_yyjson_obj_iter &&) = default;

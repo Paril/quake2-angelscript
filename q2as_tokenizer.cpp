@@ -7,59 +7,59 @@
 
 int Q_strcasecmp(const std::string_view s1, const std::string_view s2)
 {
-	char c1, c2;
+    char c1, c2;
     size_t i1 = 0, i2 = 0;
 
-	do
-	{
-		c1 = i1 >= s1.length() ? '\0' : s1[i1];
-		c2 = i2 >= s2.length() ? '\0' : s2[i2];
+    do
+    {
+        c1 = i1 >= s1.length() ? '\0' : s1[i1];
+        c2 = i2 >= s2.length() ? '\0' : s2[i2];
 
         i1++;
         i2++;
 
-		if (c1 != c2)
-		{
-			if (c1 >= 'a' && c1 <= 'z')
-				c1 -= ('a' - 'A');
-			if (c2 >= 'a' && c2 <= 'z')
-				c2 -= ('a' - 'A');
-			if (c1 != c2)
-				return c1 < c2 ? -1 : 1; // strings not equal
-		}
-	} while (c1);
+        if (c1 != c2)
+        {
+            if (c1 >= 'a' && c1 <= 'z')
+                c1 -= ('a' - 'A');
+            if (c2 >= 'a' && c2 <= 'z')
+                c2 -= ('a' - 'A');
+            if (c1 != c2)
+                return c1 < c2 ? -1 : 1; // strings not equal
+        }
+    } while (c1);
 
-	return 0; // strings are equal
+    return 0; // strings are equal
 }
 
 int Q_strncasecmp(const std::string_view s1, const std::string_view s2, size_t n)
 {
-	char c1, c2;
+    char c1, c2;
     size_t i1 = 0, i2 = 0;
 
-	do
-	{
-		c1 = i1 >= s1.length() ? '\0' : s1[i1];
-		c2 = i2 >= s2.length() ? '\0' : s2[i2];
+    do
+    {
+        c1 = i1 >= s1.length() ? '\0' : s1[i1];
+        c2 = i2 >= s2.length() ? '\0' : s2[i2];
 
         i1++;
         i2++;
 
-		if (!n--)
-			return 0; // strings are equal until end point
+        if (!n--)
+            return 0; // strings are equal until end point
 
-		if (c1 != c2)
-		{
-			if (c1 >= 'a' && c1 <= 'z')
-				c1 -= ('a' - 'A');
-			if (c2 >= 'a' && c2 <= 'z')
-				c2 -= ('a' - 'A');
-			if (c1 != c2)
-				return c1 < c2 ? -1 : 1; // strings not equal
-		}
-	} while (c1);
+        if (c1 != c2)
+        {
+            if (c1 >= 'a' && c1 <= 'z')
+                c1 -= ('a' - 'A');
+            if (c2 >= 'a' && c2 <= 'z')
+                c2 -= ('a' - 'A');
+            if (c1 != c2)
+                return c1 < c2 ? -1 : 1; // strings not equal
+        }
+    } while (c1);
 
-	return 0; // strings are equal
+    return 0; // strings are equal
 }
 
 // simple tokenizer that is similar to COM_Parse.
@@ -77,24 +77,26 @@ struct tokenizer_t : q2as_ref_t
         std::string_view view = base;
         std::optional<std::string_view> token;
     };
-    
+
     std::vector<state_t> states;
 
-    inline tokenizer_t() { }
+    inline tokenizer_t()
+    {
+    }
     inline tokenizer_t(const char *s) :
         str(s)
     {
-        states.push_back(state_t{std::string_view(str)});
+        states.push_back(state_t { std::string_view(str) });
     }
     inline tokenizer_t(const std::string &s) :
         str(s)
     {
-        states.push_back(state_t{std::string_view(str)});
+        states.push_back(state_t { std::string_view(str) });
     }
     inline tokenizer_t(std::string &&move) :
         str(std::move(move))
     {
-        states.push_back(state_t{std::string_view(str)});
+        states.push_back(state_t { std::string_view(str) });
     }
 
     inline void set_separators(const std::string &in)
@@ -108,17 +110,29 @@ struct tokenizer_t : q2as_ref_t
     }
 
     // get the current token state
-    inline const state_t &cur() const { return states.back(); }
-    inline state_t &cur() { return states.back(); }
+    inline const state_t &cur() const
+    {
+        return states.back();
+    }
+    inline state_t &cur()
+    {
+        return states.back();
+    }
 
     // returns true if the top of the tokenizer stack
     // is empty; this will occur *as* the last token is parsed,
     // not after. 
-    inline bool has_next() const { return !cur().view.empty(); }
+    inline bool has_next() const
+    {
+        return !cur().view.empty();
+    }
 
     // returns true if the current tokenizer stack has
     // a token ready to be used.
-    inline bool has_token() const { return cur().token.has_value(); }
+    inline bool has_token() const
+    {
+        return cur().token.has_value();
+    }
 
     // grab the next token from the tokenizer.
     // returns true if not EOF.
@@ -212,7 +226,7 @@ struct tokenizer_t : q2as_ref_t
     // push it into its own state.
     inline void push_state()
     {
-        states.push_back(state_t{cur().token.value_or("")});
+        states.push_back(state_t { cur().token.value_or("") });
     }
 
     // resume the tokenizer below this one
@@ -233,24 +247,24 @@ struct tokenizer_t : q2as_ref_t
 // TODO: move to factory (see pmove)
 void Q2AS_tokenizer_t_factory_cgcs(asIScriptGeneric *gen)
 {
-	tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_cg_state_t::AllocStatic(sizeof(tokenizer_t)));
-	*(tokenizer_t **)gen->GetAddressOfReturnLocation() = ptr;
-	new(ptr) tokenizer_t(cgi.get_configstring(gen->GetArgDWord(0)));
+    tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_cg_state_t::AllocStatic(sizeof(tokenizer_t)));
+    *(tokenizer_t **) gen->GetAddressOfReturnLocation() = ptr;
+    new(ptr) tokenizer_t(cgi.get_configstring(gen->GetArgDWord(0)));
 }
 
 // TODO: move to factory (see pmove)
 void Q2AS_tokenizer_t_factory_svcs(asIScriptGeneric *gen)
 {
-	tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
-	*(tokenizer_t **)gen->GetAddressOfReturnLocation() = ptr;
-	new(ptr) tokenizer_t(gi.get_configstring(gen->GetArgDWord(0)));
+    tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
+    *(tokenizer_t **) gen->GetAddressOfReturnLocation() = ptr;
+    new(ptr) tokenizer_t(gi.get_configstring(gen->GetArgDWord(0)));
 }
 
 void Q2AS_tokenizer_t_factory_str(asIScriptGeneric *gen)
 {
-	tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
-	*(tokenizer_t **)gen->GetAddressOfReturnLocation() = ptr;
-	new(ptr) tokenizer_t(*((std::string *) gen->GetArgAddress(0)));
+    tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
+    *(tokenizer_t **) gen->GetAddressOfReturnLocation() = ptr;
+    new(ptr) tokenizer_t(*((std::string *) gen->GetArgAddress(0)));
 }
 
 void Q2AS_RegisterTokenizer(q2as_registry &registry)
@@ -259,7 +273,7 @@ void Q2AS_RegisterTokenizer(q2as_registry &registry)
         .type("tokenizer_t", sizeof(tokenizer_t), asOBJ_REF)
         .behaviors({
             { asBEHAVE_ADDREF, "void f()", asFUNCTION((Q2AS_AddRef<tokenizer_t>)), asCALL_GENERIC },
-    // TODO: move to factory (see pmove)
+            // TODO: move to factory (see pmove)
             { asBEHAVE_FACTORY, "tokenizer_t@ f()",                 asFUNCTION((Q2AS_Factory<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC },
             { asBEHAVE_FACTORY, "tokenizer_t@ f(const string &in)", asFUNCTION(Q2AS_tokenizer_t_factory_str),                 asCALL_GENERIC },
             { asBEHAVE_RELEASE, "void f()",                         asFUNCTION((Q2AS_Release<tokenizer_t, q2as_sv_state_t>)), asCALL_GENERIC }
@@ -270,29 +284,29 @@ void Q2AS_RegisterTokenizer(q2as_registry &registry)
             { "bool get_has_next() const property",                asMETHOD(tokenizer_t, has_next),               asCALL_THISCALL },
             { "bool get_has_token() const property",               asMETHOD(tokenizer_t, has_token),              asCALL_THISCALL },
             { "bool token_equals(const string &in) const",         asMETHOD(tokenizer_t, token_equals),           asCALL_THISCALL },
-	        { "bool token_iequals(const string &in) const",        asMETHOD(tokenizer_t, token_iequals),          asCALL_THISCALL },
-	        { "bool token_equalsn(const string &in, uint) const",  asMETHOD(tokenizer_t, token_equalsn),          asCALL_THISCALL },
-	        { "bool token_iequalsn(const string &in, uint) const", asMETHOD(tokenizer_t, token_iequalsn),         asCALL_THISCALL },
-	        { "bool next()",                                       asMETHOD(tokenizer_t, next),                   asCALL_THISCALL },
-	        { "uint32 token_length() const",                       asMETHOD(tokenizer_t, token_length),           asCALL_THISCALL },
-	        { "uint8 token_char(uint32) const",                    asMETHOD(tokenizer_t, token_char),             asCALL_THISCALL },
-	        { "uint8 as_uint8() const",                            asMETHOD(tokenizer_t, as_primitive<uint8_t>),  asCALL_THISCALL },
-	        { "uint16 as_uint16() const",                          asMETHOD(tokenizer_t, as_primitive<uint16_t>), asCALL_THISCALL },
-	        { "uint32 as_uint32() const",                          asMETHOD(tokenizer_t, as_primitive<uint32_t>), asCALL_THISCALL },
-	        { "uint64 as_uint64() const",                          asMETHOD(tokenizer_t, as_primitive<uint64_t>), asCALL_THISCALL },
-	        { "int8 as_int8() const",                              asMETHOD(tokenizer_t, as_primitive<int8_t>),   asCALL_THISCALL },
-	        { "int16 as_int16() const",                            asMETHOD(tokenizer_t, as_primitive<int16_t>),  asCALL_THISCALL },
-	        { "int32 as_int32() const",                            asMETHOD(tokenizer_t, as_primitive<int32_t>),  asCALL_THISCALL },
-	        { "int64 as_int64() const",                            asMETHOD(tokenizer_t, as_primitive<int64_t>),  asCALL_THISCALL },
-	        { "float as_float() const",                            asMETHOD(tokenizer_t, as_primitive<float>),    asCALL_THISCALL },
-	        { "double as_double() const",                          asMETHOD(tokenizer_t, as_primitive<double>),   asCALL_THISCALL },
-	        { "string as_string() const",                          asMETHOD(tokenizer_t, as_string),              asCALL_THISCALL },
-	        { "bool skip_tokens(int)",                             asMETHOD(tokenizer_t, skip_tokens),            asCALL_THISCALL },
-	        { "void push_state()",                                 asMETHOD(tokenizer_t, push_state),             asCALL_THISCALL },
-	        { "void pop_state()",                                  asMETHOD(tokenizer_t, pop_state),              asCALL_THISCALL },
-	        { "void reset()",                                      asMETHOD(tokenizer_t, reset),                  asCALL_THISCALL }
+            { "bool token_iequals(const string &in) const",        asMETHOD(tokenizer_t, token_iequals),          asCALL_THISCALL },
+            { "bool token_equalsn(const string &in, uint) const",  asMETHOD(tokenizer_t, token_equalsn),          asCALL_THISCALL },
+            { "bool token_iequalsn(const string &in, uint) const", asMETHOD(tokenizer_t, token_iequalsn),         asCALL_THISCALL },
+            { "bool next()",                                       asMETHOD(tokenizer_t, next),                   asCALL_THISCALL },
+            { "uint32 token_length() const",                       asMETHOD(tokenizer_t, token_length),           asCALL_THISCALL },
+            { "uint8 token_char(uint32) const",                    asMETHOD(tokenizer_t, token_char),             asCALL_THISCALL },
+            { "uint8 as_uint8() const",                            asMETHOD(tokenizer_t, as_primitive<uint8_t>),  asCALL_THISCALL },
+            { "uint16 as_uint16() const",                          asMETHOD(tokenizer_t, as_primitive<uint16_t>), asCALL_THISCALL },
+            { "uint32 as_uint32() const",                          asMETHOD(tokenizer_t, as_primitive<uint32_t>), asCALL_THISCALL },
+            { "uint64 as_uint64() const",                          asMETHOD(tokenizer_t, as_primitive<uint64_t>), asCALL_THISCALL },
+            { "int8 as_int8() const",                              asMETHOD(tokenizer_t, as_primitive<int8_t>),   asCALL_THISCALL },
+            { "int16 as_int16() const",                            asMETHOD(tokenizer_t, as_primitive<int16_t>),  asCALL_THISCALL },
+            { "int32 as_int32() const",                            asMETHOD(tokenizer_t, as_primitive<int32_t>),  asCALL_THISCALL },
+            { "int64 as_int64() const",                            asMETHOD(tokenizer_t, as_primitive<int64_t>),  asCALL_THISCALL },
+            { "float as_float() const",                            asMETHOD(tokenizer_t, as_primitive<float>),    asCALL_THISCALL },
+            { "double as_double() const",                          asMETHOD(tokenizer_t, as_primitive<double>),   asCALL_THISCALL },
+            { "string as_string() const",                          asMETHOD(tokenizer_t, as_string),              asCALL_THISCALL },
+            { "bool skip_tokens(int)",                             asMETHOD(tokenizer_t, skip_tokens),            asCALL_THISCALL },
+            { "void push_state()",                                 asMETHOD(tokenizer_t, push_state),             asCALL_THISCALL },
+            { "void pop_state()",                                  asMETHOD(tokenizer_t, pop_state),              asCALL_THISCALL },
+            { "void reset()",                                      asMETHOD(tokenizer_t, reset),                  asCALL_THISCALL }
         });
-    
+
     // TODO: move to factory (see pmove)
     if (registry.engine->GetUserData(0) == &cgas)
     {

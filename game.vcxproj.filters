@@ -198,7 +198,6 @@
     <ClCompile Include="q2as_imports.cpp" />
     <ClCompile Include="q2as_json.cpp" />
     <ClCompile Include="q2as_limits.cpp" />
-    <ClCompile Include="q2as_main.cpp" />
     <ClCompile Include="q2as_math.cpp" />
     <ClCompile Include="q2as_playerstate.cpp" />
     <ClCompile Include="q2as_pmove.cpp" />

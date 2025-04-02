@@ -11,11 +11,11 @@ static void Q2AS_RegisterLimitsForType(q2as_registry &registry, const char *type
         { static const gtype _g = std::numeric_limits<T>::name; registry.for_global().property({ fmt::format("const {0} {1}", #gtype, #name), &_g }); }
 #define RegisterLimitGlobalTFunc(gtype, name) \
         { static const gtype _g = std::numeric_limits<T>::name(); registry.for_global().property({ fmt::format("const {0} {1}", type_str, #name), &_g }); }
-    
+
     RegisterLimitGlobal(int, digits);
     RegisterLimitGlobal(int, digits10);
     RegisterLimitGlobal(int, max_digits10);
-    
+
     RegisterLimitGlobalTFunc(T, min);
     RegisterLimitGlobalTFunc(T, lowest);
     RegisterLimitGlobalTFunc(T, max);

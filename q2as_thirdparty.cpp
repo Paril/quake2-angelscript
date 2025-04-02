@@ -10,16 +10,16 @@
 
 void Q2AS_RegisterThirdParty(q2as_registry &registry)
 {
-	RegisterStdString(registry.engine);
-	RegisterScriptArray(registry.engine, true);
+    RegisterStdString(registry.engine);
+    RegisterScriptArray(registry.engine, true);
 
-	RegisterScriptAny(registry.engine);
-	RegisterScriptDictionary(registry.engine);
+    RegisterScriptAny(registry.engine);
+    RegisterScriptDictionary(registry.engine);
 
-	RegisterStdStringUtils(registry.engine);
+    RegisterStdStringUtils(registry.engine);
 
-	RegisterScriptDateTime(registry.engine);
-	RegisterScriptWeakRef(registry.engine);
+    RegisterScriptDateTime(registry.engine);
+    RegisterScriptWeakRef(registry.engine);
 
     RegisterExceptionRoutines(registry.engine);
 }

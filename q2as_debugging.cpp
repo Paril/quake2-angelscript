@@ -84,7 +84,7 @@ public:
         for (auto &suffix : time_suffixes)
             if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
                 state.entries.push_back({ fmt::format("{} {}", s->milliseconds() / (double) std::get<0>(suffix), std::get<1>(suffix)) });
-            
+
         state.entries.push_back({ fmt::format("{} ms", s->milliseconds()) });
     }
 };
@@ -105,7 +105,7 @@ public:
         asIDBCache(dbg, ctx)
     {
         auto engine = ctx->GetEngine();
-        
+
         evaluators.Register<q2as_asIDBStringTypeEvaluator>(engine, "string");
         evaluators.Register<q2as_asIDBVec3TypeEvaluator>(engine, "vec3_t");
         evaluators.Register<q2as_asIDBGTimeTypeEvaluator>(engine, "gtime_t");
@@ -167,7 +167,7 @@ protected:
         {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
-            
+
             if (msg.message == WM_QUIT)
             {
                 return asIDBFrameResult::Exit;
@@ -208,7 +208,7 @@ protected:
         g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
         g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
         g_pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-        D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int)(clear_color.x*clear_color.w*255.0f), (int)(clear_color.y*clear_color.w*255.0f), (int)(clear_color.z*clear_color.w*255.0f), (int)(clear_color.w*255.0f));
+        D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int) (clear_color.x*clear_color.w*255.0f), (int) (clear_color.y*clear_color.w*255.0f), (int) (clear_color.z*clear_color.w*255.0f), (int) (clear_color.w*255.0f));
         g_pd3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
         if (g_pd3dDevice->BeginScene() >= 0)
         {
@@ -224,7 +224,7 @@ protected:
     // Windows window
     HWND                    hWnd = {};
     WNDCLASSEXW             wc = {};
-    
+
     // D3D
     LPDIRECT3D9              g_pD3D = nullptr;
     LPDIRECT3DDEVICE9        g_pd3dDevice = nullptr;
@@ -258,22 +258,22 @@ protected:
         switch (msg)
         {
         case WM_SIZE:
-            if (wParam == SIZE_MINIMIZED)
-                return 0;
-            ui->g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
-            ui->g_ResizeHeight = (UINT)HIWORD(lParam);
+        if (wParam == SIZE_MINIMIZED)
             return 0;
+        ui->g_ResizeWidth = (UINT) LOWORD(lParam); // Queue resize
+        ui->g_ResizeHeight = (UINT) HIWORD(lParam);
+        return 0;
         case WM_SYSCOMMAND:
-            if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-                return 0;
-            break;
+        if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+            return 0;
+        break;
         case WM_DESTROY:
-            ::PostQuitMessage(0);
-            return 0;
+        ::PostQuitMessage(0);
+        return 0;
         case WM_CLOSE:
-            ui->resume = true;
-            ui->SetWindowVisibility(false);
-            return 0;
+        ui->resume = true;
+        ui->SetWindowVisibility(false);
+        return 0;
         }
         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
@@ -296,10 +296,10 @@ public:
     {
         StopThread();
     }
-    
+
     std::string FetchSource(const char *section) override
     {
-        return (svas.mainModule ? (q2as_state_t &) svas : (q2as_state_t &)cgas).LoadFile(((workspace.base_path + "/") + section).c_str());
+        return (svas.mainModule ? (q2as_state_t &) svas : (q2as_state_t &) cgas).LoadFile(((workspace.base_path + "/") + section).c_str());
     }
 
 protected:
@@ -317,9 +317,9 @@ protected:
     virtual std::unique_ptr<asIDBCache> CreateCache(asIScriptContext *ctx) override
     {
         auto cache = std::make_unique<q2as_asIDBCache>(this, ctx);
-        
+
         cache->CacheCallstack();
-        
+
         return cache;
     }
 
@@ -413,8 +413,14 @@ bool q2as_imguiDebuggerUI::CreateDeviceD3D()
 
 void q2as_imguiDebuggerUI::CleanupDeviceD3D()
 {
-    if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
-    if (g_pD3D) { g_pD3D->Release(); g_pD3D = nullptr; }
+    if (g_pd3dDevice)
+    {
+        g_pd3dDevice->Release(); g_pd3dDevice = nullptr;
+    }
+    if (g_pD3D)
+    {
+        g_pD3D->Release(); g_pD3D = nullptr;
+    }
 }
 
 void q2as_imguiDebuggerUI::ResetDevice()
@@ -443,7 +449,7 @@ class q2as_asIDBDebuggerVSCode : public asIDBDebugger
 public:
     std::unique_ptr<asIDBDAPServer> server;
 
-    q2as_asIDBDebuggerVSCode()  :
+    q2as_asIDBDebuggerVSCode() :
         asIDBDebugger()
     {
         workspace = debugger_state.workspace;
@@ -469,7 +475,7 @@ public:
     virtual bool HasWork() override
     {
         server->Tick();
-        
+
         if (debugger_state.attach_type->integer)
         {
             while (!server->ClientConnected() || !asIDBDebugger::HasWork())
@@ -491,7 +497,7 @@ protected:
             return;
 
         auto ctx = cache->ctx;
-        
+
         asIScriptFunction *func = nullptr;
         int col = 0;
         const char *sec = nullptr;
@@ -658,9 +664,9 @@ static void q2as_typeof(asIScriptGeneric *gen)
         }
     }
     else
-       s = ti->GetName();
+        s = ti->GetName();
 
-	new(gen->GetAddressOfReturnLocation()) std::string(std::move(s));
+    new(gen->GetAddressOfReturnLocation()) std::string(std::move(s));
 }
 
 static void q2as_print(const std::string &s)
@@ -673,7 +679,7 @@ static void q2as_print(const std::string &s)
 void Q2AS_RegisterDebugging(q2as_registry &registry)
 {
     registry
-		.for_global()
+        .for_global()
         .functions({
             { "void profile_start(const string &in)", asFUNCTION(q2as_profile_start), asCALL_CDECL },
             { "void profile_end()",                   asFUNCTION(q2as_profile_end),   asCALL_CDECL },

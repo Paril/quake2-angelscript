@@ -12,7 +12,7 @@
 // auto-destruct wrapper for an execution context
 struct q2as_ctx_t
 {
-    asIScriptContext    *context;
+    asIScriptContext *context;
     struct q2as_state_t *state;
 
     inline q2as_ctx_t(asIScriptContext *ctx, struct q2as_state_t *state) :
@@ -27,9 +27,12 @@ struct q2as_ctx_t
     }
 
     // execute the given context
-	bool Execute();
+    bool Execute();
 
-    asIScriptContext *operator->() { return context; }
+    asIScriptContext *operator->()
+    {
+        return context;
+    }
 };
 
 struct declhash_t
@@ -44,17 +47,19 @@ using library_reg_t = void(q2as_registry &);
 struct q2as_state_t
 {
     std::unordered_map<asIScriptFunction *, declhash_t> instru;
-	asIScriptEngine *engine;
-	asIScriptModule *mainModule; // the main module
-	
-	int stringTypeId;
-	int vec3TypeId;
-	int timeTypeId;
-    // only for SV
-	int edict_tTypeId;
-	int IASEntityTypeId;
+    asIScriptEngine *engine;
+    asIScriptModule *mainModule; // the main module
 
-    virtual ~q2as_state_t() {}
+    int stringTypeId;
+    int vec3TypeId;
+    int timeTypeId;
+    // only for SV
+    int edict_tTypeId;
+    int IASEntityTypeId;
+
+    virtual ~q2as_state_t()
+    {
+    }
 
     bool LoadLibraries(library_reg_t *const *const libraries, size_t num_libs);
     bool Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc);
@@ -65,7 +70,7 @@ struct q2as_state_t
     bool Build();
 
     // called on shutdown
-	void Destroy();
+    void Destroy();
 
     // send to proper print function
     virtual void Print(const char *text) = 0;
@@ -94,7 +99,7 @@ private:
 class q2as_ref_t
 {
 public:
-	int	refs = 1;
+    int	refs = 1;
 };
 
 // basic memcmp implementation for type equality.
@@ -102,32 +107,32 @@ public:
 template<typename T>
 static bool Q2AS_type_equals(const T &a, T &b)
 {
-	return !memcmp(&a, &b, sizeof(T));
+    return !memcmp(&a, &b, sizeof(T));
 }
 
 template<typename T>
 static void Q2AS_init_construct(T *self)
 {
-	new(self) T{};
+    new(self) T {};
 }
 
 template<typename T>
 static void Q2AS_destruct(T *self)
 {
-	self->~T();
+    self->~T();
 }
 
 template<typename T>
 static void Q2AS_init_construct_copy(const T &in, T *self)
 {
-	new(self) T(in);
+    new(self) T(in);
 }
 
 template<typename T>
 static T *Q2AS_assign(const T &in, T *self)
 {
-	*self = in;
-	return self;
+    *self = in;
+    return self;
 }
 
 #include "debugger/as_debugger.h"
@@ -138,7 +143,7 @@ struct q2as_dbg_state_t
 {
     std::unique_ptr<asIDBDebugger>       debugger;
     asIDBWorkspace                       workspace;
-    struct cvar_t                        *debugger_cvar, *attach_type;
+    struct cvar_t *debugger_cvar, *attach_type;
     int                                  debugger_type; // active debugger type
 
     void CheckDebugger(asIScriptContext *ctx);

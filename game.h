@@ -9,25 +9,25 @@
 
 // compatibility with legacy float[3] stuff for engine
 #ifdef USE_VEC3_TYPE
-    using gvec3_t = vec3_t;
-    using gvec3_ptr_t = vec3_t *;
-    using gvec3_cptr_t = const vec3_t *;
-    using gvec3_ref_t = vec3_t &;
-    using gvec3_cref_t = const vec3_t &;
-    using gvec4_t = std::array<float, 4>;
+using gvec3_t = vec3_t;
+using gvec3_ptr_t = vec3_t *;
+using gvec3_cptr_t = const vec3_t *;
+using gvec3_ref_t = vec3_t &;
+using gvec3_cref_t = const vec3_t &;
+using gvec4_t = std::array<float, 4>;
 #else
-    using gvec3_t = float[3];
-    using gvec3_ptr_t = gvec3_t;
-    using gvec3_ref_t = gvec3_t;
-    // FIXME: MSVC bug
-    //using gvec3_cref_t = const gvec3_t;
-    typedef const gvec3_t gvec3_cref_t;
-    // FIXME: MSVC bug
-    //using gvec3_cptr_t = const gvec3_t;
-    typedef const gvec3_t gvec3_cptr_t;
-    using gvec4_t = float[4];
+using gvec3_t = float[3];
+using gvec3_ptr_t = gvec3_t;
+using gvec3_ref_t = gvec3_t;
+// FIXME: MSVC bug
+//using gvec3_cref_t = const gvec3_t;
+typedef const gvec3_t gvec3_cref_t;
+// FIXME: MSVC bug
+//using gvec3_cptr_t = const gvec3_t;
+typedef const gvec3_t gvec3_cptr_t;
+using gvec4_t = float[4];
 #endif
-    
+
 constexpr size_t MAX_SPLIT_PLAYERS = 8;
 
 struct rgba_t
@@ -105,11 +105,11 @@ template<size_t n>
 constexpr bit_t<n> bit_v = 1ull << n;
 
 #if defined(KEX_Q2GAME_EXPORTS)
-    #define Q2GAME_API extern "C" __declspec( dllexport )
+#define Q2GAME_API extern "C" __declspec( dllexport )
 #elif defined(KEX_Q2GAME_IMPORTS)
-    #define Q2GAME_API extern "C" __declspec( dllimport )
+#define Q2GAME_API extern "C" __declspec( dllimport )
 #else
-    #define Q2GAME_API
+#define Q2GAME_API
 #endif
 
 // game.h -- game dll information visible to server
@@ -146,10 +146,10 @@ constexpr size_t MAX_SHADOW_LIGHTS = 256;
 // game print flags
 enum print_type_t
 {
-	PRINT_LOW = 0,	  // pickup messages
-	PRINT_MEDIUM = 1, // death messages
-	PRINT_HIGH = 2,	  // critical messages
-	PRINT_CHAT = 3,	  // chat messages
+    PRINT_LOW = 0,	  // pickup messages
+    PRINT_MEDIUM = 1, // death messages
+    PRINT_HIGH = 2,	  // critical messages
+    PRINT_CHAT = 3,	  // chat messages
     PRINT_TYPEWRITER = 4, // centerprint but typed out one char at a time
     PRINT_CENTER = 5, // centerprint without a separate function (loc variants only)
     PRINT_TTS = 6, // PRINT_HIGH but will speak for players with narration on
@@ -167,9 +167,9 @@ constexpr size_t MAX_LOCALIZATION_ARGS = 8;
 // destination class for gi.multicast()
 enum multicast_t
 {
-	MULTICAST_ALL,
-	MULTICAST_PHS,
-	MULTICAST_PVS
+    MULTICAST_ALL,
+    MULTICAST_PHS,
+    MULTICAST_PVS
 };
 
 /*
@@ -182,13 +182,13 @@ CVARS (console variables)
 
 enum cvar_flags_t : uint32_t
 {
-	CVAR_NOFLAGS = 0,
-	CVAR_ARCHIVE = bit_v<0>,	 // set to cause it to be saved to config
-	CVAR_USERINFO = bit_v<1>,	 // added to userinfo  when changed
-	CVAR_SERVERINFO = bit_v<2>,  // added to serverinfo when changed
-	CVAR_NOSET = bit_v<3>,		 // don't allow change from console at all,
-						         // but can be set from the command line
-	CVAR_LATCH = bit_v<4>,		 // save changes until server restart
+    CVAR_NOFLAGS = 0,
+    CVAR_ARCHIVE = bit_v<0>,	 // set to cause it to be saved to config
+    CVAR_USERINFO = bit_v<1>,	 // added to userinfo  when changed
+    CVAR_SERVERINFO = bit_v<2>,  // added to serverinfo when changed
+    CVAR_NOSET = bit_v<3>,		 // don't allow change from console at all,
+                                 // but can be set from the command line
+    CVAR_LATCH = bit_v<4>,		 // save changes until server restart
     CVAR_USER_PROFILE = bit_v<5>, // like CVAR_USERINFO but not sent to server
 };
 MAKE_ENUM_BITFLAGS(cvar_flags_t);
@@ -196,14 +196,14 @@ MAKE_ENUM_BITFLAGS(cvar_flags_t);
 // nothing outside the Cvar_*() functions should modify these fields!
 struct cvar_t
 {
-	char		 *name;
-	char		 *string;
-	char		 *latched_string; // for CVAR_LATCH vars
-	cvar_flags_t flags;
-	int32_t      modified_count; // changed each time the cvar is changed, but never zero
-	float		 value;
-	cvar_t	    *next;
-	int32_t      integer; // integral value
+    char *name;
+    char *string;
+    char *latched_string; // for CVAR_LATCH vars
+    cvar_flags_t flags;
+    int32_t      modified_count; // changed each time the cvar is changed, but never zero
+    float		 value;
+    cvar_t *next;
+    int32_t      integer; // integral value
 };
 
 // convenience function to check if the given cvar ptr has been
@@ -231,41 +231,41 @@ COLLISION DETECTION
 // lower bits are stronger, and will eat weaker brushes completely
 enum contents_t : uint32_t
 {
-	CONTENTS_NONE = 0,
-	CONTENTS_SOLID = bit_v<0>,	 // an eye is never valid in a solid
-	CONTENTS_WINDOW = bit_v<1>, // translucent, but not watery
-	CONTENTS_AUX = bit_v<2>,
-	CONTENTS_LAVA = bit_v<3>,
-	CONTENTS_SLIME = bit_v<4>,
-	CONTENTS_WATER = bit_v<5>,
-	CONTENTS_MIST = bit_v<6>,
+    CONTENTS_NONE = 0,
+    CONTENTS_SOLID = bit_v<0>,	 // an eye is never valid in a solid
+    CONTENTS_WINDOW = bit_v<1>, // translucent, but not watery
+    CONTENTS_AUX = bit_v<2>,
+    CONTENTS_LAVA = bit_v<3>,
+    CONTENTS_SLIME = bit_v<4>,
+    CONTENTS_WATER = bit_v<5>,
+    CONTENTS_MIST = bit_v<6>,
 
-	// remaining contents are non-visible, and don't eat brushes
+    // remaining contents are non-visible, and don't eat brushes
 
     CONTENTS_NO_WATERJUMP = bit_v<13>, // [Paril-KEX] this brush cannot be waterjumped out of
     CONTENTS_PROJECTILECLIP = bit_v<14>, // [Paril-KEX] projectiles will collide with this
 
-	CONTENTS_AREAPORTAL = bit_v<15>,
+    CONTENTS_AREAPORTAL = bit_v<15>,
 
-	CONTENTS_PLAYERCLIP = bit_v<16>,
-	CONTENTS_MONSTERCLIP = bit_v<17>,
+    CONTENTS_PLAYERCLIP = bit_v<16>,
+    CONTENTS_MONSTERCLIP = bit_v<17>,
 
-	// currents can be added to any other contents, and may be mixed
-	CONTENTS_CURRENT_0 = bit_v<18>,
-	CONTENTS_CURRENT_90 = bit_v<19>,
-	CONTENTS_CURRENT_180 = bit_v<20>,
-	CONTENTS_CURRENT_270 = bit_v<21>,
-	CONTENTS_CURRENT_UP = bit_v<22>,
-	CONTENTS_CURRENT_DOWN = bit_v<23>,
+    // currents can be added to any other contents, and may be mixed
+    CONTENTS_CURRENT_0 = bit_v<18>,
+    CONTENTS_CURRENT_90 = bit_v<19>,
+    CONTENTS_CURRENT_180 = bit_v<20>,
+    CONTENTS_CURRENT_270 = bit_v<21>,
+    CONTENTS_CURRENT_UP = bit_v<22>,
+    CONTENTS_CURRENT_DOWN = bit_v<23>,
 
-	CONTENTS_ORIGIN = bit_v<24>, // removed before bsping an entity
+    CONTENTS_ORIGIN = bit_v<24>, // removed before bsping an entity
 
-	CONTENTS_MONSTER = bit_v<25>, // should never be on a brush, only in game
-	CONTENTS_DEADMONSTER = bit_v<26>,
+    CONTENTS_MONSTER = bit_v<25>, // should never be on a brush, only in game
+    CONTENTS_DEADMONSTER = bit_v<26>,
 
-	CONTENTS_DETAIL = bit_v<27>,	   // brushes to be added after vis leafs
-	CONTENTS_TRANSLUCENT = bit_v<28>, // auto set if any surface has trans
-	CONTENTS_LADDER = bit_v<29>,
+    CONTENTS_DETAIL = bit_v<27>,	   // brushes to be added after vis leafs
+    CONTENTS_TRANSLUCENT = bit_v<28>, // auto set if any surface has trans
+    CONTENTS_LADDER = bit_v<29>,
 
     CONTENTS_PLAYER = bit_v<30>, // [Paril-KEX] should never be on a brush, only in game; player
     CONTENTS_PROJECTILE = bit_v<31>  // [Paril-KEX] should never be on a brush, only in game; projectiles.
@@ -279,14 +279,14 @@ constexpr contents_t LAST_VISIBLE_CONTENTS = CONTENTS_MIST;
 enum surfflags_t : uint32_t
 {
     SURF_NONE = 0,
-	SURF_LIGHT = bit_v<0>, // value will hold the light strength
-	SURF_SLICK = bit_v<1>, // effects game physics
-	SURF_SKY = bit_v<2>,	  // don't draw, but add to skybox
-	SURF_WARP = bit_v<3>,  // turbulent water warp
-	SURF_TRANS33 = bit_v<4>,
-	SURF_TRANS66 = bit_v<5>,
-	SURF_FLOWING = bit_v<6>, // scroll towards angle
-	SURF_NODRAW = bit_v<7>,	 // don't bother referencing the texture
+    SURF_LIGHT = bit_v<0>, // value will hold the light strength
+    SURF_SLICK = bit_v<1>, // effects game physics
+    SURF_SKY = bit_v<2>,	  // don't draw, but add to skybox
+    SURF_WARP = bit_v<3>,  // turbulent water warp
+    SURF_TRANS33 = bit_v<4>,
+    SURF_TRANS66 = bit_v<5>,
+    SURF_FLOWING = bit_v<6>, // scroll towards angle
+    SURF_NODRAW = bit_v<7>,	 // don't bother referencing the texture
     SURF_ALPHATEST = bit_v<25>,   // [Paril-KEX] alpha test using widely supported flag
     SURF_N64_UV = bit_v<28>,  // [Sam-KEX] Stretches texture UVs
     SURF_N64_SCROLL_X = bit_v<29>,  // [Sam-KEX] Texture scroll X-axis
@@ -306,29 +306,29 @@ constexpr contents_t MASK_WATER = (CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLI
 constexpr contents_t MASK_OPAQUE = (CONTENTS_SOLID | CONTENTS_SLIME | CONTENTS_LAVA);
 constexpr contents_t MASK_SHOT = (CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_PLAYER | CONTENTS_WINDOW | CONTENTS_DEADMONSTER);
 constexpr contents_t MASK_CURRENT = (CONTENTS_CURRENT_0 | CONTENTS_CURRENT_90 | CONTENTS_CURRENT_180 | CONTENTS_CURRENT_270 | CONTENTS_CURRENT_UP | CONTENTS_CURRENT_DOWN);
-constexpr contents_t MASK_BLOCK_SIGHT = ( CONTENTS_SOLID | CONTENTS_LAVA | CONTENTS_SLIME | CONTENTS_MONSTER | CONTENTS_PLAYER );
-constexpr contents_t MASK_NAV_SOLID = ( CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW );
-constexpr contents_t MASK_LADDER_NAV_SOLID = ( CONTENTS_SOLID | CONTENTS_WINDOW );
-constexpr contents_t MASK_WALK_NAV_SOLID = ( CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP );
+constexpr contents_t MASK_BLOCK_SIGHT = (CONTENTS_SOLID | CONTENTS_LAVA | CONTENTS_SLIME | CONTENTS_MONSTER | CONTENTS_PLAYER);
+constexpr contents_t MASK_NAV_SOLID = (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW);
+constexpr contents_t MASK_LADDER_NAV_SOLID = (CONTENTS_SOLID | CONTENTS_WINDOW);
+constexpr contents_t MASK_WALK_NAV_SOLID = (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP);
 constexpr contents_t MASK_PROJECTILE = MASK_SHOT | CONTENTS_PROJECTILECLIP;
 
 // gi.BoxEdicts() can return a list of either solid or trigger entities
 // FIXME: eliminate AREA_ distinction?
 enum solidity_area_t
 {
-	AREA_SOLID = 1,
-	AREA_TRIGGERS = 2
+    AREA_SOLID = 1,
+    AREA_TRIGGERS = 2
 };
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
 struct cplane_t
 {
-	gvec3_t	normal;
-	float	dist;
-	byte	type;	 // for fast side tests
-	byte	signbits; // signx + (signy<<1) + (signz<<1)
-	byte	pad[2];
+    gvec3_t	normal;
+    float	dist;
+    byte	type;	 // for fast side tests
+    byte	signbits; // signx + (signy<<1) + (signz<<1)
+    byte	pad[2];
 };
 
 // [Paril-KEX]
@@ -336,9 +336,9 @@ constexpr size_t MAX_MATERIAL_NAME = 16;
 
 struct csurface_t
 {
-	char        name[32];
-	surfflags_t flags;
-	int32_t		value;
+    char        name[32];
+    surfflags_t flags;
+    int32_t		value;
 
     // [Paril-KEX]
     uint32_t    id; // unique texinfo ID, offset by 1 (0 is 'null')
@@ -348,46 +348,46 @@ struct csurface_t
 // a trace is returned when a box is swept through the world
 struct trace_t
 {
-	bool	    allsolid;	// if true, plane is not valid
-	bool        startsolid; // if true, the initial point was in a solid area
-	float		fraction;	// time completed, 1.0 = didn't hit anything
-	gvec3_t		endpos;		// final position
-	cplane_t	plane;		// surface normal at impact
-	csurface_t *surface;	// surface hit
-	contents_t	contents;	// contents on other side of surface hit
-	edict_t	    *ent;		// not set by CM_*() functions
+    bool	    allsolid;	// if true, plane is not valid
+    bool        startsolid; // if true, the initial point was in a solid area
+    float		fraction;	// time completed, 1.0 = didn't hit anything
+    gvec3_t		endpos;		// final position
+    cplane_t	plane;		// surface normal at impact
+    csurface_t *surface;	// surface hit
+    contents_t	contents;	// contents on other side of surface hit
+    edict_t *ent;		// not set by CM_*() functions
 
     // [Paril-KEX] the second-best surface hit from a trace
     cplane_t	plane2;		// second surface normal at impact
-	csurface_t *surface2;	// second surface hit
+    csurface_t *surface2;	// second surface hit
 };
 
 // pmove_state_t is the information necessary for client side movement
 // prediction
 enum pmtype_t
 {
-	// can accelerate and turn
-	PM_NORMAL,
+    // can accelerate and turn
+    PM_NORMAL,
     PM_GRAPPLE, // [Paril-KEX] pull towards velocity, no gravity
-	PM_NOCLIP,
+    PM_NOCLIP,
     PM_SPECTATOR, // [Paril-KEX] clip against walls, but not entities
-	// no acceleration or turning
-	PM_DEAD,
-	PM_GIB, // different bounding box
-	PM_FREEZE
+    // no acceleration or turning
+    PM_DEAD,
+    PM_GIB, // different bounding box
+    PM_FREEZE
 };
 
 // pmove->pm_flags
 enum pmflags_t : uint16_t
 {
     PMF_NONE = 0,
-	PMF_DUCKED = bit_v<0>,
-	PMF_JUMP_HELD = bit_v<1>,
-	PMF_ON_GROUND = bit_v<2>,
-	PMF_TIME_WATERJUMP = bit_v<3>, // pm_time is waterjump
-	PMF_TIME_LAND = bit_v<4>,		// pm_time is time before rejump
-	PMF_TIME_TELEPORT = bit_v<5>, // pm_time is non-moving time
-	PMF_NO_POSITIONAL_PREDICTION = bit_v<6>,	// temporarily disables positional prediction (used for grappling hook)
+    PMF_DUCKED = bit_v<0>,
+    PMF_JUMP_HELD = bit_v<1>,
+    PMF_ON_GROUND = bit_v<2>,
+    PMF_TIME_WATERJUMP = bit_v<3>, // pm_time is waterjump
+    PMF_TIME_LAND = bit_v<4>,		// pm_time is time before rejump
+    PMF_TIME_TELEPORT = bit_v<5>, // pm_time is non-moving time
+    PMF_NO_POSITIONAL_PREDICTION = bit_v<6>,	// temporarily disables positional prediction (used for grappling hook)
     PMF_ON_LADDER = bit_v<7>,    // signal to game that we are on a ladder
     PMF_NO_ANGULAR_PREDICTION = bit_v<8>, // temporary disables angular prediction
     PMF_IGNORE_PLAYER_COLLISION = bit_v<9>, // don't collide with other players
@@ -404,15 +404,15 @@ MAKE_ENUM_BITFLAGS(pmflags_t);
 // will result in a prediction error of some degree.
 struct pmove_state_t
 {
-	pmtype_t pm_type;
+    pmtype_t pm_type;
 
-	vec3_t                 origin;
-	vec3_t                 velocity;
-	pmflags_t			   pm_flags; // ducked, jump_held, etc
-	uint16_t			   pm_time;
-	int16_t				   gravity;
-	gvec3_t                delta_angles; // add to command angles to get view direction
-										 // changed by spawns, rotating objects, and teleporters
+    vec3_t                 origin;
+    vec3_t                 velocity;
+    pmflags_t			   pm_flags; // ducked, jump_held, etc
+    uint16_t			   pm_time;
+    int16_t				   gravity;
+    gvec3_t                delta_angles; // add to command angles to get view direction
+                                         // changed by spawns, rotating objects, and teleporters
     int8_t                 viewheight; // view height, added to origin[2] + viewoffset[2], for crouching
 };
 
@@ -421,13 +421,13 @@ struct pmove_state_t
 //
 enum button_t : uint8_t
 {
-	BUTTON_NONE = 0,
-	BUTTON_ATTACK = bit_v<0>,
-	BUTTON_USE = bit_v<1>,
+    BUTTON_NONE = 0,
+    BUTTON_ATTACK = bit_v<0>,
+    BUTTON_USE = bit_v<1>,
     BUTTON_HOLSTER = bit_v<2>, // [Paril-KEX]
     BUTTON_JUMP = bit_v<3>,
     BUTTON_CROUCH = bit_v<4>,
-	BUTTON_ANY = bit_v<7> // any key whatsoever
+    BUTTON_ANY = bit_v<7> // any key whatsoever
 };
 
 MAKE_ENUM_BITFLAGS(button_t);
@@ -435,19 +435,19 @@ MAKE_ENUM_BITFLAGS(button_t);
 // usercmd_t is sent to the server each client frame
 struct usercmd_t
 {
-	byte				   msec;
-	button_t			   buttons;
-	gvec3_t                angles;
-	float				   forwardmove, sidemove;
-	uint32_t               server_frame;	   // for integrity, etc
+    byte				   msec;
+    button_t			   buttons;
+    gvec3_t                angles;
+    float				   forwardmove, sidemove;
+    uint32_t               server_frame;	   // for integrity, etc
 };
 
 enum water_level_t : uint8_t
 {
-	WATER_NONE,
-	WATER_FEET,
-	WATER_WAIST,
-	WATER_UNDER
+    WATER_NONE,
+    WATER_FEET,
+    WATER_WAIST,
+    WATER_UNDER
 };
 
 // player_state_t->refdef flags
@@ -489,7 +489,7 @@ struct pmove_t
 
     gvec3_t mins, maxs; // bounding box size
 
-    edict_t      *groundentity;
+    edict_t *groundentity;
     cplane_t      groundplane;
     contents_t    watertype;
     water_level_t waterlevel;
@@ -497,7 +497,7 @@ struct pmove_t
     edict_t *player; // opaque handle
 
     // clip against world & entities
-    trace_t (*trace)(gvec3_cref_t start, gvec3_cptr_t mins, gvec3_cptr_t maxs, gvec3_cref_t end, const edict_t* passent, contents_t contentmask);
+    trace_t (*trace)(gvec3_cref_t start, gvec3_cptr_t mins, gvec3_cptr_t maxs, gvec3_cref_t end, const edict_t *passent, contents_t contentmask);
     // [Paril-KEX] clip against world only
     trace_t (*clip)(gvec3_cref_t start, gvec3_cptr_t mins, gvec3_cptr_t maxs, gvec3_cref_t end, contents_t contentmask);
 
@@ -928,7 +928,7 @@ enum monster_muzzleflash_id_t : uint16_t
     MZ2_ARACHNID_RAIL2,
     MZ2_ARACHNID_RAIL_UP1,
     MZ2_ARACHNID_RAIL_UP2,
-        
+
     MZ2_INFANTRY_MACHINEGUN_14, // run-attack
     MZ2_INFANTRY_MACHINEGUN_15, // run-attack
     MZ2_INFANTRY_MACHINEGUN_16, // run-attack
@@ -937,7 +937,7 @@ enum monster_muzzleflash_id_t : uint16_t
     MZ2_INFANTRY_MACHINEGUN_19, // run-attack
     MZ2_INFANTRY_MACHINEGUN_20, // run-attack
     MZ2_INFANTRY_MACHINEGUN_21, // run-attack
-    
+
     MZ2_GUNCMDR_CHAINGUN_1, // straight
     MZ2_GUNCMDR_CHAINGUN_2, // dodging
 
@@ -1259,12 +1259,12 @@ constexpr size_t CS_MAX_STRING_LENGTH_OLD = 64;
 // since vanilla didn't do a very good job of size checking
 constexpr size_t CS_SIZE(int32_t in)
 {
-	if (in >= CS_STATUSBAR && in < CS_AIRACCEL)
-		return CS_MAX_STRING_LENGTH * (CS_AIRACCEL - in);
-	else if (in >= CS_GENERAL && in < CS_WHEEL_WEAPONS)
-		return CS_MAX_STRING_LENGTH * (MAX_CONFIGSTRINGS - in);
-	
-	return CS_MAX_STRING_LENGTH;
+    if (in >= CS_STATUSBAR && in < CS_AIRACCEL)
+        return CS_MAX_STRING_LENGTH * (CS_AIRACCEL - in);
+    else if (in >= CS_GENERAL && in < CS_WHEEL_WEAPONS)
+        return CS_MAX_STRING_LENGTH * (MAX_CONFIGSTRINGS - in);
+
+    return CS_MAX_STRING_LENGTH;
 }
 
 constexpr size_t MAX_MODELS_OLD = 256, MAX_SOUNDS_OLD = 256, MAX_IMAGES_OLD = 256;
@@ -1369,7 +1369,8 @@ enum entity_event_t : uint8_t
 union player_skinnum_t
 {
     int32_t         skinnum;
-    struct {
+    struct
+    {
         uint8_t     client_num; // client index
         uint8_t     vwep_index; // vwep index
         int8_t      viewheight; // viewheight
@@ -1537,7 +1538,7 @@ struct svc_fog_data_t
     uint8_t     green; // bits & BIT_G
     uint8_t     blue; // bits & BIT_B
     uint16_t    time; // bits & BIT_TIME
-    
+
     float       hf_falloff; // bits & BIT_HEIGHTFOG_FALLOFF
     float       hf_density; // bits & BIT_HEIGHTFOG_DENSITY
     uint8_t     hf_start_r; // bits & (BIT_MORE_BITS | BIT_HEIGHTFOG_START_R)
@@ -1551,7 +1552,7 @@ struct svc_fog_data_t
 };
 
 MAKE_ENUM_BITFLAGS(svc_fog_data_t::bits_t);
-    
+
 // bit masks
 static constexpr svc_fog_data_t::bits_t BITS_GLOBAL_FOG = (svc_fog_data_t::BIT_DENSITY | svc_fog_data_t::BIT_R | svc_fog_data_t::BIT_G | svc_fog_data_t::BIT_B);
 static constexpr svc_fog_data_t::bits_t BITS_HEIGHTFOG = (svc_fog_data_t::BIT_HEIGHTFOG_FALLOFF | svc_fog_data_t::BIT_HEIGHTFOG_DENSITY | svc_fog_data_t::BIT_HEIGHTFOG_START_R | svc_fog_data_t::BIT_HEIGHTFOG_START_G |
@@ -1589,103 +1590,114 @@ enum solid_t : uint8_t
 // bitflags for STAT_LAYOUTS
 enum layout_flags_t : int16_t
 {
-	LAYOUTS_NONE              = 0,
-	LAYOUTS_LAYOUT		      = bit_v<0>, // svc_layout is active; escape remapped to putaway
-	LAYOUTS_INVENTORY	      = bit_v<1>, // inventory is active; escape remapped to putaway
-	LAYOUTS_HIDE_HUD	      = bit_v<2>, // hide entire hud, for cameras, etc
-	LAYOUTS_INTERMISSION      = bit_v<3>, // intermission is being drawn; collapse splitscreen into 1 view
-	LAYOUTS_HELP              = bit_v<4>, // help is active; escape remapped to putaway
+    LAYOUTS_NONE              = 0,
+    LAYOUTS_LAYOUT		      = bit_v<0>, // svc_layout is active; escape remapped to putaway
+    LAYOUTS_INVENTORY	      = bit_v<1>, // inventory is active; escape remapped to putaway
+    LAYOUTS_HIDE_HUD	      = bit_v<2>, // hide entire hud, for cameras, etc
+    LAYOUTS_INTERMISSION      = bit_v<3>, // intermission is being drawn; collapse splitscreen into 1 view
+    LAYOUTS_HELP              = bit_v<4>, // help is active; escape remapped to putaway
     LAYOUTS_HIDE_CROSSHAIR	  = bit_v<5> // hide crosshair only
 };
 MAKE_ENUM_BITFLAGS(layout_flags_t);
 
-enum GoalReturnCode {
-	Error = 0,
-	Started,
-	InProgress,
+enum GoalReturnCode
+{
+    Error = 0,
+    Started,
+    InProgress,
     Finished
 };
 
-enum gesture_type {
-	GESTURE_NONE = -1,
-	GESTURE_FLIP_OFF,
-	GESTURE_SALUTE,
-	GESTURE_TAUNT,
-	GESTURE_WAVE,
-	GESTURE_POINT,
+enum gesture_type
+{
+    GESTURE_NONE = -1,
+    GESTURE_FLIP_OFF,
+    GESTURE_SALUTE,
+    GESTURE_TAUNT,
+    GESTURE_WAVE,
+    GESTURE_POINT,
     GESTURE_POINT_NO_PING,
     GESTURE_MAX
 };
 
-enum class PathReturnCode {
-	ReachedGoal = 0,        // we're at our destination
-	ReachedPathEnd,         // we're as close to the goal as we can get with a path
-	TraversalPending,       // the upcoming path segment is a traversal
+enum class PathReturnCode
+{
+    ReachedGoal = 0,        // we're at our destination
+    ReachedPathEnd,         // we're as close to the goal as we can get with a path
+    TraversalPending,       // the upcoming path segment is a traversal
     RawPathFound,           // user wanted ( and got ) just a raw path ( no processing )
-	InProgress,             // pathing in progress
-	StartPathErrors,        // any code after this one indicates an error of some kind.
-	InvalidStart,           // start position is invalid.
-	InvalidGoal,            // goal position is invalid.
-	NoNavAvailable,         // no nav file available for this map.
-	NoStartNode,            // can't find a nav node near the start position
-	NoGoalNode,             // can't find a nav node near the goal position
-	NoPathFound,            // can't find a path from the start to the goal
+    InProgress,             // pathing in progress
+    StartPathErrors,        // any code after this one indicates an error of some kind.
+    InvalidStart,           // start position is invalid.
+    InvalidGoal,            // goal position is invalid.
+    NoNavAvailable,         // no nav file available for this map.
+    NoStartNode,            // can't find a nav node near the start position
+    NoGoalNode,             // can't find a nav node near the goal position
+    NoPathFound,            // can't find a path from the start to the goal
     MissingWalkOrSwimFlag   // MUST have at least Walk or Water path flags set!
 };
 
-enum class PathLinkType {
-	Walk,               // can walk between the path points
-	WalkOffLedge,       // will walk off a ledge going between path points
-	LongJump,           // will need to perform a long jump between path points
-	BarrierJump,        // will need to jump over a low barrier between path points
-	Elevator            // will need to use an elevator between path points
+enum class PathLinkType
+{
+    Walk,               // can walk between the path points
+    WalkOffLedge,       // will walk off a ledge going between path points
+    LongJump,           // will need to perform a long jump between path points
+    BarrierJump,        // will need to jump over a low barrier between path points
+    Elevator            // will need to use an elevator between path points
 };
 
-enum PathFlags : uint32_t {
-	All             = static_cast<uint32_t>( -1 ),
-	Water           = bit_v<0>,  // swim to your goal ( useful for fish/gekk/etc. )
-	Walk            = bit_v<1>,  // walk to your goal
-	WalkOffLedge    = bit_v<2>,  // allow walking over ledges
-	LongJump        = bit_v<3>,  // allow jumping over gaps
-	BarrierJump     = bit_v<4>,  // allow jumping over low barriers
-	Elevator        = bit_v<5>   // allow using elevators
+enum PathFlags : uint32_t
+{
+    All             = static_cast<uint32_t>(-1),
+    Water           = bit_v<0>,  // swim to your goal ( useful for fish/gekk/etc. )
+    Walk            = bit_v<1>,  // walk to your goal
+    WalkOffLedge    = bit_v<2>,  // allow walking over ledges
+    LongJump        = bit_v<3>,  // allow jumping over gaps
+    BarrierJump     = bit_v<4>,  // allow jumping over low barriers
+    Elevator        = bit_v<5>   // allow using elevators
 };
 MAKE_ENUM_BITFLAGS(PathFlags);
 
-struct PathRequest {
+struct PathRequest
+{
     gvec3_t     start = { 0.0f, 0.0f, 0.0f };
     gvec3_t     goal = { 0.0f, 0.0f, 0.0f };
-	PathFlags   pathFlags = PathFlags::Walk;
-	float       moveDist = 0.0f;
+    PathFlags   pathFlags = PathFlags::Walk;
+    float       moveDist = 0.0f;
 
-    struct DebugSettings {
+    struct DebugSettings
+    {
         float   drawTime = 0.0f; // if > 0, how long ( in seconds ) to draw path in world
     } debugging;
 
-    struct NodeSettings {
+    struct NodeSettings
+    {
         bool    ignoreNodeFlags = false; // true = ignore node flags when considering nodes
         float   minHeight = 0.0f; // 0 <= use default values
         float   maxHeight = 0.0f; // 0 <= use default values
         float   radius = 0.0f;    // 0 <= use default values
     } nodeSearch;
 
-	struct TraversalSettings {
-		float dropHeight = 0.0f;    // 0 = don't drop down
-		float jumpHeight = 0.0f;    // 0 = don't jump up
-	} traversals;
+    struct TraversalSettings
+    {
+        float dropHeight = 0.0f;    // 0 = don't drop down
+        float jumpHeight = 0.0f;    // 0 = don't jump up
+    } traversals;
 
-	struct PathArray {
-        mutable gvec3_t * array = nullptr;  // array to store raw path points
-		int64_t           count = 0;        // number of elements in array
-	} pathPoints;
+    struct PathArray
+    {
+        mutable gvec3_t *array = nullptr;  // array to store raw path points
+        int64_t           count = 0;        // number of elements in array
+    } pathPoints;
 };
 
-struct PathInfo {
+struct PathInfo
+{
     int32_t         numPathPoints = 0;
     float           pathDistSqr = 0.0f;
-	gvec3_t         firstMovePoint = { 0.0f, 0.0f, 0.0f };
-	gvec3_t         secondMovePoint = { 0.0f, 0.0f, 0.0f };
-	PathLinkType    pathLinkType = PathLinkType::Walk;
+    gvec3_t         firstMovePoint = { 0.0f, 0.0f, 0.0f };
+    gvec3_t         secondMovePoint = { 0.0f, 0.0f, 0.0f };
+    PathLinkType    pathLinkType = PathLinkType::Walk;
     PathReturnCode  returnCode = PathReturnCode::StartPathErrors;
 };
 
@@ -1713,7 +1725,8 @@ static constexpr int32_t    Item_UnknownRespawnTime = INT_MAX;
 static constexpr int32_t    Item_Invalid = -1;
 static constexpr int32_t    Item_Null = 0;
 
-enum sv_ent_flags_t : uint64_t {
+enum sv_ent_flags_t : uint64_t
+{
     SVFL_NONE               = 0, // no flags
     SVFL_ONGROUND           = bit_v< 0 >,
     SVFL_HAS_DMG_BOOST      = bit_v< 1 >,
@@ -1747,17 +1760,19 @@ enum sv_ent_flags_t : uint64_t {
     SVFL_IS_SPECTATOR       = bit_v< 29 >,
     SVFL_IN_TEAM            = bit_v< 30 >
 };
-MAKE_ENUM_BITFLAGS( sv_ent_flags_t );
+MAKE_ENUM_BITFLAGS(sv_ent_flags_t);
 
 static constexpr int Max_Armor_Types = 3;
 
-struct armorInfo_t {
+struct armorInfo_t
+{
     int32_t     item_id = Item_Null;
     int32_t     max_count = 0;
 };
 
 // Used by AI/Tools on the engine side...
-struct sv_entity_t {
+struct sv_entity_t
+{
     bool                        init;
     sv_ent_flags_t              ent_flags;
     button_t                    buttons;
@@ -1780,13 +1795,13 @@ struct sv_entity_t {
     gvec3_t                     velocity;
     gvec3_t                     start_origin;
     gvec3_t                     end_origin;
-    edict_t *                   enemy;
-    edict_t *                   ground_entity;
-    const char *                classname;
-    const char *                targetname;
-    char                        netname[ MAX_NETNAME ];
-    int32_t                     inventory[ MAX_ITEMS ] = { 0 };
-    armorInfo_t                 armor_info[ Max_Armor_Types ];
+    edict_t *enemy;
+    edict_t *ground_entity;
+    const char *classname;
+    const char *targetname;
+    char                        netname[MAX_NETNAME];
+    int32_t                     inventory[MAX_ITEMS] = { 0 };
+    armorInfo_t                 armor_info[Max_Armor_Types];
 };
 
 #ifndef GAME_INCLUDE
@@ -1796,26 +1811,26 @@ struct edict_shared_t
 #endif
 {
     entity_state_t s;
-    gclient_t     *client; // nullptr if not a player
+    gclient_t *client; // nullptr if not a player
                            // the server expects the first part
                            // of gclient_t to be a player_state_t
                            // but the rest of it is opaque
 
     sv_entity_t sv;        // read only info about this entity for the server
 
-	bool     inuse;
+    bool     inuse;
 
-	// world linkage data
-	bool     linked;
-	int32_t	 linkcount;
-	int32_t  areanum, areanum2;
+    // world linkage data
+    bool     linked;
+    int32_t	 linkcount;
+    int32_t  areanum, areanum2;
 
-	svflags_t  svflags;
-	vec3_t	   mins, maxs;
-	vec3_t	   absmin, absmax, size;
-	solid_t	   solid;
-	contents_t clipmask;
-	edict_t	   *owner;
+    svflags_t  svflags;
+    vec3_t	   mins, maxs;
+    vec3_t	   absmin, absmax, size;
+    solid_t	   solid;
+    contents_t clipmask;
+    edict_t *owner;
 };
 
 #define CHECK_INTEGRITY(from_type, to_type, member)                           \
@@ -1888,7 +1903,7 @@ struct game_import_t
 
     // broadcast to all clients
     void (*Broadcast_Print)(print_type_t printlevel, const char *message);
-    
+
     // print to appropriate places (console, log file, etc)
     void (*Com_Print)(const char *msg);
 
@@ -1929,8 +1944,8 @@ struct game_import_t
     // [Paril-KEX] clip the box against the specified entity
     trace_t (*clip)(edict_t *entity, gvec3_cref_t start, gvec3_cptr_t mins, gvec3_cptr_t maxs, gvec3_cref_t end, contents_t contentmask);
     contents_t (*pointcontents)(gvec3_cref_t point);
-	bool (*inPVS)(gvec3_cref_t p1, gvec3_cref_t p2, bool portals);
-	bool (*inPHS)(gvec3_cref_t p1, gvec3_cref_t p2, bool portals);
+    bool (*inPVS)(gvec3_cref_t p1, gvec3_cref_t p2, bool portals);
+    bool (*inPHS)(gvec3_cref_t p1, gvec3_cref_t p2, bool portals);
     void (*SetAreaPortalState)(int portalnum, bool open);
     bool (*AreasConnected)(int area1, int area2);
 
@@ -1972,14 +1987,14 @@ struct game_import_t
     void (*FreeTags)(int tag);
 
     // console variable interaction
-	cvar_t *(*cvar)(const char *var_name, const char *value, cvar_flags_t flags);
+    cvar_t *(*cvar)(const char *var_name, const char *value, cvar_flags_t flags);
     cvar_t *(*cvar_set)(const char *var_name, const char *value);
     cvar_t *(*cvar_forceset)(const char *var_name, const char *value);
 
     // ClientCommand and ServerCommand parameter access
     int (*argc)();
-	const char *(*argv)(int n);
-	const char *(*args)(); // concatenation of all argv >= 1
+    const char *(*argv)(int n);
+    const char *(*args)(); // concatenation of all argv >= 1
 
     // add commands to the server console as if they were typed in
     // for map changing, etc
@@ -1993,16 +2008,16 @@ struct game_import_t
     // === [KEX] Additional APIs ===
 
     // bots
-    void (*Bot_RegisterEdict)(const edict_t * edict);
-    void (*Bot_UnRegisterEdict)(const edict_t * edict);
-    GoalReturnCode (*Bot_MoveToPoint)(const edict_t * bot, gvec3_cref_t point, const float moveTolerance);
-    GoalReturnCode (*Bot_FollowActor)(const edict_t * bot, const edict_t * actor);
+    void (*Bot_RegisterEdict)(const edict_t *edict);
+    void (*Bot_UnRegisterEdict)(const edict_t *edict);
+    GoalReturnCode (*Bot_MoveToPoint)(const edict_t *bot, gvec3_cref_t point, const float moveTolerance);
+    GoalReturnCode (*Bot_FollowActor)(const edict_t *bot, const edict_t *actor);
 
     // pathfinding - returns true if a path was found
-    bool (*GetPathToGoal)(const PathRequest & request, PathInfo & info);
+    bool (*GetPathToGoal)(const PathRequest &request, PathInfo &info);
 
     // localization
-    void (*Loc_Print)(edict_t* ent, print_type_t level, const char* base, const char** args, size_t num_args);
+    void (*Loc_Print)(edict_t *ent, print_type_t level, const char *base, const char **args, size_t num_args);
 
     // drawing
     void (*Draw_Line)(gvec3_cref_t start, gvec3_cref_t end, const rgba_t &color, const float lifeTime, const bool depthTest);
@@ -2010,11 +2025,11 @@ struct game_import_t
     void (*Draw_Circle)(gvec3_cref_t origin, const float radius, const rgba_t &color, const float lifeTime, const bool depthTest);
     void (*Draw_Bounds)(gvec3_cref_t mins, gvec3_cref_t maxs, const rgba_t &color, const float lifeTime, const bool depthTest);
     void (*Draw_Sphere)(gvec3_cref_t origin, const float radius, const rgba_t &color, const float lifeTime, const bool depthTest);
-    void (*Draw_OrientedWorldText)(gvec3_cref_t origin, const char * text, const rgba_t &color, const float size, const float lifeTime, const bool depthTest);
-    void (*Draw_StaticWorldText)(gvec3_cref_t origin, gvec3_cref_t angles, const char * text, const rgba_t & color, const float size, const float lifeTime, const bool depthTest);
+    void (*Draw_OrientedWorldText)(gvec3_cref_t origin, const char *text, const rgba_t &color, const float size, const float lifeTime, const bool depthTest);
+    void (*Draw_StaticWorldText)(gvec3_cref_t origin, gvec3_cref_t angles, const char *text, const rgba_t &color, const float size, const float lifeTime, const bool depthTest);
     void (*Draw_Cylinder)(gvec3_cref_t origin, const float halfHeight, const float radius, const rgba_t &color, const float lifeTime, const bool depthTest);
     void (*Draw_Ray)(gvec3_cref_t origin, gvec3_cref_t direction, const float length, const float size, const rgba_t &color, const float lifeTime, const bool depthTest);
-    void (*Draw_Arrow)(gvec3_cref_t start, gvec3_cref_t end, const float size, const rgba_t & lineColor, const rgba_t & arrowColor, const float lifeTime, const bool depthTest);
+    void (*Draw_Arrow)(gvec3_cref_t start, gvec3_cref_t end, const float size, const rgba_t &lineColor, const rgba_t &arrowColor, const float lifeTime, const bool depthTest);
 
     // scoreboard
     void (*ReportMatchDetails_Multicast)(bool is_end);
@@ -2023,7 +2038,7 @@ struct game_import_t
     uint32_t (*ServerFrame)();
 
     // misc utils
-    void (*SendToClipBoard)(const char * text);
+    void (*SendToClipBoard)(const char *text);
 
     // info string stuff
     size_t (*Info_ValueForKey) (const char *s, const char *key, char *buffer, size_t buffer_len);
@@ -2040,13 +2055,13 @@ enum class shadow_light_type_t
 struct shadow_light_data_t
 {
     shadow_light_type_t lighttype;
-	float		radius;
-	int			resolution;
-	float		intensity = 1;
-	float		fade_start;
-	float		fade_end;
-	int			lightstyle = -1;
-	float		coneangle = 45;
+    float		radius;
+    int			resolution;
+    float		intensity = 1;
+    float		fade_start;
+    float		fade_end;
+    int			lightstyle = -1;
+    float		coneangle = 45;
     vec3_t      conedirection;
 };
 
@@ -2128,7 +2143,7 @@ struct game_export_t
     // can vary in size from one game to another.
     //
     // The size will be fixed when ge->Init() is called
-    edict_t     *edicts;
+    edict_t *edicts;
     size_t      edict_size;
     uint32_t    num_edicts; // current number, <= max_edicts
     uint32_t    max_edicts;
@@ -2142,15 +2157,15 @@ struct game_export_t
     // Fetch named extension from game DLL.
     void *(*GetExtension)(const char *name);
 
-    void    (*Bot_SetWeapon)(edict_t * botEdict, const int weaponIndex, const bool instantSwitch);
-    void    (*Bot_TriggerEdict)(edict_t * botEdict, edict_t * edict);
-    void    (*Bot_UseItem)(edict_t * botEdict, const int32_t itemID);
-    int32_t (*Bot_GetItemID)(const char * classname);
-    void    (*Edict_ForceLookAtPoint)(edict_t * edict, gvec3_cref_t point);
-    bool    (*Bot_PickedUpItem )(edict_t * botEdict, edict_t * itemEdict);
+    void    (*Bot_SetWeapon)(edict_t *botEdict, const int weaponIndex, const bool instantSwitch);
+    void    (*Bot_TriggerEdict)(edict_t *botEdict, edict_t *edict);
+    void    (*Bot_UseItem)(edict_t *botEdict, const int32_t itemID);
+    int32_t (*Bot_GetItemID)(const char *classname);
+    void    (*Edict_ForceLookAtPoint)(edict_t *edict, gvec3_cref_t point);
+    bool    (*Bot_PickedUpItem)(edict_t *botEdict, edict_t *itemEdict);
 
     // [KEX]: Checks entity visibility instancing
-    bool (*Entity_IsVisibleToPlayer)(edict_t* ent, edict_t* player);
+    bool (*Entity_IsVisibleToPlayer)(edict_t *ent, edict_t *player);
 
     // Fetch info from the shadow light, for culling
     const shadow_light_data_t *(*GetShadowLightData)(int32_t entity_number);
@@ -2191,7 +2206,7 @@ struct cgame_import_t
 
     // print to appropriate places (console, log file, etc)
     void (*Com_Print)(const char *msg);
-    
+
     // config strings hold all the index strings, the lightstyles,
     // and misc data like the sky definition and cdtrack.
     // All of the current configstrings are sent to clients when
@@ -2206,7 +2221,7 @@ struct cgame_import_t
     void (*FreeTags)(int tag);
 
     // console variable interaction
-	cvar_t *(*cvar)(const char *var_name, const char *value, cvar_flags_t flags);
+    cvar_t *(*cvar)(const char *var_name, const char *value, cvar_flags_t flags);
     cvar_t *(*cvar_set)(const char *var_name, const char *value);
     cvar_t *(*cvar_forceset)(const char *var_name, const char *value);
 
@@ -2236,7 +2251,7 @@ struct cgame_import_t
     void (*Draw_GetPicSize) (int *w, int *h, const char *name); // will return 0 0 if not found
     void (*SCR_DrawChar)(int x, int y, int scale, int num, bool shadow);
     void (*SCR_DrawPic) (int x, int y, int w, int h, const char *name);
-    void (*SCR_DrawColorPic)(int x, int y, int w, int h, const char* name, const rgba_t &color);
+    void (*SCR_DrawColorPic)(int x, int y, int w, int h, const char *name, const rgba_t &color);
 
     // [Paril-KEX] kfont stuff
     void(*SCR_SetAltTypeface)(bool enabled);
@@ -2252,11 +2267,11 @@ struct cgame_import_t
 
     // === [KEX] Additional APIs ===
     // returns a *temporary string* ptr to a localized input
-    const char* (*Localize) (const char *base, const char **args, size_t num_args);
+    const char *(*Localize) (const char *base, const char **args, size_t num_args);
 
     // [Paril-KEX] Draw binding, for centerprint; returns y offset
     int32_t (*SCR_DrawBind) (int32_t isplit, const char *binding, const char *purpose, int x, int y, int scale);
-    
+
     // [Paril-KEX]
     bool (*CL_InAutoDemoLoop) ();
 };
@@ -2289,7 +2304,7 @@ struct cgame_export_t
 
     // [Paril-KEX] fetch ammo count for given ammo id
     int16_t (*GetWeaponWheelAmmoCount)(const player_state_t *ps, int32_t ammo_id);
-    
+
     // [Paril-KEX] fetch powerup count for given powerup id
     int16_t (*GetPowerupWheelCount)(const player_state_t *ps, int32_t powerup_id);
 

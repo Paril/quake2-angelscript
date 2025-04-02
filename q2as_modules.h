@@ -27,7 +27,7 @@ void Q2AS_RegisterVec3(q2as_registry &registry);
 
 // registers dynamic_bitset and related functions
 // requires: 
-void Q2AS_RegisterDynamicBitset(q2as_registry& registry);
+void Q2AS_RegisterDynamicBitset(q2as_registry &registry);
 
 // gtime_t type
 // requires:

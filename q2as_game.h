@@ -15,12 +15,12 @@ struct q2as_edict_t : edict_t
 struct q2as_sv_state_t : q2as_state_t
 {
     uint32_t maxentities, maxclients;
-	q2as_edict_t *edicts;
-	gclient_t *clients;
+    q2as_edict_t *edicts;
+    gclient_t *clients;
 
-	std::string cmd_args;
-	std::vector<std::string> cmd_argv;
-    
+    std::string cmd_args;
+    std::vector<std::string> cmd_argv;
+
     asIScriptFunction *PreInitGame = nullptr;
     asIScriptFunction *InitGame = nullptr;
     asIScriptFunction *ShutdownGame = nullptr;

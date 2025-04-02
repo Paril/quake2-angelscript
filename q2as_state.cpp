@@ -54,7 +54,7 @@ static void InstrumentationCallback(asSFunctionInfo *info)
 static void InstrumentationGarbageCallback(q2as_state_t *state, bool pop)
 {
     static declhash_t garbage_hash { "GC", plPriv::hashString("GC") };
-    
+
     if (!plIsEnabled() || !state->InstrumentationEnabled())
         return;
 
@@ -92,16 +92,17 @@ static SpallProfile spall_ctx;
 static SpallBuffer spall_buffer;
 
 #include <Windows.h>
-double get_time_in_micros(void) {
-	static double invfreq;
-	if (!invfreq) {
-		LARGE_INTEGER frequency;
-		QueryPerformanceFrequency(&frequency);
-		invfreq = 1000000.0 / frequency.QuadPart;
-	}
-	LARGE_INTEGER counter;
-	QueryPerformanceCounter(&counter);
-	return counter.QuadPart * invfreq;
+double get_time_in_micros(void)
+{
+    static double invfreq;
+    if (!invfreq) {
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        invfreq = 1000000.0 / frequency.QuadPart;
+    }
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return counter.QuadPart * invfreq;
 }
 
 #undef GetObject
@@ -160,35 +161,35 @@ static void StartInstrumentation(q2as_state_t &as)
 {
     if (!q2as_instrumentation->integer)
         return;
-    
+
     spall_ctx = spall_init_file("spall_sample.spall", 1);
 
-	/*
-		Fun fact: You don't actually *need* a buffer, you can just pass NULL!
-		Passing a buffer clumps flushing overhead, so individual functions are faster and less noisy
+    /*
+        Fun fact: You don't actually *need* a buffer, you can just pass NULL!
+        Passing a buffer clumps flushing overhead, so individual functions are faster and less noisy
 
-		If you notice big variance in events, you can try bumping the buffer size so you do fewer flushes
-		while your code runs, or you can shrink it if you need to save some memory
-	*/
-	#define BUFFER_SIZE (10 * 1024 * 1024)
-	unsigned char *buffer = (unsigned char *) malloc(BUFFER_SIZE);
-	spall_buffer = {
-		buffer,
-		BUFFER_SIZE
-	};
+        If you notice big variance in events, you can try bumping the buffer size so you do fewer flushes
+        while your code runs, or you can shrink it if you need to save some memory
+    */
+#define BUFFER_SIZE (10 * 1024 * 1024)
+    unsigned char *buffer = (unsigned char *) malloc(BUFFER_SIZE);
+    spall_buffer = {
+        buffer,
+        BUFFER_SIZE
+    };
 
-	/*
-		Here's another neat trick:
-		We're touching the pages ahead of time here, so we get a smoother trace.
-		By pre-faulting all the pages in our event buffer, we avoid waiting for pages to load
-		while user code runs. This can make a noticable difference for data consistency, especially
-		with bigger buffers
-	*/
-	memset(spall_buffer.data, 1, spall_buffer.length);
+    /*
+        Here's another neat trick:
+        We're touching the pages ahead of time here, so we get a smoother trace.
+        By pre-faulting all the pages in our event buffer, we avoid waiting for pages to load
+        while user code runs. This can make a noticable difference for data consistency, especially
+        with bigger buffers
+    */
+    memset(spall_buffer.data, 1, spall_buffer.length);
 
-	spall_buffer_init(&spall_ctx, &spall_buffer);
+    spall_buffer_init(&spall_ctx, &spall_buffer);
 
-	as.context->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
+    as.context->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
 }
 #else
 #define WriteInstrumentation()
@@ -198,17 +199,17 @@ static void StartInstrumentation(q2as_state_t &as)
 
 static void MessageCallback(const asSMessageInfo *msg, void *param)
 {
-	const char *type = "ERR ";
+    const char *type = "ERR ";
 
-	if (msg->type == asMSGTYPE_WARNING)
-		type = "WARN";
-	else if (msg->type == asMSGTYPE_INFORMATION)
-		type = "INFO";
-	
+    if (msg->type == asMSGTYPE_WARNING)
+        type = "WARN";
+    else if (msg->type == asMSGTYPE_INFORMATION)
+        type = "INFO";
+
     ((q2as_state_t *) param)->Print(G_Fmt("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, type, msg->message).data());
 
-	//if (msg->type == asMSGTYPE_ERROR)
-		//__debugbreak();
+    //if (msg->type == asMSGTYPE_ERROR)
+        //__debugbreak();
 }
 
 static void GarbageCallback(const asSGarbageCollectionInfo *msg, void *param)
@@ -220,31 +221,31 @@ bool q2as_state_t::CreateEngine()
 {
     engine = asCreateScriptEngine();
 
-	if (!engine)
-	{
-		Print("Can't create AS engine.\n");
-		return false;
-	}
+    if (!engine)
+    {
+        Print("Can't create AS engine.\n");
+        return false;
+    }
 
     engine->SetUserData(this);
 
-	engine->SetEngineProperty(asEP_USE_CHARACTER_LITERALS, true);
-	engine->SetEngineProperty(asEP_DISALLOW_EMPTY_LIST_ELEMENTS, true);
+    engine->SetEngineProperty(asEP_USE_CHARACTER_LITERALS, true);
+    engine->SetEngineProperty(asEP_DISALLOW_EMPTY_LIST_ELEMENTS, true);
     engine->SetEngineProperty(asEP_BOOL_CONVERSION_MODE, 1);
-    
-	if (int r = engine->SetMessageCallback(asFUNCTION(MessageCallback), this, asCALL_CDECL); r < 0)
-	{
-		Print("Couldn't set AngelScript message callback.\n");
-		Destroy();
-		return false;
-	}
 
-	if (int r = engine->SetGarbageCollectionCallback(asFUNCTION(GarbageCallback), this, asCALL_CDECL); r < 0)
-	{
-		Print("Couldn't set AngelScript garbage callback.\n");
-		Destroy();
-		return false;
-	}
+    if (int r = engine->SetMessageCallback(asFUNCTION(MessageCallback), this, asCALL_CDECL); r < 0)
+    {
+        Print("Couldn't set AngelScript message callback.\n");
+        Destroy();
+        return false;
+    }
+
+    if (int r = engine->SetGarbageCollectionCallback(asFUNCTION(GarbageCallback), this, asCALL_CDECL); r < 0)
+    {
+        Print("Couldn't set AngelScript garbage callback.\n");
+        Destroy();
+        return false;
+    }
 
     return true;
 }
@@ -261,7 +262,7 @@ static std::string Q2AS_ScriptPathFromBaseDir()
     cvar_t *gn = (gi.cvar ? gi.cvar : cgi.cvar)("game", "", CVAR_NOFLAGS);
 
     fs::path path = bp->string;
-    
+
     if (*gn->string)
         path /= gn->string;
     else
@@ -302,7 +303,7 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
         return true;
 
     Print("Loading AS engine...\n");
-    
+
     fs::path script_dir(Q2AS_ScriptPath());
 
     if (debugger_state.workspace.base_path.empty())
@@ -312,14 +313,14 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
     Print(script_dir.string().c_str());
     Print("\"\n");
 
-	// TODO: need File API extension for this to work properly.
-	// for now, just using hardcoded paths.
+    // TODO: need File API extension for this to work properly.
+    // for now, just using hardcoded paths.
     fs::path script_path = script_dir / "bgame";
 
-	if (!fs::exists(script_path / "init.as"))
-		return false;
+    if (!fs::exists(script_path / "init.as"))
+        return false;
 
-	asSetGlobalMemoryFunctions(allocFunc, freeFunc);
+    asSetGlobalMemoryFunctions(allocFunc, freeFunc);
 
     if (!debugger_state.debugger_cvar)
         debugger_state.debugger_cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
@@ -331,14 +332,14 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
 bool q2as_state_t::CreateMainModule()
 {
-	mainModule = engine->GetModule("main", asGM_ALWAYS_CREATE);
+    mainModule = engine->GetModule("main", asGM_ALWAYS_CREATE);
 
-	if (!mainModule)
-	{
-		Print("Couldn't create AngelScript main module.\n");
-		Destroy();
-		return false;
-	}
+    if (!mainModule)
+    {
+        Print("Couldn't create AngelScript main module.\n");
+        Destroy();
+        return false;
+    }
 
     return true;
 }
@@ -347,34 +348,34 @@ bool q2as_state_t::LoadLibraries(library_reg_t *const *const libraries, size_t n
 {
     q2as_registry registry(engine);
 
-	for (size_t i = 0; i < num_libs; i++)
-	{
+    for (size_t i = 0; i < num_libs; i++)
+    {
         try
         {
-		    (libraries[i])(registry);
+            (libraries[i])(registry);
         }
-        catch(q2as_registry_exception)
-		{
-			Print("Couldn't register built-in library.\n");
-			Destroy();
-			return false;
-		}
-	}
+        catch (q2as_registry_exception)
+        {
+            Print("Couldn't register built-in library.\n");
+            Destroy();
+            return false;
+        }
+    }
 
     return true;
 }
 
 std::string q2as_state_t::LoadFile(const char *path)
 {
-	FILE *fp = fopen(path, "rb");
+    FILE *fp = fopen(path, "rb");
 
-	fseek(fp, 0, SEEK_END);
-	long size = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	std::string script_str;
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    std::string script_str;
     script_str.resize(size);
-	fread(script_str.data(), sizeof(char), size, fp);
-	fclose(fp);
+    fread(script_str.data(), sizeof(char), size, fp);
+    fclose(fp);
 
     return script_str;
 }
@@ -383,41 +384,41 @@ bool q2as_state_t::LoadFilesFromPath(const char *base, const char *path, asIScri
 {
     fs::path basePath(base);
 
-	for (const fs::directory_entry &entry : std::filesystem::recursive_directory_iterator(path))
-	{
-		if (!entry.is_regular_file())
-			continue;
-		else if (!entry.path().has_extension())
-			continue;
-		else if (entry.path().extension() != ".as")
-			continue;
-        
+    for (const fs::directory_entry &entry : std::filesystem::recursive_directory_iterator(path))
+    {
+        if (!entry.is_regular_file())
+            continue;
+        else if (!entry.path().has_extension())
+            continue;
+        else if (entry.path().extension() != ".as")
+            continue;
+
         std::string path = entry.path().string();
-		std::string script_str = LoadFile(path.c_str());
+        std::string script_str = LoadFile(path.c_str());
 
         path = entry.path().generic_string();
 
         std::string relative_section = fs::relative(path, basePath).generic_string();
 
-		if (module->AddScriptSection(relative_section.c_str(), script_str.c_str(), script_str.size(), 0) < 0)
-		{
-			Print("Error loading script section.\n");
-			Destroy();
-			return false;
-		}
+        if (module->AddScriptSection(relative_section.c_str(), script_str.c_str(), script_str.size(), 0) < 0)
+        {
+            Print("Error loading script section.\n");
+            Destroy();
+            return false;
+        }
 
         debugger_state.workspace.sections.insert(relative_section);
-	}
+    }
 
     return true;
 }
 
 bool q2as_state_t::LoadFiles(const char *self_scripts, asIScriptModule *module)
 {
-	fs::path script_path(Q2AS_ScriptPath());
-	fs::path bg_path = script_path / "bgame";
-	fs::path g_path = script_path / self_scripts;
-    
+    fs::path script_path(Q2AS_ScriptPath());
+    fs::path bg_path = script_path / "bgame";
+    fs::path g_path = script_path / self_scripts;
+
     if (!LoadFilesFromPath(script_path.string().c_str(), bg_path.string().c_str(), module))
         return false;
     else if (!LoadFilesFromPath(script_path.string().c_str(), g_path.string().c_str(), module))
@@ -428,31 +429,31 @@ bool q2as_state_t::LoadFiles(const char *self_scripts, asIScriptModule *module)
 
 bool q2as_state_t::Build()
 {
-	if (mainModule->Build() < 0)
-	{
-		Print("Error compiling script module.\n");
-		Destroy();
-		return false;
-	}
-	
-	stringTypeId = engine->GetStringFactory();
-	vec3TypeId = engine->GetTypeInfoByName("vec3_t")->GetTypeId();
-	edict_tTypeId = engine->GetTypeInfoByName("edict_t")->GetTypeId();
+    if (mainModule->Build() < 0)
+    {
+        Print("Error compiling script module.\n");
+        Destroy();
+        return false;
+    }
+
+    stringTypeId = engine->GetStringFactory();
+    vec3TypeId = engine->GetTypeInfoByName("vec3_t")->GetTypeId();
+    edict_tTypeId = engine->GetTypeInfoByName("edict_t")->GetTypeId();
     timeTypeId = engine->GetTypeInfoByName("gtime_t")->GetTypeId();
 
     if (auto iface = engine->GetTypeInfoByName("IASEntity"))
-    	IASEntityTypeId = iface->GetTypeId();
+        IASEntityTypeId = iface->GetTypeId();
 
-	{
-		asIScriptFunction *func = mainModule->GetFunctionByDecl("void main(bool)");
-		if (func)
+    {
+        asIScriptFunction *func = mainModule->GetFunctionByDecl("void main(bool)");
+        if (func)
         {
             auto ctx = RequestContext();
-		    ctx->Prepare(func);
+            ctx->Prepare(func);
             ctx->SetArgByte(0, 0);
-		    ctx.Execute();
+            ctx.Execute();
         }
-	}
+    }
 
     StartInstrumentation();
 
@@ -464,8 +465,8 @@ void q2as_state_t::Destroy()
     // destroy debugger
     debugger_state.debugger.reset();
 
-	if (engine)
-		engine->ShutDownAndRelease();
+    if (engine)
+        engine->ShutDownAndRelease();
 
     WriteInstrumentation();
     instru.clear();
@@ -480,7 +481,7 @@ q2as_ctx_t q2as_state_t::RequestContext()
 
 #ifdef INSTRUMENTATION
     if (InstrumentationEnabled())
-	    ctx->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
+        ctx->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
 #endif
 
     debugger_state.CheckDebugger(ctx);
@@ -492,20 +493,20 @@ static std::string exceptionInfo;
 
 bool q2as_state_t::Execute(asIScriptContext *context)
 {
-	int r = context->Execute();
+    int r = context->Execute();
 
-	if (r == asEXECUTION_FINISHED)
-		return true;
+    if (r == asEXECUTION_FINISHED)
+        return true;
 
-	if (r == asEXECUTION_EXCEPTION)
-	{
+    if (r == asEXECUTION_EXCEPTION)
+    {
         Print("AngelScript Exception\n");
         Print((exceptionInfo = GetExceptionInfo(context, true)).c_str());
         debugger_state.DebugBreak(context);
-		return false;
-	}
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 void q2as_state_t::StartInstrumentation()
