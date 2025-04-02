@@ -230,6 +230,7 @@ bool q2as_state_t::CreateEngine()
 
 	engine->SetEngineProperty(asEP_USE_CHARACTER_LITERALS, true);
 	engine->SetEngineProperty(asEP_DISALLOW_EMPTY_LIST_ELEMENTS, true);
+    engine->SetEngineProperty(asEP_BOOL_CONVERSION_MODE, 1);
     
 	if (int r = engine->SetMessageCallback(asFUNCTION(MessageCallback), this, asCALL_CDECL); r < 0)
 	{

@@ -154,4 +154,12 @@ struct dynamic_bitset
 
         return true;
     }
+
+    std::string to_hex()
+    {
+        size_t bytes = max((size_t) 1, _bitset.size() >> 3);
+        std::string hex(bytes, '0');
+
+        return hex;
+    }
 };
