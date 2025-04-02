@@ -1,21 +1,21 @@
 #include "q2as_local.h"
 #include "q2as_vec3.h"
 
-static void Q2AS_vec3_t_init_construct_fff(const float x, const float y, const float z, vec3_t *v)
+static void Q2AS_vec3_t_init_construct_fff(const float x, const float y, const float z, vec3 *v)
 {
 	(*v)[0] = x;
 	(*v)[1] = y;
 	(*v)[2] = z;
 }
 
-static void Q2AS_vec3_t_list_construct(const float *in, vec3_t *v)
+static void Q2AS_vec3_t_list_construct(const float *in, vec3 *v)
 {
 	(*v)[0] = in[0];
 	(*v)[1] = in[1];
 	(*v)[2] = in[2];
 }
 
-static void Q2AS_vec3_t_list_copy(const vec3_t &in, vec3_t *v)
+static void Q2AS_vec3_t_list_copy(const vec3 &in, vec3 *v)
 {
 	(*v)[0] = in[0];
 	(*v)[1] = in[1];
@@ -25,15 +25,15 @@ static void Q2AS_vec3_t_list_copy(const vec3_t &in, vec3_t *v)
 void Q2AS_RegisterVec3(q2as_registry &registry)
 {
 	registry
-		.type("vec3_t", sizeof(vec3_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_CAK)
+		.type("vec3_t", sizeof(vec3), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_CAK)
 		.properties({
-			{ "float x", asOFFSET(vec3_t, x) },
-			{ "float y", asOFFSET(vec3_t, y) },
-			{ "float z", asOFFSET(vec3_t, z) },
+			{ "float x", asOFFSET(vec3, x) },
+			{ "float y", asOFFSET(vec3, y) },
+			{ "float z", asOFFSET(vec3, z) },
 
-			{ "float pitch", asOFFSET(vec3_t, x) },
-			{ "float yaw", asOFFSET(vec3_t, y) },
-			{ "float roll", asOFFSET(vec3_t, z) }
+			{ "float pitch", asOFFSET(vec3, x) },
+			{ "float yaw", asOFFSET(vec3, y) },
+			{ "float roll", asOFFSET(vec3, z) }
 		})
 		.behaviors({
 			{ asBEHAVE_CONSTRUCT,      "void vec3_t(float, float, float)",           asFUNCTION(Q2AS_vec3_t_init_construct_fff), asCALL_CDECL_OBJLAST },
@@ -42,46 +42,46 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
 		})
 		.methods({
 			// indexing
-			{ "float &opIndex(uint)",             asMETHODPR(vec3_t, operator[], (int), float &),             asCALL_THISCALL },
-			{ "const float &opIndex(uint) const", asMETHODPR(vec3_t, operator[], (int) const, const float &), asCALL_THISCALL },
+			{ "float &opIndex(uint)",             asMETHODPR(vec3, operator[], (unsigned int), float &),             asCALL_THISCALL },
+			{ "const float &opIndex(uint) const", asMETHODPR(vec3, operator[], (unsigned int) const, const float &), asCALL_THISCALL },
 
 			// equality
-			{ "bool opEquals(const vec3_t &in) const",                asMETHODPR(vec3_t, operator==, (const vec3_t &) const, bool),                    asCALL_THISCALL },
-			{ "bool equals(const vec3_t &in, const float &in) const", asMETHODPR(vec3_t, equals, (const vec3_t &v, const float &epsilon) const, bool), asCALL_THISCALL },
+			{ "bool opEquals(const vec3_t &in) const",                asMETHODPR(vec3, operator==, (const vec3 &) const, bool),                    asCALL_THISCALL },
+			{ "bool equals(const vec3_t &in, const float &in) const", asMETHODPR(vec3, equals, (const vec3 &v, const float &epsilon) const, bool), asCALL_THISCALL },
 
 			// conversions
-			{ "bool opImplConv() const", asMETHODPR(vec3_t, operator bool, () const, bool), asCALL_THISCALL },
+			{ "bool opImplConv() const", asMETHODPR(vec3, operator bool, () const, bool), asCALL_THISCALL },
 
 			// basic methods
-			{ "float dot(const vec3_t &in) const",     asMETHODPR(vec3_t, dot, (const vec3_t &) const, float),     asCALL_THISCALL },
-			{ "vec3_t scaled(const vec3_t &in) const", asMETHODPR(vec3_t, scaled, (const vec3_t &) const, vec3_t), asCALL_THISCALL },
-			{ "vec3_t &scale(const vec3_t &in)",       asMETHODPR(vec3_t, scale, (const vec3_t &), vec3_t &),      asCALL_THISCALL },
+			{ "float dot(const vec3_t &in) const",     asMETHODPR(vec3, dot, (const vec3 &) const, float),     asCALL_THISCALL },
+			{ "vec3_t scaled(const vec3_t &in) const", asMETHODPR(vec3, scaled, (const vec3 &) const, vec3), asCALL_THISCALL },
+			{ "vec3_t &scale(const vec3_t &in)",       asMETHODPR(vec3, scale, (const vec3 &), vec3 &),      asCALL_THISCALL },
 
 			// operators
-			{ "vec3_t opSub(const vec3_t &in) const", asMETHODPR(vec3_t, operator-, (const vec3_t &v) const, vec3_t), asCALL_THISCALL },
-			{ "vec3_t opAdd(const vec3_t &in) const", asMETHODPR(vec3_t, operator+, (const vec3_t &v) const, vec3_t), asCALL_THISCALL },
-			{ "vec3_t opDiv(const vec3_t &in) const", asMETHODPR(vec3_t, operator/, (const vec3_t &v) const, vec3_t), asCALL_THISCALL },
-			{ "vec3_t opDiv(const float &in) const",  asMETHODPR(vec3_t, operator/, (const float &v) const, vec3_t),  asCALL_THISCALL },
-			{ "vec3_t opDiv(const int &in) const",    asMETHODPR(vec3_t, operator/, (const int &v) const, vec3_t),    asCALL_THISCALL },
-			{ "vec3_t opMul(const float &in) const",  asMETHODPR(vec3_t, operator*, (const float &v) const, vec3_t),  asCALL_THISCALL },
-			{ "vec3_t opMul(const int &in) const",    asMETHODPR(vec3_t, operator*, (const int &v) const, vec3_t),    asCALL_THISCALL },
-			{ "vec3_t opNeg() const",                 asMETHODPR(vec3_t, operator-, () const, vec3_t),                asCALL_THISCALL },
+			{ "vec3_t opSub(const vec3_t &in) const", asMETHODPR(vec3, operator-, (const vec3 &v) const, vec3), asCALL_THISCALL },
+			{ "vec3_t opAdd(const vec3_t &in) const", asMETHODPR(vec3, operator+, (const vec3 &v) const, vec3), asCALL_THISCALL },
+			{ "vec3_t opDiv(const vec3_t &in) const", asMETHODPR(vec3, operator/, (const vec3 &v) const, vec3), asCALL_THISCALL },
+			{ "vec3_t opDiv(const float &in) const",  asMETHODPR(vec3, operator/, (const float &v) const, vec3),  asCALL_THISCALL },
+			{ "vec3_t opDiv(const int &in) const",    asMETHODPR(vec3, operator/, (const int &v) const, vec3),    asCALL_THISCALL },
+			{ "vec3_t opMul(const float &in) const",  asMETHODPR(vec3, operator*, (const float &v) const, vec3),  asCALL_THISCALL },
+			{ "vec3_t opMul(const int &in) const",    asMETHODPR(vec3, operator*, (const int &v) const, vec3),    asCALL_THISCALL },
+			{ "vec3_t opNeg() const",                 asMETHODPR(vec3, operator-, () const, vec3),                asCALL_THISCALL },
 
-			{ "vec3_t &opSubAssign(const vec3_t &in)", asMETHODPR(vec3_t, operator-=, (const vec3_t &v), vec3_t &), asCALL_THISCALL },
-			{ "vec3_t &opAddAssign(const vec3_t &in)", asMETHODPR(vec3_t, operator+=, (const vec3_t &v), vec3_t &), asCALL_THISCALL },
-			{ "vec3_t &opDivAssign(const vec3_t &in)", asMETHODPR(vec3_t, operator/=, (const vec3_t &v), vec3_t &), asCALL_THISCALL },
-			{ "vec3_t &opDivAssign(const float &in)",  asMETHODPR(vec3_t, operator/=, (const float &v), vec3_t &),  asCALL_THISCALL },
-			{ "vec3_t &opDivAssign(const int &in)",    asMETHODPR(vec3_t, operator/=, (const int &v), vec3_t &),    asCALL_THISCALL },
-			{ "vec3_t &opMulAssign(const float &in)",  asMETHODPR(vec3_t, operator*=, (const float &v), vec3_t &),  asCALL_THISCALL },
-			{ "vec3_t &opMulAssign(const int &in)",    asMETHODPR(vec3_t, operator*=, (const int &v), vec3_t &),    asCALL_THISCALL },
+			{ "vec3_t &opSubAssign(const vec3_t &in)", asMETHODPR(vec3, operator-=, (const vec3 &v), vec3 &), asCALL_THISCALL },
+			{ "vec3_t &opAddAssign(const vec3_t &in)", asMETHODPR(vec3, operator+=, (const vec3 &v), vec3 &), asCALL_THISCALL },
+			{ "vec3_t &opDivAssign(const vec3_t &in)", asMETHODPR(vec3, operator/=, (const vec3 &v), vec3 &), asCALL_THISCALL },
+			{ "vec3_t &opDivAssign(const float &in)",  asMETHODPR(vec3, operator/=, (const float &v), vec3 &),  asCALL_THISCALL },
+			{ "vec3_t &opDivAssign(const int &in)",    asMETHODPR(vec3, operator/=, (const int &v), vec3 &),    asCALL_THISCALL },
+			{ "vec3_t &opMulAssign(const float &in)",  asMETHODPR(vec3, operator*=, (const float &v), vec3 &),  asCALL_THISCALL },
+			{ "vec3_t &opMulAssign(const int &in)",    asMETHODPR(vec3, operator*=, (const int &v), vec3 &),    asCALL_THISCALL },
 
 			// useful methods
-			{ "float lengthSquared() const",          asMETHODPR(vec3_t, lengthSquared, () const, float),        asCALL_THISCALL },
-			{ "float length() const",                 asMETHODPR(vec3_t, length, () const, float),               asCALL_THISCALL },
-			{ "vec3_t normalized() const",            asMETHODPR(vec3_t, normalized, () const, vec3_t),          asCALL_THISCALL },
-			{ "vec3_t normalized(float &out) const",  asMETHODPR(vec3_t, normalized, (float &) const, vec3_t),   asCALL_THISCALL },
-			{ "float normalize()",                    asMETHODPR(vec3_t, normalize, (), float ),                 asCALL_THISCALL },
-			{ "vec3_t cross(const vec3_t &in) const", asMETHODPR(vec3_t, cross, (const vec3_t &) const, vec3_t), asCALL_THISCALL }
+			{ "float lengthSquared() const",          asMETHODPR(vec3, lengthSquared, () const, float),        asCALL_THISCALL },
+			{ "float length() const",                 asMETHODPR(vec3, length, () const, float),               asCALL_THISCALL },
+			{ "vec3_t normalized() const",            asMETHODPR(vec3, normalized, () const, vec3),          asCALL_THISCALL },
+			{ "vec3_t normalized(float &out) const",  asMETHODPR(vec3, normalized, (float &) const, vec3),   asCALL_THISCALL },
+			{ "float normalize()",                    asMETHODPR(vec3, normalize, (), float ),                 asCALL_THISCALL },
+			{ "vec3_t cross(const vec3_t &in) const", asMETHODPR(vec3, cross, (const vec3 &) const, vec3), asCALL_THISCALL }
 		});
 
 	registry

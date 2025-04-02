@@ -15,19 +15,17 @@ struct vec3
 	float &operator[] (unsigned int i) {
 		i = i > 2 ? 0 : i;
 
-		Elements[i];
+		return Elements[i];
 	}
 
 	const float &operator[] (unsigned int i) const {
 		i = i > 2 ? 0 : i;
 
-		Elements[i];
+		return Elements[i];
 	}
 
 	bool operator==(const vec3 &v) const {
-		return x == v.x &&
-			   y == v.y &&
-			   z == v.z;
+		return *this == v;
 	}
 
 	bool equals(const vec3 &v, const float &epsilon) const {
@@ -68,7 +66,7 @@ struct vec3
 		vec3 result = {};
 
 		result.x = x - v.x;
-		result.y = y - v.x;
+		result.y = y - v.y;
 		result.z = z - v.z;
 
 		return result;
@@ -78,7 +76,7 @@ struct vec3
 		vec3 result = {};
 
 		result.x = x + v.x;
-		result.y = y + v.x;
+		result.y = y + v.y;
 		result.z = z + v.z;
 
 		return result;
@@ -88,7 +86,7 @@ struct vec3
 		vec3 result = {};
 
 		result.x = x / v.x;
-		result.y = y / v.x;
+		result.y = y / v.y;
 		result.z = z / v.z;
 
 		return result;
@@ -223,7 +221,7 @@ struct vec3
 	}
 
 	float normalize() {
-		auto len = length();
+		auto len = lengthSquared();
 		if (len > 0) {
 			len = 1 / sqrtf(len);
 		}
