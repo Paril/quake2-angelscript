@@ -105,7 +105,7 @@ void Q2AS_RegisterUtil(q2as_registry &registry)
 		.methods({
 			{ "bool opEquals(const vec4_t &in) const", asFUNCTION(Q2AS_type_equals<vec4_t>), asCALL_CDECL_OBJLAST },
 			{ "void accum_blend(const vec4_t &in color)", asFUNCTION(q2as_AddBlend), asCALL_CDECL_OBJLAST },
-			{ "bool opImplConv() const", asFUNCTION(q2as_vec4_empty), asCALL_CDECL_OBJLAST },
+			{ "bool opConv() const", asFUNCTION(q2as_vec4_empty), asCALL_CDECL_OBJLAST },
 			{ "vec3_t &xyz()", asFUNCTION(q2as_vec4_vec3), asCALL_CDECL_OBJLAST },
 			{ "const vec3_t &xyz() const", asFUNCTION(q2as_vec4_vec3), asCALL_CDECL_OBJLAST }
 		});

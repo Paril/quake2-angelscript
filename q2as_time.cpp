@@ -132,7 +132,7 @@ void Q2AS_RegisterTime(q2as_registry &registry)
 			{ "gtime_t &opMulAssign(const float &in)",   asMETHODPR(gtime_t, operator*=, (const float &v), gtime_t &),   asCALL_THISCALL },
 
 			// conversions
-			{ "bool opImplConv() const", asMETHODPR(gtime_t, operator bool, () const, bool), asCALL_THISCALL }
+			{ "bool opConv() const", asMETHODPR(gtime_t, operator bool, () const, bool), asCALL_THISCALL }
 		});
 
 	registry
