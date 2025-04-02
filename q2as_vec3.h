@@ -25,7 +25,7 @@ struct vec3
 	}
 
 	bool operator==(const vec3 &v) const {
-		return *this == v;
+		return Elements == v.Elements;
 	}
 
 	bool equals(const vec3 &v, const float &epsilon) const {
@@ -45,7 +45,7 @@ struct vec3
 	}
 
 	vec3 scaled(const vec3 &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x * v.x;
 		result.y = y * v.y;
@@ -63,7 +63,7 @@ struct vec3
 	}
 
 	vec3 operator-(const vec3 &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x - v.x;
 		result.y = y - v.y;
@@ -73,7 +73,7 @@ struct vec3
 	}
 
 	vec3 operator+(const vec3 &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x + v.x;
 		result.y = y + v.y;
@@ -83,7 +83,7 @@ struct vec3
 	}
 
 	vec3 operator/(const vec3 &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x / v.x;
 		result.y = y / v.y;
@@ -93,7 +93,7 @@ struct vec3
 	}
 
 	vec3 operator/(const float &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x / v;
 		result.y = y / v;
@@ -103,7 +103,7 @@ struct vec3
 	}
 
 	vec3 operator/(const int &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x / v;
 		result.y = y / v;
@@ -113,7 +113,7 @@ struct vec3
 	}
 
 	vec3 operator*(const float &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x * v;
 		result.y = y * v;
@@ -123,7 +123,7 @@ struct vec3
 	}
 
 	vec3 operator*(const int &v) const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = x * v;
 		result.y = y * v;
@@ -133,7 +133,7 @@ struct vec3
 	}
 
 	vec3 operator-() const {
-		vec3 result = {};
+		vec3 result;
 
 		result.x = -x;
 		result.y = -y;
@@ -167,17 +167,17 @@ struct vec3
 	}
 
 	vec3 &operator/=(const float &v) {
-		x /= x;
-		y /= y;
-		z /= z;
+		x /= v;
+		y /= v;
+		z /= v;
 
 		return *this;
 	}
 
 	vec3 &operator/=(const int &v) {
-		x /= x;
-		y /= y;
-		z /= z;
+		x /= v;
+		y /= v;
+		z /= v;
 
 		return *this;
 	}
@@ -234,7 +234,8 @@ struct vec3
 	}
 
 	vec3 cross(const vec3 &v) const {
-		vec3 result = {};
+		vec3 result;
+		
 		result.x = y * v.z - z * v.y;
 		result.y = z * v.x - x * v.z;
 		result.z = x * v.y - y * v.x;
