@@ -1,4 +1,5 @@
 #include "q2as_local.h"
+#include "q2as_vec3.h"
 
 static void Q2AS_vec3_t_init_construct_fff(const float x, const float y, const float z, vec3_t *v)
 {

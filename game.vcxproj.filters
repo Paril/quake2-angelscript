@@ -566,6 +566,7 @@
     <ClInclude Include="ctrack.hpp">
       <Filter>thirdparty</Filter>
     </ClInclude>
+    <ClInclude Include="q2as_vec3.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
