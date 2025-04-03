@@ -31,13 +31,18 @@ struct vec3
         return elements == v.elements;
     }
 
-    bool equals(const vec3 &v, const float &epsilon) const
+    bool equals(const vec3 &v, const float relative_tolerance, const float absolute_tolerance) const
     {
-        bool rx = abs(x - v.x) <= epsilon * max(1.0f, max(abs(x), abs(v.x)));
-        bool ry = abs(y - v.y) <= epsilon * max(1.0f, max(abs(y), abs(v.y)));
-        bool rz = abs(z - v.z) <= epsilon * max(1.0f, max(abs(z), abs(v.z)));
+        bool rx = abs(x - v.x) <= max(relative_tolerance * max(abs(x), abs(v.x)), absolute_tolerance);
+        bool ry = abs(y - v.y) <= max(relative_tolerance * max(abs(y), abs(v.y)), absolute_tolerance);
+        bool rz = abs(z - v.z) <= max(relative_tolerance * max(abs(z), abs(v.z)), absolute_tolerance);
 
         return rx && ry && rz;
+    }
+
+    bool equals(const vec3 &v, const float relative_tolerance) const
+    {
+        return equals(v, relative_tolerance, 0.0f);
     }
 
     explicit operator bool() const
