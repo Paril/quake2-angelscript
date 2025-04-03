@@ -185,7 +185,8 @@ Check if the given bot has picked up the given item or not.
 ================
 */
 bool Bot_PickedUpItem( edict_t @ bot, edict_t @ item ) {
-    return false;
-    // AS_TODO instanced items
-	//return item->item_picked_up_by[ ( bot->s.number - 1 ) ];
+	if ((item.svflags & svflags_t::INSTANCED) != 0)
+		return cast<ASEntity>(item.as_obj).item_picked_up_by[bot.number - 1];
+
+	return false;
 }

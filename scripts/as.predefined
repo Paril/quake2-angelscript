@@ -1274,9 +1274,11 @@ class dynamic_bitset
 	// behaviors
 	~dynamic_bitset();
 	dynamic_bitset();
-	dynamic_bitset(const dynamic_bitset&in);
+	dynamic_bitset(const dynamic_bitset &in);
+    dynamic_bitset(const string &in) explicit;
 	dynamic_bitset(uint count) explicit;
 	// methods
+    dynamic_bitset &opAssign(const dynamic_bitset &in);
 	bool opIndex(uint32) const;
 	bool get_bit(uint32) const;
 	void set_bit(uint32, bool);
@@ -1289,6 +1291,7 @@ class dynamic_bitset
 	bool all() const;
 	bool none() const;
 	bool opEquals(const dynamic_bitset &in) const;
+    string to_string() const;
 }
 class rgba_t
 {

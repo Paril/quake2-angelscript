@@ -1658,11 +1658,12 @@ select_spawn_result_t SelectDeathmatchSpawnPoint(bool farthest, bool force_spawn
 	return select_spawn_result_t(null, true);
 }
 
-/*
 //===============
 // ROGUE
-edict_t *SelectLavaCoopSpawnPoint(edict_t *ent)
+ASEntity @SelectLavaCoopSpawnPoint(ASEntity &ent)
 {
+    return null;
+/*
 	int		 index;
 	edict_t *spot = null;
 	float	 lavatop;
@@ -1739,10 +1740,10 @@ edict_t *SelectLavaCoopSpawnPoint(edict_t *ent)
 	}
 
 	return pointWithLeastLava;
+*/
 }
 // ROGUE
 //===============
-*/
 
 // [Paril-KEX]
 ASEntity @SelectSingleSpawnPoint(ASEntity &ent)
@@ -1824,42 +1825,36 @@ ASEntity @G_UnsafeSpawnPosition(vec3_t spot, bool check_players)
 
 ASEntity @SelectCoopSpawnPoint(ASEntity &ent, bool force_spawn, bool check_players)
 {
-    return null;
-/*
-	edict_t	*spot = null;
-	const char *target;
+	ASEntity @spot = null;
 
 	// ROGUE
 	//  rogue hack, but not too gross...
-	if (!Q_strcasecmp(level.mapname, "rmine2"))
+	if (Q_strcasecmp(level.mapname, "rmine2") == 0)
 		return SelectLavaCoopSpawnPoint(ent);
 	// ROGUE
 
 	// try the main spawn point first
-	spot = SelectSingleSpawnPoint(ent);
+	@spot = SelectSingleSpawnPoint(ent);
 
-	if (spot && !G_UnsafeSpawnPosition(spot.s.origin, check_players))
+	if (spot !is null && G_UnsafeSpawnPosition(spot.e.origin, check_players) is null)
 		return spot;
 
-	spot = null;
+	@spot = null;
 
 	// assume there are four coop spots at each spawnpoint
-	int32_t num_valid_spots = 0;
+	uint num_valid_spots = 0;
 
-	while (1)
+	while (true)
 	{
-		spot = G_FindByStringClassname(spot, "info_player_coop");
-		if (!spot)
+		@spot = find_by_str<ASEntity>(spot, "classname", "info_player_coop");
+		if (spot is null)
 			break; // we didn't have enough...
 
-		target = spot.targetname;
-		if (!target)
-			target = "";
-		if (Q_strcasecmp(game.spawnpoint, target) == 0)
+		if (Q_strcasecmp(game.spawnpoint, spot.targetname) == 0)
 		{ // this is a coop spawn point for one of the clients here
 			num_valid_spots++;
 
-			if (!G_UnsafeSpawnPosition(spot.s.origin, check_players))
+			if (G_UnsafeSpawnPosition(spot.e.origin, check_players) is null)
 				return spot; // this is it
 		}
 	}
@@ -1868,50 +1863,45 @@ ASEntity @SelectCoopSpawnPoint(ASEntity &ent, bool force_spawn, bool check_playe
 
 	// if we didn't find any spots, map is probably set up wrong.
 	// use empty targetname ones.
-	if (!num_valid_spots)
+	if (num_valid_spots == 0)
 	{
 		use_targetname = false;
 
-		while (1)
+		while (true)
 		{
-			spot = G_FindByStringClassname(spot, "info_player_coop");
-			if (!spot)
+			@spot = find_by_str<ASEntity>(spot, "classname", "info_player_coop");
+			if (spot is null)
 				break; // we didn't have enough...
 
-			target = spot.targetname;
-			if (!target)
+			if (spot.targetname.empty())
 			{
 				// this is a coop spawn point for one of the clients here
 				num_valid_spots++;
 
-				if (!G_UnsafeSpawnPosition(spot.s.origin, check_players))
+				if (G_UnsafeSpawnPosition(spot.e.origin, check_players) is null)
 					return spot; // this is it
 			}
 		}
 	}
 
 	// if player collision is disabled, just pick a random spot
-	if (!g_coop_player_collision.integer)
+	if (g_coop_player_collision.integer == 0)
 	{
-		spot = null;
+		@spot = null;
 
 		num_valid_spots = irandom(num_valid_spots);
 
-		while (1)
+		while (true)
 		{
-			spot = G_FindByStringClassname(spot, "info_player_coop");
+			@spot = find_by_str<ASEntity>(spot, "classname", "info_player_coop");
 
-			if (!spot)
+			if (spot is null)
 				break; // we didn't have enough...
 
-			target = spot.targetname;
-			if (use_targetname && !target)
-				target = "";
-			if (use_targetname ? (Q_strcasecmp(game.spawnpoint, target) == 0) : !target)
-			{ // this is a coop spawn point for one of the clients here
-				num_valid_spots++;
-
-				if (!num_valid_spots)
+			if (use_targetname ? (Q_strcasecmp(game.spawnpoint, spot.targetname) == 0) : spot.targetname.empty())
+			{
+                // this is a coop spawn point for one of the clients here
+				if (num_valid_spots == 0)
 					return spot;
 
 				--num_valid_spots;
@@ -1922,11 +1912,10 @@ ASEntity @SelectCoopSpawnPoint(ASEntity &ent, bool force_spawn, bool check_playe
 	}
 
 	// no safe spots..?
-	if (force_spawn || !g_coop_player_collision.integer)
+	if (force_spawn || g_coop_player_collision.integer == 0)
 		return SelectSingleSpawnPoint(spot);
 	
 	return null;
-*/
 }
 
 namespace internal

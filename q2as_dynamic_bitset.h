@@ -22,6 +22,17 @@ struct dynamic_bitset
         _bitset.resize(n);
     }
 
+    // load bits from string
+    // TODO: compress this a bit more efficiently
+    // maybe using nibbles
+    explicit dynamic_bitset(const std::string_view str)
+    {
+        _bitset.resize(str.size());
+
+        for (size_t i = 0; i < str.size(); i++)
+            _bitset[i] = str[i] == '1';
+    }
+
     // Copy
     dynamic_bitset(const dynamic_bitset &in) = default;
 
@@ -154,12 +165,17 @@ struct dynamic_bitset
 
         return true;
     }
-
-    std::string to_hex()
+    
+    // TODO: compress this a bit more efficiently
+    // maybe using nibbles
+    std::string to_string() const
     {
-        size_t bytes = max((size_t) 1, _bitset.size() >> 3);
-        std::string hex(bytes, '0');
+        std::string s(_bitset.size(), '0');
 
-        return hex;
+        for (size_t i = 0; i < s.size(); i++)
+            if (_bitset[i])
+                s[i] = '1';
+
+        return s;
     }
 };

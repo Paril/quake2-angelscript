@@ -1391,7 +1391,8 @@ json_mutval WriteEntity(json_mutdoc &doc, ASEntity &ent)
     json_add_optional(doc, obj, "hackflags", ent.hackflags);
 
     // AS_TODO fog, heightfog
-    // AS_TODO item_picked_up_by
+    if (ent.item_picked_up_by.any())
+        json_add_optional(doc, obj, "item_picked_up_by", ent.item_picked_up_by.to_string());
 
     json_add_optional(doc, obj, "slime_debounce_time", ent.slime_debounce_time);
 
@@ -1574,7 +1575,13 @@ void ReadEntity(json_doc &doc, json_val obj, ASEntity &ent)
     obj["hackflags"].get(ent.hackflags);
 
     // AS_TODO fog, heightfog
-    // AS_TODO item_picked_up_by
+    {
+        string s;
+        obj["item_picked_up_by"].get(s);
+
+        if (!s.empty())
+            ent.item_picked_up_by = dynamic_bitset(s);
+    }
 
     json_get_optional(doc, obj["slime_debounce_time"], ent.slime_debounce_time);
 
