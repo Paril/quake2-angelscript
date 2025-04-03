@@ -72,7 +72,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
