@@ -344,7 +344,7 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "void get(int64 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int64_t &) const, void),    asCALL_THISCALL },
             { "void get(float &out) const",  asMETHODPR(q2as_yyjson_val, get, (float &) const, void),      asCALL_THISCALL },
             { "void get(double &out) const", asMETHODPR(q2as_yyjson_val, get, (double &) const, void),     asCALL_THISCALL },
-            { "void get(string &out) const", asMETHOD(q2as_yyjson_val, as_string),                        asCALL_THISCALL },
+            { "void get(string &out) const", asMETHOD(q2as_yyjson_val, get_str),                           asCALL_THISCALL },
             // TODO: this should be `get` but implicit conversion rules make that not work
             { "void get_enum(? &out) const", asMETHODPR(q2as_yyjson_val, get, (void *, int) const, void), asCALL_THISCALL },
 

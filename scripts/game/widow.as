@@ -348,7 +348,7 @@ void WidowBlaster(ASEntity &self)
 	}
 	else if ((self.e.s.frame >= widow::frames::fired02a) && (self.e.s.frame <= widow::frames::fired20))
 	{
-		vec3_t angles, aimpoint;
+		vec3_t angles;
 		float  aim_angle, target_angle;
 		float  error;
 
@@ -366,7 +366,7 @@ void WidowBlaster(ASEntity &self)
 
 		start = G_ProjectSource(self.e.s.origin, monster_flash_offset[flashnum], forward, right);
 
-		PredictAim(self, self.enemy, start, 1000, true, crandom() * 0.1f, forward, aimpoint);
+		PredictAim(self, self.enemy, start, 1000, true, crandom() * 0.1f, forward);
 
 		// clamp it to within 10 degrees of the aiming angle (where she's facing)
 		angles = vectoangles(forward);

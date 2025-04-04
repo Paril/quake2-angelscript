@@ -1173,7 +1173,7 @@ void GunnerFire(ASEntity &self)
 {
 	vec3_t					 start;
 	vec3_t					 forward, right;
-	vec3_t					 aim, aimpoint;
+	vec3_t					 aim;
 	monster_muzzle_t         flash_number;
 
 	if (self.enemy is null || !self.enemy.e.inuse) // PGM
@@ -1183,7 +1183,7 @@ void GunnerFire(ASEntity &self)
 
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
-	PredictAim(self, self.enemy, start, 0, true, -0.2f, aim, aimpoint);
+	PredictAim(self, self.enemy, start, 0, true, -0.2f, aim);
 	monster_fire_bullet(self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
 }
 

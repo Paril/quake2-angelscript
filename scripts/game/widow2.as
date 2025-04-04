@@ -392,7 +392,7 @@ void WidowDisrupt(ASEntity &self)
 {
 	vec3_t start;
 	vec3_t dir;
-	vec3_t forward, right, aimpoint;
+	vec3_t forward, right;
 	float  len;
 
 	AngleVectors(self.e.s.angles, forward, right);
@@ -411,7 +411,7 @@ void WidowDisrupt(ASEntity &self)
 	}
 	else
 	{
-		PredictAim(self, self.enemy, start, 1200, true, 0, dir, aimpoint);
+		PredictAim(self, self.enemy, start, 1200, true, 0, dir);
 		monster_fire_tracker(self, start, dir, 20, 1200, null, monster_muzzle_t::WIDOW_DISRUPTOR);
 	}
 

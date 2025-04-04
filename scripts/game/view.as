@@ -1378,12 +1378,11 @@ void ClientEndServerFrame(ASEntity &ent)
 	}
 	// ZOID
 
-    /*
 	// if the scoreboard is up, update it
 	if (ent.client.showscores && ent.client.menutime <= level.time)
 	{
 		// ZOID
-		if (ent.client.menu)
+		if (ent.client.menu !is null)
 		{
 			PMenu_Do_Update(ent);
 			ent.client.menudirty = false;
@@ -1391,14 +1390,14 @@ void ClientEndServerFrame(ASEntity &ent)
 		else
 			// ZOID
 			DeathmatchScoreboardMessage(ent, ent.enemy);
-		gi.unicast(ent, false);
-		ent.client.menutime = level.time + 3_sec;
+		gi_unicast(ent.e, false);
+		ent.client.menutime = level.time + time_sec(3);
 	}
 
-	if ( ( ent.svflags & SVF_BOT ) != 0 ) {
-		Bot_EndFrame( ent );
+	if ( ( ent.e.svflags & svflags_t::BOT ) != 0 ) {
+        // AS_TODO
+		//Bot_EndFrame( ent );
 	}
-    */
 
 	P_AssignClientSkinnum(ent);
 

@@ -2242,14 +2242,14 @@ void P_AssignClientSkinnum(ASEntity &ent)
 // POI tags used by this mod
 namespace pois_t// : uint16_t
 {
-	uint16 POI_OBJECTIVE = MAX_EDICTS; // current objective
-	uint16 POI_RED_FLAG = POI_OBJECTIVE + 1; // red flag/carrier
-	uint16 POI_BLUE_FLAG = POI_RED_FLAG + 1; // blue flag/carrier
-	uint16 POI_PING = POI_BLUE_FLAG + 1;
-	uint16 POI_PING_END = POI_PING + MAX_CLIENTS - 1;
+	const uint16 POI_OBJECTIVE = MAX_EDICTS; // current objective
+	const uint16 POI_RED_FLAG = POI_OBJECTIVE + 1; // red flag/carrier
+	const uint16 POI_BLUE_FLAG = POI_RED_FLAG + 1; // blue flag/carrier
+	const uint16 POI_PING = POI_BLUE_FLAG + 1;
+	const uint16 POI_PING_END = POI_PING + MAX_CLIENTS - 1;
 
-    uint16 POI_FLAG_NONE = 0;
-    uint16 POI_FLAG_HIDE_ON_AIM = 1; // hide the POI if we get close to it with our aim
+    const uint16 POI_FLAG_NONE = 0;
+    const uint16 POI_FLAG_HIDE_ON_AIM = 1; // hide the POI if we get close to it with our aim
 };
 
 // [Paril-KEX] send player level POI
@@ -3122,8 +3122,8 @@ void ClientBegin(edict_t @ent_handle)
 	}
 
 	level.coop_scale_players++;
-    // AS_TODO
-	//G_Monster_CheckCoopHealthScaling();
+
+	G_Monster_CheckCoopHealthScaling();
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame(ent);
@@ -4057,34 +4057,65 @@ void ClientThink(edict_t @ent_handle, const usercmd_t &in ucmd)
 	}
 }
 
-/*
-// active monsters
-struct active_monsters_filter_t
+class active_monsters_t
 {
-	inline bool operator()(edict_t *ent) const
-	{
-		return (ent->inuse && (ent->svflags & SVF_MONSTER) && ent->health > 0);
-	}
-};
+    uint opForBegin() const
+    {
+        for (uint i = 1 + max_clients + BODY_QUEUE_SIZE; i < num_edicts; i++)
+        {
+            ASEntity @e = entities[i];
 
-inline entity_iterable_t<active_monsters_filter_t> active_monsters()
-{
-	return entity_iterable_t<active_monsters_filter_t> { game.maxclients + (uint32_t)BODY_QUEUE_SIZE + 1U };
+            if (e.e.inuse && e.health > 0 && (e.e.svflags & svflags_t::MONSTER) != 0)
+                return i;
+        }
+
+        return num_edicts;
+    }
+
+    bool opForEnd(uint i) const
+    {
+        return i > max_clients;
+    }
+
+    uint opForNext(uint i) const
+    {
+        for (i = i + 1; i < num_edicts; i++)
+        {
+            ASEntity @e = entities[i];
+
+            if (e.e.inuse && e.health > 0 && (e.e.svflags & svflags_t::MONSTER) != 0)
+                return i;
+        }
+
+        return num_edicts;
+    }
+
+    ASEntity @opForValue(uint i) const
+    {
+        return entities[i];
+    }
 }
 
-inline bool G_MonstersSearchingFor(edict_t *player)
+active_monsters_t active_monsters;
+
+// AS_TODO: this function is going to be super slow
+// for AngelScript, if all players are dead
+// and it has to scan every entity. I think this could
+// be done faster if accumulated during a frame from the
+// monster's think functions.
+bool G_MonstersSearchingFor(ASEntity @player)
 {
-	for (auto ent : active_monsters())
+	foreach (ASEntity @ent : active_monsters)
 	{
 		// check for *any* player target
-		if (player == null && ent->enemy && !ent->enemy->client)
+		if (player is null && ent.enemy  !is null && ent.enemy.client is null)
 			continue;
 		// they're not targeting us, so who cares
-		else if (player != nullptr && ent->enemy != player)
+		else if (player !is null && ent.enemy !is player)
 			continue;
 
 		// they lost sight of us
-		if ((ent->monsterinfo.aiflags & AI_LOST_SIGHT) && level.time > ent->monsterinfo.trail_time + 5_sec)
+		if ((ent.monsterinfo.aiflags & ai_flags_t::LOST_SIGHT) != 0 && level.time > ent.monsterinfo.trail_time + time_sec(5))
 			continue;
 
 		// no sir
@@ -4095,68 +4126,73 @@ inline bool G_MonstersSearchingFor(edict_t *player)
 	return false;
 }
 
+namespace respawn_spot_globals
+{
+    // throw five boxes a short-ish distance from the player and see if they land in a good, visible spot
+    const float[] yaw_spread = { 0, 90, 45, -45, -90 };
+    const float back_distance = 128.f;
+    const float up_distance = 128.f;
+    const float player_viewheight = 22.f;
+
+	// we don't want to spawn inside of these
+	const contents_t mask = contents_t(contents_t::MASK_PLAYERSOLID | contents_t::LAVA | contents_t::SLIME);
+}
+
 // [Paril-KEX] from the given player, find a good spot to
 // spawn a player
-inline bool G_FindRespawnSpot(edict_t *player, vec3_t &spot)
+bool G_FindRespawnSpot(ASEntity &player, vec3_t &out spot)
 {
 	// sanity check; make sure there's enough room for ourselves.
 	// (crouching in a small area, etc)
-	trace_t tr = gi.trace(player->s.origin, PLAYER_MINS, PLAYER_MAXS, player->s.origin, player, MASK_PLAYERSOLID);
+	trace_t tr = gi_trace(player.e.origin, PLAYER_MINS, PLAYER_MAXS, player.e.origin, player.e, contents_t::MASK_PLAYERSOLID);
 
 	if (tr.startsolid || tr.allsolid)
 		return false;
 
-	// throw five boxes a short-ish distance from the player and see if they land in a good, visible spot
-	constexpr float yaw_spread[] = { 0, 90, 45, -45, -90 };
-	constexpr float back_distance = 128.f;
-	constexpr float up_distance = 128.f;
-	constexpr float player_viewheight = 22.f;
-
-	// we don't want to spawn inside of these
-	contents_t mask = MASK_PLAYERSOLID | CONTENTS_LAVA | CONTENTS_SLIME;
-
-	for (auto &yaw : yaw_spread)
+	foreach (float yaw : respawn_spot_globals::yaw_spread)
 	{
-		vec3_t angles = { 0, (player->s.angles.yaw + 180) + yaw, 0 };
+		vec3_t angles(0, (player.e.angles.yaw + 180) + yaw, 0);
 
 		// throw the box three times:
 		// one up & back
 		// one back
 		// one up, then back
 		// pick the one that went the farthest
-		vec3_t start = player->s.origin;
-		vec3_t end = start + vec3_t { 0, 0, up_distance };
+		vec3_t start = player.e.origin;
+		vec3_t end = start;
+        end.z += respawn_spot_globals::up_distance;
 
-		tr = gi.trace(start, PLAYER_MINS, PLAYER_MAXS, end, player, mask);
+		tr = gi_trace(start, PLAYER_MINS, PLAYER_MAXS, end, player.e, respawn_spot_globals::mask);
 
 		// stuck
-		if (tr.startsolid || tr.allsolid || (tr.contents & (CONTENTS_LAVA | CONTENTS_SLIME)))
+		if (tr.startsolid || tr.allsolid || (tr.contents & (contents_t::LAVA | contents_t::SLIME)) != 0)
 			continue;
 
 		vec3_t fwd;
 		AngleVectors(angles, fwd);
 
 		start = tr.endpos;
-		end = start + fwd * back_distance;
+		end = start + fwd * respawn_spot_globals::back_distance;
 
-		tr = gi.trace(start, PLAYER_MINS, PLAYER_MAXS, end, player, mask);
+		tr = gi_trace(start, PLAYER_MINS, PLAYER_MAXS, end, player.e, respawn_spot_globals::mask);
 
 		// stuck
-		if (tr.startsolid || tr.allsolid || (tr.contents & (CONTENTS_LAVA | CONTENTS_SLIME)))
+		if (tr.startsolid || tr.allsolid || (tr.contents & (contents_t::LAVA | contents_t::SLIME)) != 0)
 			continue;
 
 		// plop us down now
 		start = tr.endpos;
-		end = tr.endpos - vec3_t { 0, 0, up_distance * 4 };
+		end = tr.endpos;
+        end.z -= respawn_spot_globals::up_distance * 4;
 
-		tr = gi.trace(start, PLAYER_MINS, PLAYER_MAXS, end, player, mask);
+		tr = gi_trace(start, PLAYER_MINS, PLAYER_MAXS, end, player.e, respawn_spot_globals::mask);
 
 		// stuck, or floating, or touching some other entity
-		if (tr.startsolid || tr.allsolid || (tr.contents & (CONTENTS_LAVA | CONTENTS_SLIME)) || tr.fraction == 1.0f || tr.ent != world)
+		if (tr.startsolid || tr.allsolid || (tr.contents & (contents_t::LAVA | contents_t::SLIME)) != 0 || tr.fraction == 1.0f || tr.ent !is world.e)
 			continue;
 
 		// don't spawn us *inside* liquids
-		if (gi.pointcontents(tr.endpos + vec3_t{0, 0, player_viewheight}) & MASK_WATER)
+		if ((gi_pointcontents(tr.endpos + vec3_t(0, 0, respawn_spot_globals::player_viewheight)) & contents_t::MASK_WATER) != 0)
 			continue;
 
 		// don't spawn us on steep slopes
@@ -4165,7 +4201,7 @@ inline bool G_FindRespawnSpot(edict_t *player, vec3_t &spot)
 
 		spot = tr.endpos;
 
-		float z_diff = fabsf(player->s.origin[2] - tr.endpos[2]);
+		float z_diff = abs(player.e.origin[2] - tr.endpos[2]);
 
 		// 5 steps is way too many steps
 		if (z_diff > STEPSIZE * 4.f)
@@ -4174,12 +4210,15 @@ inline bool G_FindRespawnSpot(edict_t *player, vec3_t &spot)
 		// if we went up or down 1 step, make sure we can still see their origin and their head
 		if (z_diff > STEPSIZE)
 		{
-			tr = gi.traceline(player->s.origin, tr.endpos, player, mask);
+			tr = gi_traceline(player.e.origin, tr.endpos, player.e, respawn_spot_globals::mask);
 
 			if (tr.fraction != 1.0f)
 				continue;
 
-			tr = gi.traceline(player->s.origin + vec3_t{0, 0, player_viewheight}, tr.endpos + vec3_t{0, 0, player_viewheight}, player, mask);
+			tr = gi_traceline(player.e.origin + vec3_t(0, 0, respawn_spot_globals::player_viewheight),
+                              tr.endpos + vec3_t(0, 0, respawn_spot_globals::player_viewheight),
+                              player.e,
+                              respawn_spot_globals::mask);
 
 			if (tr.fraction != 1.0f)
 				continue;
@@ -4192,22 +4231,35 @@ inline bool G_FindRespawnSpot(edict_t *player, vec3_t &spot)
 	return false;
 }
 
+class squad_respawn_target_t
+{
+    ASEntity @player;
+    vec3_t spot;
+
+    squad_respawn_target_t() { }
+    squad_respawn_target_t(ASEntity @player, const vec3_t &in spot)
+    {
+        this.player = player;
+        this.spot = spot;
+    }
+}
+
 // [Paril-KEX] check each player to find a good
 // respawn target & position
-inline std::tuple<edict_t *, vec3_t> G_FindSquadRespawnTarget()
+squad_respawn_target_t G_FindSquadRespawnTarget()
 {
-	bool monsters_searching_for_anybody = G_MonstersSearchingFor(nullptr);
+	bool monsters_searching_for_anybody = G_MonstersSearchingFor(null);
 
-	for (auto player : active_players())
+	foreach (ASEntity @player : active_players)
 	{
 		// no dead players
-		if (player->deadflag)
+		if (player.deadflag)
 			continue;
 		
 		// check combat state; we can't have taken damage recently
-		if (player->client->last_damage_time >= level.time)
+		if (player.client.last_damage_time >= level.time)
 		{
-			player->client->coop_respawn_state = COOP_RESPAWN_IN_COMBAT;
+			player.client.coop_respawn_state = coop_respawn_t::IN_COMBAT;
 			continue;
 		}
 
@@ -4215,29 +4267,29 @@ inline std::tuple<edict_t *, vec3_t> G_FindSquadRespawnTarget()
 		// or searching for us
 		if (G_MonstersSearchingFor(player))
 		{
-			player->client->coop_respawn_state = COOP_RESPAWN_IN_COMBAT;
+			player.client.coop_respawn_state = coop_respawn_t::IN_COMBAT;
 			continue;
 		}
 
 		// check firing state; if any enemies are mad at any players,
 		// don't respawn until everybody has cooled down
-		if (monsters_searching_for_anybody && player->client->last_firing_time >= level.time)
+		if (monsters_searching_for_anybody && player.client.last_firing_time >= level.time)
 		{
-			player->client->coop_respawn_state = COOP_RESPAWN_IN_COMBAT;
+			player.client.coop_respawn_state = coop_respawn_t::IN_COMBAT;
 			continue;
 		}
 
 		// check positioning; we must be on world ground
-		if (player->groundentity != world)
+		if (player.groundentity !is world)
 		{
-			player->client->coop_respawn_state = COOP_RESPAWN_BAD_AREA;
+			player.client.coop_respawn_state = coop_respawn_t::BAD_AREA;
 			continue;
 		}
 
 		// can't be in liquid
-		if (player->waterlevel >= WATER_UNDER)
+		if (player.waterlevel >= water_level_t::UNDER)
 		{
-			player->client->coop_respawn_state = COOP_RESPAWN_BAD_AREA;
+			player.client.coop_respawn_state = coop_respawn_t::BAD_AREA;
 			continue;
 		}
 
@@ -4246,18 +4298,17 @@ inline std::tuple<edict_t *, vec3_t> G_FindSquadRespawnTarget()
 		
 		if (!G_FindRespawnSpot(player, spot))
 		{
-			player->client->coop_respawn_state = COOP_RESPAWN_BLOCKED;
+			player.client.coop_respawn_state = coop_respawn_t::BLOCKED;
 			continue;
 		}
 
 		// good player most likely
-		return { player, spot };
+		return squad_respawn_target_t(player, spot);
 	}
 
 	// no good player
-	return { nullptr, {} };
+	return squad_respawn_target_t();
 }
-*/
 
 enum respawn_state_t
 {
@@ -4279,30 +4330,29 @@ bool G_CoopRespawn(ASEntity &ent)
 	else if (g_coop_squad_respawn.integer == 0 && g_coop_enable_lives.integer == 0)
 		return false;
 
-/*
-	respawn_state_t state = RESPAWN_NONE;
+	respawn_state_t state = respawn_state_t::NONE;
 
 	// first pass: if we have no lives left, just move to spectator
-	if (g_coop_enable_lives->integer)
+	if (g_coop_enable_lives.integer != 0)
 	{
-		if (ent->client->pers.lives == 0)
+		if (ent.client.pers.lives == 0)
 		{
-			state = RESPAWN_SPECTATE;
-			ent->client->coop_respawn_state = COOP_RESPAWN_NO_LIVES;
+			state = respawn_state_t::SPECTATE;
+			ent.client.coop_respawn_state = coop_respawn_t::NO_LIVES;
 		}
 	}
 
 	// second pass: check for where to spawn
-	if (state == RESPAWN_NONE)
+	if (state == respawn_state_t::NONE)
 	{
 		// if squad respawn, don't respawn until we can find a good player to spawn on.
-		if (g_coop_squad_respawn->integer)
+		if (g_coop_squad_respawn.integer != 0)
 		{
 			bool allDead = true;
 
-			for (auto player : active_players())
+			foreach (ASEntity @player : active_players)
 			{
-				if (player->health > 0)
+				if (player.health > 0)
 				{
 					allDead = false;
 					break;
@@ -4312,65 +4362,65 @@ bool G_CoopRespawn(ASEntity &ent)
 			// all dead, so if we ever get here we have lives enabled;
 			// we should just respawn at the start of the level
 			if (allDead)
-				state = RESPAWN_START;
+				state = respawn_state_t::START;
 			else
 			{
-				auto [ good_player, good_spot ] = G_FindSquadRespawnTarget();
+				auto target = G_FindSquadRespawnTarget();
 
-				if (good_player) {
-					state = RESPAWN_SQUAD;
+				if (target.player !is null) {
+					state = respawn_state_t::SQUAD;
 
-					squad_respawn_position = good_spot;
-					squad_respawn_angles = good_player->s.angles;
+					squad_respawn_position = target.spot;
+					squad_respawn_angles = target.player.e.angles;
 					squad_respawn_angles[2] = 0;
 
 					use_squad_respawn = true;
 				} else {
-					state = RESPAWN_SPECTATE;
+					state = respawn_state_t::SPECTATE;
 				}
 			}
 		}
 		else
-			state = RESPAWN_START;
+			state = respawn_state_t::START;
 	}
 
-	if (state == RESPAWN_SQUAD || state == RESPAWN_START)
+	if (state == respawn_state_t::SQUAD || state == respawn_state_t::START)
 	{
 		// give us our max health back since it will reset
 		// to pers.health; in instanced items we'd lose the items
 		// we touched so we always want to respawn with our max.
 		if (P_UseCoopInstancedItems())
-			ent->client->pers.health = ent->client->pers.max_health = ent->max_health;
+			ent.client.pers.health = ent.client.pers.max_health = ent.max_health;
 
 		respawn(ent);
 
-		ent->client->latched_buttons = BUTTON_NONE;
+		ent.client.latched_buttons = button_t::NONE;
 		use_squad_respawn = false;
 	}
-	else if (state == RESPAWN_SPECTATE)
+	else if (state == respawn_state_t::SPECTATE)
 	{
-		if (!ent->client->coop_respawn_state)
-			ent->client->coop_respawn_state = COOP_RESPAWN_WAITING;
+		if (ent.client.coop_respawn_state == coop_respawn_t::NONE)
+			ent.client.coop_respawn_state = coop_respawn_t::WAITING;
 
-		if (!ent->client->resp.spectator)
+		if (!ent.client.resp.spectator)
 		{
 			// move us to spectate just so we don't have to twiddle
 			// our thumbs forever
 			CopyToBodyQue(ent);
-			ent->client->resp.spectator = true;
-			ent->solid = SOLID_NOT;
-			ent->takedamage = false;
-			ent->s.modelindex = 0;
-			ent->svflags |= SVF_NOCLIENT;
-			ent->client->ps.damage_blend[3] = ent->client->ps.screen_blend[3] = 0;
-			ent->client->ps.rdflags = RDF_NONE;
-			ent->movetype = MOVETYPE_NOCLIP;
+			ent.client.resp.spectator = true;
+			ent.e.solid = solid_t::NOT;
+			ent.takedamage = false;
+			ent.e.modelindex = 0;
+			ent.e.svflags = svflags_t(ent.e.svflags | svflags_t::NOCLIENT);
+			ent.e.client.ps.damage_blend.a = ent.e.client.ps.screen_blend.a = 0;
+			ent.e.client.ps.rdflags = refdef_flags_t::NONE;
+			ent.movetype = movetype_t::NOCLIP;
 			// TODO: check if anything else needs to be reset
-			gi.linkentity(ent);
+			gi_linkentity(ent.e);
 			GetChaseTarget(ent);
 		}
 	}
-*/
+
 	return true;
 }
 

@@ -237,6 +237,25 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
         obj.obj_add(key, v);
 }
 
+void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const fog_t &in v)
+{
+    json_mutval fv = doc.val_obj();
+    json_add_optional(doc, fv, "density", v.density);
+    json_add_optional(doc, fv, "rgb", v.rgb);
+    json_add_optional(doc, fv, "skyfactor", v.skyfactor);
+    json_add_optional(doc, obj, key, fv);
+}
+
+void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, const height_fog_t &in v)
+{
+    json_mutval fv = doc.val_obj();
+    json_add_optional(doc, fv, "density", v.density);
+    json_add_optional(doc, fv, "end", v.end);
+    json_add_optional(doc, fv, "falloff", v.falloff);
+    json_add_optional(doc, fv, "start", v.start);
+    json_add_optional(doc, obj, key, fv);
+}
+
 // get wrappers
 void json_get_optional(json_doc &doc, json_val obj, float &out value, const float &in defaultValue)
 {
@@ -328,6 +347,21 @@ void json_get_optional(json_doc &doc, json_val obj, ASEntity @&out value)
         @value = null;
 }
 
+void json_get_optional(json_doc &doc, json_val obj, fog_t &out value)
+{
+    obj["density"].get(value.density);
+    json_get_optional(doc, obj["rgb"], value.rgb);
+    obj["skyfactor"].get(value.skyfactor);
+}
+
+void json_get_optional(json_doc &doc, json_val obj, height_fog_t &out value)
+{
+    obj["density"].get(value.density);
+    json_get_optional(doc, obj["end"], value.end);
+    obj["falloff"].get(value.falloff);
+    json_get_optional(doc, obj["start"], value.start);
+}
+
 json_mutval WriteGameLocals(json_mutdoc &doc)
 {
     json_mutval obj = doc.val_obj();
@@ -399,8 +433,8 @@ json_mutval WriteClientPersistent(json_mutdoc &doc, client_persistant_t &p)
     json_add_optional(doc, obj, "help_time", p.help_time);
     json_add_optional(doc, obj, "spectator", p.spectator);
     json_add_optional(doc, obj, "bob_skip", p.bob_skip);
-    // AS_TODO wanted_fog
-    // AS_TODO wanted_heightfog
+    json_add_optional(doc, obj, "wanted_fog", p.wanted_fog);
+    json_add_optional(doc, obj, "wanted_heightfog", p.wanted_heightfog);
     json_add_optional(doc, obj, "megahealth_time", p.megahealth_time);
     json_add_optional(doc, obj, "lives", p.lives);
     json_add_optional(doc, obj, "n64_crouch_warn_times", p.n64_crouch_warn_times);
@@ -464,8 +498,8 @@ void ReadClientPersistent(json_doc &doc, json_val obj, client_persistant_t &p)
     json_get_optional(doc, obj["help_time"], p.help_time);
     obj["spectator"].get(p.spectator);
     obj["bob_skip"].get(p.bob_skip);
-    // AS_TODO wanted_fog
-    // AS_TODO wanted_heightfog
+    json_get_optional(doc, obj["wanted_fog"], p.wanted_fog);
+    json_get_optional(doc, obj["wanted_heightfog"], p.wanted_heightfog);
     json_get_optional(doc, obj["megahealth_time"], p.megahealth_time);
     obj["lives"].get(p.lives);
     obj["n64_crouch_warn_times"].get(p.n64_crouch_warn_times);
@@ -1120,8 +1154,32 @@ json_mutval WriteEntityMonsterInfo(json_mutdoc &doc, const monsterinfo_t &info)
     json_add_optional(doc, obj, "react_to_damage_time", info.react_to_damage_time);
     json_add_optional(doc, obj, "jump_time", info.jump_time);
 
-    // AS_TODO reinforcements
-    // AS_TODO chosen_reinforcements
+    if (!info.reinforcements.empty())
+    {
+        json_mutval arr = doc.val_arr();
+        
+        foreach (const reinforcement_t @v : info.reinforcements)
+        {
+            json_mutval val = doc.val_obj();
+            val.obj_put("classname", doc.val(v.classname));
+            json_add_optional(doc, val, "mins", v.mins);
+            json_add_optional(doc, val, "maxs", v.maxs);
+            val.obj_put("strength", doc.val(v.strength));
+            arr.arr_append(val);
+        }
+
+        obj.obj_add("reinforcements", arr);
+    }
+    if (!info.chosen_reinforcements.empty())
+    {
+        json_mutval arr = doc.val_arr();
+        
+        foreach (uint8 v : info.chosen_reinforcements)
+            arr.arr_append(doc.val(v));
+
+        obj.obj_add("chosen_reinforcements", arr);
+    }
+
     return obj;
 }
 
@@ -1231,8 +1289,46 @@ void ReadEntityMonsterInfo(json_doc &doc, json_val obj, monsterinfo_t &info)
     json_get_optional(doc, obj["react_to_damage_time"], info.react_to_damage_time);
     json_get_optional(doc, obj["jump_time"], info.jump_time);
 
-    // AS_TODO reinforcements
-    // AS_TODO chosen_reinforcements
+    {
+        json_val arr = obj["reinforcements"];
+        if (arr.is_arr && arr.length != 0)
+        {
+            info.reinforcements.resize(arr.length);
+            json_arr_iter iter(arr);
+            int i = 0;
+
+            while (iter.has_next)
+            {
+                json_val robj = iter.next;
+                reinforcement_t @v = info.reinforcements[i];
+                robj["classname"].get(v.classname);
+                robj["mins"][0].get(v.mins.x);
+                robj["mins"][1].get(v.mins.y);
+                robj["mins"][2].get(v.mins.z);
+                robj["maxs"][0].get(v.mins.x);
+                robj["maxs"][1].get(v.maxs.y);
+                robj["maxs"][2].get(v.maxs.z);
+                robj["strength"].get(v.strength);
+                i++;
+            }
+        }
+    }
+    {
+        json_val arr = obj["chosen_reinforcements"];
+        if (arr.is_arr && arr.length != 0)
+        {
+            info.chosen_reinforcements.resize(arr.length);
+            json_arr_iter iter(arr);
+            int i = 0;
+
+            while (iter.has_next)
+            {
+                arr = iter.next;
+                info.chosen_reinforcements[i] = arr.get_uint8();
+                i++;
+            }
+        }
+    }
 }
 
 json_mutval WriteEntity(json_mutdoc &doc, ASEntity &ent)
@@ -1390,7 +1486,10 @@ json_mutval WriteEntity(json_mutdoc &doc, ASEntity &ent)
     json_add_optional(doc, obj, "proboscus", ent.proboscus);
     json_add_optional(doc, obj, "hackflags", ent.hackflags);
 
-    // AS_TODO fog, heightfog
+    json_add_optional(doc, obj, "fog", ent.fog);
+    json_add_optional(doc, obj, "fog_off", ent.fog_off);
+    json_add_optional(doc, obj, "heightfog", ent.heightfog);
+    json_add_optional(doc, obj, "heightfog_off", ent.heightfog_off);
     if (ent.item_picked_up_by.any())
         json_add_optional(doc, obj, "item_picked_up_by", ent.item_picked_up_by.to_string());
 
@@ -1449,7 +1548,7 @@ void ReadEntity(json_doc &doc, json_val obj, ASEntity &ent)
     obj["clipmask"].get_enum(e.clipmask);
     json_get_optional(doc, obj["owner"], e.owner);
 
-    obj["spawn_count"].get_enum(ent.spawn_count);
+    obj["spawn_count"].get(ent.spawn_count);
     obj["movetype"].get_enum(ent.movetype);
     obj["flags"].get_enum(ent.flags);
 
@@ -1574,7 +1673,11 @@ void ReadEntity(json_doc &doc, json_val obj, ASEntity &ent)
     json_get_optional(doc, obj["proboscus"], ent.proboscus);
     obj["hackflags"].get(ent.hackflags);
 
-    // AS_TODO fog, heightfog
+    json_get_optional(doc, obj["fog"], ent.fog);
+    json_get_optional(doc, obj["fog_off"], ent.fog_off);
+    json_get_optional(doc, obj["heightfog"], ent.heightfog);
+    json_get_optional(doc, obj["heightfog_off"], ent.heightfog_off);
+
     {
         string s;
         obj["item_picked_up_by"].get(s);

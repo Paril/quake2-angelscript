@@ -555,14 +555,10 @@ void InfantryMachineGun(ASEntity &self)
 		AngleVectors(self.e.s.angles, forward, right);
 		start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
 
-        vec3_t aimpt; // AS_TODO
-
 		if (self.enemy !is null)
-			PredictAim(self, self.enemy, start, 0, true, -0.2f, forward, aimpt);
+			PredictAim(self, self.enemy, start, 0, true, -0.2f, forward);
 		else
-		{
 			AngleVectors(self.e.s.angles, forward, right);
-		}
 	}
 	else
 	{

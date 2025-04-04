@@ -674,8 +674,7 @@ void jorg_firebullet_right(ASEntity &self)
 	vec3_t forward, right, start;
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::JORG_MACHINEGUN_R1], forward, right);
-    vec3_t aimpoint; // AS_TODO
-	PredictAim(self, self.enemy, start, 0, false, -0.2f, forward, aimpoint);
+	PredictAim(self, self.enemy, start, 0, false, -0.2f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, monster_muzzle_t::JORG_MACHINEGUN_R1);
 }
 
@@ -684,8 +683,7 @@ void jorg_firebullet_left(ASEntity &self)
 	vec3_t forward, right, start;
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::JORG_MACHINEGUN_L1], forward, right);
-    vec3_t aimpoint; // AS_TODO
-	PredictAim(self, self.enemy, start, 0, false, 0.2f, forward, aimpoint);
+	PredictAim(self, self.enemy, start, 0, false, 0.2f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, monster_muzzle_t::JORG_MACHINEGUN_L1);
 }
 

@@ -758,7 +758,7 @@ void guncmdr_opengun(ASEntity &self)
 void GunnerCmdrFire(ASEntity &self)
 {
 	vec3_t					 start;
-	vec3_t					 forward, right, aimpoint;
+	vec3_t					 forward, right;
 	vec3_t					 aim;
 	monster_muzzle_t         flash_number;
 
@@ -772,7 +772,7 @@ void GunnerCmdrFire(ASEntity &self)
 
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
-	PredictAim(self, self.enemy, start, 800, false, frandom() * 0.3f, aim, aimpoint);
+	PredictAim(self, self.enemy, start, 800, false, frandom() * 0.3f, aim);
 	for (int i = 0; i < 3; i++)
 		aim[i] += crandom_open() * 0.025f;
 	monster_fire_flechette(self, start, aim, 4, 800, flash_number);
@@ -959,8 +959,7 @@ void GunnerCmdrGrenade(ASEntity &self)
 	}
 	else
 	{
-        vec3_t aimpoint;
-		PredictAim(self, self.enemy, start, 800, false, 0.f, aim, aimpoint);
+		PredictAim(self, self.enemy, start, 800, false, 0.f, aim);
 		aim += right * spread;
 		aim.normalize();
 	}

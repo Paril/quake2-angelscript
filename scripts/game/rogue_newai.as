@@ -456,7 +456,7 @@ bool MarkTeslaArea(ASEntity &self, ASEntity &tesla)
 // offset is how much time to miss by
 // aimdir is the resulting aim direction (optional)
 // aimpoint is the resulting aimpoint (optional)
-void PredictAim(ASEntity &self, ASEntity @target, const vec3_t &in start, float bolt_speed, bool eye_height, float offset, vec3_t &out aimdir, vec3_t &out aimpoint /* = void*/)
+void PredictAim(ASEntity &self, ASEntity @target, const vec3_t &in start, float bolt_speed, bool eye_height, float offset, vec3_t &out aimdir = void, vec3_t &out aimpoint = void)
 {
 	vec3_t dir, vec;
 	float  dist, time;

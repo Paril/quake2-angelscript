@@ -580,8 +580,8 @@ void berserk_jump_takeoff(ASEntity &self)
 	// immediately turn to where we need to go
 	float length = (self.e.s.origin - self.enemy.e.s.origin).length();
 	float fwd_speed = length * 1.95f;
-	vec3_t dir, aimpoint; // AS_TODO
-	PredictAim(self, self.enemy, self.e.s.origin, fwd_speed, false, 0.f, dir, aimpoint);
+	vec3_t dir;
+	PredictAim(self, self.enemy, self.e.s.origin, fwd_speed, false, 0.f, dir);
 	self.e.s.angles.y = vectoyaw(dir);
 	AngleVectors(self.e.s.angles, forward);
 	self.e.s.origin.z += 1;

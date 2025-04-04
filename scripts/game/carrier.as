@@ -260,7 +260,7 @@ void CarrierGrenade(ASEntity &self)
 
 void CarrierPredictiveRocket(ASEntity &self)
 {
-	vec3_t forward, right, aimpt;
+	vec3_t forward, right;
 	vec3_t start;
 	vec3_t dir;
 
@@ -268,22 +268,22 @@ void CarrierPredictiveRocket(ASEntity &self)
 
 	// 1
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::CARRIER_ROCKET_1], forward, right);
-	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, -0.3f, dir, aimpt);
+	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, -0.3f, dir);
 	monster_fire_rocket(self, start, dir, 50, CARRIER_ROCKET_SPEED, monster_muzzle_t::CARRIER_ROCKET_1);
 
 	// 2
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::CARRIER_ROCKET_2], forward, right);
-	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, -0.15f, dir, aimpt);
+	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, -0.15f, dir);
 	monster_fire_rocket(self, start, dir, 50, CARRIER_ROCKET_SPEED, monster_muzzle_t::CARRIER_ROCKET_2);
 
 	// 3
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::CARRIER_ROCKET_3], forward, right);
-	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, 0, dir, aimpt);
+	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, 0, dir);
 	monster_fire_rocket(self, start, dir, 50, CARRIER_ROCKET_SPEED, monster_muzzle_t::CARRIER_ROCKET_3);
 
 	// 4
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::CARRIER_ROCKET_4], forward, right);
-	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, 0.15f, dir, aimpt);
+	PredictAim(self, self.enemy, start, CARRIER_ROCKET_SPEED, false, 0.15f, dir);
 	monster_fire_rocket(self, start, dir, 50, CARRIER_ROCKET_SPEED, monster_muzzle_t::CARRIER_ROCKET_4);
 }
 
@@ -348,7 +348,7 @@ void CarrierRocket(ASEntity &self)
 
 void carrier_firebullet_right(ASEntity &self)
 {
-	vec3_t					 forward, right, start, aimpoint;
+	vec3_t					 forward, right, start;
 	monster_muzzle_t flashnum;
 
 	// if we're in manual steering mode, it means we're leaning down .. use the lower shot
@@ -359,13 +359,13 @@ void carrier_firebullet_right(ASEntity &self)
 
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flashnum], forward, right);
-	PredictAim(self, self.enemy, start, 0, true, -0.3f, forward, aimpoint);
+	PredictAim(self, self.enemy, start, 0, true, -0.3f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flashnum);
 }
 
 void carrier_firebullet_left(ASEntity &self)
 {
-	vec3_t					 forward, right, start, aimpoint;
+	vec3_t					 forward, right, start;
 	monster_muzzle_t flashnum;
 
 	// if we're in manual steering mode, it means we're leaning down .. use the lower shot
@@ -376,7 +376,7 @@ void carrier_firebullet_left(ASEntity &self)
 
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flashnum], forward, right);
-	PredictAim(self, self.enemy, start, 0, true, -0.3f, forward, aimpoint);
+	PredictAim(self, self.enemy, start, 0, true, -0.3f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flashnum);
 }
 

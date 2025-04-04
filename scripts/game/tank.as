@@ -650,7 +650,7 @@ void TankBlaster(ASEntity &self)
 	}
 	else
     {
-		PredictAim(self, self.enemy, start, 0, false, 0.f, dir, target);
+		PredictAim(self, self.enemy, start, 0, false, 0.f, dir);
     }
 	// pmm
 

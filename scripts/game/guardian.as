@@ -513,7 +513,7 @@ void guardian_atk1_charge(ASEntity &self)
 
 void guardian_fire_blaster(ASEntity &self)
 {
-	vec3_t forward, right, up, aimpt;
+	vec3_t forward, right, up;
 	vec3_t start;
 	monster_muzzle_t id = monster_muzzle_t::GUARDIAN_BLASTER;
 
@@ -525,7 +525,7 @@ void guardian_fire_blaster(ASEntity &self)
 
 	AngleVectors(self.e.s.angles, forward, right, up);
 	start = M_ProjectFlashSource(self, monster_flash_offset[id], forward, right);
-	PredictAim(self, self.enemy, start, 1000, false, crandom() * 0.1f, forward, aimpt);
+	PredictAim(self, self.enemy, start, 1000, false, crandom() * 0.1f, forward);
 	forward += right * crandom() * 0.02f;
 	forward += up * crandom() * 0.02f;
 	forward.normalize();
@@ -597,12 +597,11 @@ void guardian_fire_update(ASEntity &laser)
 	{
 		ASEntity @self = laser.owner;
 
-		vec3_t forward, right, target;
-		vec3_t start;
+		vec3_t forward, right, start;
 
 		AngleVectors(self.e.s.angles, forward, right);
 		start = M_ProjectFlashSource(self, laser_positions[(laser.spawnflags & spawnflags::dabeam::SECONDARY) != 0 ? 1 : 0], forward, right);
-		PredictAim(self, self.enemy, start, 0, false, 0.3f, forward, target);
+		PredictAim(self, self.enemy, start, 0, false, 0.3f, forward);
 
 		laser.e.s.origin = start;
 		forward[0] += crandom() * 0.02f;

@@ -845,7 +845,7 @@ struct q2as_yyjson_val
         auto ctx = asGetActiveContext();
         auto type = ctx->GetEngine()->GetTypeInfoById(refTypeId);
 
-        if (!(type->GetFlags() & asOBJ_ENUM))
+        if (!type || !(type->GetFlags() & asOBJ_ENUM))
         {
             ctx->SetException("Type is not an enum");
             return;

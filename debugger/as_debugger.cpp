@@ -71,7 +71,7 @@ asIDBScope::asIDBScope(asUINT offset, asIDBDebugger *dbg, asIScriptFunction *fun
 
 void asIDBScope::CalcLocals(asIDBDebugger *dbg, asIScriptFunction *function, asIDBVariableContainer *container)
 {
-    if (!function)
+    if (!function || offset == SCOPE_SYSTEM)
         return;
 
     auto cache = dbg->cache.get();

@@ -396,7 +396,7 @@ const int TURRET_BULLET_DAMAGE = 2;
 void TurretFire(ASEntity &self)
 {
 	vec3_t	forward;
-	vec3_t	start, end, dir, aimpoint;
+	vec3_t	start, end, dir;
 	float	dist, chance;
 	trace_t trace;
 	int		rocketSpeed;
@@ -449,9 +449,9 @@ void TurretFire(ASEntity &self)
 			// on harder difficulties, randomly fire directly at enemy
 			// more often; makes them more unpredictable
 			if ((self.spawnflags & spawnflags::turret::MACHINEGUN) != 0)
-				PredictAim(self, self.enemy, start, 0, true, 0.3f, dir, aimpoint);
+				PredictAim(self, self.enemy, start, 0, true, 0.3f, dir);
 			else if (frandom() < skill.integer / 5.f)
-				PredictAim(self, self.enemy, start, float(rocketSpeed), true, (frandom(3.f - skill.integer) / 3.f) - frandom(0.05f * (3.f - skill.integer)), dir, aimpoint);
+				PredictAim(self, self.enemy, start, float(rocketSpeed), true, (frandom(3.f - skill.integer) / 3.f) - frandom(0.05f * (3.f - skill.integer)), dir);
 		}
 
 		dir.normalize();
@@ -1049,7 +1049,7 @@ void SP_monster_turret(ASEntity &self)
             // AS_TODO
 			//if (g_debug_monster_kills.integer)
 			//	level.monsters_registered[level.total_monsters] = self;
-			//level.total_monsters++;
+			level.total_monsters++;
 		}
 	}
 	else

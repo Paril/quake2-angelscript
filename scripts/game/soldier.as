@@ -1098,10 +1098,8 @@ void soldierh_laser_update(ASEntity &laser)
 	start += (right * tempvec.y);
 	start += (up * (tempvec.z + 6));
 
-    vec3_t aimpoint; // AS_TODO
-
 	if (!self.deadflag)
-		PredictAim(self, self.enemy, start, 0, false, frandom(0.1f, 0.2f), forward, aimpoint);
+		PredictAim(self, self.enemy, start, 0, false, frandom(0.1f, 0.2f), forward);
 	
 	laser.e.s.origin = start;
 	laser.movedir = forward;

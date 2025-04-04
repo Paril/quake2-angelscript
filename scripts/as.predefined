@@ -2422,7 +2422,7 @@ void gi_Draw_OrientedWorldText(const vec3_t &in origin, const string &in text, c
 void gi_Draw_StaticWorldText(const vec3_t &in origin, const vec3_t &in angles, const string &in text, const rgba_t &in color, float size, float lifeTime, bool depthTest);
 void gi_Draw_Cylinder(const vec3_t &in origin, float halfHeight, float radius, const rgba_t &in color, float lifeTime, bool depthTest);
 void gi_Draw_Arrow(const vec3_t &in start, const vec3_t &in end, float size, const rgba_t &in lineColor, const rgba_t &in arrowColor, float lifeTime, bool depthTest);
-void SendToClipBoard(const string &in text);
+void gi_SendToClipBoard(const string &in text);
 T @find_by_str<T>(T @from, const string &in member, const string &in value) nodiscard;
 bool gi_GetPathToGoal(const PathRequest &in, PathInfo &out);
 void gi_SetShadowLightData(uint32, const shadow_light_data_t &in);

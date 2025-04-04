@@ -748,8 +748,8 @@ void parasite_fire_proboscis(ASEntity &self)
 
 	vec3_t start = parasite_get_proboscis_start(self);
 
-	vec3_t dir, aimpos;
-	PredictAim(self, self.enemy, start, g_athena_parasite_proboscis_speed, false, crandom_open() * g_athena_parasite_miss_chance, dir, aimpos);
+	vec3_t dir;
+	PredictAim(self, self.enemy, start, g_athena_parasite_proboscis_speed, false, crandom_open() * g_athena_parasite_miss_chance, dir);
 
 	fire_proboscis(self, start, dir, g_athena_parasite_proboscis_speed);
 }

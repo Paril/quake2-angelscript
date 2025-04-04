@@ -1192,23 +1192,53 @@ void G_Monster_ScaleCoopHealth(ASEntity &self)
 	self.monsterinfo.health_scaling = level.coop_scale_players;
 }
 
-// AS_TODO
-/*
-struct monster_filter_t
+class scalable_monsters_t
 {
-	inline bool operator()(edict_t *self) const
-	{
-		return self->inuse && (self->flags & FL_COOP_HEALTH_SCALE) && self->health > 0;
-	}
-};
+    uint opForBegin() const
+    {
+        for (uint i = 1 + max_clients + BODY_QUEUE_SIZE; i < num_edicts; i++)
+        {
+            ASEntity @e = entities[i];
+
+            if (e.e.inuse && e.health > 0 && (e.flags & ent_flags_t::COOP_HEALTH_SCALE) != 0)
+                return i;
+        }
+
+        return num_edicts;
+    }
+
+    bool opForEnd(uint i) const
+    {
+        return i > max_clients;
+    }
+
+    uint opForNext(uint i) const
+    {
+        for (i = i + 1; i < num_edicts; i++)
+        {
+            ASEntity @e = entities[i];
+
+            if (e.e.inuse && e.health > 0 && (e.flags & ent_flags_t::COOP_HEALTH_SCALE) != 0)
+                return i;
+        }
+
+        return num_edicts;
+    }
+
+    ASEntity @opForValue(uint i) const
+    {
+        return entities[i];
+    }
+}
+
+scalable_monsters_t scalable_monsters;
 
 // check all active monsters' scaling
 void G_Monster_CheckCoopHealthScaling()
 {
-	for (auto monster : entity_iterable_t<monster_filter_t>())
+	foreach (ASEntity @monster : scalable_monsters)
 		G_Monster_ScaleCoopHealth(monster);
 }
-*/
 
 //============================================================================
 namespace spawnflags::monsters

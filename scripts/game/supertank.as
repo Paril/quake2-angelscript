@@ -741,7 +741,7 @@ void supertankRocket(ASEntity &self)
 	}
 	else
 	{
-		PredictAim(self, self.enemy, start, 750, false, 0.f, forward, dir);
+		PredictAim(self, self.enemy, start, 750, false, 0.f, forward);
 		monster_fire_rocket(self, start, forward, 50, 750, flash_number);
 	}
 }
@@ -764,7 +764,7 @@ void supertankMachineGun(ASEntity &self)
 
 	AngleVectors(dir, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
-	PredictAim(self, self.enemy, start, 0, true, -0.1f, forward, dir);
+	PredictAim(self, self.enemy, start, 0, true, -0.1f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD * 3, DEFAULT_BULLET_VSPREAD * 3, flash_number);
 }
 

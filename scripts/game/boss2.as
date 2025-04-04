@@ -236,28 +236,28 @@ void Boss2PredictiveRocket(ASEntity &self)
 {
 	vec3_t forward, right;
 	vec3_t start;
-	vec3_t dir, aimdir;
+	vec3_t dir;
 
 	AngleVectors(self.e.s.angles, forward, right);
 
 	// 1
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::BOSS2_ROCKET_1], forward, right);
-	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, -0.10f, dir, aimdir);
+	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, -0.10f, dir);
 	monster_fire_rocket(self, start, dir, 50, BOSS2_ROCKET_SPEED, monster_muzzle_t::BOSS2_ROCKET_1);
 
 	// 2
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::BOSS2_ROCKET_2], forward, right);
-	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, -0.05f, dir, aimdir);
+	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, -0.05f, dir);
 	monster_fire_rocket(self, start, dir, 50, BOSS2_ROCKET_SPEED, monster_muzzle_t::BOSS2_ROCKET_2);
 
 	// 3
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::BOSS2_ROCKET_3], forward, right);
-	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, 0.05f, dir, aimdir);
+	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, 0.05f, dir);
 	monster_fire_rocket(self, start, dir, 50, BOSS2_ROCKET_SPEED, monster_muzzle_t::BOSS2_ROCKET_3);
 
 	// 4
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::BOSS2_ROCKET_4], forward, right);
-	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, 0.10f, dir, aimdir);
+	PredictAim(self, self.enemy, start, BOSS2_ROCKET_SPEED, false, 0.10f, dir);
 	monster_fire_rocket(self, start, dir, 50, BOSS2_ROCKET_SPEED, monster_muzzle_t::BOSS2_ROCKET_4);
 }
 
@@ -358,19 +358,19 @@ void Boss2Rocket64(ASEntity &self)
 
 void boss2_firebullet_right(ASEntity &self)
 {
-	vec3_t forward, right, start, aimdir;
+	vec3_t forward, right, start;
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::BOSS2_MACHINEGUN_R1], forward, right);
-	PredictAim(self, self.enemy, start, 0, true, -0.2f, forward, aimdir);
+	PredictAim(self, self.enemy, start, 0, true, -0.2f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD * 3, DEFAULT_BULLET_VSPREAD, monster_muzzle_t::BOSS2_MACHINEGUN_R1);
 }
 
 void boss2_firebullet_left(ASEntity &self)
 {
-	vec3_t forward, right, start, aimdir;
+	vec3_t forward, right, start;
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[monster_muzzle_t::BOSS2_MACHINEGUN_L1], forward, right);
-	PredictAim(self, self.enemy, start, 0, true, -0.2f, forward, aimdir);
+	PredictAim(self, self.enemy, start, 0, true, -0.2f, forward);
 	monster_fire_bullet(self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD * 3, DEFAULT_BULLET_VSPREAD, monster_muzzle_t::BOSS2_MACHINEGUN_L1);
 }
 

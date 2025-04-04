@@ -1032,8 +1032,7 @@ void Cmd_Where_f( ASEntity & ent ) {
 
 	string location = format( "{:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f}\n", origin[ 0 ], origin[ 1 ], origin[ 2 ], ent.e.client.ps.viewangles[0], ent.e.client.ps.viewangles[1], ent.e.client.ps.viewangles[2] );
 	gi_LocClient_Print( ent.e, print_type_t::HIGH, "Location: {}\n", location );
-    // AS_TODO
-	//gi_SendToClipBoard( location.c_str() );
+	gi_SendToClipBoard( location );
 }
 
 /*

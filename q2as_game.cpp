@@ -1629,7 +1629,6 @@ static void Q2AS_AddCommandString(asIScriptGeneric *gen)
     std::string result = q2as_format_to(svas, gen, 0);
     gi.AddCommandString(result.c_str());
 }
-
 static cvar_t *Q2AS_cvar(const std::string &name, const std::string &value, cvar_flags_t flags)
 {
     return gi.cvar(name.c_str(), value.c_str(), flags);
@@ -1719,7 +1718,7 @@ static void Q2AS_RegisterGame(q2as_registry &registry)
             { "void gi_AddCommandString(const string &in text)",                                                                                                                                                    asFUNCTION(Q2AS_AddCommandString_Zero),            asCALL_CDECL },
             { "void gi_AddCommandString(const string &in fmt, const ?&in...)",                                                                                                                                      asFUNCTION(Q2AS_AddCommandString),                 asCALL_GENERIC },
             { "void gi_Bot_RegisterEdict(edict_t @)",                                                                                                                                                               asFUNCTION(gi.game_import_t::Bot_RegisterEdict),   asCALL_CDECL },
-            { "void gi_Bot_UnRegisterEdict(edict_t @)",                                                                                                                                                             asFUNCTION(gi.game_import_t::Bot_UnRegisterEdict), asCALL_CDECL },
+            { "void gi_Bot_UnRegisterEdict(edict_t @)",                                                                                                                                                             asFUNCTION(gi.game_import_t::Bot_UnRegisterEdict), asCALL_CDECL }
         })
         .properties({
             { "const uint gi_tick_rate",     (const void *) &gi.tick_rate },
@@ -1737,7 +1736,7 @@ static void Q2AS_RegisterGame(q2as_registry &registry)
             { "void gi_Draw_Cylinder(const vec3_t &in origin, float halfHeight, float radius, const rgba_t &in color, float lifeTime, bool depthTest)",                                    asFUNCTION(gi.game_import_t::Draw_Cylinder), asCALL_CDECL },
             { "void gi_Draw_Arrow(const vec3_t &in start, const vec3_t &in end, float size, const rgba_t &in lineColor, const rgba_t &in arrowColor, float lifeTime, bool depthTest)",     asFUNCTION(gi.game_import_t::Draw_Arrow),    asCALL_CDECL },
 
-            { "void SendToClipBoard(const string &in text)", asFUNCTION(q2as_SendToClipBoard), asCALL_CDECL }
+            { "void gi_SendToClipBoard(const string &in text)", asFUNCTION(q2as_SendToClipBoard), asCALL_CDECL }
         })
         .properties({
             { "const uint max_edicts",       (const void *) &globals.max_edicts },

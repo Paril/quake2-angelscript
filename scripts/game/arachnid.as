@@ -311,8 +311,7 @@ void arachnid_charge_rail(ASEntity &self, monster_muzzle_t mz)
 	AngleVectors(self.e.s.angles, forward, right);
 	start = M_ProjectFlashSource(self, monster_flash_offset[mz], forward, right);
 
-    vec3_t dir;
-	PredictAim(self, self.enemy, start, 0, false, 0.0f, dir, self.pos1);
+	PredictAim(self, self.enemy, start, 0, false, 0.0f, aimpoint: self.pos1);
 }
 
 void arachnid_charge_rail_left(ASEntity &self)
@@ -363,7 +362,7 @@ void arachnid_rail_real(ASEntity &self, monster_muzzle_t id)
 		{
 			ASEntity @chosen = players_scanned[irandom(players_scanned.length())];
 
-			PredictAim(self, chosen, start, 0, false, 0.0f, dir, self.pos1);
+			PredictAim(self, chosen, start, 0, false, 0.0f, aimpoint: self.pos1);
 
 			dir = (chosen.e.s.origin - self.e.s.origin).normalized();
 

@@ -710,7 +710,7 @@ void brain_right_eye_laser_update(ASEntity &laser)
 {
 	ASEntity @self = laser.owner;
 
-	vec3_t start, forward, right, up, dir, aimpoint;
+	vec3_t start, forward, right, up, dir;
 
 	// check for max distance
 	AngleVectors(self.e.s.angles, forward, right, up);
@@ -720,7 +720,7 @@ void brain_right_eye_laser_update(ASEntity &laser)
 	start += forward * brain_reye[self.e.s.frame - brain::frames::walk101].y;
 	start += up * brain_reye[self.e.s.frame - brain::frames::walk101].z;
 
-	PredictAim(self, self.enemy, start, 0, false, frandom(0.1f, 0.2f), dir, aimpoint);
+	PredictAim(self, self.enemy, start, 0, false, frandom(0.1f, 0.2f), dir);
 
 	laser.e.s.origin = start;
 	laser.movedir = dir;
@@ -731,7 +731,7 @@ void brain_left_eye_laser_update(ASEntity &laser)
 {
 	ASEntity @self = laser.owner;
 
-	vec3_t start, forward, right, up, dir, aimpoint;
+	vec3_t start, forward, right, up, dir;
 
 	// check for max distance
 	AngleVectors(self.e.s.angles, forward, right, up);
@@ -741,7 +741,7 @@ void brain_left_eye_laser_update(ASEntity &laser)
 	start += forward * brain_leye[self.e.s.frame - brain::frames::walk101].y;
 	start += up * brain_leye[self.e.s.frame - brain::frames::walk101].z;
 
-	PredictAim(self, self.enemy, start, 0, false, frandom(0.1f, 0.2f), dir, aimpoint);
+	PredictAim(self, self.enemy, start, 0, false, frandom(0.1f, 0.2f), dir);
 
 	laser.e.s.origin = start;
 	laser.movedir = dir;
