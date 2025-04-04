@@ -21,6 +21,10 @@ void Q2AS_RegisterLimits(q2as_registry &registry);
 // requires:
 void Q2AS_RegisterMath(q2as_registry &registry);
 
+// registers vec2_t and related functions
+// requires:
+void Q2AS_RegisterVec2(q2as_registry &registry);
+
 // registers vec3_t and related functions
 // requires:
 void Q2AS_RegisterVec3(q2as_registry &registry);

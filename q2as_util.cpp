@@ -72,18 +72,6 @@ void Q2AS_RegisterUtil(q2as_registry &registry)
             { asBEHAVE_CONSTRUCT, "void f(uint8, uint8, uint8, uint8)", asFUNCTION(Q2AS_rgba_t_init_construct_u8u8u8u8), asCALL_CDECL_OBJLAST }
         });
 
-    Q2AS_RegisterFixedArray<float, 2>(registry, "vec2_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
-
-    registry
-        .for_type("vec2_t")
-        .properties({
-            { "float x", asOFFSET(vec2_t, x) },
-            { "float y", asOFFSET(vec2_t, y) }
-        })
-        .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f(float, float)", asFUNCTION(Q2AS_vec2_t_init_construct_ff), asCALL_CDECL_OBJLAST }
-        });
-
     Q2AS_RegisterFixedArray<float, 4>(registry, "vec4_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
 
     registry

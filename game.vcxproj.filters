@@ -250,6 +250,7 @@
       <Filter>debugger</Filter>
     </ClCompile>
     <ClCompile Include="q2as_dynamic_bitset.cpp" />
+    <ClCompile Include="q2as_vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bg_local.h" />
@@ -566,6 +567,7 @@
       <Filter>thirdparty</Filter>
     </ClInclude>
     <ClInclude Include="q2as_vec3.h" />
+    <ClInclude Include="q2as_vec2.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">

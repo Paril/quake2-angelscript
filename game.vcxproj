@@ -175,6 +175,7 @@
     <ClCompile Include="q2as_tokenizer.cpp" />
     <ClCompile Include="q2as_trace.cpp" />
     <ClCompile Include="q2as_util.cpp" />
+    <ClCompile Include="q2as_vec2.cpp" />
     <ClCompile Include="q2as_vec3.cpp" />
     <ClCompile Include="q_std.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_atomic.cpp" />
@@ -272,6 +273,7 @@
     <ClInclude Include="q2as_predefined.h" />
     <ClInclude Include="q2as_reg.h" />
     <ClInclude Include="q2as_stringex.h" />
+    <ClInclude Include="q2as_vec2.h" />
     <ClInclude Include="q2as_vec3.h" />
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
