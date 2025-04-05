@@ -67,6 +67,7 @@ protected:
 	bool IsKeyWord(const char *source, size_t sourceLength, size_t &tokenLength, eTokenType &tokenType) const;
 	bool IsIdentifier(const char *source, size_t sourceLength, size_t &tokenLength, eTokenType &tokenType) const;
 	bool IsDigitInRadix(char ch, int radix) const;
+	bool IsValidSeparatorDigitInRadix(const char *source, size_t sourceLength, size_t n, int radix) const;
 
 	void InitJumpTable();
 	void FreeJumpTable();
