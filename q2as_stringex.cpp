@@ -426,7 +426,9 @@ void Q2AS_RegisterStringEx(q2as_registry &registry)
         .methods({
             { "string &appendChar(uint8)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST },
             { "string aslower() const",    asFUNCTION(q2as_string_aslower),     asCALL_CDECL_OBJLAST },
-            { "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST }
+            { "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST },
+            { "int32 findStartOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindStartOfUTF8Codepoint), asCALL_CDECL_OBJLAST },
+            { "int32 findEndOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindEndOfUTF8Codepoint), asCALL_CDECL_OBJLAST },
         });
 
     registry
