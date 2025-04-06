@@ -7,14 +7,135 @@ static std::string *q2as_string_append_char(uint8_t c, std::string *s)
     return s;
 }
 
+char to_lower(char c) 
+{
+    return static_cast<char>(std::tolower(static_cast<uint8_t>(c)));
+}
+
 static int q2as_Q_strcasecmp(const std::string &a, const std::string &b)
 {
-    return Q_strcasecmp(a.c_str(), b.c_str());
+    auto iterator_a = a.begin();
+    auto iterator_b = b.begin();
+
+    while (iterator_a != a.end() && iterator_b != b.end())
+    {
+        char ca = to_lower(*iterator_a);
+        char cb = to_lower(*iterator_b);
+
+        if (ca != cb)
+        {
+            if (ca < cb)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        iterator_a++;
+        iterator_b++;
+    }
+
+    if (iterator_a == a.end() && iterator_b == b.end())
+    {
+        return 0;
+    }
+    else if (iterator_a == a.end())
+    {
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32_t n)
 {
-    return Q_strncasecmp(a.c_str(), b.c_str(), n);
+    auto iterator_a = a.begin();
+    auto iterator_b = b.begin();
+
+    uint32_t count = 0;
+    while (iterator_a != a.end() && iterator_b != b.end() && count < n)
+    {
+        char ca = to_lower(*iterator_a);
+        char cb = to_lower(*iterator_b);
+
+        if (ca != cb)
+        {
+            if (ca < cb)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        iterator_a++;
+        iterator_b++;
+        count++;
+    }
+
+    if (count == n)
+    {
+        return 0;
+    }
+
+    if (iterator_a == a.end() && iterator_b == b.end())
+    {
+        return 0;
+    }
+    else if (iterator_a == a.end())
+    {
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+static constexpr size_t ALIGN = sizeof(size_t) - 1;
+static constexpr size_t ONES = static_cast<size_t>(-1) / UCHAR_MAX;
+static constexpr size_t HIGHS = ONES * (UCHAR_MAX / 2 + 1);
+static inline bool HASZERO(size_t x)
+{
+    return ((x) - ONES & ~(x) & HIGHS) != 0;
+}
+
+size_t q2as_strlcpy(char *d, const char *s, size_t n)
+{
+    char *d0 = d;
+    size_t *wd;
+    const size_t *ws;
+
+    if (!n--) goto finish;
+
+    if (((uintptr_t) s & ALIGN) == ((uintptr_t) d & ALIGN)) {
+        for (; ((uintptr_t) s & ALIGN) && n && (*d=*s); n--, s++, d++);
+        if (n && *s)
+        {
+            wd=reinterpret_cast<size_t *>(d);
+            ws=reinterpret_cast<const size_t *>(s);
+            for (; n>=sizeof(size_t) && !HASZERO(*ws);
+                   n-=sizeof(size_t), ws++, wd++)
+            {
+                *wd = *ws;
+            }
+
+            d=reinterpret_cast<char *>(wd);
+            s=reinterpret_cast<const char *>(ws);
+        }
+    }
+
+    for (; n && (*d=*s); n--, s++, d++);
+    *d = 0;
+finish:
+    return d-d0 + strlen(s);
 }
 
 constexpr int FORMATTER_USERDATA = 1;
