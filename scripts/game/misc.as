@@ -540,7 +540,7 @@ void setup_shadow_lights()
 
         gi_SetShadowLightData(self.e.s.number, lightdata);
 
-		gi_configstring(int16(configstring_id_t::SHADOWLIGHTS) + s, format("{};{};{:1};{};{:1};{:1};{:1};{};{:1};{:1};{:1};{:1}",
+		gi_configstring(int16(configstring_id_t::SHADOWLIGHTS) + s, "{};{};{:1};{};{:1};{:1};{:1};{};{:1};{:1};{:1};{:1}",
 			self.e.s.number,
 			int(lightdata.lighttype),
 			lightdata.radius,
@@ -552,7 +552,7 @@ void setup_shadow_lights()
 			lightdata.coneangle,
 			lightdata.conedirection.x,
 			lightdata.conedirection.y,
-			lightdata.conedirection.z));
+			lightdata.conedirection.z);
         s++;
 	}
 }

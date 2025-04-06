@@ -1348,6 +1348,13 @@ static void q2as_configstring(int index, const std::string &value)
     gi.configstring(index, value.c_str());
 }
 
+static void q2as_configstringfmt(asIScriptGeneric *gen)
+{
+    int index = gen->GetArgDWord(0);
+    std::string result = q2as_impl_format(svas, gen, 1);
+    gi.configstring(index, result.c_str());
+}
+
 static std::string q2as_get_configstring(int index)
 {
     return gi.get_configstring(index);
@@ -1691,6 +1698,7 @@ static void Q2AS_RegisterGame(q2as_registry &registry)
             { "uint gi_Info_ValueForKey(const string &in, const string &in, const string &out)",                                                                                                                    asFUNCTION(q2as_Info_ValueForKey),                 asCALL_CDECL },
             { "bool gi_Info_SetValueForKey(const string &in, const string &in, const string &in, string &out)",                                                                                                     asFUNCTION(q2as_Info_SetValueForKey),              asCALL_CDECL },
             { "void gi_configstring(int num, const string &in str)",                                                                                                                                                asFUNCTION(q2as_configstring),                     asCALL_CDECL },
+            { "void gi_configstring(int num, const string &in fmt, const ?&in...)",                                                                                                                                 asFUNCTION(q2as_configstringfmt),                  asCALL_GENERIC },
             { "string gi_get_configstring(int num) nodiscard",                                                                                                                                                      asFUNCTION(q2as_get_configstring),                 asCALL_CDECL },
             { "uint gi_ServerFrame() nodiscard",                                                                                                                                                                    asFUNCTION(gi.ServerFrame),                        asCALL_CDECL },
             { "void gi_setmodel(edict_t @ent, const string &in name)",                                                                                                                                              asFUNCTION(q2as_setmodel),                         asCALL_CDECL },

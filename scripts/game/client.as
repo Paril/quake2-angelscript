@@ -3191,7 +3191,7 @@ void ClientUserinfoChanged(edict_t @ent_handle, const string &in userinfo)
 		gi_Info_ValueForKey(userinfo, "dogtag", dogtag);
 
 		// ZOID
-		gi_configstring(int(configstring_id_t::PLAYERSKINS) + playernum, format("{}\\{}\\{}", ent.client.pers.netname, val, dogtag));
+		gi_configstring(int(configstring_id_t::PLAYERSKINS) + playernum, "{}\\{}\\{}", ent.client.pers.netname, val, dogtag);
 	}
 
 	// ZOID

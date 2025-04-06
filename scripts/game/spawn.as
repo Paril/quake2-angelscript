@@ -1067,9 +1067,9 @@ void SP_worldspawn(ASEntity &ent)
 	else
 		gi_configstring(uint(configstring_id_t::SKY), "unit1_");
 
-	gi_configstring(uint(configstring_id_t::SKYROTATE), format("{} {}", st.skyrotate, st.skyautorotate));
+	gi_configstring(uint(configstring_id_t::SKYROTATE), "{} {}", st.skyrotate, st.skyautorotate);
 
-	gi_configstring(uint(configstring_id_t::SKYAXIS), format("{}", st.skyaxis));
+	gi_configstring(uint(configstring_id_t::SKYAXIS), "{}", st.skyaxis);
 
 	if (!st.music.empty())
 	{
@@ -1077,13 +1077,13 @@ void SP_worldspawn(ASEntity &ent)
 	}
 	else
 	{
-		gi_configstring(uint(configstring_id_t::CDTRACK), format("{}", ent.sounds));
+		gi_configstring(uint(configstring_id_t::CDTRACK), "{}", ent.sounds);
 	}
 
 	if (level.is_n64)
 		gi_configstring(uint(configstring_id_t::CD_LOOP_COUNT), "0");
 	else if (st.was_key_specified("loop_count"))
-		gi_configstring(uint(configstring_id_t::CD_LOOP_COUNT), format("{}", st.loop_count));
+		gi_configstring(uint(configstring_id_t::CD_LOOP_COUNT), "{}", st.loop_count);
 	else
 		gi_configstring(uint(configstring_id_t::CD_LOOP_COUNT), "");
 
@@ -1094,11 +1094,11 @@ void SP_worldspawn(ASEntity &ent)
 
 	// [Paril-KEX]
 	if (deathmatch.integer == 0)
-		gi_configstring(uint(configstring_id_t::GAME_STYLE), format("{}", int(game_style_t::PVE)));
+		gi_configstring(uint(configstring_id_t::GAME_STYLE), "{}", int(game_style_t::PVE));
 	else if (teamplay.integer != 0 || ctf.integer != 0)
-		gi_configstring(uint(configstring_id_t::GAME_STYLE), format("{}", int(game_style_t::TDM)));
+		gi_configstring(uint(configstring_id_t::GAME_STYLE), "{}", int(game_style_t::TDM));
 	else
-		gi_configstring(uint(configstring_id_t::GAME_STYLE), format("{}", int(game_style_t::FFA)));
+		gi_configstring(uint(configstring_id_t::GAME_STYLE), "{}", int(game_style_t::FFA));
 
 	// [Paril-KEX]
 	if (!st.goals.empty())
@@ -1113,7 +1113,7 @@ void SP_worldspawn(ASEntity &ent)
 	if (st.no_grapple != 0)
 		level.no_grapple = true;
 
-	gi_configstring(uint(configstring_id_t::MAXCLIENTS), format("{}", max_clients));
+	gi_configstring(uint(configstring_id_t::MAXCLIENTS), "{}", max_clients);
 
 	int override_physics = gi_cvar("g_override_physics_flags", "-1", cvar_flags_t::NOFLAGS).integer;
 
@@ -1139,7 +1139,7 @@ void SP_worldspawn(ASEntity &ent)
 			pm_config.physics_flags = physics_flags_t(pm_config.physics_flags | physics_flags_t::DEATHMATCH);
 	}
 
-	gi_configstring(uint(game_configstring_id_t::PHYSICS_FLAGS), format("{}", int(pm_config.physics_flags)));
+	gi_configstring(uint(game_configstring_id_t::PHYSICS_FLAGS), "{}", int(pm_config.physics_flags));
 	
 	level.primary_objective_string = "$g_primary_mission_objective";
 	level.secondary_objective_string = "$g_secondary_mission_objective";
@@ -1162,7 +1162,7 @@ void SP_worldspawn(ASEntity &ent)
 
 	// [Paril-KEX] air accel handled by game DLL now, and allow
 	// it to be changed in sp/coop
-	gi_configstring(uint(configstring_id_t::AIRACCEL), format("{}", sv_airaccelerate.integer));
+	gi_configstring(uint(configstring_id_t::AIRACCEL), "{}", sv_airaccelerate.integer);
 	pm_config.airaccel = sv_airaccelerate.integer;
 
 	game.airacceleration_modified = sv_airaccelerate.modified_count;

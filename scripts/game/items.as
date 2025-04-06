@@ -3689,7 +3689,7 @@ void SetItemNames()
 		if (cs_index >= MAX_WHEEL_ITEMS)
 			gi_Com_Error("out of wheel indices");
 
-		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_AMMO + cs_index), format("{}|{}", int32(i), gi_imageindex(itemlist[i].icon)));
+		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_AMMO + cs_index), "{}|{}", int32(i), gi_imageindex(itemlist[i].icon));
 		itemlist[i].ammo_wheel_index = cs_index;
 		cs_index++;
 	}
@@ -3707,7 +3707,7 @@ void SetItemNames()
 
 		int32 min_ammo = (itemlist[i].flags & item_flags_t::AMMO) != 0 ? 1 : itemlist[i].quantity;
 
-		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_WEAPONS + cs_index), format("{}|{}|{}|{}|{}|{}|{}|{}",
+		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_WEAPONS + cs_index), "{}|{}|{}|{}|{}|{}|{}|{}",
 			int32(i),
 			gi_imageindex(itemlist[i].icon),
 			itemlist[i].ammo != item_id_t::NULL ? GetItemByIndex(itemlist[i].ammo).ammo_wheel_index : -1,
@@ -3716,7 +3716,7 @@ void SetItemNames()
 			itemlist[i].sort_id,
 			itemlist[i].quantity_warn,
 			G_CanDropItem(itemlist[i]) ? 1 : 0
-		));
+		);
 		itemlist[i].weapon_wheel_index = cs_index;
 		cs_index++;
 	}
@@ -3732,14 +3732,14 @@ void SetItemNames()
 		if (cs_index >= MAX_WHEEL_ITEMS)
 			gi_Com_Error("out of wheel indices");
 
-		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_POWERUPS + cs_index), format("{}|{}|{}|{}|{}|{}",
+		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_POWERUPS + cs_index), "{}|{}|{}|{}|{}|{}",
 			int32(i),
 			gi_imageindex(itemlist[i].icon),
 			(itemlist[i].flags & item_flags_t::POWERUP_ONOFF) != 0 ? 1 : 0,
 			itemlist[i].sort_id,
 			G_CanDropItem(itemlist[i]) ? 1 : 0,
 			itemlist[i].ammo != item_id_t::NULL ? GetItemByIndex(itemlist[i].ammo).ammo_wheel_index : -1
-		));
+		);
 		itemlist[i].powerup_wheel_index = cs_index;
 		cs_index++;
 	}
