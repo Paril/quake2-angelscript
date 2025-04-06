@@ -1,6 +1,5 @@
 #include <angelscript.h>
 #include <fstream>
-#include <fmt/format.h>
 #include <vector>
 #include <map>
 #include <string>

@@ -567,7 +567,7 @@ static void q2as_profile_end()
     ((q2as_state_t *) asGetActiveContext()->GetEngine()->GetUserData())->Print(G_Fmt("{}\n", result.count()).data());
 }
 
-static std::string q2as_backtrace()
+std::string q2as_backtrace()
 {
     std::string trace;
     auto ctx = asGetActiveContext();

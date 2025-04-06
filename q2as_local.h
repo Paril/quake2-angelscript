@@ -51,11 +51,6 @@ struct q2as_state_t
     asIScriptModule *mainModule; // the main module
 
     int stringTypeId;
-    int vec3TypeId;
-    int timeTypeId;
-    // only for SV
-    int edict_tTypeId;
-    int IASEntityTypeId;
 
     virtual ~q2as_state_t()
     {
@@ -153,3 +148,4 @@ struct q2as_dbg_state_t
 extern q2as_dbg_state_t debugger_state;
 
 std::string Q2AS_ScriptPath();
+std::string q2as_backtrace();

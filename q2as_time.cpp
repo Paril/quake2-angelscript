@@ -80,6 +80,16 @@ static gtime_t Q2AS_max_time(const gtime_t &a, const gtime_t &b)
     return max(a, b);
 }
 
+static void gtime_formatter(std::string &str, const std::string &args, const gtime_t &time)
+{
+    if (abs(time.minutes<float>()) >= 1)
+        fmt::format_to(std::back_inserter(str), "{} min", time.minutes<float>());
+    else if (abs(time.seconds<float>()) >= 1)
+        fmt::format_to(std::back_inserter(str), "{} sec", time.seconds<float>());
+    else
+        fmt::format_to(std::back_inserter(str), "{} ms", time.milliseconds());
+}
+
 void Q2AS_RegisterTime(q2as_registry &registry)
 {
     registry
@@ -150,6 +160,8 @@ void Q2AS_RegisterTime(q2as_registry &registry)
             // FIXME: why do these only work by ref? does it matter?
             { "gtime_t clamp(const gtime_t &in, const gtime_t &in, const gtime_t &in)", asFUNCTION(Q2AS_clamp_time), asCALL_CDECL },
             { "gtime_t min(const gtime_t &in, const gtime_t &in)",                      asFUNCTION(Q2AS_min_time),   asCALL_CDECL },
-            { "gtime_t max(const gtime_t &in, const gtime_t &in)",                      asFUNCTION(Q2AS_max_time),   asCALL_CDECL }
+            { "gtime_t max(const gtime_t &in, const gtime_t &in)",                      asFUNCTION(Q2AS_max_time),   asCALL_CDECL },
+
+            { "void formatter(string &str, const string &in args, const gtime_t &in time)", asFUNCTION(gtime_formatter), asCALL_CDECL }
         });
 }

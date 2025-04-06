@@ -20,6 +20,11 @@ static void Q2AS_vec3_t_list_copy(const vec3 &in, vec3 &v)
     v = in;
 }
 
+static void vec3_formatter(std::string &str, const std::string &args, const vec3 &in)
+{
+    fmt::format_to(std::back_inserter(str), "{} {} {}", in.x, in.y, in.z);
+}
+
 void Q2AS_RegisterVec3(q2as_registry &registry)
 {
     registry
@@ -103,6 +108,7 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
             { "vec3_t G_ProjectSource(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in) nodiscard",                    asFUNCTION(G_ProjectSource),                                                      asCALL_CDECL },
             { "vec3_t G_ProjectSource2(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in) nodiscard", asFUNCTION(G_ProjectSource2),                                                     asCALL_CDECL },
             { "vec3_t slerp(const vec3_t &in, const vec3_t &in, float) nodiscard",                                                           asFUNCTION(slerp),                                                                asCALL_CDECL },
-            { "vec3_t lerp(vec3_t, vec3_t, float) nodiscard",                                                                                asFUNCTIONPR(lerp, (vec3_t, vec3_t, float), vec3_t),                              asCALL_CDECL }
+            { "vec3_t lerp(vec3_t, vec3_t, float) nodiscard",                                                                                asFUNCTIONPR(lerp, (vec3_t, vec3_t, float), vec3_t),                              asCALL_CDECL },
+            { "void formatter(string &str, const string &in args, const vec3_t &in vec)",                                                    asFUNCTION(vec3_formatter),                                                       asCALL_CDECL }
         });
 }

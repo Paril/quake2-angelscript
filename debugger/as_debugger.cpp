@@ -1078,7 +1078,7 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBCache &cache, const asI
 
             asIDBVarAddr elemId { typeId, false, addr };
 
-            var.children.emplace_back(fmt::format(opForValues.size() == 1 ? "[{0}]" : "[{0},{1}]", elementId, fv), cache.GetTypeNameFromType({ typeId, asTM_NONE }), elemId,
+            var.children.emplace_back(fmt::vformat(opForValues.size() == 1 ? "[{0}]" : "[{0},{1}]", fmt::make_format_args(elementId, fv)), cache.GetTypeNameFromType({ typeId, asTM_NONE }), elemId,
                 asIDBVarState { cache.evaluators.Evaluate(cache, elemId), std::move(stackMemory) });
             fv++;
         }

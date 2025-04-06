@@ -1,4 +1,3 @@
-
 const int    Team_None = 0;
 const int    Item_UnknownRespawnTime = int32_limits::max;
 const int    Item_Invalid = -1;

@@ -80,6 +80,8 @@ void q2as_cg_state_t::LoadFunctions()
     pmove_inst->trace_f->AddRef();
     pmove_inst->clip_f->AddRef();
     pmove_inst->pointcontents_f->AddRef();
+
+    q2as_format_init(engine);
 }
 
 q2as_cg_state_t cgas;
@@ -140,14 +142,14 @@ static void q2as_CG_Com_Print(const std::string &s)
 
 static void q2as_CG_Com_ErrorFmt(asIScriptGeneric *gen)
 {
-    std::string data = q2as_format_to(cgas, gen, 0);
+    std::string data = q2as_impl_format(cgas, gen, 0);
 
     cgi.Com_Error(data.c_str());
 }
 
 static void q2as_CG_Com_PrintFmt(asIScriptGeneric *gen)
 {
-    std::string data = q2as_format_to(cgas, gen, 0);
+    std::string data = q2as_impl_format(cgas, gen, 0);
 
     cgi.Com_Print(data.c_str());
 }

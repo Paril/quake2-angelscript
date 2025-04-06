@@ -85,6 +85,8 @@ void q2as_sv_state_t::LoadFunctions()
     Edict_ForceLookAtPoint = mainModule->GetFunctionByDecl("void Edict_ForceLookAtPoint( edict_t @, const vec3_t &in )");
     Bot_PickedUpItem = mainModule->GetFunctionByDecl("bool Bot_PickedUpItem( edict_t @, edict_t @ )");
     Entity_IsVisibleToPlayer = mainModule->GetFunctionByDecl("bool Entity_IsVisibleToPlayer( edict_t @, edict_t @ )");
+
+    q2as_format_init(engine);
 }
 
 q2as_sv_state_t svas;
@@ -1415,7 +1417,7 @@ static void q2as_gi_Client_Print(asIScriptGeneric *gen)
     edict_t *ent = (edict_t *) gen->GetArgAddress(0);
     print_type_t level = (print_type_t) gen->GetArgDWord(1);
     const std::string *base = (std::string *) gen->GetArgAddress(2);
-    std::string result = q2as_format_to(svas, gen, 3);
+    std::string result = q2as_impl_format(svas, gen, 3);
     gi.Client_Print(ent, level, result.c_str());
 }
 
@@ -1501,19 +1503,19 @@ static loc_args_t &q2as_set_loc_args(q2as_state_t &as, asIScriptGeneric *gen, in
 
 static void q2as_Com_ErrorFmt(asIScriptGeneric *gen)
 {
-    std::string result = q2as_format_to(svas, gen, 0);
+    std::string result = q2as_impl_format(svas, gen, 0);
     gi.Com_Error(result.c_str());
 }
 
 static void q2as_Com_PrintFmt(asIScriptGeneric *gen)
 {
-    std::string result = q2as_format_to(svas, gen, 0);
+    std::string result = q2as_impl_format(svas, gen, 0);
     gi.Com_Print(result.c_str());
 }
 
 static void q2as_sv_format(asIScriptGeneric *gen)
 {
-    std::string result = q2as_format_to(svas, gen, 0);
+    std::string result = q2as_impl_format(svas, gen, 0);
     new(gen->GetAddressOfReturnLocation()) std::string(std::move(result));
 }
 
@@ -1556,7 +1558,7 @@ static void q2as_gi_Center_Print(asIScriptGeneric *gen)
 {
     edict_t *ent = (edict_t *) gen->GetArgAddress(0);
     const std::string *base = (std::string *) gen->GetArgAddress(1);
-    std::string result = q2as_format_to(svas, gen, 2);
+    std::string result = q2as_impl_format(svas, gen, 2);
     gi.Center_Print(ent, result.c_str());
 }
 
@@ -1603,7 +1605,7 @@ static void q2as_gi_LocBroadcast_Print_Zero(print_type_t t, const std::string &b
 static void q2as_gi_Broadcast_Print(asIScriptGeneric *gen)
 {
     print_type_t t = (print_type_t) gen->GetArgDWord(0);
-    std::string result = q2as_format_to(svas, gen, 1);
+    std::string result = q2as_impl_format(svas, gen, 1);
     gi.Broadcast_Print(t, result.c_str());
 }
 
@@ -1626,7 +1628,7 @@ static void Q2AS_AddCommandString_Zero(const std::string &str)
 
 static void Q2AS_AddCommandString(asIScriptGeneric *gen)
 {
-    std::string result = q2as_format_to(svas, gen, 0);
+    std::string result = q2as_impl_format(svas, gen, 0);
     gi.AddCommandString(result.c_str());
 }
 static cvar_t *Q2AS_cvar(const std::string &name, const std::string &value, cvar_flags_t flags)
