@@ -1064,7 +1064,7 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
     }
 
     registry
-        .type("armorInfo_t", sizeof(armorInfo_t), asOBJ_VALUE | asOBJ_POD)
+        .type("armorInfo_t", sizeof(armorInfo_t), asGetTypeTraits<armorInfo_t>() | asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLINTS)
         .properties({
             { "int item_id",   asOFFSET(armorInfo_t, item_id) },
             { "int max_count", asOFFSET(armorInfo_t, max_count) }
@@ -1076,7 +1076,7 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
             { "const int Max_Armor_Types", &Max_Armor_Types }
         });
 
-    Q2AS_RegisterFixedArray<int, MAX_ITEMS>(registry, "inventoryArray_t", "int", asOBJ_APP_CLASS_ALLINTS);
+    Q2AS_RegisterFixedArray<int, MAX_ITEMS>(registry, "inventoryArray_t", "int", asOBJ_APP_CLASS_ALLINTS, false);
     Q2AS_RegisterFixedArray<armorInfo_t, Max_Armor_Types>(registry, "armorInfoArray_t", "armorInfo_t", asOBJ_APP_CLASS_ALLINTS);
 
     // entity handle; special handle, always active and allocated

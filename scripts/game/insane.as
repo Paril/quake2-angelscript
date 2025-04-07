@@ -926,7 +926,7 @@ void SP_misc_insane(ASEntity &self)
 	{
 		insane::sounds::shake.precache();
 		insane::sounds::moan.precache();
-        foreach (auto @sound : insane::sounds::scream)
+        foreach (cached_soundindex @sound : insane::sounds::scream)
             sound.precache();
 	}
 

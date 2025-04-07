@@ -999,7 +999,6 @@ class string
 	~string();
 	string();
 	string(const string&in);
-    string(const string &in fmt, const ?& in ...);
 	// methods
 	string &opAssign(const string &in);
 	string &opAddAssign(const string &in);
@@ -1242,10 +1241,10 @@ class vec3_t
 	// behaviors
 	vec3_t(int&in) { float, float, float };
 	vec3_t(float, float, float);
-	vec3_t(const vec3_t&in);
 	// methods
 	float &opIndex(uint32);
 	const float &opIndex(uint32) const;
+	uint32 size() const;
 	bool opEquals(const vec3_t &in) const;
 	bool equals(const vec3_t &in, float) const;
 	bool equals(const vec3_t &in, float, float) const;
@@ -1307,7 +1306,7 @@ class rgba_t
 	uint8 b;
 	uint8 a;
 	// behaviors
-	rgba_t(int&in) { repeat uint8 };
+	rgba_t(int&in) { uint8, uint8, uint8, uint8 };
 	rgba_t(uint8, uint8, uint8, uint8);
 	// methods
 	uint8 &opIndex(uint32);
@@ -1320,7 +1319,7 @@ class vec2_t
 	float x;
 	float y;
 	// behaviors
-	vec2_t(int&in) { repeat float };
+	vec2_t(int&in) { float, float };
 	vec2_t(float, float);
 	// methods
 	float &opIndex(uint32);
@@ -1339,7 +1338,7 @@ class vec4_t
 	float b;
 	float a;
 	// behaviors
-	vec4_t(int&in) { repeat float };
+	vec4_t(int&in) { float, float, float, float };
 	vec4_t(float, float, float, float);
 	// methods
 	float &opIndex(uint32);
@@ -1354,7 +1353,8 @@ class vec4_t
 class mat3_t
 {
 	// behaviors
-	mat3_t(int&in) { repeat vec3_t };
+	mat3_t(int&in) { vec3_t, vec3_t, vec3_t };
+	mat3_t(vec3_t, vec3_t, vec3_t);
 	// methods
 	vec3_t &opIndex(uint32);
 	const vec3_t &opIndex(uint32) const;
@@ -1438,7 +1438,8 @@ class csurface_t
 class stat_array_t
 {
 	// behaviors
-	stat_array_t(int&in) { repeat int16 };
+	stat_array_t(int&in) { int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16 };
+	stat_array_t(int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16);
 	// methods
 	int16 &opIndex(uint32);
 	const int16 &opIndex(uint32) const;
@@ -1556,7 +1557,8 @@ class armorInfo_t
 class inventoryArray_t
 {
 	// behaviors
-	inventoryArray_t(int&in) { repeat int };
+	inventoryArray_t(int&in) { int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int };
+	inventoryArray_t(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
 	// methods
 	int32 &opIndex(uint32);
 	const int32 &opIndex(uint32) const;
@@ -1565,7 +1567,8 @@ class inventoryArray_t
 class armorInfoArray_t
 {
 	// behaviors
-	armorInfoArray_t(int&in) { repeat armorInfo_t };
+	armorInfoArray_t(int&in) { armorInfo_t, armorInfo_t, armorInfo_t };
+	armorInfoArray_t(armorInfo_t, armorInfo_t, armorInfo_t);
 	// methods
 	armorInfo_t &opIndex(uint32);
 	const armorInfo_t &opIndex(uint32) const;
@@ -2038,7 +2041,8 @@ class vrect_t
 	int32 width;
 	int32 height;
 	// behaviors
-	vrect_t(int&in) { repeat int };
+	vrect_t(int&in) { int, int, int, int };
+	vrect_t(int, int, int, int);
 	// methods
 	int32 &opIndex(uint32);
 	const int32 &opIndex(uint32) const;
@@ -2047,7 +2051,8 @@ class vrect_t
 class item_array_t
 {
 	// behaviors
-	item_array_t(int&in) { repeat int16 };
+	item_array_t(int&in) { int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16 };
+	item_array_t(int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16);
 	// methods
 	int16 &opIndex(uint32);
 	const int16 &opIndex(uint32) const;

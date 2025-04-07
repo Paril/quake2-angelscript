@@ -300,7 +300,7 @@ static void Q2AS_RegisterCGameUtil(q2as_registry &registry)
             { "int32 height", asOFFSET(vrect_t, height) },
         });
 
-    Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(registry, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS);
+    Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(registry, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS, false);
 
     // special handle, always active and allocated
     // by the host, wrapped by AngelScript.
