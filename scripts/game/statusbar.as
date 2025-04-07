@@ -3,55 +3,55 @@ class statusbar_t
 {
 	string sb;
 	
-	statusbar_t &yb(int32 offset) { sb += format("yb {} ", offset); return this; }
-	statusbar_t &yt(int32 offset) { sb += format("yt {} ", offset); return this; }
-	statusbar_t &yv(int32 offset) { sb += format("yv {} ", offset); return this; }
-	statusbar_t &xl(int32 offset) { sb += format("xl {} ", offset); return this; }
-	statusbar_t &xr(int32 offset) { sb += format("xr {} ", offset); return this; }
-	statusbar_t &xv(int32 offset) { sb += format("xv {} ", offset); return this; }
+	statusbar_t &yb(int32 offset) { sb.format_append("yb {} ", offset); return this; }
+	statusbar_t &yt(int32 offset) { sb.format_append("yt {} ", offset); return this; }
+	statusbar_t &yv(int32 offset) { sb.format_append("yv {} ", offset); return this; }
+	statusbar_t &xl(int32 offset) { sb.format_append("xl {} ", offset); return this; }
+	statusbar_t &xr(int32 offset) { sb.format_append("xr {} ", offset); return this; }
+	statusbar_t &xv(int32 offset) { sb.format_append("xv {} ", offset); return this; }
 
-	statusbar_t &ifstat(player_stat_t stat) { sb += format("if {} ", int(stat)); return this; }
+	statusbar_t &ifstat(player_stat_t stat) { sb.format_append("if {} ", int(stat)); return this; }
 	statusbar_t &endifstat() { sb += "endif "; return this; }
 
-	statusbar_t &pic(player_stat_t stat) { sb += format("pic {} ", int(stat)); return this; }
-	statusbar_t &picn(const ::string &in icon) { sb += format("picn {} ", icon); return this; }
+	statusbar_t &pic(player_stat_t stat) { sb.format_append("pic {} ", int(stat)); return this; }
+	statusbar_t &picn(const ::string &in icon) { sb.format_append("picn {} ", icon); return this; }
 
 	statusbar_t &anum() { sb += "anum "; return this; }
 	statusbar_t &rnum() { sb += "rnum "; return this; }
 	statusbar_t &hnum() { sb += "hnum "; return this; }
-	statusbar_t &num(int32 width, player_stat_t stat) { sb += format("num {} {} ", width, int(stat)); return this; }
+	statusbar_t &num(int32 width, player_stat_t stat) { sb.format_append("num {} {} ", width, int(stat)); return this; }
 	
-	statusbar_t &loc_stat_string(player_stat_t stat) { sb += format("loc_stat_string {} ", int(stat)); return this; }
-	statusbar_t &loc_stat_rstring(player_stat_t stat) { sb += format("loc_stat_rstring {} ", int(stat)); return this; }
-	statusbar_t &stat_string(player_stat_t stat) { sb += format("stat_string {} ", int(stat)); return this; }
-	statusbar_t &loc_stat_cstring2(player_stat_t stat) { sb += format("loc_stat_cstring2 {} ", int(stat)); return this; }
+	statusbar_t &loc_stat_string(player_stat_t stat) { sb.format_append("loc_stat_string {} ", int(stat)); return this; }
+	statusbar_t &loc_stat_rstring(player_stat_t stat) { sb.format_append("loc_stat_rstring {} ", int(stat)); return this; }
+	statusbar_t &stat_string(player_stat_t stat) { sb.format_append("stat_string {} ", int(stat)); return this; }
+	statusbar_t &loc_stat_cstring2(player_stat_t stat) { sb.format_append("loc_stat_cstring2 {} ", int(stat)); return this; }
 	statusbar_t &string2(const ::string &in str)
 	{
 		if (str[0] != '"' && (str.findFirstOf(" \n") != -1))
-			sb += format("string2 \"{}\" ", str);
+			sb.format_append("string2 \"{}\" ", str);
 		else
-			sb += format("string2 {} ", str);
+			sb.format_append("string2 {} ", str);
 		return this;
 	}
 	statusbar_t &string(const ::string &in str)
 	{
 		if (str[0] != '"' && (str.findFirstOf(" \n") != -1))
-			sb += format("string \"{}\" ", str);
+			sb.format_append("string \"{}\" ", str);
 		else
-			sb += format("string {} ", str);
+			sb.format_append("string {} ", str);
 		return this;
 	}
 	statusbar_t &loc_rstring(const ::string &in str)
 	{
 		if (str[0] != '"' && (str.findFirstOf(" \n") != -1))
-			sb += format("loc_rstring 0 \"{}\" ", str);
+			sb.format_append("loc_rstring 0 \"{}\" ", str);
 		else
-			sb += format("loc_rstring 0 {} ", str);
+			sb.format_append("loc_rstring 0 {} ", str);
 		return this;
 	}
 
-	statusbar_t &lives_num(player_stat_t stat) { sb += format("lives_num {} ", int(stat)); return this; }
-	statusbar_t &stat_pname(player_stat_t stat) { sb += format("stat_pname {} ", int(stat)); return this; }
+	statusbar_t &lives_num(player_stat_t stat) { sb.format_append("lives_num {} ", int(stat)); return this; }
+	statusbar_t &stat_pname(player_stat_t stat) { sb.format_append("stat_pname {} ", int(stat)); return this; }
 
 	statusbar_t &health_bars() { sb += "health_bars "; return this; }
 	statusbar_t &story() { sb += "story "; return this; }

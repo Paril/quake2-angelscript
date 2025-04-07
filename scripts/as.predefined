@@ -999,6 +999,7 @@ class string
 	~string();
 	string();
 	string(const string&in);
+    string(const string &in fmt, const ?& in ...);
 	// methods
 	string &opAssign(const string &in);
 	string &opAddAssign(const string &in);
@@ -1048,6 +1049,10 @@ class string
 	string &appendChar(uint8);
 	string aslower() const;
 	string asupper() const;
+	string &lower();
+	string &upper();
+	string &format(const string &in fmt, const ? &in ...);
+	string &format_append(const string &in fmt, const ? &in ...);
 }
 class array<T>
 {
@@ -1242,8 +1247,9 @@ class vec3_t
 	float &opIndex(uint32);
 	const float &opIndex(uint32) const;
 	bool opEquals(const vec3_t &in) const;
-	bool equals(const vec3_t &in, const float &in) const;
-	bool opImplConv() const;
+	bool equals(const vec3_t &in, float) const;
+	bool equals(const vec3_t &in, float, float) const;
+	bool opConv() const;
 	float dot(const vec3_t &in) const;
 	vec3_t scaled(const vec3_t &in) const;
 	vec3_t &scale(const vec3_t &in);
@@ -1274,11 +1280,11 @@ class dynamic_bitset
 	// behaviors
 	~dynamic_bitset();
 	dynamic_bitset();
-	dynamic_bitset(const dynamic_bitset &in);
-    dynamic_bitset(const string &in) explicit;
+	dynamic_bitset(const dynamic_bitset&in);
+	dynamic_bitset(const string&in) explicit;
 	dynamic_bitset(uint count) explicit;
 	// methods
-    dynamic_bitset &opAssign(const dynamic_bitset &in);
+	dynamic_bitset &opAssign(const dynamic_bitset &in);
 	bool opIndex(uint32) const;
 	bool get_bit(uint32) const;
 	void set_bit(uint32, bool);
@@ -1291,7 +1297,7 @@ class dynamic_bitset
 	bool all() const;
 	bool none() const;
 	bool opEquals(const dynamic_bitset &in) const;
-    string to_string() const;
+	string to_string() const;
 }
 class rgba_t
 {
@@ -1340,10 +1346,10 @@ class vec4_t
 	const float &opIndex(uint32) const;
 	uint32 size() const;
 	bool opEquals(const vec4_t &in) const;
-    void accum_blend(const vec4_t &in color);
-    bool opImplConv() const;
-    vec3_t &xyz();
-    const vec3_t &xyz() const;
+	void accum_blend(const vec4_t &in color);
+	bool opConv() const;
+	vec3_t &xyz();
+	const vec3_t &xyz() const;
 }
 class mat3_t
 {
@@ -1384,7 +1390,7 @@ class gtime_t
 	gtime_t &opMulAssign(const int32 &in);
 	gtime_t &opDivAssign(const float &in);
 	gtime_t &opMulAssign(const float &in);
-	bool opImplConv() const;
+	bool opConv() const;
 }
 class cvar_t
 {
@@ -2315,6 +2321,7 @@ vec3_t G_ProjectSource(const vec3_t &in, const vec3_t &in, const vec3_t &in, con
 vec3_t G_ProjectSource2(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in) nodiscard;
 vec3_t slerp(const vec3_t &in, const vec3_t &in, float) nodiscard;
 vec3_t lerp(vec3_t, vec3_t, float) nodiscard;
+void formatter(string &str, const string &in args, const vec3_t &in vec);
 gtime_t time_ms(int64);
 gtime_t time_sec(int64);
 gtime_t time_sec(float);
@@ -2324,6 +2331,7 @@ gtime_t time_hz(uint64);
 gtime_t clamp(const gtime_t &in, const gtime_t &in, const gtime_t &in);
 gtime_t min(const gtime_t &in, const gtime_t &in);
 gtime_t max(const gtime_t &in, const gtime_t &in);
+void formatter(string &str, const string &in args, const gtime_t &in time);
 float frandom();
 float frandom(float, float);
 float frandom(float);
@@ -2338,7 +2346,7 @@ bool brandom();
 int32 Q_strcasecmp(const string &in, const string &in);
 int32 Q_strncasecmp(const string &in, const string &in, uint32 n);
 string format(const string &in fmt, const ? &in ...);
-void format_to(string &str, const string &in fmt, const ?&in ...);
+void format_to(string &str, const string &in fmt, const ? &in ...);
 void profile_start(const string &in);
 void profile_end();
 string backtrace();
@@ -2384,7 +2392,7 @@ void gi_cvar_forceset(const string &in var_name, const string &in value);
 uint32 gi_Info_ValueForKey(const string &in, const string &in, const string &out);
 bool gi_Info_SetValueForKey(const string &in, const string &in, const string &in, string &out);
 void gi_configstring(int32 num, const string &in str);
-void gi_configstring(int num, const string &in fmt, const ?&in...);
+void gi_configstring(int32 num, const string &in fmt, const ? &in ...);
 string gi_get_configstring(int32 num) nodiscard;
 uint32 gi_ServerFrame() nodiscard;
 void gi_setmodel(edict_t @ent, const string &in name);

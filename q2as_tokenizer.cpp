@@ -4,63 +4,7 @@
 #include "q2as_cgame.h"
 #include "g_local.h"
 #include "q2as_game.h"
-
-int Q_strcasecmp(const std::string_view s1, const std::string_view s2)
-{
-    char c1, c2;
-    size_t i1 = 0, i2 = 0;
-
-    do
-    {
-        c1 = i1 >= s1.length() ? '\0' : s1[i1];
-        c2 = i2 >= s2.length() ? '\0' : s2[i2];
-
-        i1++;
-        i2++;
-
-        if (c1 != c2)
-        {
-            if (c1 >= 'a' && c1 <= 'z')
-                c1 -= ('a' - 'A');
-            if (c2 >= 'a' && c2 <= 'z')
-                c2 -= ('a' - 'A');
-            if (c1 != c2)
-                return c1 < c2 ? -1 : 1; // strings not equal
-        }
-    } while (c1);
-
-    return 0; // strings are equal
-}
-
-int Q_strncasecmp(const std::string_view s1, const std::string_view s2, size_t n)
-{
-    char c1, c2;
-    size_t i1 = 0, i2 = 0;
-
-    do
-    {
-        c1 = i1 >= s1.length() ? '\0' : s1[i1];
-        c2 = i2 >= s2.length() ? '\0' : s2[i2];
-
-        i1++;
-        i2++;
-
-        if (!n--)
-            return 0; // strings are equal until end point
-
-        if (c1 != c2)
-        {
-            if (c1 >= 'a' && c1 <= 'z')
-                c1 -= ('a' - 'A');
-            if (c2 >= 'a' && c2 <= 'z')
-                c2 -= ('a' - 'A');
-            if (c1 != c2)
-                return c1 < c2 ? -1 : 1; // strings not equal
-        }
-    } while (c1);
-
-    return 0; // strings are equal
-}
+#include "q2as_stringex.h"
 
 // simple tokenizer that is similar to COM_Parse.
 // states begin in a 'start' state, with no token stored.
@@ -69,7 +13,7 @@ int Q_strncasecmp(const std::string_view s1, const std::string_view s2, size_t n
 struct tokenizer_t : q2as_ref_t
 {
     std::string str;
-    std::array<char, 16> separators = { '\r', '\n', '\t', ' ', '\0' }; // is this too limiting?
+    std::string separators = "\r\n\t ";
 
     struct state_t
     {
@@ -101,7 +45,7 @@ struct tokenizer_t : q2as_ref_t
 
     inline void set_separators(const std::string &in)
     {
-        Q_strlcpy(separators.data(), in.c_str(), separators.size());
+        separators = in;
     }
 
     inline std::string get_separators() const

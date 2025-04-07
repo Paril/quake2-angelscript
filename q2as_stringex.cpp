@@ -3,16 +3,20 @@
 
 static std::string *q2as_string_append_char(uint8_t c, std::string *s)
 {
-    *s += (char) c;
-    return s;
+    return &(*s += (char) c);
 }
 
-char to_lower(char c) 
+constexpr char to_upper(char c) 
 {
-    return static_cast<char>(std::tolower(static_cast<uint8_t>(c)));
+    return (c >= 'A' && c <= 'Z') ? c : (c - ('a' - 'A'));
 }
 
-static int q2as_Q_strcasecmp(const std::string &a, const std::string &b)
+constexpr char to_lower(char c) 
+{
+    return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+
+int Q_strcasecmp(const std::string_view &a, const std::string_view &b)
 {
     auto iterator_a = a.begin();
     auto iterator_b = b.begin();
@@ -52,7 +56,7 @@ static int q2as_Q_strcasecmp(const std::string &a, const std::string &b)
     }
 }
 
-static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32_t n)
+int Q_strncasecmp(const std::string_view &a, const std::string_view &b, uint32_t n)
 {
     auto iterator_a = a.begin();
     auto iterator_b = b.begin();
@@ -97,6 +101,16 @@ static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32
     {
         return 1;
     }
+}
+
+static int q2as_Q_strcasecmp(const std::string &a, const std::string &b)
+{
+    return Q_strcasecmp(a, b);
+}
+
+static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32_t n)
+{
+    return Q_strncasecmp(a, b, n);
 }
 
 static constexpr size_t ALIGN = sizeof(size_t) - 1;
@@ -447,25 +461,67 @@ static void q2as_format_to(asIScriptGeneric *gen)
 static std::string q2as_string_aslower(const std::string &in)
 {
     std::string result = in;
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    std::transform(result.begin(), result.end(), result.begin(), to_lower);
     return result;
 }
 
 static std::string q2as_string_asupper(const std::string &in)
 {
     std::string result = in;
-    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+    std::transform(result.begin(), result.end(), result.begin(), to_upper);
     return result;
+}
+
+static std::string &q2as_string_lower(std::string &in)
+{
+    std::transform(in.begin(), in.end(), in.begin(), to_lower);
+    return in;
+}
+
+static std::string &q2as_string_upper(std::string &in)
+{
+    std::transform(in.begin(), in.end(), in.begin(), to_upper);
+    return in;
+}
+
+static void q2as_string_format(asIScriptGeneric *gen)
+{
+    std::string *str = (std::string *) gen->GetObject();
+    str->clear();
+    q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *str);
+    gen->SetReturnAddress(str);
+}
+
+static void q2as_string_format_append(asIScriptGeneric *gen)
+{
+    std::string *str = (std::string *) gen->GetObject();
+    q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *str);
+    gen->SetReturnAddress(str);
+}
+
+static void q2as_string_construct_formatted(asIScriptGeneric *gen)
+{
+	std::string *s = new (gen->GetObject()) std::string;
+    q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *s);
 }
 
 void Q2AS_RegisterStringEx(q2as_registry &registry)
 {
     registry
         .for_type("string")
+        //.behaviors({
+            // TODO: causes crashes
+            // { asBEHAVE_CONSTRUCT,  "void f(const string &in fmt, const ?& in ...)", asFUNCTION(q2as_string_construct_formatted), asCALL_GENERIC }
+        //})
         .methods({
             { "string &appendChar(uint8)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST },
             { "string aslower() const",    asFUNCTION(q2as_string_aslower),     asCALL_CDECL_OBJLAST },
-            { "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST }
+            { "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST },
+            { "string &lower()",           asFUNCTION(q2as_string_lower),       asCALL_CDECL_OBJLAST },
+            { "string &upper()",           asFUNCTION(q2as_string_upper),       asCALL_CDECL_OBJLAST },
+
+            { "string &format(const string&in fmt, const ?&in ...)",        asFUNCTION(q2as_string_format),        asCALL_GENERIC },
+            { "string &format_append(const string&in fmt, const ?&in ...)", asFUNCTION(q2as_string_format_append), asCALL_GENERIC }
         });
 
     registry

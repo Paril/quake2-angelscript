@@ -165,10 +165,6 @@ std::optional<std::string_view> COM_ParseView(std::string_view &data_p, const ch
 
 //=============================================
 
-// portable case insensitive compare
-[[nodiscard]] int Q_strcasecmp(const char *s1, const char *s2);
-[[nodiscard]] int Q_strncasecmp(const char *s1, const char *s2, size_t n);
-
 // BSD string utils - haleyjd
 size_t Q_strlcpy(char *dst, const char *src, size_t siz);
 

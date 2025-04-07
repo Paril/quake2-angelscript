@@ -278,13 +278,13 @@ void CTFAssignSkin(ASEntity &ent, const string &in s)
 	switch (ent.client.resp.ctf_team)
 	{
 	case ctfteam_t::TEAM1:
-		t = format("{}\\{}{}\\default", ent.client.pers.netname, t, CTF_TEAM1_SKIN);
+		t.format("{}\\{}{}\\default", ent.client.pers.netname, t, CTF_TEAM1_SKIN);
 		break;
 	case ctfteam_t::TEAM2:
-		t = format("{}\\{}{}\\default", ent.client.pers.netname, t, CTF_TEAM2_SKIN);
+		t.format("{}\\{}{}\\default", ent.client.pers.netname, t, CTF_TEAM2_SKIN);
 		break;
 	default:
-		t = format("{}\\{}\\default", ent.client.pers.netname, s);
+		t.format("{}\\{}\\default", ent.client.pers.netname, s);
 		break;
 	}
 
@@ -1642,25 +1642,25 @@ void CTFScoreboardMessage(ASEntity &ent, ASEntity @killer)
 	{
 		if (fraglimit.integer != 0)
 		{
-			str += format("xv -20 yv -10 loc_string2 1 $g_score_frags \"{}\" ", fraglimit.integer);
+			str.format_append("xv -20 yv -10 loc_string2 1 $g_score_frags \"{}\" ", fraglimit.integer);
 		}
 	}
 	else
 	{
 		if (capturelimit.integer != 0)
 		{
-			str += format("xv -20 yv -10 loc_string2 1 $g_score_captures \"{}\" ", capturelimit.integer);
+			str.format_append("xv -20 yv -10 loc_string2 1 $g_score_captures \"{}\" ", capturelimit.integer);
 		}
 	}
 	if (timelimit.value != 0)
 	{
-		str += format("xv 340 yv -10 time_limit {} ", gi_ServerFrame() + ((time_min(timelimit.value) - level.time)).milliseconds / gi_frame_time_ms);
+		str.format_append("xv 340 yv -10 time_limit {} ", gi_ServerFrame() + ((time_min(timelimit.value) - level.time)).milliseconds / gi_frame_time_ms);
 	}
 
 	// team one
 	if (teamplay.integer != 0)
 	{
-		str += format(
+		str.format_append(
 			"if 25 xv -32 yv 8 pic 25 endif "
 			"xv -123 yv 28 cstring \"{}\" "
 			"xv 41 yv 12 num 3 19 "
@@ -1672,7 +1672,7 @@ void CTFScoreboardMessage(ASEntity &ent, ASEntity @killer)
 	}
 	else
 	{
-		str += format(
+		str.format_append(
 			"if 25 xv -32 yv 8 pic 25 endif "
 			"xv 0 yv 28 string \"{:4}/{:<3}\" "
 			"xv 58 yv 12 num 2 19 "
@@ -1751,7 +1751,7 @@ void CTFScoreboardMessage(ASEntity &ent, ASEntity @killer)
 			if (k == 0)
 			{
 				k = 1;
-				str += format("xv 0 yv {} loc_string2 0 \"$g_pc_spectators\" ", j);
+				str.format_append("xv 0 yv {} loc_string2 0 \"$g_pc_spectators\" ", j);
 				j += 8;
 			}
 
@@ -1772,14 +1772,14 @@ void CTFScoreboardMessage(ASEntity &ent, ASEntity @killer)
 	}
 
 	if (teams[0].total - teams[0].last > 1) // couldn't fit everyone
-		str += format("xv -32 yv {} loc_string 1 $g_ctf_and_more {} ",
+		str.format_append("xv -32 yv {} loc_string 1 $g_ctf_and_more {} ",
 					42 + (teams[0].last + 1) * 8, teams[0].total - teams[0].last - 1);
 	if (teams[1].total - teams[1].last > 1) // couldn't fit everyone
-		str += format("xv 208 yv {} loc_string 1 $g_ctf_and_more {} ",
+		str.format_append("xv 208 yv {} loc_string 1 $g_ctf_and_more {} ",
 					42 + (teams[1].last + 1) * 8, teams[1].total - teams[1].last - 1);
 
 	if (level.intermissiontime)
-		str += format("ifgef {} yb -48 xv 0 loc_cstring2 0 \"$m_eou_press_button\" endif ", (level.intermission_server_frame + time_sec(5).frames()));
+		str.format_append("ifgef {} yb -48 xv 0 loc_cstring2 0 \"$m_eou_press_button\" endif ", (level.intermission_server_frame + time_sec(5).frames()));
 
 	gi_WriteByte(svc_t::layout);
 	gi_WriteString(str);
@@ -2834,7 +2834,7 @@ void CTFUpdateJoinMenu(ASEntity &ent)
 	if (!entries[jmenu_red].text.empty())
 	{
 		entries[jmenu_red + 1].text = "$g_pc_playercount";
-		entries[jmenu_red + 1].text_arg1 = format("{}", num1);
+		entries[jmenu_red + 1].text_arg1.format("{}", num1);
 	}
 	else
 	{
@@ -2844,7 +2844,7 @@ void CTFUpdateJoinMenu(ASEntity &ent)
 	if (!entries[jmenu_blue].text.empty())
 	{
 		entries[jmenu_blue + 1].text = "$g_pc_playercount";
-		entries[jmenu_blue + 1].text_arg1 = format("{}", num2);
+		entries[jmenu_blue + 1].text_arg1.format("{}", num2);
 	}
 	else
 	{
@@ -3018,15 +3018,15 @@ bool CTFCheckRules()
 			}
 
 			if (competition.integer < 3)
-				text = format("{:02}:{:02} SETUP: {} not ready", t / 60, t % 60, j);
+				text.format("{:02}:{:02} SETUP: {} not ready", t / 60, t % 60, j);
 			else
-				text = format("SETUP: {} not ready", j);
+				text.format("SETUP: {} not ready", j);
 
 			gi_configstring(game_configstring_id_t::CTF_MATCH, text);
 			break;
 
 		case match_t::PREGAME:
-			text = format("{:02}:{:02} UNTIL START", t / 60, t % 60);
+			text.format("{:02}:{:02} UNTIL START", t / 60, t % 60);
 			gi_configstring(game_configstring_id_t::CTF_MATCH, text);
 
 			if (t <= 10 && !ctfgame.countdown)
@@ -3037,7 +3037,7 @@ bool CTFCheckRules()
 			break;
 
 		case match_t::GAME:
-			text = format("{:02}:{:02} MATCH", t / 60, t % 60);
+			text.format("{:02}:{:02} MATCH", t / 60, t % 60);
 			gi_configstring(game_configstring_id_t::CTF_MATCH, text);
 			if (t <= 10 && !ctfgame.countdown)
 			{
@@ -3786,7 +3786,7 @@ void CTFBoot(ASEntity &ent)
 		return;
 	}
 
-	gi_AddCommandString(format("kick {}\n", i - 1));
+	gi_AddCommandString("kick {}\n", i - 1);
 }
 
 void CTFSetPowerUpEffect(ASEntity &ent, effects_t def)
