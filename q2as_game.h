@@ -6,16 +6,10 @@
 #include <vector>
 #include <string>
 
-// server game stuff
-struct q2as_edict_t : edict_t
-{
-    asIScriptObject *as_obj; // handle to "entity" object set by AS
-};
-
 struct q2as_sv_state_t : q2as_state_t
 {
     uint32_t maxentities, maxclients;
-    q2as_edict_t *edicts;
+    struct q2as_edict_t *edicts;
     gclient_t *clients;
 
     std::string cmd_args;

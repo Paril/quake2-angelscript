@@ -13,6 +13,18 @@
 
 #include "q2as_predefined.h"
 
+// server game stuff
+struct q2as_edict_t : edict_t
+{
+    // handle to "entity" object set by AS
+    asIScriptObject *as_obj;
+
+    // these two strings are used by the bot system.
+    // sv_entity_t expects pointers and it's too
+    // expensive to try to allocate them every frame.
+    std::string sv_classname, sv_targetname;
+};
+
 /*virtual*/ void q2as_sv_state_t::Print(const char *text) /*override*/
 {
     gi.Com_Print(text);
@@ -120,6 +132,8 @@ static void Q2AS_InitGame()
 
     for (uint32_t i = 0; i < svas.maxentities; i++)
     {
+        new(&svas.edicts[i]) q2as_edict_t;
+
         svas.edicts[i].s.number = i;
 
         if (i >= 1 && i <= svas.maxclients)
@@ -156,6 +170,9 @@ static void Q2AS_ShutdownGame()
 
         svas.Destroy();
     }
+    
+    for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
+        e->~q2as_edict_t();
 
     gi.FreeTags(TAG_LEVEL);
     gi.FreeTags(TAG_GAME);
@@ -823,7 +840,10 @@ static void q2as_edict_t_reset(q2as_edict_t *ed)
     if (ed->as_obj)
         ed->as_obj->Release();
 
+    ed->~q2as_edict_t();
     memset(ed, 0, sizeof(*ed));
+    new(ed) q2as_edict_t;
+
     ed->s.number = ed - svas.edicts;
 
     if (ed->s.number >= 1 && ed->s.number <= svas.maxclients)
@@ -840,45 +860,61 @@ static entity_state_t &Q2AS_entity_state_t_assign(const entity_state_t &other, e
 
 static void q2as_sv_entity_t_set_netname(const std::string &s, sv_entity_t &sv)
 {
-    q2as_strlcpy(sv.netname, s.c_str(), sizeof(sv.netname));
+    if (s.empty())
+    {
+        sv.netname[0] = '\0';
+        return;
+    }
+
+    size_t len = min(s.size(), sizeof(sv.netname) - 1);
+    memcpy(sv.netname, s.data(), len);
+    sv.netname[len] = '\0';
 }
 
 static void q2as_sv_entity_t_set_classname(const std::string &s, sv_entity_t &sv)
 {
-    // FIXME
-    using cln = char[32];
-    static cln estoy[MAX_EDICTS];
-    static uint32_t loopin = 0;
+    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<byte *>(&sv) - offsetof(edict_t, sv));
+
+    // make sure it's an sv_entity_t owned by an edict
+    if (e < globals.edicts || e >= globals.edicts + globals.num_edicts)
+        return;
+
+    if (e->sv_classname == s)
+        return;
 
     if (s.empty())
     {
-        sv.classname = nullptr;
-        return;
+        e->sv_classname.clear();
+        e->sv.classname = nullptr;
     }
-
-    q2as_strlcpy(estoy[loopin], s.c_str(), sizeof(cln));
-    sv.classname = estoy[loopin];
-
-    loopin = (loopin + 1) % MAX_EDICTS;
+    else
+    {
+        e->sv_classname = s;
+        e->sv.classname = e->sv_classname.data();
+    }
 }
 
 static void q2as_sv_entity_t_set_targetname(const std::string &s, sv_entity_t &sv)
 {
-    // FIXME
-    using cln = char[32];
-    static cln estoy[MAX_EDICTS];
-    static uint32_t loopin = 0;
+    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<byte *>(&sv) - offsetof(edict_t, sv));
+
+    // make sure it's an sv_entity_t owned by an edict
+    if (e < globals.edicts || e >= globals.edicts + globals.num_edicts)
+        return;
+
+    if (e->sv_targetname == s)
+        return;
 
     if (s.empty())
     {
-        sv.targetname = nullptr;
-        return;
+        e->sv_targetname.clear();
+        e->sv.targetname = nullptr;
     }
-
-    q2as_strlcpy(estoy[loopin], s.c_str(), sizeof(cln));
-    sv.targetname = estoy[loopin];
-
-    loopin = (loopin + 1) % MAX_EDICTS;
+    else
+    {
+        e->sv_targetname = s;
+        e->sv.targetname = e->sv_targetname.data();
+    }
 }
 
 static void Q2AS_RegisterEntity(q2as_registry &registry)
@@ -1338,7 +1374,7 @@ static bool q2as_Info_SetValueForKey(std::string &userinfo, const std::string &n
     static char userinfo_cstr[MAX_INFO_STRING];
     size_t len = min(MAX_INFO_STRING - 1, userinfo.size());
     memcpy(userinfo_cstr, userinfo.c_str(), len);
-    userinfo_cstr[len + 1] = '\0';
+    userinfo_cstr[len] = '\0';
     bool set = gi.Info_SetValueForKey(userinfo_cstr, name.c_str(), value.c_str());
     if (set)
         userinfo.assign(userinfo_cstr);

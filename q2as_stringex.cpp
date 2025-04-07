@@ -113,45 +113,6 @@ static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32
     return Q_strncasecmp(a, b, n);
 }
 
-static constexpr size_t ALIGN = sizeof(size_t) - 1;
-static constexpr size_t ONES = static_cast<size_t>(-1) / UCHAR_MAX;
-static constexpr size_t HIGHS = ONES * (UCHAR_MAX / 2 + 1);
-static inline bool HASZERO(size_t x)
-{
-    return ((x) - ONES & ~(x) & HIGHS) != 0;
-}
-
-size_t q2as_strlcpy(char *d, const char *s, size_t n)
-{
-    char *d0 = d;
-    size_t *wd;
-    const size_t *ws;
-
-    if (!n--) goto finish;
-
-    if (((uintptr_t) s & ALIGN) == ((uintptr_t) d & ALIGN)) {
-        for (; ((uintptr_t) s & ALIGN) && n && (*d=*s); n--, s++, d++);
-        if (n && *s)
-        {
-            wd=reinterpret_cast<size_t *>(d);
-            ws=reinterpret_cast<const size_t *>(s);
-            for (; n>=sizeof(size_t) && !HASZERO(*ws);
-                   n-=sizeof(size_t), ws++, wd++)
-            {
-                *wd = *ws;
-            }
-
-            d=reinterpret_cast<char *>(wd);
-            s=reinterpret_cast<const char *>(ws);
-        }
-    }
-
-    for (; n && (*d=*s); n--, s++, d++);
-    *d = 0;
-finish:
-    return d-d0 + strlen(s);
-}
-
 void q2as_format_init(q2as_state_t &state)
 {
     // find matching formatters.
