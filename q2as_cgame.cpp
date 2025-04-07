@@ -81,7 +81,7 @@ void q2as_cg_state_t::LoadFunctions()
     pmove_inst->clip_f->AddRef();
     pmove_inst->pointcontents_f->AddRef();
 
-    q2as_format_init(engine);
+    q2as_format_init(*this);
 }
 
 q2as_cg_state_t cgas;

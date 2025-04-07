@@ -152,33 +152,18 @@ finish:
     return d-d0 + strlen(s);
 }
 
-constexpr int FORMATTER_USERDATA = 1;
-using formatter_map = std::unordered_map<int, asIScriptFunction *>;
-
-static void q2as_formatter_cleanup(asIScriptEngine *engine)
-{
-    auto mapptr = reinterpret_cast<formatter_map *>(engine->GetUserData(FORMATTER_USERDATA));
-
-    if (mapptr)
-    {
-        mapptr->~formatter_map();
-        asFreeMem(mapptr);
-    }
-}
-
-void q2as_format_init(asIScriptEngine *engine)
+void q2as_format_init(q2as_state_t &state)
 {
     // find matching formatters.
     // they have to match the following decl:
     // void formatter(string &str, const string &in args, const T &in if_handle_then_const);
-    int stringTypeId = engine->GetStringFactory();
+    int stringTypeId = state.engine->GetStringFactory();
 
     // sanity
     if (!stringTypeId)
         return;
-    
-    formatter_map *map = reinterpret_cast<formatter_map *>(asAllocMem(sizeof(formatter_map)));
-    new(map) formatter_map;
+
+    state.formatters.clear();
 
     auto add_function = [&](asIScriptFunction *func) {
         if (strcmp(func->GetName(), "formatter"))
@@ -218,31 +203,21 @@ void q2as_format_init(asIScriptEngine *engine)
                 return;
         }
 
-        map->emplace(paramTypeId, func);
+        state.formatters.emplace(paramTypeId, func);
     };
 
     // check globals (host registered formatters)
-    for (size_t i = 0; i < engine->GetGlobalFunctionCount(); i++)
-        add_function(engine->GetGlobalFunctionByIndex(i));
+    for (size_t i = 0; i < state.engine->GetGlobalFunctionCount(); i++)
+        add_function(state.engine->GetGlobalFunctionByIndex(i));
 
     // check functions in modules
-    for (size_t i = 0; i < engine->GetModuleCount(); i++)
+    for (size_t i = 0; i < state.engine->GetModuleCount(); i++)
     {
-        asIScriptModule *module = engine->GetModuleByIndex(i);
+        asIScriptModule *module = state.engine->GetModuleByIndex(i);
 
         for (size_t m = 0; m < module->GetFunctionCount(); m++)
             add_function(module->GetFunctionByIndex(m));
     }
-
-    formatter_map *old = reinterpret_cast<formatter_map *>(engine->SetUserData(map, FORMATTER_USERDATA));
-
-    if (old)
-    {
-        old->~formatter_map();
-        asFreeMem(old);
-    }
-    else
-        engine->SetEngineUserDataCleanupCallback(q2as_formatter_cleanup, FORMATTER_USERDATA);
 }
 
 #ifndef USE_CPP20_FORMAT
@@ -252,7 +227,7 @@ void q2as_format_init(asIScriptEngine *engine)
 #endif
 
 template<typename T>
-static void q2as_call_formatter(std::string &str, const std::string_view args, const void *addr)
+static bool q2as_call_builtin_formatter(std::string &str, const std::string_view args, const void *addr)
 {
     if (args.empty())
         fmt::format_to(std::back_inserter(str), "{}", *reinterpret_cast<const T *>(addr));
@@ -267,12 +242,53 @@ static void q2as_call_formatter(std::string &str, const std::string_view args, c
         *(end.out) = '\0';
         fmt::vformat_to(std::back_inserter(str), format_str, fmt::make_format_args(*reinterpret_cast<const T *>(addr)));
     }
+
+    return true;
+}
+
+bool q2as_call_formatter(std::string &str, q2as_state_t &as, const std::string_view args, int typeId, const void *addr)
+{
+    if (typeId == asTYPEID_BOOL) return q2as_call_builtin_formatter<bool>(str, args, addr);
+    else if (typeId == asTYPEID_INT8) return q2as_call_builtin_formatter<int8_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT16) return q2as_call_builtin_formatter<int16_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT32) return q2as_call_builtin_formatter<int32_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT64) return q2as_call_builtin_formatter<int64_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT8) return q2as_call_builtin_formatter<uint8_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT16) return q2as_call_builtin_formatter<uint16_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT32) return q2as_call_builtin_formatter<uint32_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT64) return q2as_call_builtin_formatter<uint64_t>(str, args, addr);
+    else if (typeId == asTYPEID_FLOAT) return q2as_call_builtin_formatter<float>(str, args, addr);
+    else if (typeId == asTYPEID_DOUBLE) return q2as_call_builtin_formatter<double>(str, args, addr);
+    else if (typeId == as.stringTypeId) return q2as_call_builtin_formatter<std::string>(str, args, addr);
+
+    // check type
+    auto typeInfo = as.engine->GetTypeInfoById(typeId);
+    std::string arg_string(args);
+
+    if (auto funcdef = typeInfo->GetFuncdefSignature())
+    {
+        str.append(funcdef->GetName());
+        return true;
+    }
+    else if (auto formatter = as.formatters.find(typeId); formatter != as.formatters.end())
+    {
+        auto ctx = asGetActiveContext();
+        ctx->PushState();
+        ctx->Prepare(formatter->second);
+        ctx->SetArgAddress(0, &str);
+        ctx->SetArgAddress(1, &arg_string);
+        ctx->SetArgAddress(2, const_cast<void *>(addr));
+        as.Execute(ctx);
+        ctx->PopState();
+        return true;
+    }
+
+    return false;
 }
 
 void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGeneric *gen, int base_arg, std::string &str)
 {
     const std::string *base = (std::string *) gen->GetArgAddress(base_arg);
-    const formatter_map *mapptr = reinterpret_cast<formatter_map *>(as.engine->GetUserData(FORMATTER_USERDATA));
 
     size_t start = 0;
     size_t next_position = 0;
@@ -390,45 +406,13 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
         }
 
         // do the formatting
-        int type = gen->GetArgTypeId(base_arg + 1 + arg);
+        int typeId = gen->GetArgTypeId(base_arg + 1 + arg);
         void *addr = gen->GetArgAddress(base_arg + 1 + arg);
         
-        if (type == asTYPEID_BOOL) q2as_call_formatter<bool>(str, args, addr);
-        else if (type == asTYPEID_INT8) q2as_call_formatter<int8_t>(str, args, addr);
-        else if (type == asTYPEID_INT16) q2as_call_formatter<int16_t>(str, args, addr);
-        else if (type == asTYPEID_INT32) q2as_call_formatter<int32_t>(str, args, addr);
-        else if (type == asTYPEID_INT64) q2as_call_formatter<int64_t>(str, args, addr);
-        else if (type == asTYPEID_UINT8) q2as_call_formatter<uint8_t>(str, args, addr);
-        else if (type == asTYPEID_UINT16) q2as_call_formatter<uint16_t>(str, args, addr);
-        else if (type == asTYPEID_UINT32) q2as_call_formatter<uint32_t>(str, args, addr);
-        else if (type == asTYPEID_UINT64) q2as_call_formatter<uint64_t>(str, args, addr);
-        else if (type == asTYPEID_FLOAT) q2as_call_formatter<float>(str, args, addr);
-        else if (type == asTYPEID_DOUBLE) q2as_call_formatter<double>(str, args, addr);
-        else if (type == as.stringTypeId) q2as_call_formatter<std::string>(str, args, addr);
-        else
+        if (!q2as_call_formatter(str, as, args, typeId, addr))
         {
-            // check type
-            auto typeInfo = as.engine->GetTypeInfoById(type);
-            std::string arg_string(args);
-
-            if (auto funcdef = typeInfo->GetFuncdefSignature())
-                str.append(funcdef->GetName());
-            else if (auto formatter = mapptr->find(type); formatter != mapptr->end())
-            {
-                auto ctx = asGetActiveContext();
-                ctx->PushState();
-                ctx->Prepare(formatter->second);
-                ctx->SetArgAddress(0, &str);
-                ctx->SetArgAddress(1, &arg_string);
-                ctx->SetArgAddress(2, addr);
-                as.Execute(ctx);
-                ctx->PopState();
-            }
-            else
-            {
-                asGetActiveContext()->SetException("unformattable type");
-                return;
-            }
+            asGetActiveContext()->SetException("unformattable type");
+            return;
         }
 
         start = c + 1;

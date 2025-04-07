@@ -163,9 +163,4 @@ LerpAngle
 
 std::optional<std::string_view> COM_ParseView(std::string_view &data_p, const char *seps = "\r\n\t ");
 
-//=============================================
-
-// BSD string utils - haleyjd
-size_t Q_strlcpy(char *dst, const char *src, size_t siz);
-
 // EOF
