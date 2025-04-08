@@ -255,15 +255,17 @@ void G_PlayerNotifyGoal(ASEntity &player)
 			// skip ahead by the number of goals we've finished
 			for (int i = 0; i < level.goal_num; i++)
 			{
-                goal_start = level.goals.findFirstOf("\t", goal_start + 1);
+                goal_start = level.goals.findFirstOf("\t", goal_start);
 
                 if (goal_start == -1)
 					gi_Com_Error("invalid n64 goals\n");
+                else
+                    goal_start++;
 			}
 
 			// find the end of this goal
-            int goal_end = level.goals.findFirstOf("\t", goal_start + 1);
-            game.helpmessage1 = level.goals.substr(uint(goal_start + 1), goal_end != -1 ? goal_end - 1 : -1);
+            int goal_end = level.goals.findFirstOf("\t", goal_start);
+            game.helpmessage1 = level.goals.substr(uint(goal_start), goal_end != -1 ? (goal_end - goal_start) : -1);
 
 			game.help2changed = game.help1changed;
 		}
@@ -322,7 +324,7 @@ void use_target_goal(ASEntity &ent, ASEntity &other, ASEntity @activator)
 	if (level.found_goals == level.total_goals && (ent.spawnflags & spawnflags::goal::KEEP_MUSIC) == 0)
 	{
 		if (ent.sounds != 0)
-			gi_configstring(configstring_id_t::CDTRACK, format("{}", ent.sounds));
+			gi_configstring(configstring_id_t::CDTRACK, "{}", ent.sounds);
 		else
 			gi_configstring(configstring_id_t::CDTRACK, "0");
 	}
@@ -1360,7 +1362,7 @@ void target_camera_dummy_think(ASEntity &self)
 void use_target_camera(ASEntity &self, ASEntity &other, ASEntity @activator)
 {
 	if (self.sounds != 0)
-		gi_configstring (configstring_id_t::CDTRACK, format("{}", self.sounds) );
+		gi_configstring (configstring_id_t::CDTRACK, "{}", self.sounds );
 
 	if (self.target.empty())
 		return;
@@ -1996,7 +1998,7 @@ Change music when used
 
 void use_target_music(ASEntity &ent, ASEntity &other, ASEntity @activator)
 {
-	gi_configstring(configstring_id_t::CDTRACK, format("{}", ent.sounds));
+	gi_configstring(configstring_id_t::CDTRACK, "{}", ent.sounds);
 }
 
 void SP_target_music(ASEntity &self)
@@ -2148,11 +2150,11 @@ void use_target_sky(ASEntity &self, ASEntity &other, ASEntity @activator)
 		if ((self.count & 2) != 0)
 			autorotate = self.style;
 
-		gi_configstring(configstring_id_t::SKYROTATE, format("{} {}", rotate, autorotate));
+		gi_configstring(configstring_id_t::SKYROTATE, "{} {}", rotate, autorotate);
 	}
 
 	if ((self.count & 4)  != 0)
-		gi_configstring(configstring_id_t::SKYAXIS, format("{}", self.movedir));
+		gi_configstring(configstring_id_t::SKYAXIS, "{}", self.movedir);
 }
 
 void SP_target_sky(ASEntity &self)

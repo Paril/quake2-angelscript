@@ -3191,7 +3191,7 @@ void ClientUserinfoChanged(edict_t @ent_handle, const string &in userinfo)
 		gi_Info_ValueForKey(userinfo, "dogtag", dogtag);
 
 		// ZOID
-		gi_configstring(int(configstring_id_t::PLAYERSKINS) + playernum, format("{}\\{}\\{}", ent.client.pers.netname, val, dogtag));
+		gi_configstring(int(configstring_id_t::PLAYERSKINS) + playernum, "{}\\{}\\{}", ent.client.pers.netname, val, dogtag);
 	}
 
 	// ZOID
@@ -3417,7 +3417,7 @@ Changing levels will NOT cause this to be called again, but
 loadgames will.
 ============
 */
-bool ClientConnect(edict_t @ent, string &in userinfo, string &in social_id, bool isBot, string &out reject_userinfo)
+bool ClientConnect(edict_t @ent, const string &in userinfo, const string &in social_id, bool isBot, string &out reject_error)
 {
     string value;
 

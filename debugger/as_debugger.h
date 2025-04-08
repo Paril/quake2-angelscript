@@ -23,11 +23,17 @@
 #include <string>
 #include <map>
 #include <set>
-#include <fmt/format.h>
 #include <variant>
 #include <mutex>
 #include <filesystem>
 #include "angelscript.h"
+
+#ifdef __cpp_lib_format
+#include <format>
+namespace fmt = std;
+#else
+#include <fmt/format.h>
+#endif
 
 class asIDBDebugger;
 

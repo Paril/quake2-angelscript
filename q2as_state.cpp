@@ -437,12 +437,6 @@ bool q2as_state_t::Build()
     }
 
     stringTypeId = engine->GetStringFactory();
-    vec3TypeId = engine->GetTypeInfoByName("vec3_t")->GetTypeId();
-    edict_tTypeId = engine->GetTypeInfoByName("edict_t")->GetTypeId();
-    timeTypeId = engine->GetTypeInfoByName("gtime_t")->GetTypeId();
-
-    if (auto iface = engine->GetTypeInfoByName("IASEntity"))
-        IASEntityTypeId = iface->GetTypeId();
 
     {
         asIScriptFunction *func = mainModule->GetFunctionByDecl("void main(bool)");

@@ -101,15 +101,15 @@ string G_EndOfUnitEntry(const int &in y, const level_entry_t &in entry)
 		return layout;
 	}
 
-	layout += format("table_row 4 \"{}\" ", entry.pretty_name) + 
-		format("{}/{} ", entry.killed_monsters, entry.total_monsters) + 
-		format("{}/{} ", entry.found_secrets, entry.total_secrets);
+	layout.format_append("table_row 4 \"{}\" ", entry.pretty_name) 
+		  .format_append("{}/{} ", entry.killed_monsters, entry.total_monsters) 
+		  .format_append("{}/{} ", entry.found_secrets, entry.total_secrets);
 
 	int minutes = entry.time.milliseconds / 60000;
 	int seconds = (entry.time.milliseconds / 1000) % 60;
 	int milliseconds = entry.time.milliseconds % 1000;
 
-	layout += format("{:02}:{:02}:{:03} ", minutes, seconds, milliseconds);
+	layout.format_append("{:02}:{:02}:{:03} ", minutes, seconds, milliseconds);
 
     return layout;
 }
@@ -166,7 +166,7 @@ void G_EndOfUnitMessage()
 
 	layout += "xv 160 yt 0 draw_table ";
 
-	layout += format("ifgef {} yb -48 xv 0 loc_cstring2 0 \"$m_eou_press_button\" endif ", (level.intermission_server_frame + time_sec(5).frames()));
+	layout.format_append("ifgef {} yb -48 xv 0 loc_cstring2 0 \"$m_eou_press_button\" endif ", (level.intermission_server_frame + time_sec(5).frames()));
 
 	gi_WriteByte(svc_t::layout);
 	gi_WriteString(layout);
@@ -370,7 +370,7 @@ void DeathmatchScoreboardMessage(ASEntity &ent, ASEntity @killer)
 
 		if (!tag.empty())
 		{
-			entry = format("xv {} yv {} picn {} ", x + 32, y, tag);
+			entry.format("xv {} yv {} picn {} ", x + 32, y, tag);
 
 			if (str.length() + entry.length() > MAX_SCOREBOARD_SIZE)
 				break;
@@ -379,7 +379,7 @@ void DeathmatchScoreboardMessage(ASEntity &ent, ASEntity @killer)
 		}
 		else
 		{
-			entry = format("xv {} yv {} dogtag {} ", x + 32, y, sorted[i]);
+			entry.format("xv {} yv {} dogtag {} ", x + 32, y, sorted[i]);
 
 			if (str.length() + entry.length() > MAX_SCOREBOARD_SIZE)
 				break;
@@ -387,7 +387,7 @@ void DeathmatchScoreboardMessage(ASEntity &ent, ASEntity @killer)
 			str += entry;
 		}
 
-		entry = format("client {} {} {} {} {} {} ",
+		entry.format("client {} {} {} {} {} {} ",
 					x, y, sorted[i], cl.resp.score, cl_ent.e.client.ping, (level.time - cl.resp.entertime).minutesi());
 
 		if (str.length() + entry.length() > MAX_SCOREBOARD_SIZE)
@@ -399,15 +399,15 @@ void DeathmatchScoreboardMessage(ASEntity &ent, ASEntity @killer)
 	// [Paril-KEX] time & frags
 	if (fraglimit.integer != 0)
 	{
-		str += format("xv -20 yv -10 loc_string2 1 $g_score_frags \"{}\" ", fraglimit.integer);
+		str.format_append("xv -20 yv -10 loc_string2 1 $g_score_frags \"{}\" ", fraglimit.integer);
 	}
 	if (timelimit.value != 0 && !level.intermissiontime)
 	{
-		str += format("xv 340 yv -10 time_limit {} ", gi_ServerFrame() + ((time_min(timelimit.value) - level.time)).milliseconds / gi_frame_time_ms);
+		str.format_append("xv 340 yv -10 time_limit {} ", gi_ServerFrame() + ((time_min(timelimit.value) - level.time)).milliseconds / gi_frame_time_ms);
 	}
 
 	if (level.intermissiontime)
-		str += format("ifgef {} yb -48 xv 0 loc_cstring2 0 \"$m_eou_press_button\" endif ", (level.intermission_server_frame + time_sec(5).frames()));
+		str.format_append("ifgef {} yb -48 xv 0 loc_cstring2 0 \"$m_eou_press_button\" endif ", (level.intermission_server_frame + time_sec(5).frames()));
 
 	gi_WriteByte(svc_t::layout);
 	gi_WriteString(str);
@@ -493,7 +493,7 @@ void HelpComputer(ASEntity &ent)
 
 	if (level.is_n64)
 	{
-		helpString += format("xv 0 yv 54 loc_cstring 1 \"{{}}\" \"{}\" ",  // help 1
+		helpString.format_append("xv 0 yv 54 loc_cstring 1 \"{{}}\" \"{}\" ",  // help 1
 			game.helpmessage1);
 	}
 	else 
@@ -520,7 +520,7 @@ void HelpComputer(ASEntity &ent)
 		int y = 54;
 		if (!first_message.empty())
 		{
-			helpString += format("xv 0 yv {} loc_cstring2 0 \"{}\" "  // title
+			helpString.format_append("xv 0 yv {} loc_cstring2 0 \"{}\" "  // title
 				"xv 0 yv {} loc_cstring 0 \"{}\" ",
 				y,
 				first_title,
@@ -532,7 +532,7 @@ void HelpComputer(ASEntity &ent)
 
 		if (!second_message.empty())
 		{
-			helpString += format("xv 0 yv {} loc_cstring2 0 \"{}\" "  // title
+			helpString.format_append("xv 0 yv {} loc_cstring2 0 \"{}\" "  // title
 				"xv 0 yv {} loc_cstring 0 \"{}\" ",
 				y,
 				second_title,
@@ -542,7 +542,7 @@ void HelpComputer(ASEntity &ent)
 
 	}
 
-	helpString += format("xv 55 yv 164 loc_string2 0 \"{}\" "
+	helpString.format_append("xv 55 yv 164 loc_string2 0 \"{}\" "
 		"xv 265 yv 164 loc_rstring2 1 \"{{}}: {}/{}\" \"$g_pc_goals\" "
 		"xv 55 yv 172 loc_string2 1 \"{{}}: {}/{}\" \"$g_pc_kills\" "
 		"xv 265 yv 172 loc_rstring2 1 \"{{}}: {}/{}\" \"$g_pc_secrets\" ",

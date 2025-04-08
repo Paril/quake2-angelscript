@@ -1116,8 +1116,8 @@ void Cmd_Players_f(ASEntity &ent)
 	{
 		for (i = 0; i < index.length(); i++)
 		{
-			small = format("{:3} {}\n", players[index[i]].e.client.ps.stats[player_stat_t::FRAGS],
-						players[index[i]].client.pers.netname);
+			small.format("{:3} {}\n", players[index[i]].e.client.ps.stats[player_stat_t::FRAGS],
+				players[index[i]].client.pers.netname);
 
 			if (small.length() + large.length() > MAX_IDEAL_PACKET_SIZE - 50)
 			{ // can't print all of them in one packet
@@ -1421,9 +1421,9 @@ void Cmd_PlayerList_f(ASEntity &ent)
 		if (!e2.e.inuse)
 			continue;
 
-		str = format("{:02}:{:02} {:4} {:3} {}{}\n", (level.time - e2.client.resp.entertime).milliseconds / 60000,
-					((level.time - e2.client.resp.entertime).milliseconds % 60000) / 1000, e2.e.client.ping,
-					e2.client.resp.score, e2.client.pers.netname, e2.client.resp.spectator ? " (spectator)" : "");
+		str.format("{:02}:{:02} {:4} {:3} {}{}\n", (level.time - e2.client.resp.entertime).milliseconds / 60000,
+                ((level.time - e2.client.resp.entertime).milliseconds % 60000) / 1000, e2.e.client.ping,
+                e2.client.resp.score, e2.client.pers.netname, e2.client.resp.spectator ? " (spectator)" : "");
 
 		if (text.length() + str.length() > MAX_IDEAL_PACKET_SIZE - 50)
 		{

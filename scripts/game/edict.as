@@ -950,3 +950,9 @@ void G_FreeEdict(ASEntity &e)
 {
 	e.Free();
 }
+
+// formatter support
+void formatter(string &str, const string &in args, const ASEntity &in ent)
+{
+    format_to(str, "{} @ {}", ent.classname, ent.e.origin);
+}

@@ -80,6 +80,8 @@ void q2as_cg_state_t::LoadFunctions()
     pmove_inst->trace_f->AddRef();
     pmove_inst->clip_f->AddRef();
     pmove_inst->pointcontents_f->AddRef();
+
+    q2as_format_init(*this);
 }
 
 q2as_cg_state_t cgas;
@@ -140,14 +142,14 @@ static void q2as_CG_Com_Print(const std::string &s)
 
 static void q2as_CG_Com_ErrorFmt(asIScriptGeneric *gen)
 {
-    std::string data = q2as_format_to(cgas, gen, 0);
+    std::string data = q2as_impl_format(cgas, gen, 0);
 
     cgi.Com_Error(data.c_str());
 }
 
 static void q2as_CG_Com_PrintFmt(asIScriptGeneric *gen)
 {
-    std::string data = q2as_format_to(cgas, gen, 0);
+    std::string data = q2as_impl_format(cgas, gen, 0);
 
     cgi.Com_Print(data.c_str());
 }
@@ -298,7 +300,7 @@ static void Q2AS_RegisterCGameUtil(q2as_registry &registry)
             { "int32 height", asOFFSET(vrect_t, height) },
         });
 
-    Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(registry, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS);
+    Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(registry, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS, false);
 
     // special handle, always active and allocated
     // by the host, wrapped by AngelScript.

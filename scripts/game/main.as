@@ -460,9 +460,9 @@ void ExitLevel()
     if (level.changemap.length() > (6 + start_offset) &&
 		Q_strncasecmp(level.changemap.substr(), "victor", 6) == 0 &&
 		Q_strncasecmp(level.changemap.substr(level.changemap.length() - 4), ".pcx", 4) == 0)
-		gi_AddCommandString(format("endgame \"{}\"\n", level.changemap.substr(start_offset)));
+		gi_AddCommandString("endgame \"{}\"\n", level.changemap.substr(start_offset));
 	else
-		gi_AddCommandString(format("gamemap \"{}\"\n", level.changemap));
+		gi_AddCommandString("gamemap \"{}\"\n", level.changemap);
 
 	level.changemap = "";
 }
@@ -473,7 +473,7 @@ void G_CheckCvars()
 	{
 		// [Paril-KEX] air accel handled by game DLL now, and allow
 		// it to be changed in sp/coop
-		gi_configstring(configstring_id_t::AIRACCEL, format("{}", sv_airaccelerate.integer));
+		gi_configstring(configstring_id_t::AIRACCEL, "{}", sv_airaccelerate.integer);
 		pm_config.airaccel = sv_airaccelerate.integer;
 	}
 

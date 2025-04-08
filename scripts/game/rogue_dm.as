@@ -1,3 +1,133 @@
+const item_flags_t IF_TYPE_MASK = item_flags_t(item_flags_t::WEAPON | item_flags_t::AMMO | item_flags_t::POWERUP | item_flags_t::ARMOR | item_flags_t::KEY);
+
+item_flags_t GetSubstituteItemFlags(item_id_t id)
+{
+	const gitem_t @item = GetItemByIndex(id);
+
+	// we want to stay within the item class
+	item_flags_t flags = item_flags_t(item.flags & IF_TYPE_MASK);
+
+	if ((flags & (item_flags_t::WEAPON | item_flags_t::AMMO)) == (item_flags_t::WEAPON | item_flags_t::AMMO))
+		flags = item_flags_t::AMMO;
+	// Adrenaline and Mega Health count as powerup
+	else if (id == item_id_t::ITEM_ADRENALINE || id == item_id_t::HEALTH_MEGA)
+		flags = item_flags_t::POWERUP;
+
+	return flags;
+}
+
+item_id_t FindSubstituteItem(ASEntity &ent)
+{
+	// never replace flags
+	if (ent.item.id == item_id_t::FLAG1 || ent.item.id == item_id_t::FLAG2)
+		return item_id_t::NULL;
+
+	// stimpack/shard randomizes
+	if (ent.item.id == item_id_t::HEALTH_SMALL ||
+		ent.item.id == item_id_t::ARMOR_SHARD)
+		return brandom() ? item_id_t::HEALTH_SMALL : item_id_t::ARMOR_SHARD;
+
+	// health is special case
+	if (ent.item.id == item_id_t::HEALTH_MEDIUM ||
+		ent.item.id == item_id_t::HEALTH_LARGE)
+	{
+		float rnd = frandom();
+
+		if (rnd < 0.6f)
+			return item_id_t::HEALTH_MEDIUM;
+		else
+			return item_id_t::HEALTH_LARGE;
+	}
+	// armor is also special case
+	else if (ent.item.id == item_id_t::ARMOR_JACKET ||
+			 ent.item.id == item_id_t::ARMOR_COMBAT ||
+			 ent.item.id == item_id_t::ARMOR_BODY ||
+			 ent.item.id == item_id_t::ITEM_POWER_SCREEN ||
+			 ent.item.id == item_id_t::ITEM_POWER_SHIELD)
+	{
+		float rnd = frandom();
+
+		if (rnd < 0.4f)
+			return item_id_t::ARMOR_JACKET;
+		else if (rnd < 0.6f)
+			return item_id_t::ARMOR_COMBAT;
+		else if (rnd < 0.8f)
+			return item_id_t::ARMOR_BODY;
+		else if (rnd < 0.9f)
+			return item_id_t::ITEM_POWER_SCREEN;
+		else
+			return item_id_t::ITEM_POWER_SHIELD;
+	}
+
+	item_flags_t myflags = GetSubstituteItemFlags(ent.item.id);
+
+	array<item_id_t> possible_items;
+
+	// gather matching items
+	for (item_id_t i = item_id_t(item_id_t::NULL + 1); i < item_id_t::TOTAL; i = item_id_t(int(i) + 1))
+	{
+		const gitem_t @it = GetItemByIndex(i);
+		item_flags_t itflags = it.flags;
+
+		if (itflags == 0 || (itflags & (item_flags_t::NOT_GIVEABLE | item_flags_t::TECH | item_flags_t::NOT_RANDOM)) != 0 || it.pickup is null || it.world_model.empty())
+			continue;
+
+		// don't respawn spheres if they're dmflag disabled.
+		if (g_no_spheres.integer != 0)
+		{
+			if (i == item_id_t::ITEM_SPHERE_VENGEANCE ||
+				i == item_id_t::ITEM_SPHERE_HUNTER ||
+				i == item_id_t::ITEM_SPHERE_DEFENDER)
+			{
+				continue;
+			}
+		}
+
+		if (g_no_nukes.integer != 0 && i == item_id_t::AMMO_NUKE)
+			continue;
+
+		if (g_no_mines.integer != 0 &&
+			(i == item_id_t::AMMO_PROX || i == item_id_t::AMMO_TESLA || i == item_id_t::AMMO_TRAP || i == item_id_t::WEAPON_PROXLAUNCHER))
+			continue;
+
+		itflags = GetSubstituteItemFlags(i);
+
+		if ((itflags & IF_TYPE_MASK) == (myflags & IF_TYPE_MASK))
+			possible_items.push_back(i);
+	}
+
+	if (possible_items.empty())
+		return item_id_t::NULL;
+
+	return possible_items[irandom(possible_items.size())];
+}
+
+//=================
+//=================
+item_id_t DoRandomRespawn(ASEntity &ent)
+{
+	if (ent.item is null)
+		return item_id_t::NULL; // why
+
+	return FindSubstituteItem(ent);
+}
+
+//=================
+//=================
+void PrecacheForRandomRespawn()
+{
+	for (item_id_t i = item_id_t(item_id_t::NULL + 1); i < item_id_t::TOTAL; i++)
+	{
+        const gitem_t @it = GetItemByIndex(i);
+		item_flags_t itflags = it.flags;
+
+		if (itflags == 0 || (itflags & (item_flags_t::NOT_GIVEABLE | item_flags_t::TECH | item_flags_t::NOT_RANDOM)) != 0 || it.pickup is null || it.world_model.empty())
+			continue;
+
+		PrecacheItem(it);
+	}
+}
+
 void doppleganger_die(ASEntity &self, ASEntity &inflictor, ASEntity &attacker, int damage, const vec3_t &in point, const mod_t &in mod)
 {
 	ASEntity @sphere;

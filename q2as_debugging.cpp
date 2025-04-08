@@ -567,7 +567,7 @@ static void q2as_profile_end()
     ((q2as_state_t *) asGetActiveContext()->GetEngine()->GetUserData())->Print(G_Fmt("{}\n", result.count()).data());
 }
 
-static std::string q2as_backtrace()
+std::string q2as_backtrace()
 {
     std::string trace;
     auto ctx = asGetActiveContext();
@@ -577,8 +577,9 @@ static std::string q2as_backtrace()
     {
         auto f = ctx->GetFunction(i);
         int col;
-        int row = ctx->GetLineNumber(i, &col);
-        trace += G_Fmt("{} [{}:{}]\n", f->GetDeclaration(true, false, true), row, col);
+        const char *section;
+        int row = ctx->GetLineNumber(i, &col, &section);
+        trace += G_Fmt("{} {}[{}:{}]\n", f->GetDeclaration(true, false, true), section, row, col);
     }
 
     return trace;

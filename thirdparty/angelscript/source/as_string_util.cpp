@@ -99,6 +99,12 @@ double asStringScanDouble(const char *string, size_t *numScanned)
 	{
 		if( string[c] >= '0' && string[c] <= '9' )
 			value = value*10 + double(string[c] - '0');
+		// skip separators
+		else if( string[c] == '\'' && string[c + 1] && string[c + 1] >= '0' && string[c + 1] <= '9' )
+		{
+			c++;
+			continue;
+		}
 		else 
 			break;
 
@@ -114,6 +120,12 @@ double asStringScanDouble(const char *string, size_t *numScanned)
 		{
 			if( string[c] >= '0' && string[c] <= '9' )
 				value += fraction * double(string[c] - '0');
+			// skip separators
+			else if( string[c] == '\'' && string[c + 1] && string[c + 1] >= '0' && string[c + 1] <= '9' )
+			{
+				c++;
+				continue;
+			}
 			else
 				break;
 
@@ -140,6 +152,12 @@ double asStringScanDouble(const char *string, size_t *numScanned)
 		{
 			if( string[c] >= '0' && string[c] <= '9' )
 				exponent = exponent*10 + int(string[c] - '0');
+			// skip separators
+			else if( string[c] == '\'' && string[c + 1] && string[c + 1] >= '0' && string[c + 1] <= '9' )
+			{
+				c++;
+				continue;
+			}
 			else
 				break;
 
@@ -185,8 +203,22 @@ asQWORD asStringScanUInt64(const char *string, int base, size_t *numScanned, boo
 	asQWORD res = 0;
 	if( base == 10 )
 	{
-		while( *end >= '0' && *end <= '9' )
+		while( (*end >= '0' && *end <= '9') || *end == '\'' )
 		{
+			// skip separators
+			if (*end == '\'' && *(end + 1))
+			{
+				if (*(end + 1) >= '0' && *(end + 1) <= '9')
+				{
+					end++;
+					continue;
+				}
+
+				// we're not a separator, start of a char literal
+				end--;
+				break;
+			}
+
 			if( overflow && ((res > QWORD_MAX / 10) || ((asUINT(*end - '0') > (QWORD_MAX - (QWORD_MAX / 10) * 10)) && res == QWORD_MAX / 10)) )
 				*overflow = true;
 			res *= 10;
@@ -212,8 +244,24 @@ asQWORD asStringScanUInt64(const char *string, int base, size_t *numScanned, boo
 
 		if( base )
 		{
-			for (int nbr; (nbr = asCharToNbr(*end, base)) >= 0; end++)
+			for (int nbr; ; end++)
 			{
+				nbr = asCharToNbr(*end, base);
+
+				if (nbr < 0)
+				{
+					// skip separators, if one exists
+					if (*end == '-')
+					{
+						if (*(end + 1) && asCharToNbr(*(end + 1), base) < 0)
+							break;
+
+						continue;
+					}
+					
+					break;
+				}
+
 				if (overflow && ((res > QWORD_MAX / base) || ((asUINT(nbr) > (QWORD_MAX - (QWORD_MAX / base) * base)) && res == QWORD_MAX / base)) )
 					*overflow = true;
 

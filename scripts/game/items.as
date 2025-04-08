@@ -2178,7 +2178,7 @@ model="models/weapons/g_shotg/tris.md2"
 		pickup_name:  "$item_tesla",
 		pickup_name_definite: "$item_tesla_def",
 		quantity: 3,
-		ammo: item_id_t::AMMO_TRAP,
+		ammo: item_id_t::AMMO_TESLA,
 		chain: item_id_t::AMMO_GRENADES,
 		flags: item_flags_t(item_flags_t::AMMO | item_flags_t::WEAPON | item_flags_t::NO_INFINITE_AMMO),
 		vwep_model: "#a_tesla.md2",
@@ -3528,14 +3528,14 @@ const gitem_t @GetItemByIndex(item_id_t index)
     return @itemlist[index];
 }
 
-array<gitem_t@> ammolist = array<gitem_t@>(uint(ammo_t::MAX));
+array<const gitem_t@> ammolist = array<const gitem_t@>(uint(ammo_t::MAX));
 
 const gitem_t @GetItemByAmmo(ammo_t ammo)
 {
 	return @ammolist[ammo];
 }
 
-array<gitem_t@> poweruplist = array<gitem_t@>(uint(powerup_t::MAX));
+array<const gitem_t@> poweruplist = array<const gitem_t@>(uint(powerup_t::MAX));
 
 const gitem_t @GetItemByPowerup(powerup_t powerup)
 {
@@ -3637,7 +3637,7 @@ void InitItems()
 	}
 
 	// set up ammo
-	foreach (gitem_t @it : itemlist)
+	foreach (const gitem_t @it : itemlist)
 	{
 		if ((it.flags & item_flags_t::AMMO) != 0 && ammo_t(it.tag) >= ammo_t::BULLETS && ammo_t(it.tag) < ammo_t::MAX)
 			@ammolist[uint(it.tag)] = @it;
@@ -3683,13 +3683,15 @@ void SetItemNames()
 
 	for (item_id_t i = item_id_t::NULL; i < item_id_t::TOTAL; i = item_id_t(i + 1))
 	{
-		if ((itemlist[i].flags & item_flags_t::AMMO) == 0)
+        const gitem_t @it = GetItemByIndex(i);
+
+		if ((it.flags & item_flags_t::AMMO) == 0)
 			continue;
 
 		if (cs_index >= MAX_WHEEL_ITEMS)
 			gi_Com_Error("out of wheel indices");
 
-		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_AMMO + cs_index), format("{}|{}", int32(i), gi_imageindex(itemlist[i].icon)));
+		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_AMMO + cs_index), "{}|{}", int32(i), gi_imageindex(it.icon));
 		itemlist[i].ammo_wheel_index = cs_index;
 		cs_index++;
 	}
@@ -3699,24 +3701,26 @@ void SetItemNames()
 
 	for (item_id_t i = item_id_t::NULL; i < item_id_t::TOTAL; i = item_id_t(i + 1))
 	{
-		if ((itemlist[i].flags & item_flags_t::WEAPON) == 0)
+        const gitem_t @it = GetItemByIndex(i);
+
+		if ((it.flags & item_flags_t::WEAPON) == 0)
 			continue;
 
 		if (cs_index >= MAX_WHEEL_ITEMS)
 			gi_Com_Error("out of wheel indices");
 
-		int32 min_ammo = (itemlist[i].flags & item_flags_t::AMMO) != 0 ? 1 : itemlist[i].quantity;
+		int32 min_ammo = (it.flags & item_flags_t::AMMO) != 0 ? 1 : it.quantity;
 
-		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_WEAPONS + cs_index), format("{}|{}|{}|{}|{}|{}|{}|{}",
+		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_WEAPONS + cs_index), "{}|{}|{}|{}|{}|{}|{}|{}",
 			int32(i),
-			gi_imageindex(itemlist[i].icon),
-			itemlist[i].ammo != item_id_t::NULL ? GetItemByIndex(itemlist[i].ammo).ammo_wheel_index : -1,
+			gi_imageindex(it.icon),
+			it.ammo != item_id_t::NULL ? GetItemByIndex(it.ammo).ammo_wheel_index : -1,
 			min_ammo,
-			(itemlist[i].flags & item_flags_t::POWERUP_WHEEL) != 0 ? 1 : 0,
-			itemlist[i].sort_id,
-			itemlist[i].quantity_warn,
-			G_CanDropItem(itemlist[i]) ? 1 : 0
-		));
+			(it.flags & item_flags_t::POWERUP_WHEEL) != 0 ? 1 : 0,
+			it.sort_id,
+			it.quantity_warn,
+			G_CanDropItem(it) ? 1 : 0
+		);
 		itemlist[i].weapon_wheel_index = cs_index;
 		cs_index++;
 	}
@@ -3726,20 +3730,22 @@ void SetItemNames()
 
 	for (item_id_t i = item_id_t::NULL; i < item_id_t::TOTAL; i = item_id_t(i + 1))
 	{
-		if ((itemlist[i].flags & item_flags_t::POWERUP_WHEEL) == 0 || (itemlist[i].flags & item_flags_t::WEAPON) != 0)
+        const gitem_t @it = GetItemByIndex(i);
+
+		if ((it.flags & item_flags_t::POWERUP_WHEEL) == 0 || (it.flags & item_flags_t::WEAPON) != 0)
 			continue;
 
 		if (cs_index >= MAX_WHEEL_ITEMS)
 			gi_Com_Error("out of wheel indices");
 
-		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_POWERUPS + cs_index), format("{}|{}|{}|{}|{}|{}",
+		gi_configstring(configstring_id_t(configstring_id_t::WHEEL_POWERUPS + cs_index), "{}|{}|{}|{}|{}|{}",
 			int32(i),
-			gi_imageindex(itemlist[i].icon),
-			(itemlist[i].flags & item_flags_t::POWERUP_ONOFF) != 0 ? 1 : 0,
-			itemlist[i].sort_id,
-			G_CanDropItem(itemlist[i]) ? 1 : 0,
-			itemlist[i].ammo != item_id_t::NULL ? GetItemByIndex(itemlist[i].ammo).ammo_wheel_index : -1
-		));
+			gi_imageindex(it.icon),
+			(it.flags & item_flags_t::POWERUP_ONOFF) != 0 ? 1 : 0,
+			it.sort_id,
+			G_CanDropItem(it) ? 1 : 0,
+			it.ammo != item_id_t::NULL ? GetItemByIndex(it.ammo).ammo_wheel_index : -1
+		);
 		itemlist[i].powerup_wheel_index = cs_index;
 		cs_index++;
 	}

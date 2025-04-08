@@ -1,29 +1,18 @@
 #include "q2as_local.h"
 #include "q2as_vec3.h"
+#include "q2as_fixedarray.h"
 
-static void Q2AS_vec3_t_init_construct_fff(const float x, const float y, const float z, vec3 &v)
+static void vec3_formatter(std::string &str, const std::string &args, const vec3 &in)
 {
-    v.x = x;
-    v.y = y;
-    v.z = z;
-}
-
-static void Q2AS_vec3_t_list_construct(const float *in, vec3 &v)
-{
-    v.x = in[0];
-    v.y = in[1];
-    v.z = in[2];
-}
-
-static void Q2AS_vec3_t_list_copy(const vec3 &in, vec3 &v)
-{
-    v = in;
+    fmt::format_to(std::back_inserter(str), "{} {} {}", in.x, in.y, in.z);
 }
 
 void Q2AS_RegisterVec3(q2as_registry &registry)
 {
+    Q2AS_RegisterFixedArray<float, 3>(registry, "vec3_t", "float", asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_AK);
+
     registry
-        .type("vec3_t", sizeof(vec3), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_CAK)
+        .for_type("vec3_t")
         .properties({
             { "float x", asOFFSET(vec3, x) },
             { "float y", asOFFSET(vec3, y) },
@@ -33,16 +22,7 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
             { "float yaw", asOFFSET(vec3, y) },
             { "float roll", asOFFSET(vec3, z) }
         })
-        .behaviors({
-            { asBEHAVE_CONSTRUCT,      "void vec3_t(float, float, float)",           asFUNCTION(Q2AS_vec3_t_init_construct_fff), asCALL_CDECL_OBJLAST },
-            { asBEHAVE_CONSTRUCT,      "void vec3_t(const vec3_t &in)",              asFUNCTION(Q2AS_vec3_t_list_copy),          asCALL_CDECL_OBJLAST },
-            { asBEHAVE_LIST_CONSTRUCT, "void vec3_t(int &in) {float, float, float}", asFUNCTION(Q2AS_vec3_t_list_construct),     asCALL_CDECL_OBJLAST }
-        })
         .methods({
-            // indexing
-            { "float &opIndex(uint)",             asMETHODPR(vec3, operator[], (unsigned int), float &),             asCALL_THISCALL },
-            { "const float &opIndex(uint) const", asMETHODPR(vec3, operator[], (unsigned int) const, const float &), asCALL_THISCALL },
-
             // equality
             { "bool opEquals(const vec3_t &in) const",                         asMETHODPR(vec3, operator==, (const vec3 &) const, bool),                                                              asCALL_THISCALL },
             { "bool equals(const vec3_t &in, float) const",              asMETHODPR(vec3, equals, (const vec3 &v, const float relative_tolerance) const, bool),                                 asCALL_THISCALL },
@@ -103,6 +83,7 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
             { "vec3_t G_ProjectSource(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in) nodiscard",                    asFUNCTION(G_ProjectSource),                                                      asCALL_CDECL },
             { "vec3_t G_ProjectSource2(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in) nodiscard", asFUNCTION(G_ProjectSource2),                                                     asCALL_CDECL },
             { "vec3_t slerp(const vec3_t &in, const vec3_t &in, float) nodiscard",                                                           asFUNCTION(slerp),                                                                asCALL_CDECL },
-            { "vec3_t lerp(vec3_t, vec3_t, float) nodiscard",                                                                                asFUNCTIONPR(lerp, (vec3_t, vec3_t, float), vec3_t),                              asCALL_CDECL }
+            { "vec3_t lerp(vec3_t, vec3_t, float) nodiscard",                                                                                asFUNCTIONPR(lerp, (vec3_t, vec3_t, float), vec3_t),                              asCALL_CDECL },
+            { "void formatter(string &str, const string &in args, const vec3_t &in vec)",                                                    asFUNCTION(vec3_formatter),                                                       asCALL_CDECL }
         });
 }

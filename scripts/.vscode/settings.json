@@ -3,5 +3,6 @@
     "angelScript.formatter.useTabIndent": true,
     "angelScript.supportsForEach": true,
     "angelScript.supportsTypedEnumerations": true,
-    "angelScript.characterLiterals": true
+    "angelScript.characterLiterals": true,
+    "angelScript.supportsDigitSeparators": true
 }
