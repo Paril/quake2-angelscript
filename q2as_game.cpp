@@ -45,14 +45,9 @@ struct q2as_edict_t : edict_t
     return gi.cvar(name, value, flags);
 }
 
-enum
-{
-    TAG_ANGELSCRIPT_SV = 765//767
-};
-
 /*virtual*/ void *q2as_sv_state_t::Alloc(size_t size) /*override*/
 {
-    return gi.TagMalloc(size, TAG_ANGELSCRIPT_SV);
+    return gi.TagMalloc(size, TAG_GAME);
 }
 
 /*virtual*/ void q2as_sv_state_t::Free(void *ptr) /*override*/
@@ -62,7 +57,7 @@ enum
 
 /*virtual*/ void *q2as_sv_state_t::AllocStatic(size_t size) /*override*/
 {
-    return gi.TagMalloc(size, TAG_ANGELSCRIPT_SV);
+    return gi.TagMalloc(size, TAG_GAME);
 }
 
 /*virtual*/ void q2as_sv_state_t::FreeStatic(void *ptr) /*override*/
@@ -173,10 +168,6 @@ static void Q2AS_ShutdownGame()
     
     for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
         e->~q2as_edict_t();
-
-    gi.FreeTags(TAG_LEVEL);
-    gi.FreeTags(TAG_GAME);
-    gi.FreeTags(TAG_ANGELSCRIPT_SV);
 }
 
 static void Q2AS_SpawnEntities(const char *mapname, const char *entstring, const char *spawnpoint)
@@ -1260,7 +1251,7 @@ static void q2as_find_by_str(asIScriptGeneric *gen)
 
     if (!edict)
     {
-        gi.Com_Error("world has no attached entity");
+        asGetActiveContext()->SetException("world has no attached entity");
         return;
     }
 
@@ -1278,7 +1269,8 @@ static void q2as_find_by_str(asIScriptGeneric *gen)
 
     if (propId == typeinfo->GetPropertyCount())
     {
-        gi.Com_ErrorFmt("invalid key to search for in find_by_str: {}", *key);
+        // TODO: add info to exception?
+        asGetActiveContext()->SetException("invalid \"key\" to search for in find_by_str");
         return;
     }
 
@@ -1287,9 +1279,15 @@ static void q2as_find_by_str(asIScriptGeneric *gen)
         if (!edict->inuse)
             continue;
         if (!edict->as_obj)
-            gi.Com_Error("missing as_obj on active entity");
+        {
+            asGetActiveContext()->SetException("missing as_obj on active entity");
+            return;
+        }
         else if (edict->as_obj->GetTypeId() != typeinfo->GetTypeId())
-            gi.Com_Error("as_obj has wrong type id");
+        {
+            asGetActiveContext()->SetException("as_obj has wrong type id");
+            return;
+        }
 
         std::string *edict_val = (std::string *) edict->as_obj->GetAddressOfProperty(propId);
 

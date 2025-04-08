@@ -1,41 +1,23 @@
 #include "q2as_local.h"
+#include "q2as_fixedarray.h"
 #include "q2as_vec2.h"
 
-static void Q2AS_vec2_t_init_construct_fff(const float x, const float y, vec2 &v)
+static void vec2_formatter(std::string &str, const std::string &args, const vec2 &in)
 {
-	v.x = x;
-	v.y = y;
-}
-
-static void Q2AS_vec2_t_list_construct(const float *in, vec2 &v)
-{
-	v.x = in[0];
-	v.y = in[1];
-}
-
-static void Q2AS_vec2_t_list_copy(const vec2 &in, vec2 &v)
-{
-	v = in;
+    fmt::format_to(std::back_inserter(str), "{} {}", in.x, in.y);
 }
 
 void Q2AS_RegisterVec2(q2as_registry &registry)
 {
-	registry
-		.type("vec2_t", sizeof(vec2), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_CAK)
+	Q2AS_RegisterFixedArray<float, 2>(registry, "vec2_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
+
+    registry
+        .for_type("vec2_t")
 		.properties({
 			{ "float x", asOFFSET(vec2, x) },
 			{ "float y", asOFFSET(vec2, y) },
 		})
-		.behaviors({
-			{ asBEHAVE_CONSTRUCT,      "void vec2_t(float, float)",           asFUNCTION(Q2AS_vec2_t_init_construct_fff), asCALL_CDECL_OBJLAST },
-			{ asBEHAVE_CONSTRUCT,      "void vec2_t(const vec2_t &in)",       asFUNCTION(Q2AS_vec2_t_list_copy),          asCALL_CDECL_OBJLAST },
-			{ asBEHAVE_LIST_CONSTRUCT, "void vec2_t(int &in) {float, float}", asFUNCTION(Q2AS_vec2_t_list_construct),     asCALL_CDECL_OBJLAST }
-		})
 		.methods({
-			// indexing
-			{ "float &opIndex(uint)",             asMETHODPR(vec2, operator[], (unsigned int), float &),             asCALL_THISCALL },
-			{ "const float &opIndex(uint) const", asMETHODPR(vec2, operator[], (unsigned int) const, const float &), asCALL_THISCALL },
-
 			// equality
 			{ "bool opEquals(const vec2_t &in) const",             asMETHODPR(vec2, operator==, (const vec2 &) const, bool),                                                              asCALL_THISCALL },
 			{ "bool equals(const vec2_t &in, float) const",        asMETHODPR(vec2, equals, (const vec2 &v, const float relative_tolerance) const, bool),                                 asCALL_THISCALL },
@@ -76,4 +58,10 @@ void Q2AS_RegisterVec2(q2as_registry &registry)
 			{ "vec2_t normalized(float &out) const",			asMETHODPR(vec2, normalized, (float &) const, vec2), asCALL_THISCALL },
 			{ "float normalize()",								asMETHODPR(vec2, normalize, (), float),              asCALL_THISCALL }
 		});
+
+    registry
+        .for_global()
+        .functions({
+            { "void formatter(string &str, const string &in args, const vec2_t &in vec)",                                                    asFUNCTION(vec2_formatter),                                                       asCALL_CDECL }
+        });
 }

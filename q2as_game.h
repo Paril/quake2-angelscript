@@ -1,7 +1,6 @@
 #pragma once
 
 #include "q2as_local.h"
-#include "bg_local.h"
 
 #include <vector>
 #include <string>

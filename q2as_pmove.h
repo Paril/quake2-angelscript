@@ -1,7 +1,6 @@
 #pragma once
 
 #include "q2as_local.h"
-#include "bg_local.h"
 
 struct q2as_edict_t;
 

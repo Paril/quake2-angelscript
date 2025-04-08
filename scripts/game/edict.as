@@ -571,29 +571,29 @@ class bmodel_anim_t
 
 namespace internal
 {
-    bool allow_value_assign = false;
+    int allow_value_assign = 0;
 }
 
 // a special framework type that will throw if
-// constructoed or value-assign is used without first setting
-// the `internal::allow_value_assign` boolean.
+// constructed or value-assign is used without first setting
+// the `internal::allow_value_assign` integer.
 class no_value_assign
 {
     no_value_assign()
     {
-        if (!internal::allow_value_assign)
+        if (internal::allow_value_assign == 0)
             throw("value assign not allowed");
     }
 
     no_value_assign(const no_value_assign &in)
     {
-        if (!internal::allow_value_assign)
+        if (!internal::allow_value_assign == 0)
             throw("value assign not allowed");
     }
 
     no_value_assign &opAssign(const no_value_assign &in)
     {
-        if (!internal::allow_value_assign)
+        if (!internal::allow_value_assign == 0)
             throw("value assign not allowed");
         return this;
     }
@@ -800,9 +800,9 @@ class ASEntity : IASEntity
 			return;
 		}
 
-        internal::allow_value_assign = true;
+        internal::allow_value_assign++;
 		this = ASEntity(e);
-        internal::allow_value_assign = false;
+        internal::allow_value_assign--;
 		this.classname = "freed";
 		e.sv.init = false;
     }
@@ -872,7 +872,7 @@ bool G_EdictExpired(ASEntity &e)
 void SetupEntityArrays(bool loadgame)
 {
 	num_edicts = max_clients + 1;
-    internal::allow_value_assign = true;
+    internal::allow_value_assign++;
 
     if (!loadgame)
     {
@@ -898,7 +898,7 @@ void SetupEntityArrays(bool loadgame)
         @players[i] = p;
     }
 
-    internal::allow_value_assign = false;
+    internal::allow_value_assign--;
 }
 
 /*
@@ -930,9 +930,9 @@ ASEntity @G_Spawn()
 	if (num_edicts == max_edicts)
 		gi_Com_Error("ED_Alloc: no free edicts");
 
-    internal::allow_value_assign = true;
+    internal::allow_value_assign++;
 	@e = ASEntity(G_EdictForNum(num_edicts));
-    internal::allow_value_assign = false;
+    internal::allow_value_assign--;
 	e.Init();
 	@entities[e.e.s.number] = @e;
 	num_edicts++;

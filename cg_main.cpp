@@ -1,7 +1,7 @@
 // Copyright (c) ZeniMax Media Inc.
 // Licensed under the GNU General Public License 2.0.
 
-#include "cg_local.h"
+#include "q2as_cgame.h"
 #include "q2as_main.h"
 #include "q2as_platform.h"
 

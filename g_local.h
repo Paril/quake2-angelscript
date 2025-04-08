@@ -4,7 +4,10 @@
 // g_local.h -- local definitions for game module
 #pragma once
 
-#include "bg_local.h"
+#include "q_std.h"
+
+#define USE_VEC3_TYPE
+#include "game.h"
 
 // memory tags to allow dynamic memory to be cleaned up
 enum
@@ -18,14 +21,6 @@ constexpr const char *GAMEVERSION = "baseq2";
 
 //==================================================================
 
-#include <charconv>
-
-template<typename T>
-constexpr bool is_char_ptr_v = std::is_convertible_v<T, const char *>;
-
-template<typename T>
-constexpr bool is_valid_loc_embed_v = !std::is_null_pointer_v<T> && (std::is_floating_point_v<std::remove_reference_t<T>> || std::is_integral_v<std::remove_reference_t<T>> || is_char_ptr_v<T>);
-
 struct local_game_import_t : game_import_t
 {
     inline local_game_import_t() = default;
@@ -34,103 +29,7 @@ struct local_game_import_t : game_import_t
     {
     }
 
-private:
-    // shared buffer for wrappers below
-    static char print_buffer[0x10000];
-
 public:
-#ifdef USE_CPP20_FORMAT
-    template<typename... Args>
-    inline void Com_PrintFmt(std::format_string<Args...> format_str, Args &&... args)
-#else
-#define Com_PrintFmt(str, ...) \
-	Com_PrintFmt_(FMT_STRING(str), __VA_ARGS__)
-
-    template<typename S, typename... Args>
-    inline void Com_PrintFmt_(const S &format_str, Args &&... args)
-#endif
-    {
-        G_FmtTo_(print_buffer, format_str, std::forward<Args>(args)...);
-        Com_Print(print_buffer);
-    }
-
-#ifdef USE_CPP20_FORMAT
-    template<typename... Args>
-    inline void Com_ErrorFmt(std::format_string<Args...> format_str, Args &&... args)
-#else
-#define Com_ErrorFmt(str, ...) \
-	Com_ErrorFmt_(FMT_STRING(str), __VA_ARGS__)
-
-    template<typename S, typename... Args>
-    inline void Com_ErrorFmt_(const S &format_str, Args &&... args)
-#endif
-    {
-        G_FmtTo_(print_buffer, format_str, std::forward<Args>(args)...);
-        Com_Error(print_buffer);
-    }
-
-private:
-    // localized print functions
-    template<typename T>
-    inline void loc_embed(T input, char *buffer, const char *&output)
-    {
-        if constexpr (std::is_floating_point_v<T> || std::is_integral_v<T>)
-        {
-            auto result = std::to_chars(buffer, buffer + MAX_INFO_STRING - 1, input);
-            *result.ptr = '\0';
-            output = buffer;
-        }
-        else if constexpr (is_char_ptr_v<T>)
-        {
-            if (!input)
-                Com_Error("null const char ptr passed to loc");
-
-            output = input;
-        }
-        else
-            Com_Error("invalid loc argument");
-    }
-
-    static std::array<char[MAX_INFO_STRING], MAX_LOCALIZATION_ARGS> buffers;
-    static std::array<const char *, MAX_LOCALIZATION_ARGS> buffer_ptrs;
-
-public:
-    template<typename... Args>
-    inline void LocClient_Print(edict_t *e, print_type_t level, const char *base, Args&& ...args)
-    {
-        static_assert(sizeof...(args) < MAX_LOCALIZATION_ARGS, "too many arguments to gi.LocClient_Print");
-        static_assert(((is_valid_loc_embed_v<Args>) && ...), "invalid argument passed to gi.LocClient_Print");
-
-        size_t n = 0;
-        ((loc_embed(args, buffers[n], buffer_ptrs[n]), ++n), ...);
-
-        Loc_Print(e, level, base, &buffer_ptrs.front(), sizeof...(args));
-    }
-
-    template<typename... Args>
-    inline void LocBroadcast_Print(print_type_t level, const char *base, Args&& ...args)
-    {
-        static_assert(sizeof...(args) < MAX_LOCALIZATION_ARGS, "too many arguments to gi.LocBroadcast_Print");
-        static_assert(((is_valid_loc_embed_v<Args>) && ...), "invalid argument passed to gi.LocBroadcast_Print");
-
-        size_t n = 0;
-        ((loc_embed(args, buffers[n], buffer_ptrs[n]), ++n), ...);
-
-        Loc_Print(nullptr, (print_type_t) (level | print_type_t::PRINT_BROADCAST), base, &buffer_ptrs.front(), sizeof...(args));
-    }
-
-    template<typename... Args>
-    inline void LocCenter_Print(edict_t *e, const char *base, Args&& ...args)
-    {
-        static_assert(sizeof...(args) < MAX_LOCALIZATION_ARGS, "too many arguments to gi.LocCenter_Print");
-        static_assert(((is_valid_loc_embed_v<Args>) && ...), "invalid argument passed to gi.LocCenter_Print");
-
-        size_t n = 0;
-        ((loc_embed(args, buffers[n], buffer_ptrs[n]), ++n), ...);
-
-        Loc_Print(e, PRINT_CENTER, base, &buffer_ptrs.front(), sizeof...(args));
-    }
-
     // collision detection
     [[nodiscard]] inline trace_t trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const edict_t *passent, contents_t contentmask)
     {

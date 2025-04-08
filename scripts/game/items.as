@@ -305,25 +305,21 @@ void DoRespawn(ASEntity &self)
 	ent.e.s.event = entity_event_t::ITEM_RESPAWN;
 
 	// ROGUE
-    // AS_TODO
-    /*
 	if (g_dm_random_items.integer != 0)
 	{
 		item_id_t new_item = DoRandomRespawn(ent);
 
 		// if we've changed entities, then do some sleight of hand.
 		// otherwise, the old entity will respawn
-		if (new_item)
+		if (new_item != item_id_t::NULL)
 		{
-			ent.item = GetItemByIndex(new_item);
+			@ent.item = GetItemByIndex(new_item);
 
 			ent.classname = ent.item.classname;
-			ent.s.effects = ent.item.world_model_flags;
-			gi.setmodel(ent, ent.item.world_model);
+			ent.e.effects = ent.item.world_model_flags;
+			gi_setmodel(ent.e, ent.item.world_model);
 		}
 	}
-    */
-	// ROGUE
 }
 
 void SetRespawn(ASEntity &ent, gtime_t delay, bool hide_self = true)

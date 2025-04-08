@@ -315,8 +315,9 @@ void asIDBDAPServer::StartServer()
 
 void asIDBDAPServer::StopServer()
 {
+    if (client)
+        client.reset();
     server.reset();
-    client.reset();
 }
 
 void asIDBDAPServer::Tick()

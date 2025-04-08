@@ -1045,15 +1045,15 @@ class string
 	int32 find(const string &in, uint32 start = 0) const;
 	int32 rfind(const string &in, int32 start = -1) const;
 	array<string> @split(const string &in) const;
-	string &appendChar(uint8);
+	string &appendChar(uint8 ch);
 	string aslower() const;
 	string asupper() const;
 	string &lower();
 	string &upper();
 	string &format(const string &in fmt, const ? &in ...);
 	string &format_append(const string &in fmt, const ? &in ...);
-    int32 findStartOfUTF8Codepoint(int32 pos) const;
-    int32 findEndOfUTF8Codepoint(int32 pos) const;
+	int32 findStartOfUTF8Codepoint(int32 pos) const;
+	int32 findEndOfUTF8Codepoint(int32 pos) const;
 }
 class array<T>
 {
@@ -1231,6 +1231,48 @@ class const_weakref<T>
 	const_weakref<T> &opHndlAssign(const weakref<T> &in);
 	bool opEquals(const weakref<T> &in) const;
 }
+class vec2_t
+{
+	// properties
+	float x;
+	float y;
+	// behaviors
+	vec2_t(int&in) { float, float };
+	vec2_t(float, float);
+	// methods
+	float &opIndex(uint32);
+	const float &opIndex(uint32) const;
+	uint32 size() const;
+	bool opEquals(const vec2_t &in) const;
+	bool equals(const vec2_t &in, float) const;
+	bool equals(const vec2_t &in, float, float) const;
+	bool opConv() const;
+	float dot(const vec2_t &in) const;
+	vec2_t scaled(const vec2_t &in) const;
+	vec2_t &scale(const vec2_t &in);
+	vec2_t opSub(const vec2_t &in) const;
+	vec2_t opAdd(const vec2_t &in) const;
+	vec2_t opDiv(const vec2_t &in) const;
+	vec2_t opDiv(const float &in) const;
+	vec2_t opDiv(const int32 &in) const;
+	vec2_t opMul(const float &in) const;
+	vec2_t opMul(const int32 &in) const;
+	vec2_t opNeg() const;
+	vec2_t &opSubAssign(const vec2_t &in);
+	vec2_t &opAddAssign(const vec2_t &in);
+	vec2_t &opDivAssign(const vec2_t &in);
+	vec2_t &opDivAssign(const float &in);
+	vec2_t &opDivAssign(const int32 &in);
+	vec2_t &opMulAssign(const float &in);
+	vec2_t &opMulAssign(const int32 &in);
+	float lengthSquared() const;
+	float length() const;
+	float distanceSquared(const vec2_t &in) const;
+	float distance(const vec2_t &in) const;
+	vec2_t normalized() const;
+	vec2_t normalized(float &out) const;
+	float normalize();
+}
 class vec3_t
 {
 	// properties
@@ -1313,19 +1355,6 @@ class rgba_t
 	// methods
 	uint8 &opIndex(uint32);
 	const uint8 &opIndex(uint32) const;
-	uint32 size() const;
-}
-class vec2_t
-{
-	// properties
-	float x;
-	float y;
-	// behaviors
-	vec2_t(int&in) { float, float };
-	vec2_t(float, float);
-	// methods
-	float &opIndex(uint32);
-	const float &opIndex(uint32) const;
 	uint32 size() const;
 }
 class vec4_t
@@ -1439,9 +1468,6 @@ class csurface_t
 }
 class stat_array_t
 {
-	// behaviors
-	stat_array_t(int&in) { int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16 };
-	stat_array_t(int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16);
 	// methods
 	int16 &opIndex(uint32);
 	const int16 &opIndex(uint32) const;
@@ -1558,9 +1584,6 @@ class armorInfo_t
 }
 class inventoryArray_t
 {
-	// behaviors
-	inventoryArray_t(int&in) { int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int };
-	inventoryArray_t(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
 	// methods
 	int32 &opIndex(uint32);
 	const int32 &opIndex(uint32) const;
@@ -2052,9 +2075,6 @@ class vrect_t
 }
 class item_array_t
 {
-	// behaviors
-	item_array_t(int&in) { int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16 };
-	item_array_t(int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16, int16);
 	// methods
 	int16 &opIndex(uint32);
 	const int16 &opIndex(uint32) const;
@@ -2313,6 +2333,7 @@ uint64 clamp(uint64, uint64, uint64);
 float lerp(float, float, float);
 float LerpAngle(float, float, float);
 float anglemod(float);
+void formatter(string &str, const string &in args, const vec2_t &in vec);
 void AngleVectors(const vec3_t &in, vec3_t &out forward = void, vec3_t &out right = void, vec3_t &out up = void);
 vec3_t ProjectPointOnPlane(const vec3_t &in, const vec3_t &in) nodiscard;
 vec3_t PerpendicularVector(const vec3_t &in) nodiscard;
@@ -2350,8 +2371,8 @@ uint32 irandom();
 int32 irandom(int32, int32);
 int32 irandom(int32);
 bool brandom();
-int32 Q_strcasecmp(const string &in, const string &in);
-int32 Q_strncasecmp(const string &in, const string &in, uint32 n);
+int32 Q_strcasecmp(const string &in a, const string &in b);
+int32 Q_strncasecmp(const string &in a, const string &in b, uint32 n);
 string format(const string &in fmt, const ? &in ...);
 void format_to(string &str, const string &in fmt, const ? &in ...);
 void profile_start(const string &in);
@@ -2397,7 +2418,7 @@ void gi_Com_Print(const string &in fmt, const ? &in ...);
 void gi_cvar_set(const string &in var_name, const string &in value);
 void gi_cvar_forceset(const string &in var_name, const string &in value);
 uint32 gi_Info_ValueForKey(const string &in, const string &in, const string &out);
-bool gi_Info_SetValueForKey(const string &in, const string &in, const string &in, string &out);
+bool gi_Info_SetValueForKey(string &userinfo, const string &in, const string &in);
 void gi_configstring(int32 num, const string &in str);
 void gi_configstring(int32 num, const string &in fmt, const ? &in ...);
 string gi_get_configstring(int32 num) nodiscard;

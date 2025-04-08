@@ -2728,9 +2728,9 @@ void PutClientInServer(ASEntity &ent)
 
 	// clear everything but the persistant data
 	saved = ent.client.pers;
-    internal::allow_value_assign = true;
+    internal::allow_value_assign++;
     ent.client = ASClient(ent.e.client);
-    internal::allow_value_assign = false;
+    internal::allow_value_assign--;
 	ent.client.pers = saved;
 	ent.client.resp = resp;
 

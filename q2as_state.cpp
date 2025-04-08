@@ -250,8 +250,8 @@ bool q2as_state_t::CreateEngine()
     return true;
 }
 
-#include "cg_local.h"
 #include "g_local.h"
+#include "q2as_cgame.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;

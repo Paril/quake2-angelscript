@@ -118,9 +118,10 @@ void CG_ClearCenterprint(int32 isplit)
 void CG_ClearNotify(int32 isplit)
 {
     // AS_TODO: mutable forEach?
+    hud_data_t @data = hud_data[isplit];
     //foreach (cl_notify_t @msg : hud_data[isplit].notify)
     for (uint i = 0; i < MAX_NOTIFY; i++)
-        hud_data[isplit].notify[i].is_active = false;
+        data.notify[i].is_active = false;
 }
 
 // if the top one is expired, cycle the ones ahead backwards (since

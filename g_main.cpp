@@ -9,11 +9,6 @@ std::mt19937 mt_rand;
 
 local_game_import_t  gi;
 
-/*static*/ char local_game_import_t::print_buffer[0x10000];
-
-/*static*/ std::array<char[MAX_INFO_STRING], MAX_LOCALIZATION_ARGS> local_game_import_t::buffers;
-/*static*/ std::array<const char *, MAX_LOCALIZATION_ARGS> local_game_import_t::buffer_ptrs;
-
 game_export_t  globals;
 
 /*

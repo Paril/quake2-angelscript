@@ -253,8 +253,6 @@
     <ClCompile Include="q2as_vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bg_local.h" />
-    <ClInclude Include="cg_local.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="q_std.h" />

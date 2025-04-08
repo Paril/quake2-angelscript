@@ -842,13 +842,22 @@ void SpawnEntities(string &in mapname, string &in entstring, string &in spawnpoi
     // except the special reserved entities.
     // we have to back up the client data, but all
     // the edict_t stuff gets wiped.
-    internal::allow_value_assign = true;
+    internal::allow_value_assign++;
 	for (uint i = 0; i < num_edicts; i++)
     {
+        edict_t @e = G_EdictForNum(i);
+
+        // FIXME: this happens during restart_level although
+        // I'm not 100% sure why. ReadGame is called when restart_level
+        // happens and that should reset the state (num_edicts, etc)
+        // properly, but entities[2] (bodyque) is null.
+        if (entities[i] is null)
+            @entities[i] = ASEntity(e);
+
         if (i < max_clients + 1 + BODY_QUEUE_SIZE)
         {
-            edict_t @e = G_EdictForNum(i);
             e.reset();
+
             ASClient @cl = entities[i].client;
             @entities[i] = ASEntity(e);
             @entities[i].client = cl;
@@ -859,7 +868,7 @@ void SpawnEntities(string &in mapname, string &in entstring, string &in spawnpoi
         else
             entities[i].Free();
     }
-    internal::allow_value_assign = false;
+    internal::allow_value_assign--;
 
 	// all other flags are not important atm
     server_flags = server_flags_t(server_flags & server_flags_t::LOADING);

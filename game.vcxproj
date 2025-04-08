@@ -243,8 +243,6 @@
     <ClCompile Include="thirdparty\yyjson\yyjson.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bg_local.h" />
-    <ClInclude Include="cg_local.h" />
     <ClInclude Include="ctrack.hpp" />
     <ClInclude Include="debugger\as_debugger.h" />
     <ClInclude Include="debugger\as_debugger_dap.h" />

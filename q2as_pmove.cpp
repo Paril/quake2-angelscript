@@ -1,6 +1,5 @@
 #include "q2as_local.h"
 #include "q2as_pmove.h"
-#include "bg_local.h"
 
 void Q2AS_RegisterPmove(q2as_registry &registry)
 {

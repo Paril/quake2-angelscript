@@ -1,10 +1,9 @@
 #include "q2as_json.h"
-#include "bg_local.h"
-#include "cg_local.h"
 #include "q2as_cgame.h"
 #include "g_local.h"
 #include "q2as_game.h"
 #include "q2as_stringex.h"
+#include <charconv>
 
 // simple tokenizer that is similar to COM_Parse.
 // states begin in a 'start' state, with no token stored.

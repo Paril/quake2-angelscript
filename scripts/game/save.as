@@ -782,7 +782,7 @@ void ReadGame(json_doc &doc)
 
     entities = array<ASEntity@>(max_edicts);
 
-    internal::allow_value_assign = true;
+    internal::allow_value_assign++;
 
     @world = ASEntity(G_EdictForNum(0));
     @entities[0] = @world;
@@ -816,7 +816,7 @@ void ReadGame(json_doc &doc)
         i++;
 	}
 
-    internal::allow_value_assign = false;
+    internal::allow_value_assign--;
 }
 
 json_mutval WriteLevelLocals(json_mutdoc &doc)
@@ -1800,7 +1800,7 @@ void ReadLevel(json_doc &doc)
     json_obj_iter iter(v);
 
 	// read entities
-    internal::allow_value_assign = true;
+    internal::allow_value_assign++;
     while (iter.has_next)
 	{
         json_val key = iter.next;
@@ -1866,7 +1866,7 @@ void ReadLevel(json_doc &doc)
 		if (ent.classname == "target_crosslevel_target" || ent.classname == "target_crossunit_target")
 			ent.nextthink = level.time + time_sec(ent.delay);
 	}
-    internal::allow_value_assign = false;
+    internal::allow_value_assign--;
 
 	G_PrecacheInventoryItems();
 
