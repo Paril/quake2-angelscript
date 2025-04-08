@@ -1052,6 +1052,8 @@ class string
 	string &upper();
 	string &format(const string &in fmt, const ? &in ...);
 	string &format_append(const string &in fmt, const ? &in ...);
+    int32 findStartOfUTF8Codepoint(int32 pos) const;
+    int32 findEndOfUTF8Codepoint(int32 pos) const;
 }
 class array<T>
 {

@@ -65,7 +65,7 @@ class cl_centerprint_t
     bool        instant; // don't type out
 
     uint        current_line; // current line we're typing out
-    uint        line_count; // byte count to draw on current line
+    int         line_count; // byte count to draw on current line
     bool        finished; // done typing it out
     uint64      time_tick, time_off; // time to remove at
 };
@@ -290,69 +290,6 @@ int CG_DrawHUDString (const string &in str, int x, int y, int centerwidth, int _
     return x;
 }
 
-// Shamefully stolen from Kex
-uint32 FindStartOfUTF8Codepoint(const string &in str, uint32 pos)
-{
-    if(pos >= str.length())
-    {
-        return uint32(-1);
-    }
-
-    for(int64 i = pos; i >= 0; i--)
-    {
-        uint8 ch = str[i];
-
-        if((ch & 0x80) == 0)
-        {
-            // character is one byte
-            return i;
-        }
-        else if((ch & 0xC0) == 0x80)
-        {
-            // character is part of a multi-byte sequence, keep going
-            continue;
-        }
-        else
-        {
-            // character is the start of a multi-byte sequence, so stop now
-            return i;
-        }
-    }
-
-    return uint32(-1);
-}
-
-uint32 FindEndOfUTF8Codepoint(const string &in str, uint32 pos)
-{
-    if(pos >= str.length())
-    {
-        return uint32(-1);
-    }
-
-    for(uint32 i = pos; i < str.length(); i++)
-    {
-        uint8 ch = str[i];
-
-        if((ch & 0x80) == 0)
-        {
-            // character is one byte
-            return i;
-        }
-        else if((ch & 0xC0) == 0x80)
-        {
-            // character is part of a multi-byte sequence, keep going
-            continue;
-        }
-        else
-        {
-            // character is the start of a multi-byte sequence, so stop now
-            return i;
-        }
-    }
-
-    return uint32(-1);
-}
-
 void CG_NotifyMessage(int32 isplit, const string &in msg, bool is_chat)
 {
     CG_AddNotify(hud_data[isplit], msg, is_chat);
@@ -471,11 +408,11 @@ void CG_ParseCenterPrint(const string &in str, int isplit, bool instant) // [Sam
     cgi_Com_Print("\n\x1D\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1E\x1F\n\n");
     CG_ClearNotify (isplit);
 
-    for (uint32 line_end = 0; ; )
+    for (int32 line_end = 0; ; )
     {
-        line_end = FindEndOfUTF8Codepoint(line_str, line_end);
+        line_end = line_str.findEndOfUTF8Codepoint(line_end);
 
-        if (line_end == uint(-1))
+        if (line_end == -1)
         {
             // final line
             if (line_start < line_str.length())
@@ -489,7 +426,7 @@ void CG_ParseCenterPrint(const string &in str, int isplit, bool instant) // [Sam
 
         if (ch == '\n')
         {
-            if (line_end > line_start)
+            if (uint(line_end) > line_start)
                 center.lines.push_back(line_str.substr(line_start, line_end - line_start));
             else
                 center.lines.push_back("");
@@ -576,9 +513,9 @@ void CG_DrawCenterString( const player_state_t &in ps, const vrect_t &in hud_vre
         if (center.time_tick < t)
         {
             center.time_tick = int(t + (scr_printspeed.value * 1000));
-            center.line_count = FindEndOfUTF8Codepoint(center.lines[center.current_line], center.line_count + 1);
+            center.line_count = center.lines[center.current_line].findEndOfUTF8Codepoint(center.line_count + 1);
 
-            if (center.line_count == uint(-1))
+            if (center.line_count == -1)
             {
                 center.current_line++;
                 center.line_count = 0;

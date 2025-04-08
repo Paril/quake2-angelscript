@@ -541,25 +541,25 @@ void Q2AS_RegisterStringEx(q2as_registry &registry)
             // { asBEHAVE_CONSTRUCT,  "void f(const string &in fmt, const ?& in ...)", asFUNCTION(q2as_string_construct_formatted), asCALL_GENERIC }
         //})
         .methods({
-            { "string &appendChar(uint8)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST },
+            { "string &appendChar(uint8 ch)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST },
             { "string aslower() const",    asFUNCTION(q2as_string_aslower),     asCALL_CDECL_OBJLAST },
             { "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST },
             { "string &lower()",           asFUNCTION(q2as_string_lower),       asCALL_CDECL_OBJLAST },
             { "string &upper()",           asFUNCTION(q2as_string_upper),       asCALL_CDECL_OBJLAST },
 
-            { "string &format(const string&in fmt, const ?&in ...)",        asFUNCTION(q2as_string_format),        asCALL_GENERIC },
+            { "string &format(const string &in fmt, const ?&in ...)",        asFUNCTION(q2as_string_format),        asCALL_GENERIC },
             { "string &format_append(const string&in fmt, const ?&in ...)", asFUNCTION(q2as_string_format_append), asCALL_GENERIC },
 
-            { "int32 findStartOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindStartOfUTF8Codepoint), asCALL_CDECL_OBJFIRST },
-            { "int32 findEndOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindEndOfUTF8Codepoint), asCALL_CDECL_OBJFIRST }
+            { "int32 findStartOfUTF8Codepoint(int32 pos) const", asFUNCTION(FindStartOfUTF8Codepoint), asCALL_CDECL_OBJFIRST },
+            { "int32 findEndOfUTF8Codepoint(int32 pos) const", asFUNCTION(FindEndOfUTF8Codepoint), asCALL_CDECL_OBJFIRST }
         });
 
     registry
         .for_global()
         .functions({
-            { "int Q_strcasecmp(const string &in, const string &in)",             asFUNCTION(q2as_Q_strcasecmp),  asCALL_CDECL },
-            { "int Q_strncasecmp(const string &in, const string &in, uint n)",    asFUNCTION(q2as_Q_strncasecmp), asCALL_CDECL },
-            { "string format(const string&in fmt, const ?&in ...)",               asFUNCTION(q2as_format),        asCALL_GENERIC },
-            { "void format_to(string &str, const string&in fmt, const ?&in ...)", asFUNCTION(q2as_format_to),     asCALL_GENERIC }
+            { "int Q_strcasecmp(const string &in a, const string &in b)",             asFUNCTION(q2as_Q_strcasecmp),  asCALL_CDECL },
+            { "int Q_strncasecmp(const string &in a, const string &in b, uint n)",    asFUNCTION(q2as_Q_strncasecmp), asCALL_CDECL },
+            { "string format(const string &in fmt, const ?&in ...)",               asFUNCTION(q2as_format),        asCALL_GENERIC },
+            { "void format_to(string &str, const string &in fmt, const ?&in ...)", asFUNCTION(q2as_format_to),     asCALL_GENERIC }
         });
 }
