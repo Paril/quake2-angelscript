@@ -217,6 +217,8 @@ static void GarbageCallback(const asSGarbageCollectionInfo *msg, void *param)
     InstrumentationGarbageCallback((q2as_state_t *) param, msg->popped);
 }
 
+static int engines_alive = 0;
+
 bool q2as_state_t::CreateEngine()
 {
     engine = asCreateScriptEngine();
@@ -226,6 +228,8 @@ bool q2as_state_t::CreateEngine()
         Print("Can't create AS engine.\n");
         return false;
     }
+
+    engines_alive++;
 
     engine->SetUserData(this);
 
@@ -467,6 +471,16 @@ void q2as_state_t::Destroy()
 
     mainModule = nullptr;
     engine = nullptr;
+
+    engines_alive--;
+
+    if (!engines_alive)
+    {
+        // FIXME: this can't be done currently because of
+        // Kex limitations (custom memory tags don't work)
+        //(gi.FreeTags ? gi.FreeTags : cgi.FreeTags)(TAG_LEVEL);
+        //(gi.FreeTags ? gi.FreeTags : cgi.FreeTags)(TAG_GAME);
+    }
 }
 
 q2as_ctx_t q2as_state_t::RequestContext()

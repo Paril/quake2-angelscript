@@ -10,9 +10,9 @@ struct q2as_registry_exception : public std::runtime_error
 struct q2as_type_registry
 {
     asIScriptEngine *engine;
-    const std::string_view name;
+    std::string name;
 
-    q2as_type_registry(asIScriptEngine *engine, const std::string_view name) :
+    q2as_type_registry(asIScriptEngine *engine, const std::string &name) :
         engine(engine),
         name(name)
     {
@@ -20,8 +20,8 @@ struct q2as_type_registry
 
     struct property_defn
     {
-        std::string decl;
-        int offset;
+        std::string decl {};
+        int offset = 0;
         int compositeOffset = 0;
         bool isCompositeIndirect = false;
     };
@@ -39,7 +39,7 @@ struct q2as_type_registry
 
     struct method_defn
     {
-        std::string decl;
+        std::string decl {};
         asSFuncPtr funcPointer {};
         asDWORD callConv = 0;
         void *auxiliary = nullptr;
@@ -65,7 +65,7 @@ struct q2as_type_registry
 
         return *this;
     }
-    q2as_type_registry &behavior(const behavior_defn behavior)
+    q2as_type_registry &behavior(const behavior_defn &behavior)
     {
         if (name.empty())
             throw q2as_registry_exception("missing type name");
@@ -117,14 +117,14 @@ struct q2as_global_registry
         std::string decl;
 
         template<typename T>
-        global_property_defn(std::string_view decl, T *ptr) :
+        global_property_defn(const std::string &decl, T *ptr) :
             decl(decl),
             ptr(ptr)
         {
         }
 
         template<typename T>
-        global_property_defn(std::string_view decl, const T *ptr) :
+        global_property_defn(const std::string &decl, const T *ptr) :
             decl(decl),
             cptr(ptr)
         {
@@ -144,7 +144,7 @@ struct q2as_global_registry
 
     q2as_global_registry &property(const global_property_defn &prop)
     {
-        bool is_constant = std::string_view(prop.decl).find("const ") == 0;
+        bool is_constant = prop.decl.find("const ") == 0;
 
         if (is_constant != !!prop.cptr)
             throw q2as_registry_exception("global property constant mismatch");
@@ -182,9 +182,9 @@ struct q2as_global_registry
 struct q2as_enum_registry
 {
     asIScriptEngine *engine;
-    const std::string_view name;
+    std::string name;
 
-    q2as_enum_registry(asIScriptEngine *engine, const std::string_view name) :
+    q2as_enum_registry(asIScriptEngine *engine, const std::string &name) :
         engine(engine),
         name(name)
     {
@@ -214,21 +214,21 @@ struct q2as_enum_registry
 struct q2as_interface_registry
 {
     asIScriptEngine *engine;
-    const std::string_view name;
+    std::string name;
 
-    q2as_interface_registry(asIScriptEngine *engine, const std::string_view name) :
+    q2as_interface_registry(asIScriptEngine *engine, const std::string &name) :
         engine(engine),
         name(name)
     {
     }
 
-    q2as_interface_registry &method(const std::string_view declaration)
+    q2as_interface_registry &method(const std::string &declaration)
     {
         engine->RegisterInterfaceMethod(name.data(), declaration.data());
         return *this;
     }
     template<size_t N>
-    q2as_interface_registry &methods(const std::string_view (&declarations)[N])
+    q2as_interface_registry &methods(const std::string (&declarations)[N])
     {
         for (auto &decl : declarations)
             method(decl);
@@ -248,7 +248,7 @@ struct q2as_registry
     }
 
     // change type context
-    q2as_type_registry for_type(const std::string_view name)
+    q2as_type_registry for_type(const std::string &name)
     {
         if (!engine->GetTypeInfoByName(name.data()))
             throw q2as_registry_exception("missing type");
@@ -256,7 +256,7 @@ struct q2as_registry
         return q2as_type_registry(engine, name);
     }
     // create new type + change type context
-    q2as_type_registry type(const std::string_view name, size_t size, asQWORD flags)
+    q2as_type_registry type(const std::string &name, size_t size, asQWORD flags)
     {
         if (engine->GetTypeInfoByName(name.data()))
             throw q2as_registry_exception("type already exists");
@@ -267,7 +267,7 @@ struct q2as_registry
     }
 
     // change type context
-    q2as_interface_registry for_interface(const std::string_view name)
+    q2as_interface_registry for_interface(const std::string &name)
     {
         if (!engine->GetTypeInfoByName(name.data()))
             throw q2as_registry_exception("missing interface");
@@ -275,7 +275,7 @@ struct q2as_registry
         return q2as_interface_registry(engine, name);
     }
     // create new interface + change type context
-    q2as_interface_registry interface(const std::string_view name)
+    q2as_interface_registry interface(const std::string &name)
     {
         if (engine->GetTypeInfoByName(name.data()))
             throw q2as_registry_exception("interface already exists");
@@ -286,7 +286,7 @@ struct q2as_registry
     }
 
     // change type context
-    q2as_enum_registry for_enumeration(const std::string_view name)
+    q2as_enum_registry for_enumeration(const std::string &name)
     {
         if (!engine->GetTypeInfoByName(name.data()))
             throw q2as_registry_exception("missing enum");
@@ -294,7 +294,7 @@ struct q2as_registry
         return q2as_enum_registry(engine, name);
     }
     // create new type + change type context
-    q2as_enum_registry enumeration(const std::string_view name, const std::string_view type = "int32")
+    q2as_enum_registry enumeration(const std::string &name, const std::string &type = "int32")
     {
         if (engine->GetTypeInfoByName(name.data()))
             throw q2as_registry_exception("enum already exists");
@@ -310,14 +310,14 @@ struct q2as_registry
         return q2as_global_registry(engine);
     }
 
-    q2as_registry &funcdef(const std::string_view def)
+    q2as_registry &funcdef(const std::string &def)
     {
         engine->RegisterFuncdef(def.data());
         return *this;
     }
 
     template<size_t N>
-    q2as_registry &funcdefs(const std::string_view (&defs)[N])
+    q2as_registry &funcdefs(const std::string (&defs)[N])
     {
         for (auto &def : defs)
             funcdef(def);
@@ -331,7 +331,7 @@ struct q2as_registry
         return *this;
     }
 
-    q2as_registry &set_namespace(const std::string_view str)
+    q2as_registry &set_namespace(const std::string &str)
     {
         engine->SetDefaultNamespace(str.data());
         return *this;

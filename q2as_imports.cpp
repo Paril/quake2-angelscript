@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "bg_local.h"
 
 // import-related stuff that doesn't belong anywhere else.
 void Q2AS_RegisterImportTypes(q2as_registry &registry)

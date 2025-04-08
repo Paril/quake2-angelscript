@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "bg_local.h"
 
 static std::string Q2AS_cvar_t_name(cvar_t *n)
 {

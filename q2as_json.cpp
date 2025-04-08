@@ -1,16 +1,17 @@
 #include "q2as_json.h"
 #include "q2as_game.h"
+#include "g_local.h"
 
 static yyjson_alc q2as_yyjson_alcs = {
-    [](void *, size_t size) { return q2as_sv_state_t::AllocStatic(size); },
+    [](void *, size_t size) { return gi.TagMalloc(size, TAG_GAME); },
     [](void *, void *ptr, size_t old_size, size_t size)
     {
-        void *nptr = q2as_sv_state_t::AllocStatic(size);
+        void *nptr = gi.TagMalloc(size, TAG_GAME);
         memcpy(nptr, ptr, old_size);
-        q2as_sv_state_t::FreeStatic(ptr);
+        gi.TagFree(ptr);
         return nptr;
     },
-    [](void *, void *ptr) { q2as_sv_state_t::FreeStatic(ptr); }
+    [](void *, void *ptr) { gi.TagFree(ptr); }
 };
 
 q2as_yyjson_mut_val::q2as_yyjson_mut_val(yyjson_mut_val *val, q2as_yyjson_mut_doc *d) :

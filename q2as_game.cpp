@@ -47,22 +47,26 @@ struct q2as_edict_t : edict_t
 
 /*virtual*/ void *q2as_sv_state_t::Alloc(size_t size) /*override*/
 {
-    return gi.TagMalloc(size, TAG_GAME);
+    //return gi.TagMalloc(size, TAG_GAME);
+    return calloc(size, 1);
 }
 
 /*virtual*/ void q2as_sv_state_t::Free(void *ptr) /*override*/
 {
-    gi.TagFree(ptr);
+    //gi.TagFree(ptr);
+    free(ptr);
 }
 
 /*virtual*/ void *q2as_sv_state_t::AllocStatic(size_t size) /*override*/
 {
-    return gi.TagMalloc(size, TAG_GAME);
+    //return gi.TagMalloc(size, TAG_GAME);
+    return calloc(size, 1);
 }
 
 /*virtual*/ void q2as_sv_state_t::FreeStatic(void *ptr) /*override*/
 {
-    gi.TagFree(ptr);
+    //gi.TagFree(ptr);
+    free(ptr);
 }
 
 void q2as_sv_state_t::LoadFunctions()
@@ -115,14 +119,16 @@ static void Q2AS_InitGame()
 
     // initialize all entities for this game
     svas.maxentities = maxentities->integer;
-    svas.edicts = (q2as_edict_t *) gi.TagMalloc(svas.maxentities * sizeof(q2as_edict_t), TAG_GAME);
+    //svas.edicts = (q2as_edict_t *) gi.TagMalloc(svas.maxentities * sizeof(q2as_edict_t), TAG_GAME);
+    svas.edicts = (q2as_edict_t *) calloc(svas.maxentities, sizeof(q2as_edict_t));
 
     globals.edicts = (edict_t *) svas.edicts;
     globals.max_edicts = svas.maxentities;
 
     // initialize all clients for this game
     svas.maxclients = maxclients->integer;
-    svas.clients = (gclient_t *) gi.TagMalloc(svas.maxclients * sizeof(gclient_t), TAG_GAME);
+    //svas.clients = (gclient_t *) gi.TagMalloc(svas.maxclients * sizeof(gclient_t), TAG_GAME);
+    svas.clients = (gclient_t *) calloc(svas.maxclients, sizeof(gclient_t));
     globals.num_edicts = svas.maxclients + 1;
 
     for (uint32_t i = 0; i < svas.maxentities; i++)
@@ -157,17 +163,17 @@ static void Q2AS_ShutdownGame()
 #ifdef RUNFRAME_PROFILING
         gi.Com_Print(ctrack::result_as_string().c_str());
 #endif
-
-        // disconnect all entities
-        for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
-            if (e->as_obj)
-                e->as_obj->Release();
-
-        svas.Destroy();
     }
+
+    // disconnect all entities
+    for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
+        if (e->as_obj)
+            e->as_obj->Release();
     
     for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
         e->~q2as_edict_t();
+
+    svas.Destroy();
 }
 
 static void Q2AS_SpawnEntities(const char *mapname, const char *entstring, const char *spawnpoint)

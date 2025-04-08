@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "bg_local.h"
 #include "q2as_fixedarray.h"
 
 static std::string Q2AS_csurface_t_name(csurface_t *n)

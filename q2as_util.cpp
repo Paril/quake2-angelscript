@@ -1,6 +1,5 @@
 #include "q2as_local.h"
 #include "q2as_fixedarray.h"
-#include "bg_local.h"
 
 struct vec4_t
 {

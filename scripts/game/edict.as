@@ -587,13 +587,13 @@ class no_value_assign
 
     no_value_assign(const no_value_assign &in)
     {
-        if (!internal::allow_value_assign == 0)
+        if (internal::allow_value_assign == 0)
             throw("value assign not allowed");
     }
 
     no_value_assign &opAssign(const no_value_assign &in)
     {
-        if (!internal::allow_value_assign == 0)
+        if (internal::allow_value_assign == 0)
             throw("value assign not allowed");
         return this;
     }

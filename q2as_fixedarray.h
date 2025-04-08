@@ -64,7 +64,7 @@ inline void Q2AS_RegisterFixedArray(q2as_registry &registry, const char *name, c
     using AT = std::array<T, N>;
     using FT = q2as_fixedarray<T, N>;
 
-    auto &type = registry
+    auto type = registry
         .type(name, sizeof(AT), asOBJ_VALUE | asOBJ_POD | traits | asGetTypeTraits<AT>())
         .methods({
             { fmt::format("{} &opIndex(uint)", underlying),             asFUNCTION(FT::IndexRef),      asCALL_CDECL_OBJLAST },

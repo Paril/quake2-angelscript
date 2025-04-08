@@ -1,5 +1,4 @@
 #include "q2as_local.h"
-#include "bg_local.h"
 
 void Q2AS_RegisterTrace(q2as_registry &registry)
 {

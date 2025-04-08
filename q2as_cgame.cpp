@@ -32,22 +32,26 @@ enum
 
 /*virtual*/ void *q2as_cg_state_t::Alloc(size_t size) /*override*/
 {
-    return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
+    //return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
+    return calloc(size, 1);
 }
 
 /*virtual*/ void q2as_cg_state_t::Free(void *ptr) /*override*/
 {
-    cgi.TagFree(ptr);
+    //cgi.TagFree(ptr);
+    free(ptr);
 }
 
 /*static*/ void *q2as_cg_state_t::AllocStatic(size_t size)
 {
-    return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
+    //return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
+    return calloc(size, 1);
 }
 
 /*static*/ void q2as_cg_state_t::FreeStatic(void *ptr)
 {
-    cgi.TagFree(ptr);
+    //cgi.TagFree(ptr);
+    return free(ptr);
 }
 
 void q2as_cg_state_t::LoadFunctions()
