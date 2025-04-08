@@ -446,8 +446,90 @@ static void q2as_string_format_append(asIScriptGeneric *gen)
 
 static void q2as_string_construct_formatted(asIScriptGeneric *gen)
 {
-	std::string *s = new (gen->GetObject()) std::string;
+	  std::string *s = new (gen->GetObject()) std::string;
     q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *s);
+}
+
+static int32_t FindStartOfUTF8Codepoint(const std::string &str, int32_t pos)
+{
+    if (pos >= str.length())
+    {
+        return -1;
+    }
+
+    if ((str[pos] & 0xC0) != 0x80)
+    {
+        return pos;
+    }
+
+    int32_t start = pos;
+    while (start > 0 && (str[start] & 0xC0) == 0x80)
+    {
+        --start;
+    }
+
+    uint8_t c = str[start];
+    if ((c & 0x80) == 0 ||
+        (c & 0xE0) == 0xC0 ||
+        (c & 0xF0) == 0xE0 ||
+        (c & 0xF8) == 0xF0)
+    {
+        return start;
+    }
+
+    return -1;
+}
+
+static int32_t FindEndOfUTF8Codepoint(const std::string &str, int32_t pos)
+{
+    if (pos < 0 || pos >= str.length())
+    {
+        return -1;
+    }
+
+    int32_t start = FindStartOfUTF8Codepoint(str, pos);
+    if (start == -1)
+    {
+        return -1;
+    }
+
+    uint8_t c = str[start];
+    int32_t length = 0;
+    if ((c & 0x80) == 0)
+    {
+        length = 1;
+    }
+    else if ((c & 0xE0) == 0xC0)
+    {
+        length = 2;
+    }
+    else if ((c & 0xF0) == 0xE0)
+    {
+        length = 3;
+    }
+    else if ((c & 0xF8) == 0xF0)
+    {
+        length = 4;
+    }
+    else
+    {
+        return -1;
+    }
+
+    if (start + length > (int32_t) str.length())
+    {
+        return -1;
+    }
+
+    for (int i = 1; i < length; ++i)
+    {
+        if ((str[start + i] & 0xC0) != 0x80)
+        {
+            return -1;
+        }
+    }
+
+    return start + length - 1;
 }
 
 void Q2AS_RegisterStringEx(q2as_registry &registry)
@@ -466,7 +548,10 @@ void Q2AS_RegisterStringEx(q2as_registry &registry)
             { "string &upper()",           asFUNCTION(q2as_string_upper),       asCALL_CDECL_OBJLAST },
 
             { "string &format(const string&in fmt, const ?&in ...)",        asFUNCTION(q2as_string_format),        asCALL_GENERIC },
-            { "string &format_append(const string&in fmt, const ?&in ...)", asFUNCTION(q2as_string_format_append), asCALL_GENERIC }
+            { "string &format_append(const string&in fmt, const ?&in ...)", asFUNCTION(q2as_string_format_append), asCALL_GENERIC },
+
+            { "int32 findStartOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindStartOfUTF8Codepoint), asCALL_CDECL_OBJFIRST },
+            { "int32 findEndOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindEndOfUTF8Codepoint), asCALL_CDECL_OBJFIRST }
         });
 
     registry
