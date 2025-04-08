@@ -255,15 +255,17 @@ void G_PlayerNotifyGoal(ASEntity &player)
 			// skip ahead by the number of goals we've finished
 			for (int i = 0; i < level.goal_num; i++)
 			{
-                goal_start = level.goals.findFirstOf("\t", goal_start + 1);
+                goal_start = level.goals.findFirstOf("\t", goal_start);
 
                 if (goal_start == -1)
 					gi_Com_Error("invalid n64 goals\n");
+                else
+                    goal_start++;
 			}
 
 			// find the end of this goal
-            int goal_end = level.goals.findFirstOf("\t", goal_start + 1);
-            game.helpmessage1 = level.goals.substr(uint(goal_start + 1), goal_end != -1 ? goal_end - 1 : -1);
+            int goal_end = level.goals.findFirstOf("\t", goal_start);
+            game.helpmessage1 = level.goals.substr(uint(goal_start), goal_end != -1 ? (goal_end - goal_start) : -1);
 
 			game.help2changed = game.help1changed;
 		}

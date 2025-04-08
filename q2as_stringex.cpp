@@ -284,8 +284,13 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
             ctx->SetException("invalid format string: unexpected { or }");
             return;
         }
+
+        // push everything between start and c
+        for (size_t i = start; i < c; i++)
+            str.push_back(base->at(i));
+
         // {{ or }} is an escape sequence
-        else if (base->at(c + 1) == base->at(c))
+        if (base->at(c + 1) == base->at(c))
         {
             str.push_back(base->at(c));
             start = c + 2;
@@ -297,10 +302,6 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
             ctx->SetException("invalid format string: unexpected }");
             return;
         }
-
-        // push everything between start and c
-        for (size_t i = start; i < c; i++)
-            str.push_back(base->at(i));
 
         c++;
 
@@ -446,7 +447,7 @@ static void q2as_string_format_append(asIScriptGeneric *gen)
 
 static void q2as_string_construct_formatted(asIScriptGeneric *gen)
 {
-	  std::string *s = new (gen->GetObject()) std::string;
+    std::string *s = new (gen->GetObject()) std::string;
     q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *s);
 }
 
