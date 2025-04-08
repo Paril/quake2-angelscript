@@ -3417,7 +3417,7 @@ Changing levels will NOT cause this to be called again, but
 loadgames will.
 ============
 */
-bool ClientConnect(edict_t @ent, string &in userinfo, string &in social_id, bool isBot, string &out reject_userinfo)
+bool ClientConnect(edict_t @ent, const string &in userinfo, const string &in social_id, bool isBot, string &out reject_error)
 {
     string value;
 

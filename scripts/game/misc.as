@@ -1872,19 +1872,19 @@ void func_clock_format_countdown(ASEntity &self)
 {
 	if (self.style == 0)
 	{
-		self.clock_message = format("{:2}", self.health);
+		self.clock_message.format("{:2}", self.health);
 		return;
 	}
 
 	if (self.style == 1)
 	{
-		self.clock_message = format("{:2}:{:02}", self.health / 60, self.health % 60);
+		self.clock_message.format("{:2}:{:02}", self.health / 60, self.health % 60);
 		return;
 	}
 
 	if (self.style == 2)
 	{
-		self.clock_message = format("{:2}:{:02}:{:02}", self.health / 3600,
+		self.clock_message.format("{:2}:{:02}:{:02}", self.health / 3600,
 					(self.health - (self.health / 3600) * 3600) / 60, self.health % 60);
 		return;
 	}
@@ -1914,7 +1914,7 @@ void func_clock_think(ASEntity &self)
         // AS_TODO: this is only in UTC. does this matter?
         // this feature is super niche
         datetime t;
-		self.clock_message = format("{:2}:{:02}:{:02}", t.hour, t.minute, t.second);
+		self.clock_message.format("{:2}:{:02}:{:02}", t.hour, t.minute, t.second);
 	}
 
 	self.enemy.message = self.clock_message;
@@ -2472,21 +2472,21 @@ void SetupMannequinModel( ASEntity & self, const int modelType, const string &in
 	}
 
 	if ( !modelName.empty() ) {
-		self.model = format( "players/{}/tris.md2", modelName );
+		self.model.format( "players/{}/tris.md2", modelName );
 
 		string weaponName;
 		if ( !weapon.empty() ) {
-			weaponName = format( "players/{}/{}.md2", modelName, weapon );
+			weaponName.format( "players/{}/{}.md2", modelName, weapon );
 		} else {
-			weaponName = format( "players/{}/{}.md2", modelName, "w_hyperblaster" );
+			weaponName.format( "players/{}/{}.md2", modelName, "w_hyperblaster" );
 		}
 		self.e.s.modelindex2 = gi_modelindex( weaponName );
 
 		string skinName;
 		if ( !skin.empty() ) {
-			skinName = format( "mannequin\\{}/{}", modelName, skin );
+			skinName.format( "mannequin\\{}/{}", modelName, skin );
 		} else {
-			skinName = format( "mannequin\\{}/{}", modelName, defaultSkin );
+			skinName.format( "mannequin\\{}/{}", modelName, defaultSkin );
 		}
 		gi_configstring( configstring_id_t::PLAYERSKINS + self.e.s.skinnum, skinName );
 	}

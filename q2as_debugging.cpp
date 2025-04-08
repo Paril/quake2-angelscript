@@ -577,8 +577,9 @@ std::string q2as_backtrace()
     {
         auto f = ctx->GetFunction(i);
         int col;
-        int row = ctx->GetLineNumber(i, &col);
-        trace += G_Fmt("{} [{}:{}]\n", f->GetDeclaration(true, false, true), row, col);
+        const char *section;
+        int row = ctx->GetLineNumber(i, &col, &section);
+        trace += G_Fmt("{} {}[{}:{}]\n", f->GetDeclaration(true, false, true), section, row, col);
     }
 
     return trace;

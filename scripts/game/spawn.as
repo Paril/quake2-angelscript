@@ -130,7 +130,7 @@ void ED_CallSpawn(ASEntity &ent, const spawn_temp_t @spawntemp)
 	// pmm
 
 	// check item spawn functions
-	foreach (gitem_t @item : itemlist)
+	foreach (const gitem_t @item : itemlist)
 	{
 		if (item.classname.empty())
 			continue;
@@ -138,20 +138,17 @@ void ED_CallSpawn(ASEntity &ent, const spawn_temp_t @spawntemp)
 		{
 			// found it
 			// before spawning, pick random item replacement
-            // AS_TODO
-            /*
-			if (g_dm_random_items.integer != 0)
+			if (deathmatch.integer != 0 && g_dm_random_items.integer != 0)
 			{
-				ent->item = item;
+				@ent.item = item;
 				item_id_t new_item = DoRandomRespawn(ent);
 
-				if (new_item)
+				if (new_item != item_id_t::NULL)
 				{
-					item = GetItemByIndex(new_item);
-					ent->classname = item->classname;
+					@item = GetItemByIndex(new_item);
+					ent.classname = item.classname;
 				}
 			}
-            */
 
 			SpawnItem(ent, item, spawntemp);
 
@@ -950,9 +947,8 @@ void SpawnEntities(string &in mapname, string &in entstring, string &in spawnpoi
 	// ROGUE
 	if (deathmatch.integer != 0)
 	{
-        // AS_TODO
-		//if (g_dm_random_items.integer != 0)
-		//	PrecacheForRandomRespawn();
+		if (g_dm_random_items.integer != 0)
+			PrecacheForRandomRespawn();
 	}
 	// ROGUE
 
@@ -1191,7 +1187,7 @@ void SP_worldspawn(ASEntity &ent)
 	PrecacheItem(GetItemByIndex(item_id_t::ITEM_COMPASS));
 	PrecacheItem(GetItemByIndex(item_id_t::WEAPON_BLASTER));
 
-	if (g_dm_random_items.integer != 0)
+	if (deathmatch.integer != 0 && g_dm_random_items.integer != 0)
 		for (item_id_t i = item_id_t(item_id_t::NULL + 1); i < item_id_t::TOTAL; i = item_id_t(i + 1))
 			PrecacheItem(GetItemByIndex(i));
 

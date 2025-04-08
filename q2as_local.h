@@ -43,12 +43,15 @@ struct declhash_t
 
 using library_reg_t = void(q2as_registry &);
 
+using formatter_map = std::unordered_map<int, asIScriptFunction *>;
+
 // stores the state for each Q2AS engine.
 struct q2as_state_t
 {
     std::unordered_map<asIScriptFunction *, declhash_t> instru;
     asIScriptEngine *engine;
     asIScriptModule *mainModule; // the main module
+    formatter_map formatters;
 
     int stringTypeId;
 

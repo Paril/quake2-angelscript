@@ -127,7 +127,7 @@ void Q2AS_RegisterPlayerState(q2as_registry &registry)
             { "const uint id",           asOFFSET(csurface_t, id) }
         });
 
-    Q2AS_RegisterFixedArray<int16_t, MAX_STATS>(registry, "stat_array_t", "int16", asOBJ_APP_CLASS_ALLINTS);
+    Q2AS_RegisterFixedArray<int16_t, MAX_STATS>(registry, "stat_array_t", "int16", asOBJ_APP_CLASS_ALLINTS, false);
 
     registry
         .for_type("stat_array_t")

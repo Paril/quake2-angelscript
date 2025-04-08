@@ -13,6 +13,18 @@
 
 #include "q2as_predefined.h"
 
+// server game stuff
+struct q2as_edict_t : edict_t
+{
+    // handle to "entity" object set by AS
+    asIScriptObject *as_obj;
+
+    // these two strings are used by the bot system.
+    // sv_entity_t expects pointers and it's too
+    // expensive to try to allocate them every frame.
+    std::string sv_classname, sv_targetname;
+};
+
 /*virtual*/ void q2as_sv_state_t::Print(const char *text) /*override*/
 {
     gi.Com_Print(text);
@@ -70,7 +82,7 @@ void q2as_sv_state_t::LoadFunctions()
     ReadLevelJson = mainModule->GetFunctionByDecl("void ReadLevel(json_doc &)");
     CanSave = mainModule->GetFunctionByDecl("bool CanSave()");
     ClientChooseSlot = mainModule->GetFunctionByDecl("edict_t @ClientChooseSlot(const string &in userinfo, const string &in social_id, bool isBot, const array<edict_t@> &in ignore, bool cinematic)");
-    ClientConnect = mainModule->GetFunctionByDecl("bool ClientConnect(edict_t @ent, string &in userinfo, string &in social_id, bool isBot, string &out reject_userinfo)");
+    ClientConnect = mainModule->GetFunctionByDecl("bool ClientConnect(edict_t @ent, const string &in userinfo, const string &in social_id, bool isBot, string &out reject_error)");
     ClientBegin = mainModule->GetFunctionByDecl("void ClientBegin(edict_t @ent)");
     ClientUserinfoChanged = mainModule->GetFunctionByDecl("void ClientUserinfoChanged(edict_t @ent_handle, const string &in userinfo)");
     ClientDisconnect = mainModule->GetFunctionByDecl("void ClientDisconnect(edict_t @ent_handle)");
@@ -86,7 +98,7 @@ void q2as_sv_state_t::LoadFunctions()
     Bot_PickedUpItem = mainModule->GetFunctionByDecl("bool Bot_PickedUpItem( edict_t @, edict_t @ )");
     Entity_IsVisibleToPlayer = mainModule->GetFunctionByDecl("bool Entity_IsVisibleToPlayer( edict_t @, edict_t @ )");
 
-    q2as_format_init(engine);
+    q2as_format_init(*this);
 }
 
 q2as_sv_state_t svas;
@@ -120,6 +132,8 @@ static void Q2AS_InitGame()
 
     for (uint32_t i = 0; i < svas.maxentities; i++)
     {
+        new(&svas.edicts[i]) q2as_edict_t;
+
         svas.edicts[i].s.number = i;
 
         if (i >= 1 && i <= svas.maxclients)
@@ -156,6 +170,9 @@ static void Q2AS_ShutdownGame()
 
         svas.Destroy();
     }
+    
+    for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
+        e->~q2as_edict_t();
 
     gi.FreeTags(TAG_LEVEL);
     gi.FreeTags(TAG_GAME);
@@ -320,7 +337,7 @@ static bool Q2AS_ClientConnect(edict_t *ent, char *userinfo, const char *social_
 
     std::string userinfo_ = userinfo;
     std::string social_id_ = social_id;
-    std::string out_userinfo;
+    std::string reject_error;
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.ClientConnect);
@@ -328,13 +345,13 @@ static bool Q2AS_ClientConnect(edict_t *ent, char *userinfo, const char *social_
     ctx->SetArgAddress(1, &userinfo_);
     ctx->SetArgAddress(2, &social_id_);
     ctx->SetArgByte(3, isBot);
-    ctx->SetArgAddress(4, &out_userinfo);
+    ctx->SetArgAddress(4, &reject_error);
     ctx.Execute();
 
     bool allow = !!ctx->GetReturnByte();
 
-    if (!allow)
-        Q_strlcpy(userinfo, out_userinfo.c_str(), MAX_INFO_STRING);
+    if (!allow && !reject_error.empty())
+        gi.Info_SetValueForKey(userinfo, "rejmsg", reject_error.c_str());
 
     return allow;
 }
@@ -823,7 +840,10 @@ static void q2as_edict_t_reset(q2as_edict_t *ed)
     if (ed->as_obj)
         ed->as_obj->Release();
 
+    ed->~q2as_edict_t();
     memset(ed, 0, sizeof(*ed));
+    new(ed) q2as_edict_t;
+
     ed->s.number = ed - svas.edicts;
 
     if (ed->s.number >= 1 && ed->s.number <= svas.maxclients)
@@ -840,45 +860,61 @@ static entity_state_t &Q2AS_entity_state_t_assign(const entity_state_t &other, e
 
 static void q2as_sv_entity_t_set_netname(const std::string &s, sv_entity_t &sv)
 {
-    Q_strlcpy(sv.netname, s.c_str(), sizeof(sv.netname));
+    if (s.empty())
+    {
+        sv.netname[0] = '\0';
+        return;
+    }
+
+    size_t len = min(s.size(), sizeof(sv.netname) - 1);
+    memcpy(sv.netname, s.data(), len);
+    sv.netname[len] = '\0';
 }
 
 static void q2as_sv_entity_t_set_classname(const std::string &s, sv_entity_t &sv)
 {
-    // FIXME
-    using cln = char[32];
-    static cln estoy[MAX_EDICTS];
-    static uint32_t loopin = 0;
+    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<byte *>(&sv) - offsetof(edict_t, sv));
+
+    // make sure it's an sv_entity_t owned by an edict
+    if (e < globals.edicts || e >= globals.edicts + globals.num_edicts)
+        return;
+
+    if (e->sv_classname == s)
+        return;
 
     if (s.empty())
     {
-        sv.classname = nullptr;
-        return;
+        e->sv_classname.clear();
+        e->sv.classname = nullptr;
     }
-
-    Q_strlcpy(estoy[loopin], s.c_str(), sizeof(cln));
-    sv.classname = estoy[loopin];
-
-    loopin = (loopin + 1) % MAX_EDICTS;
+    else
+    {
+        e->sv_classname = s;
+        e->sv.classname = e->sv_classname.data();
+    }
 }
 
 static void q2as_sv_entity_t_set_targetname(const std::string &s, sv_entity_t &sv)
 {
-    // FIXME
-    using cln = char[32];
-    static cln estoy[MAX_EDICTS];
-    static uint32_t loopin = 0;
+    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<byte *>(&sv) - offsetof(edict_t, sv));
+
+    // make sure it's an sv_entity_t owned by an edict
+    if (e < globals.edicts || e >= globals.edicts + globals.num_edicts)
+        return;
+
+    if (e->sv_targetname == s)
+        return;
 
     if (s.empty())
     {
-        sv.targetname = nullptr;
-        return;
+        e->sv_targetname.clear();
+        e->sv.targetname = nullptr;
     }
-
-    Q_strlcpy(estoy[loopin], s.c_str(), sizeof(cln));
-    sv.targetname = estoy[loopin];
-
-    loopin = (loopin + 1) % MAX_EDICTS;
+    else
+    {
+        e->sv_targetname = s;
+        e->sv.targetname = e->sv_targetname.data();
+    }
 }
 
 static void Q2AS_RegisterEntity(q2as_registry &registry)
@@ -1064,7 +1100,7 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
     }
 
     registry
-        .type("armorInfo_t", sizeof(armorInfo_t), asOBJ_VALUE | asOBJ_POD)
+        .type("armorInfo_t", sizeof(armorInfo_t), asGetTypeTraits<armorInfo_t>() | asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLINTS)
         .properties({
             { "int item_id",   asOFFSET(armorInfo_t, item_id) },
             { "int max_count", asOFFSET(armorInfo_t, max_count) }
@@ -1076,7 +1112,7 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
             { "const int Max_Armor_Types", &Max_Armor_Types }
         });
 
-    Q2AS_RegisterFixedArray<int, MAX_ITEMS>(registry, "inventoryArray_t", "int", asOBJ_APP_CLASS_ALLINTS);
+    Q2AS_RegisterFixedArray<int, MAX_ITEMS>(registry, "inventoryArray_t", "int", asOBJ_APP_CLASS_ALLINTS, false);
     Q2AS_RegisterFixedArray<armorInfo_t, Max_Armor_Types>(registry, "armorInfoArray_t", "armorInfo_t", asOBJ_APP_CLASS_ALLINTS);
 
     // entity handle; special handle, always active and allocated
@@ -1329,12 +1365,19 @@ static uint32_t q2as_Info_ValueForKey(const std::string &userinfo, const std::st
     return v;
 }
 
-static bool q2as_Info_SetValueForKey(const std::string &in_userinfo, const std::string &name, const std::string &value, std::string &out_userinfo)
+static bool q2as_Info_SetValueForKey(std::string &userinfo, const std::string &name, const std::string &value)
 {
-    static char userinfo[MAX_INFO_STRING];
-    Q_strlcpy(userinfo, in_userinfo.data(), sizeof(userinfo));
-    bool set = gi.Info_SetValueForKey(userinfo, name.c_str(), value.c_str());
-    out_userinfo = userinfo;
+    // in old code this would error anyways
+    if (userinfo.size() >= MAX_INFO_STRING)
+        return false;
+
+    static char userinfo_cstr[MAX_INFO_STRING];
+    size_t len = min(MAX_INFO_STRING - 1, userinfo.size());
+    memcpy(userinfo_cstr, userinfo.c_str(), len);
+    userinfo_cstr[len] = '\0';
+    bool set = gi.Info_SetValueForKey(userinfo_cstr, name.c_str(), value.c_str());
+    if (set)
+        userinfo.assign(userinfo_cstr);
     return set;
 }
 
@@ -1435,12 +1478,13 @@ static void q2as_gi_Client_Print_Zero(edict_t *e, print_type_t t, const std::str
 
 struct loc_args_t
 {
-    std::array<char[MAX_INFO_STRING], MAX_LOCALIZATION_ARGS> args;
-    std::array<const char *, MAX_LOCALIZATION_ARGS> ptrs {
-        args[0], args[1], args[2], args[3],
-        args[4], args[5], args[6], args[7]
-    };
+    std::array<std::string, MAX_LOCALIZATION_ARGS> args;
     bool error = false;
+    std::array<const char *, MAX_LOCALIZATION_ARGS> ptrs()
+    {
+        return { args[0].data(), args[1].data(), args[2].data(), args[3].data(),
+                 args[4].data(), args[5].data(), args[6].data(), args[7].data() };
+    }
 };
 
 static loc_args_t &q2as_set_loc_args(q2as_state_t &as, asIScriptGeneric *gen, int start_arg)
@@ -1452,57 +1496,15 @@ static loc_args_t &q2as_set_loc_args(q2as_state_t &as, asIScriptGeneric *gen, in
     for (int i = start_arg, o = 0; i < gen->GetArgCount(); i++, o++)
     {
         int typeId = gen->GetArgTypeId(i);
-        void *ref = gen->GetArgAddress(i);
-        char *begin = args.args[o], *end = args.args[o] + MAX_INFO_STRING - 1;
+        const void *ref = gen->GetArgAddress(i);
+        args.args[o].clear();
 
-        if (typeId == as.stringTypeId)
+        if (!q2as_call_formatter(args.args[o], as, "", typeId, ref))
         {
-            Q_strlcpy(begin, ((std::string *) ref)->data(), MAX_INFO_STRING);
-            continue;
-        }
-
-        std::to_chars_result result;
-
-        if (typeId == asTYPEID_INT8)
-            result = std::to_chars(begin, end, *(int8_t *) ref);
-        else if (typeId == asTYPEID_INT16)
-            result = std::to_chars(begin, end, *(int16_t *) ref);
-        else if (typeId == asTYPEID_INT32)
-            result = std::to_chars(begin, end, *(int32_t *) ref);
-        else if (typeId == asTYPEID_INT64)
-            result = std::to_chars(begin, end, *(int64_t *) ref);
-        else if (typeId == asTYPEID_UINT8)
-            result = std::to_chars(begin, end, *(uint8_t *) ref);
-        else if (typeId == asTYPEID_UINT16)
-            result = std::to_chars(begin, end, *(uint16_t *) ref);
-        else if (typeId == asTYPEID_UINT32)
-            result = std::to_chars(begin, end, *(uint32_t *) ref);
-        else if (typeId == asTYPEID_UINT64)
-            result = std::to_chars(begin, end, *(uint64_t *) ref);
-        else if (typeId == asTYPEID_FLOAT)
-            result = std::to_chars(begin, end, *(float *) ref);
-        else if (typeId == asTYPEID_DOUBLE)
-            result = std::to_chars(begin, end, *(float *) ref);
-        // TODO: vec3_t
-        // TODO: gtime_t
-        // TODO: edict_t*
-        // TODO: ASEntity@
-        // TODO: custom formatter
-        else
-        {
-            asGetActiveContext()->SetException("unformattable");
+            asGetActiveContext()->SetException("unformattable type");
             args.error = true;
-            return args;
+            break;
         }
-
-        if (!result.ptr)
-        {
-            asGetActiveContext()->SetException("format error");
-            args.error = true;
-            return args;
-        }
-
-        *result.ptr = '\0';
     }
 
     return args;
@@ -1536,7 +1538,7 @@ static void q2as_gi_LocClient_Print(asIScriptGeneric *gen)
     if (args.error)
         return;
 
-    gi.Loc_Print(ent, t, base->c_str(), args.ptrs.data(), gen->GetArgCount() - 2);
+    gi.Loc_Print(ent, t, base->c_str(), args.ptrs().data(), gen->GetArgCount() - 2);
 }
 
 static void q2as_gi_LocClient_Print_Zero(edict_t *e, print_type_t t, const std::string &base)
@@ -1553,7 +1555,7 @@ static void q2as_gi_LocCenter_Print(asIScriptGeneric *gen)
     if (args.error)
         return;
 
-    gi.Loc_Print(ent, PRINT_CENTER, base->c_str(), args.ptrs.data(), gen->GetArgCount() - 1);
+    gi.Loc_Print(ent, PRINT_CENTER, base->c_str(), args.ptrs().data(), gen->GetArgCount() - 1);
 }
 
 static void q2as_gi_LocCenter_Print_Zero(edict_t *e, const std::string &base)
@@ -1584,7 +1586,7 @@ static void q2as_gi_Loc_Print(asIScriptGeneric *gen)
     if (args.error)
         return;
 
-    gi.Loc_Print(ent, t, base->c_str(), args.ptrs.data(), gen->GetArgCount() - 1);
+    gi.Loc_Print(ent, t, base->c_str(), args.ptrs().data(), gen->GetArgCount() - 1);
 }
 
 static void q2as_gi_Loc_Print_Zero(edict_t *ent, print_type_t t, const std::string &base)
@@ -1601,7 +1603,7 @@ static void q2as_gi_LocBroadcast_Print(asIScriptGeneric *gen)
     if (args.error)
         return;
 
-    gi.Loc_Print(nullptr, (print_type_t) (t | print_type_t::PRINT_BROADCAST), base->c_str(), args.ptrs.data(), gen->GetArgCount() - 1);
+    gi.Loc_Print(nullptr, (print_type_t) (t | print_type_t::PRINT_BROADCAST), base->c_str(), args.ptrs().data(), gen->GetArgCount() - 1);
 }
 
 static void q2as_gi_LocBroadcast_Print_Zero(print_type_t t, const std::string &base)
@@ -1696,7 +1698,7 @@ static void Q2AS_RegisterGame(q2as_registry &registry)
             { "void gi_cvar_set(const string &in var_name, const string &in value)",                                                                                                                                asFUNCTION(q2as_cvar_set),                         asCALL_CDECL },
             { "void gi_cvar_forceset(const string &in var_name, const string &in value)",                                                                                                                           asFUNCTION(q2as_cvar_forceset),                    asCALL_CDECL },
             { "uint gi_Info_ValueForKey(const string &in, const string &in, const string &out)",                                                                                                                    asFUNCTION(q2as_Info_ValueForKey),                 asCALL_CDECL },
-            { "bool gi_Info_SetValueForKey(const string &in, const string &in, const string &in, string &out)",                                                                                                     asFUNCTION(q2as_Info_SetValueForKey),              asCALL_CDECL },
+            { "bool gi_Info_SetValueForKey(string &userinfo, const string &in, const string &in)",                                                                                                                  asFUNCTION(q2as_Info_SetValueForKey),              asCALL_CDECL },
             { "void gi_configstring(int num, const string &in str)",                                                                                                                                                asFUNCTION(q2as_configstring),                     asCALL_CDECL },
             { "void gi_configstring(int num, const string &in fmt, const ?&in...)",                                                                                                                                 asFUNCTION(q2as_configstringfmt),                  asCALL_GENERIC },
             { "string gi_get_configstring(int num) nodiscard",                                                                                                                                                      asFUNCTION(q2as_get_configstring),                 asCALL_CDECL },

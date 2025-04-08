@@ -3,47 +3,128 @@
 
 static std::string *q2as_string_append_char(uint8_t c, std::string *s)
 {
-    *s += (char) c;
-    return s;
+    return &(*s += (char) c);
+}
+
+constexpr char to_upper(char c) 
+{
+    return (c >= 'A' && c <= 'Z') ? c : (c - ('a' - 'A'));
+}
+
+constexpr char to_lower(char c) 
+{
+    return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+
+int Q_strcasecmp(const std::string_view &a, const std::string_view &b)
+{
+    auto iterator_a = a.begin();
+    auto iterator_b = b.begin();
+
+    while (iterator_a != a.end() && iterator_b != b.end())
+    {
+        char ca = to_lower(*iterator_a);
+        char cb = to_lower(*iterator_b);
+
+        if (ca != cb)
+        {
+            if (ca < cb)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        iterator_a++;
+        iterator_b++;
+    }
+
+    if (iterator_a == a.end() && iterator_b == b.end())
+    {
+        return 0;
+    }
+    else if (iterator_a == a.end())
+    {
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+int Q_strncasecmp(const std::string_view &a, const std::string_view &b, uint32_t n)
+{
+    auto iterator_a = a.begin();
+    auto iterator_b = b.begin();
+
+    uint32_t count = 0;
+    while (iterator_a != a.end() && iterator_b != b.end() && count < n)
+    {
+        char ca = to_lower(*iterator_a);
+        char cb = to_lower(*iterator_b);
+
+        if (ca != cb)
+        {
+            if (ca < cb)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        iterator_a++;
+        iterator_b++;
+        count++;
+    }
+
+    if (count == n)
+    {
+        return 0;
+    }
+
+    if (iterator_a == a.end() && iterator_b == b.end())
+    {
+        return 0;
+    }
+    else if (iterator_a == a.end())
+    {
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 static int q2as_Q_strcasecmp(const std::string &a, const std::string &b)
 {
-    return Q_strcasecmp(a.c_str(), b.c_str());
+    return Q_strcasecmp(a, b);
 }
 
 static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32_t n)
 {
-    return Q_strncasecmp(a.c_str(), b.c_str(), n);
+    return Q_strncasecmp(a, b, n);
 }
 
-constexpr int FORMATTER_USERDATA = 1;
-using formatter_map = std::unordered_map<int, asIScriptFunction *>;
-
-static void q2as_formatter_cleanup(asIScriptEngine *engine)
-{
-    auto mapptr = reinterpret_cast<formatter_map *>(engine->GetUserData(FORMATTER_USERDATA));
-
-    if (mapptr)
-    {
-        mapptr->~formatter_map();
-        asFreeMem(mapptr);
-    }
-}
-
-void q2as_format_init(asIScriptEngine *engine)
+void q2as_format_init(q2as_state_t &state)
 {
     // find matching formatters.
     // they have to match the following decl:
     // void formatter(string &str, const string &in args, const T &in if_handle_then_const);
-    int stringTypeId = engine->GetStringFactory();
+    int stringTypeId = state.engine->GetStringFactory();
 
     // sanity
     if (!stringTypeId)
         return;
-    
-    formatter_map *map = reinterpret_cast<formatter_map *>(asAllocMem(sizeof(formatter_map)));
-    new(map) formatter_map;
+
+    state.formatters.clear();
 
     auto add_function = [&](asIScriptFunction *func) {
         if (strcmp(func->GetName(), "formatter"))
@@ -83,31 +164,21 @@ void q2as_format_init(asIScriptEngine *engine)
                 return;
         }
 
-        map->emplace(paramTypeId, func);
+        state.formatters.emplace(paramTypeId, func);
     };
 
     // check globals (host registered formatters)
-    for (size_t i = 0; i < engine->GetGlobalFunctionCount(); i++)
-        add_function(engine->GetGlobalFunctionByIndex(i));
+    for (size_t i = 0; i < state.engine->GetGlobalFunctionCount(); i++)
+        add_function(state.engine->GetGlobalFunctionByIndex(i));
 
     // check functions in modules
-    for (size_t i = 0; i < engine->GetModuleCount(); i++)
+    for (size_t i = 0; i < state.engine->GetModuleCount(); i++)
     {
-        asIScriptModule *module = engine->GetModuleByIndex(i);
+        asIScriptModule *module = state.engine->GetModuleByIndex(i);
 
         for (size_t m = 0; m < module->GetFunctionCount(); m++)
             add_function(module->GetFunctionByIndex(m));
     }
-
-    formatter_map *old = reinterpret_cast<formatter_map *>(engine->SetUserData(map, FORMATTER_USERDATA));
-
-    if (old)
-    {
-        old->~formatter_map();
-        asFreeMem(old);
-    }
-    else
-        engine->SetEngineUserDataCleanupCallback(q2as_formatter_cleanup, FORMATTER_USERDATA);
 }
 
 #ifndef USE_CPP20_FORMAT
@@ -117,7 +188,7 @@ void q2as_format_init(asIScriptEngine *engine)
 #endif
 
 template<typename T>
-static void q2as_call_formatter(std::string &str, const std::string_view args, const void *addr)
+static bool q2as_call_builtin_formatter(std::string &str, const std::string_view args, const void *addr)
 {
     if (args.empty())
         fmt::format_to(std::back_inserter(str), "{}", *reinterpret_cast<const T *>(addr));
@@ -132,12 +203,53 @@ static void q2as_call_formatter(std::string &str, const std::string_view args, c
         *(end.out) = '\0';
         fmt::vformat_to(std::back_inserter(str), format_str, fmt::make_format_args(*reinterpret_cast<const T *>(addr)));
     }
+
+    return true;
+}
+
+bool q2as_call_formatter(std::string &str, q2as_state_t &as, const std::string_view args, int typeId, const void *addr)
+{
+    if (typeId == asTYPEID_BOOL) return q2as_call_builtin_formatter<bool>(str, args, addr);
+    else if (typeId == asTYPEID_INT8) return q2as_call_builtin_formatter<int8_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT16) return q2as_call_builtin_formatter<int16_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT32) return q2as_call_builtin_formatter<int32_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT64) return q2as_call_builtin_formatter<int64_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT8) return q2as_call_builtin_formatter<uint8_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT16) return q2as_call_builtin_formatter<uint16_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT32) return q2as_call_builtin_formatter<uint32_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT64) return q2as_call_builtin_formatter<uint64_t>(str, args, addr);
+    else if (typeId == asTYPEID_FLOAT) return q2as_call_builtin_formatter<float>(str, args, addr);
+    else if (typeId == asTYPEID_DOUBLE) return q2as_call_builtin_formatter<double>(str, args, addr);
+    else if (typeId == as.stringTypeId) return q2as_call_builtin_formatter<std::string>(str, args, addr);
+
+    // check type
+    auto typeInfo = as.engine->GetTypeInfoById(typeId);
+    std::string arg_string(args);
+
+    if (auto funcdef = typeInfo->GetFuncdefSignature())
+    {
+        str.append(funcdef->GetName());
+        return true;
+    }
+    else if (auto formatter = as.formatters.find(typeId); formatter != as.formatters.end())
+    {
+        auto ctx = asGetActiveContext();
+        ctx->PushState();
+        ctx->Prepare(formatter->second);
+        ctx->SetArgAddress(0, &str);
+        ctx->SetArgAddress(1, &arg_string);
+        ctx->SetArgAddress(2, const_cast<void *>(addr));
+        as.Execute(ctx);
+        ctx->PopState();
+        return true;
+    }
+
+    return false;
 }
 
 void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGeneric *gen, int base_arg, std::string &str)
 {
     const std::string *base = (std::string *) gen->GetArgAddress(base_arg);
-    const formatter_map *mapptr = reinterpret_cast<formatter_map *>(as.engine->GetUserData(FORMATTER_USERDATA));
 
     size_t start = 0;
     size_t next_position = 0;
@@ -255,45 +367,13 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
         }
 
         // do the formatting
-        int type = gen->GetArgTypeId(base_arg + 1 + arg);
+        int typeId = gen->GetArgTypeId(base_arg + 1 + arg);
         void *addr = gen->GetArgAddress(base_arg + 1 + arg);
         
-        if (type == asTYPEID_BOOL) q2as_call_formatter<bool>(str, args, addr);
-        else if (type == asTYPEID_INT8) q2as_call_formatter<int8_t>(str, args, addr);
-        else if (type == asTYPEID_INT16) q2as_call_formatter<int16_t>(str, args, addr);
-        else if (type == asTYPEID_INT32) q2as_call_formatter<int32_t>(str, args, addr);
-        else if (type == asTYPEID_INT64) q2as_call_formatter<int64_t>(str, args, addr);
-        else if (type == asTYPEID_UINT8) q2as_call_formatter<uint8_t>(str, args, addr);
-        else if (type == asTYPEID_UINT16) q2as_call_formatter<uint16_t>(str, args, addr);
-        else if (type == asTYPEID_UINT32) q2as_call_formatter<uint32_t>(str, args, addr);
-        else if (type == asTYPEID_UINT64) q2as_call_formatter<uint64_t>(str, args, addr);
-        else if (type == asTYPEID_FLOAT) q2as_call_formatter<float>(str, args, addr);
-        else if (type == asTYPEID_DOUBLE) q2as_call_formatter<double>(str, args, addr);
-        else if (type == as.stringTypeId) q2as_call_formatter<std::string>(str, args, addr);
-        else
+        if (!q2as_call_formatter(str, as, args, typeId, addr))
         {
-            // check type
-            auto typeInfo = as.engine->GetTypeInfoById(type);
-            std::string arg_string(args);
-
-            if (auto funcdef = typeInfo->GetFuncdefSignature())
-                str.append(funcdef->GetName());
-            else if (auto formatter = mapptr->find(type); formatter != mapptr->end())
-            {
-                auto ctx = asGetActiveContext();
-                ctx->PushState();
-                ctx->Prepare(formatter->second);
-                ctx->SetArgAddress(0, &str);
-                ctx->SetArgAddress(1, &arg_string);
-                ctx->SetArgAddress(2, addr);
-                as.Execute(ctx);
-                ctx->PopState();
-            }
-            else
-            {
-                asGetActiveContext()->SetException("unformattable type");
-                return;
-            }
+            asGetActiveContext()->SetException("unformattable type");
+            return;
         }
 
         start = c + 1;
@@ -326,18 +406,51 @@ static void q2as_format_to(asIScriptGeneric *gen)
 static std::string q2as_string_aslower(const std::string &in)
 {
     std::string result = in;
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    std::transform(result.begin(), result.end(), result.begin(), to_lower);
     return result;
 }
 
 static std::string q2as_string_asupper(const std::string &in)
 {
     std::string result = in;
-    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+    std::transform(result.begin(), result.end(), result.begin(), to_upper);
     return result;
 }
 
-int32_t FindStartOfUTF8Codepoint(const std::string &str, int32_t pos)
+static std::string &q2as_string_lower(std::string &in)
+{
+    std::transform(in.begin(), in.end(), in.begin(), to_lower);
+    return in;
+}
+
+static std::string &q2as_string_upper(std::string &in)
+{
+    std::transform(in.begin(), in.end(), in.begin(), to_upper);
+    return in;
+}
+
+static void q2as_string_format(asIScriptGeneric *gen)
+{
+    std::string *str = (std::string *) gen->GetObject();
+    str->clear();
+    q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *str);
+    gen->SetReturnAddress(str);
+}
+
+static void q2as_string_format_append(asIScriptGeneric *gen)
+{
+    std::string *str = (std::string *) gen->GetObject();
+    q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *str);
+    gen->SetReturnAddress(str);
+}
+
+static void q2as_string_construct_formatted(asIScriptGeneric *gen)
+{
+	  std::string *s = new (gen->GetObject()) std::string;
+    q2as_impl_format_to(*(q2as_state_t *) gen->GetEngine()->GetUserData(), asGetActiveContext(), gen, 0, *s);
+}
+
+static int32_t FindStartOfUTF8Codepoint(const std::string &str, int32_t pos)
 {
     if (pos >= str.length())
     {
@@ -367,7 +480,7 @@ int32_t FindStartOfUTF8Codepoint(const std::string &str, int32_t pos)
     return -1;
 }
 
-int32_t FindEndOfUTF8Codepoint(const std::string &str, int32_t pos)
+static int32_t FindEndOfUTF8Codepoint(const std::string &str, int32_t pos)
 {
     if (pos < 0 || pos >= str.length())
     {
@@ -423,12 +536,22 @@ void Q2AS_RegisterStringEx(q2as_registry &registry)
 {
     registry
         .for_type("string")
+        //.behaviors({
+            // TODO: causes crashes
+            // { asBEHAVE_CONSTRUCT,  "void f(const string &in fmt, const ?& in ...)", asFUNCTION(q2as_string_construct_formatted), asCALL_GENERIC }
+        //})
         .methods({
             { "string &appendChar(uint8)", asFUNCTION(q2as_string_append_char), asCALL_CDECL_OBJLAST },
             { "string aslower() const",    asFUNCTION(q2as_string_aslower),     asCALL_CDECL_OBJLAST },
             { "string asupper() const",    asFUNCTION(q2as_string_asupper),     asCALL_CDECL_OBJLAST },
+            { "string &lower()",           asFUNCTION(q2as_string_lower),       asCALL_CDECL_OBJLAST },
+            { "string &upper()",           asFUNCTION(q2as_string_upper),       asCALL_CDECL_OBJLAST },
+
+            { "string &format(const string&in fmt, const ?&in ...)",        asFUNCTION(q2as_string_format),        asCALL_GENERIC },
+            { "string &format_append(const string&in fmt, const ?&in ...)", asFUNCTION(q2as_string_format_append), asCALL_GENERIC },
+
             { "int32 findStartOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindStartOfUTF8Codepoint), asCALL_CDECL_OBJFIRST },
-            { "int32 findEndOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindEndOfUTF8Codepoint), asCALL_CDECL_OBJFIRST },
+            { "int32 findEndOfUTF8Codepoint(const string &in, int32 pos)", asFUNCTION(FindEndOfUTF8Codepoint), asCALL_CDECL_OBJFIRST }
         });
 
     registry
