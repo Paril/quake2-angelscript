@@ -47,15 +47,6 @@ void Q2AS_RegisterUtil(q2as_registry &registry)
             { "uint8 a", asOFFSET(rgba_t, a) },
         });
 
-    Q2AS_RegisterFixedArray<float, 2>(registry, "vec2_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
-
-    registry
-        .for_type("vec2_t")
-        .properties({
-            { "float x", asOFFSET(vec2_t, x) },
-            { "float y", asOFFSET(vec2_t, y) }
-        });
-
     Q2AS_RegisterFixedArray<float, 4>(registry, "vec4_t", "float", asOBJ_APP_CLASS_ALLFLOATS);
 
     registry

@@ -2048,6 +2048,7 @@ game_export_t *Q2AS_GetGameAPI()
         Q2AS_RegisterThirdParty,
         Q2AS_RegisterLimits,
         Q2AS_RegisterMath,
+        Q2AS_RegisterVec2,
         Q2AS_RegisterVec3,
         Q2AS_RegisterDynamicBitset,
         Q2AS_RegisterUtil,
