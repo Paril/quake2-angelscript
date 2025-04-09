@@ -1484,7 +1484,6 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
             }
             continue;
         }
-
         else if (tokenizer.token_equals("health_bars"))
         {
             if (skip_depth)
@@ -1522,23 +1521,23 @@ void CG_ExecuteLayoutString (tokenizer_t &tokenizer, const vrect_t &in hud_vrect
                 y += int(bar_height * 3);
             }
         }
-
-/*
-        else if (!strcmp(token, "story"))
+        else if (tokenizer.token_equals("story"))
         {
-            const char *story_str = cgi.get_configstring(CONFIG_STORY);
-
-            if (!*story_str)
+            if (skip_depth)
                 continue;
 
-            const char *localized = cgi.Localize(story_str, nullptr, 0);
-            vec2_t size = cgi.SCR_MeasureFontString(localized, scale);
+            string story_str = cgi_get_configstring(game_configstring_id_t::STORY);
+
+            if (story_str.empty())
+                continue;
+
+            story_str = cgi_Localize(story_str);
+            vec2_t size = cgi_SCR_MeasureFontString(story_str, scale);
             float centerx = ((hud_vrect.x + (hud_vrect.width * 0.5f)) * scale);
             float centery = ((hud_vrect.y + (hud_vrect.height * 0.5f)) * scale) - (size.y * 0.5f);
 
-            cgi.SCR_DrawFontString(localized, centerx, centery, scale, rgba_white, true, text_align_t::CENTER);
+            cgi_SCR_DrawFontString(story_str, int(centerx), int(centery), scale, rgba_white, true, text_align_t::CENTER);
         }
-*/
         else
         {
             //cgi_Com_Print("invalid layout cmd: {}\n", tokenizer.as_string());

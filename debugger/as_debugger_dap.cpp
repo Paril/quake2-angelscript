@@ -21,13 +21,13 @@ public:
 
         session->registerHandler([&](const dap::InitializeRequest &request) {
             dap::InitializeResponse response;
-            response.supportsClipboardContext = true;
-            response.supportsCompletionsRequest = true;
+            //response.supportsClipboardContext = true;
+            //response.supportsCompletionsRequest = true;
             response.supportsConfigurationDoneRequest = true;
-            response.supportsDelayedStackTraceLoading = true;
+            //response.supportsDelayedStackTraceLoading = true;
             response.supportsEvaluateForHovers = true;
-            response.supportsFunctionBreakpoints = true;
-            response.supportsBreakpointLocationsRequest = true;
+            //response.supportsFunctionBreakpoints = true;
+            //response.supportsBreakpointLocationsRequest = true;
             return response;
         });
 
@@ -153,6 +153,8 @@ public:
         dap::ScopesResponse response {};
         bool found = false;
 
+        dbg->cache->CacheGlobals();
+
         for (auto &stack : dbg->cache->call_stack)
         {
             if (stack.id != request.frameId)
@@ -182,16 +184,14 @@ public:
                 scope.namedVariables = stack.scope.registers->named_variables.size();
                 scope.variablesReference = stack.scope.registers->ref_id;
             }
-#if 0
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Globals";
                 scope.presentationHint = "globals";
-                scope.namedVariables = dbg->cache->global.count;
+                scope.namedVariables = dbg->cache->global->named_variables.size();
                 scope.expensive = true;
-                scope.variablesReference = dbg->cache->global.variable_ref;
+                scope.variablesReference = dbg->cache->global->ref_id;
             }
-#endif
             found = true;
             break;
         }

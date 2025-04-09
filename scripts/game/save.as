@@ -780,13 +780,17 @@ void ReadGame(json_doc &doc)
 
 	game = game_locals_t();
 
+    // unlink all old entities
     entities = array<ASEntity@>(max_edicts);
+    players = array<ASEntity@>(max_clients);
 
     internal::allow_value_assign++;
 
+    for (uint i = 0; i < max_edicts; i++)
+        G_EdictForNum(i).reset();
+
     @world = ASEntity(G_EdictForNum(0));
     @entities[0] = @world;
-    players = array<ASEntity@>(max_clients);
 
     for (uint i = 0; i < max_clients; i++)
     {
@@ -795,10 +799,6 @@ void ReadGame(json_doc &doc)
         @entities[i + 1] = @p;
         @players[i] = p;
     }
-
-    // edicts & client ptrs will have been cleared by the host.
-    // AS_TODO: double-check entities array and if it's working
-    // properly or not here.
 
 	// read game
     ReadGameLocals(doc, root["game"]);

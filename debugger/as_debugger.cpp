@@ -74,6 +74,8 @@ void asIDBScope::CalcLocals(asIDBDebugger *dbg, asIScriptFunction *function, asI
     if (!function || offset == SCOPE_SYSTEM)
         return;
 
+    container->cached = true;
+
     auto cache = dbg->cache.get();
     auto ctx = cache->ctx;
     asUINT numParams = function->GetParamCount();
@@ -518,8 +520,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
 /*virtual*/ void asIDBCache::CacheGlobals()
 {
-#if 0
-    if (!ctx || global.cached)
+    if (!ctx || global->cached)
         return;
 
     auto main = ctx->GetFunction(0)->GetModule();
@@ -540,11 +541,14 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         asIDBVarAddr idKey { typeId, isConst, ptr };
 
-        global.variables.emplace_back(asIDBGlobal {
-            false,
-            n,
-            { ((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } }
-        });
+        std::string localName = ((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name);
+
+        asIDBVarView view { std::move(localName), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } };
+
+        auto &var = global->named_variables.emplace_back(asIDBNamedVariable { idKey, name, viewType, std::move(view.state.value.value) });
+
+        if (view.state.value.expandable != asIDBExpandType::None)
+            var.container = CreateVariableContainer(asIDBVariableSource { global, global->named_variables.size() - 1 });
     }
 
     for (asUINT n = 0; n < main->GetEngine()->GetGlobalPropertyCount(); n++)
@@ -562,88 +566,17 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         asIDBVarAddr idKey { typeId, isConst, ptr };
 
-        global.variables.emplace_back(asIDBGlobal {
-            true,
-            n,
-            { (nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name, viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } }
-        });
+        std::string localName = (nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name;
+
+        asIDBVarView view { std::move(localName), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } };
+
+        auto &var = global->named_variables.emplace_back(asIDBNamedVariable { idKey, name, viewType, std::move(view.state.value.value) });
+
+        if (view.state.value.expandable != asIDBExpandType::None)
+            var.container = CreateVariableContainer(asIDBVariableSource { global, global->named_variables.size() - 1 });
     }
 
-    global.cached = true;
-#endif
-}
-
-/*virtual*/ void asIDBCache::CacheLocals(asIDBScope &scope)
-{
-#if 0
-    if (!ctx || variables.cached)
-        return;
-
-    if (scope.offset == SCOPE_SYSTEM)
-    {
-        variables.cached = true;
-        return;
-    }
-
-    asUINT numParams = ctx->GetFunction(scope.offset)->GetParamCount();
-    asUINT numLocals = ctx->GetVarCount(scope.offset);
-
-    asUINT start = 0, end = 0;
-
-    if (&variables == &scope.parameters)
-        end = numParams;
-    else
-    {
-        start = numParams;
-        end = numLocals;
-    }
-
-    if (&variables == &scope.locals)
-    {
-        if (auto thisPtr = ctx->GetThisPointer(scope.offset))
-        {
-            int thisTypeId = ctx->GetThisTypeId(scope.offset);
-
-            asIDBTypeId typeKey { thisTypeId, asTM_NONE };
-
-            const std::string_view viewType = GetTypeNameFromType(typeKey);
-
-            asIDBVarAddr idKey { thisTypeId, false, thisPtr };
-
-            variables.variables.emplace_back(asIDBLocal { LOCAL_THIS, asIDBVarView { "this", viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } } });
-        }
-    }
-
-    for (asUINT n = start; n < end; n++)
-    {
-        const char *name;
-        int typeId;
-        asETypeModifiers modifiers;
-        int stackOffset;
-        ctx->GetVar(n, scope.offset, &name, &typeId, &modifiers, 0, &stackOffset);
-
-        bool isTemporary = (&variables != &scope.parameters) && (!name || !*name);
-        
-        if (!ctx->IsVarInScope(n, scope.offset))
-            continue;
-        else if (isTemporary != (&variables == &scope.registers))
-            continue;
-
-        void *ptr = ctx->GetAddressOfVar(n, scope.offset);
-
-        asIDBTypeId typeKey { typeId, modifiers };
-
-        std::string localName = (name && *name) ? fmt::format("{} (&{})", name, n) : fmt::format("&{}", n);
-
-        const std::string_view viewType = GetTypeNameFromType(typeKey);
-
-        asIDBVarAddr idKey { typeId, (modifiers & asTM_CONST) != 0, ptr };
-
-        variables.variables.emplace_back(asIDBLocal { n, asIDBVarView { std::move(localName), viewType, idKey, asIDBVarState { evaluators.Evaluate(*this, idKey) } } });
-    }
-
-    variables.cached = true;
-#endif
+    global->cached = true;
 }
 
 class asIDBNullTypeEvaluator : public asIDBTypeEvaluator

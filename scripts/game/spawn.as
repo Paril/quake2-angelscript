@@ -576,6 +576,9 @@ void ED_ParseEdict(tokenizer_t &tokenizer, ASEntity &ent, spawn_temp_t &st)
 
 		init = true;
 
+        if (keyname.empty())
+            continue;
+
 		// keynames with a leading underscore are used for utility comments,
 		// and are immediately discarded by quake
 		if (keyname[0] == '_')

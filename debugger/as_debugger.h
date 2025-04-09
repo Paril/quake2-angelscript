@@ -253,13 +253,13 @@ public:
     int64_t             ref_id; // reference to our own variable id.
                                 // this is set by the cache.
     asIDBVariableSource source; // the container is a child of this source
-    bool cached;
+    bool                cached = false;
 
-    std::vector<asIDBNamedVariable>     named_variables;
+    std::vector<asIDBNamedVariable> named_variables;
 
     void Cache();
 
-    asIDBVariableContainer(asIDBDebugger *dbg, int64_t ref_id, asIDBVariableSource source) : dbg(dbg), ref_id(ref_id), source(source), cached(source.container == nullptr) { }
+    asIDBVariableContainer(asIDBDebugger *dbg, int64_t ref_id, asIDBVariableSource source) : dbg(dbg), ref_id(ref_id), source(source) { }
     virtual ~asIDBVariableContainer() { }
 };
 
@@ -635,8 +635,7 @@ public:
     asIDBTypeEvaluatorMap evaluators;
 
     // cached globals
-    // TODO
-    asIDBVariableContainer *global = nullptr;
+    asIDBVariableContainer *global;
 
     // cached map of variable reference to
     // a variable provider.
@@ -654,6 +653,7 @@ public:
         ctx(ctx)
     {
         ctx->AddRef();
+        global = CreateVariableContainer();
     }
     
     virtual ~asIDBCache()
@@ -668,9 +668,6 @@ public:
 
     // caches all of the global properties in the context.
     virtual void CacheGlobals();
-
-    // caches all of the locals with the specified key.
-    virtual void CacheLocals(asIDBScope &scope);
 
     // cache call stack entries
     virtual void CacheCallstack();
