@@ -8,6 +8,22 @@
 #include <array>
 #include <charconv>
 
+void asIDBVariable::MakeExpandable()
+{
+    if (!ref_id)
+    {
+        int64_t next_id = dbg.cache->variable_refs.size() + 1;
+        ref_id = next_id;
+        dbg.cache->variable_refs.emplace(next_id, ptr);
+    }
+}
+
+void asIDBVariable::PushChild(WeakPtr ptr)
+{
+    MakeExpandable();
+    children.push_back(ptr);
+}
+
 void asIDBVariable::Expand()
 {
     if (expanded)
@@ -67,7 +83,7 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
             var->address = idKey;
             var->typeName = viewType;
             cache.evaluators.Evaluate(var);
-            container->children.push_back(var);
+            container->PushChild(var);
         }
     }
 
@@ -101,10 +117,9 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
         var->address = idKey;
         var->typeName = viewType;
         cache.evaluators.Evaluate(var);
-        container->children.push_back(var);
+        container->PushChild(var);
     }
-    
-    cache.LinkVariable(container);
+
     container->expanded = true;
 }
 
@@ -516,7 +531,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         var->address = idKey;
         var->typeName = viewType;
         evaluators.Evaluate(var);
-        globals->children.push_back(var);
+        globals->PushChild(var);
     }
 
     for (asUINT n = 0; n < main->GetEngine()->GetGlobalPropertyCount(); n++)
@@ -541,7 +556,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         var->address = idKey;
         var->typeName = viewType;
         evaluators.Evaluate(var);
-        globals->children.push_back(var);
+        globals->PushChild(var);
     }
 
     globals->expanded = true;
@@ -642,7 +657,7 @@ public:
         }
 
         var->value = fmt::format("{} bits", bits.count());
-        dbg.cache->LinkVariable(var);
+        var->MakeExpandable();
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override
@@ -698,7 +713,7 @@ public:
             child->owner = var;
             child->name = "value";
             child->value = std::move(rawValue);
-            var->children.push_back(std::move(child));
+            var->PushChild(child);
         }
         
         // find bit names
@@ -747,7 +762,7 @@ public:
                 child->owner = var;
                 child->name = fmt::format("[{:2}]", e);
                 child->value = std::move(bitEntry);
-                var->children.push_back(std::move(child));
+                var->PushChild(child);
             }
         }
     }
@@ -842,9 +857,10 @@ bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &
             if (!it.error.empty())
             {
                 var->value = std::string(it.error);
-                cache.LinkVariable(var);
                 return;
             }
+
+            var->value = fmt::format("{{{}}}", var->typeName);
         }
         else
         {
@@ -864,7 +880,7 @@ bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &
     }
 
     if (canExpand)
-        cache.LinkVariable(var);
+        var->MakeExpandable();
 }
 
 /*virtual*/ void asIDBObjectTypeEvaluator::Expand(asIDBVariable::Ptr var) const /*override*/
@@ -921,7 +937,7 @@ void asIDBObjectTypeEvaluator::QueryVariableProperties(asIDBVariable::Ptr var) c
         child->name = name;
         child->typeName = cache.GetTypeNameFromType({ propTypeId, isReadOnly ? asTM_CONST : asTM_NONE });
         cache.evaluators.Evaluate(child);
-        var->children.push_back(child);
+        var->PushChild(child);
     }
 }
 
@@ -1025,7 +1041,7 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
             child->typeName = cache.GetTypeNameFromType({ typeId, asTM_NONE });
             child->stackData = std::move(stackMemory);
             cache.evaluators.Evaluate(child);
-            var->children.push_back(child);
+            var->PushChild(child);
 
             fv++;
         }

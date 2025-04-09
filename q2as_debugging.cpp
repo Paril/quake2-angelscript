@@ -23,8 +23,6 @@
 #include "q2as_game.h"
 #include "q2as_cgame.h"
 
-#include <filesystem>
-
 class q2as_asIDBStringTypeEvaluator : public asIDBTypeEvaluator
 {
 public:
@@ -33,7 +31,7 @@ public:
         const std::string *s = var->address.ResolveAs<const std::string>();
 
         if (s->empty())
-            var->value = "empty";
+            var->value = "(empty)";
         else
             var->value = *s;
     }
@@ -46,7 +44,7 @@ public:
     {
         const vec3_t *s = var->address.ResolveAs<const vec3_t>();
         var->value = fmt::format("{} {} {}", s->x, s->y, s->z);
-        var->dbg.cache->LinkVariable(var);
+        var->MakeExpandable();
     }
 };
 
@@ -75,7 +73,7 @@ public:
             }
 
         var->value = fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx);
-        var->dbg.cache->LinkVariable(var);
+        var->MakeExpandable();
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override
@@ -89,7 +87,7 @@ public:
                 child->owner = var;
                 child->name = std::get<1>(suffix);
                 child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
-                var->children.push_back(child);
+                var->PushChild(child);
             }
 
         {
@@ -97,7 +95,7 @@ public:
             child->owner = var;
             child->name = "ms";
             child->value = fmt::format("{}", s->milliseconds());
-            var->children.push_back(child);
+            var->PushChild(child);
         }
     }
 };

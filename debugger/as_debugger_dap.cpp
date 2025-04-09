@@ -160,38 +160,38 @@ public:
             if (stack.id != request.frameId)
                 continue;
 
-            if (stack.scope.locals->ref_id)
+            if (!stack.scope.locals->Children().empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Locals";
                 scope.presentationHint = "locals";
-                scope.namedVariables = stack.scope.locals->children.size();
-                scope.variablesReference = stack.scope.locals->ref_id.value();
+                scope.namedVariables = stack.scope.locals->Children().size();
+                scope.variablesReference = stack.scope.locals->RefId();
             }
-            if (stack.scope.parameters->ref_id)
+            if (!stack.scope.parameters->Children().empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Parameters";
                 scope.presentationHint = "parameters";
-                scope.namedVariables = stack.scope.parameters->children.size();
-                scope.variablesReference = stack.scope.parameters->ref_id.value();
+                scope.namedVariables = stack.scope.parameters->Children().size();
+                scope.variablesReference = stack.scope.parameters->RefId();
             }
-            if (stack.scope.registers->ref_id)
+            if (!stack.scope.registers->Children().empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Registers";
                 scope.presentationHint = "registers";
-                scope.namedVariables = stack.scope.registers->children.size();
-                scope.variablesReference = stack.scope.registers->ref_id.value();
+                scope.namedVariables = stack.scope.registers->Children().size();
+                scope.variablesReference = stack.scope.registers->RefId();
             }
-            if (dbg->cache->globals->ref_id)
+            if (!dbg->cache->globals->Children().empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Globals";
                 scope.presentationHint = "globals";
-                scope.namedVariables = dbg->cache->globals->children.size();
+                scope.namedVariables = dbg->cache->globals->Children().size();
                 scope.expensive = true;
-                scope.variablesReference = dbg->cache->globals->ref_id.value();
+                scope.variablesReference = dbg->cache->globals->RefId();
             }
             found = true;
             break;
@@ -216,14 +216,14 @@ public:
 
         dap::VariablesResponse response {};
 
-        for (auto &local_ptr : varContainer->children)
+        for (auto &local_ptr : varContainer->Children())
         {
             auto &var = response.variables.emplace_back();
             auto local = local_ptr.lock();
             var.name = local->name;
             var.type = dap::string(local->typeName);
             var.value = local->value.empty() ? dbg->cache->GetTypeNameFromType({ local->address.source.typeId, asTM_NONE }) : local->value;
-            var.variablesReference = local->ref_id.value_or(0);
+            var.variablesReference = local->RefId();
         }
 
         return response;

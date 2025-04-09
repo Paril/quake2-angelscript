@@ -146,10 +146,6 @@ struct asIDBVariable
     WeakPtr                    owner {};
     size_t                     ownerOffset = 0;
 
-    // if ref_id is set, the variable has children.
-    // call asIDBCache::LinkVariable to set this.
-    std::optional<int64_t>     ref_id {};
-    Vector                     children;
     bool                       expanded = false;
 
     asIDBVariable(asIDBDebugger &dbg) :
@@ -157,7 +153,18 @@ struct asIDBVariable
     {
     }
 
+    const Vector &Children() const { return children; }
+    void MakeExpandable();
+    void PushChild(WeakPtr ptr);
+    int64_t RefId() const { return ref_id.value_or(0); }
+
     void Expand();
+
+private:
+    // if ref_id is set, the variable has children.
+    // call asIDBCache::LinkVariable to set this.
+    std::optional<int64_t>     ref_id {};
+    Vector                     children;
 };
 
 // a local, fetched from GetVar
@@ -610,14 +617,6 @@ public:
         asIDBVariable::Ptr ptr = std::make_shared<asIDBVariable>(dbg);
         ptr->ptr = ptr;
         return *variables.emplace(ptr).first;
-    }
-
-    // Link a variable into the ref ID list.
-    void LinkVariable(asIDBVariable::Ptr var)
-    {
-        int64_t next_id = variable_refs.size() + 1;
-        var->ref_id = next_id;
-        variable_refs.emplace(next_id, var);
     }
 };
 
