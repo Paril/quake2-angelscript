@@ -24,7 +24,7 @@ public:
             //response.supportsClipboardContext = true;
             //response.supportsCompletionsRequest = true;
             response.supportsConfigurationDoneRequest = true;
-            //response.supportsDelayedStackTraceLoading = true;
+            response.supportsDelayedStackTraceLoading = true;
             response.supportsEvaluateForHovers = true;
             //response.supportsFunctionBreakpoints = true;
             //response.supportsBreakpointLocationsRequest = true;
@@ -160,37 +160,38 @@ public:
             if (stack.id != request.frameId)
                 continue;
 
-            if (stack.scope.locals)
+            if (stack.scope.locals->ref_id)
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Locals";
                 scope.presentationHint = "locals";
-                scope.namedVariables = stack.scope.locals->named_variables.size();
-                scope.variablesReference = stack.scope.locals->ref_id;
+                scope.namedVariables = stack.scope.locals->children.size();
+                scope.variablesReference = stack.scope.locals->ref_id.value();
             }
-            if (stack.scope.parameters)
+            if (stack.scope.parameters->ref_id)
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Parameters";
                 scope.presentationHint = "parameters";
-                scope.namedVariables = stack.scope.parameters->named_variables.size();
-                scope.variablesReference = stack.scope.parameters->ref_id;
+                scope.namedVariables = stack.scope.parameters->children.size();
+                scope.variablesReference = stack.scope.parameters->ref_id.value();
             }
-            if (stack.scope.registers)
+            if (stack.scope.registers->ref_id)
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Registers";
                 scope.presentationHint = "registers";
-                scope.namedVariables = stack.scope.registers->named_variables.size();
-                scope.variablesReference = stack.scope.registers->ref_id;
+                scope.namedVariables = stack.scope.registers->children.size();
+                scope.variablesReference = stack.scope.registers->ref_id.value();
             }
+            if (dbg->cache->globals->ref_id)
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Globals";
                 scope.presentationHint = "globals";
-                scope.namedVariables = dbg->cache->global->named_variables.size();
+                scope.namedVariables = dbg->cache->globals->children.size();
                 scope.expensive = true;
-                scope.variablesReference = dbg->cache->global->ref_id;
+                scope.variablesReference = dbg->cache->globals->ref_id.value();
             }
             found = true;
             break;
@@ -204,23 +205,25 @@ public:
 
     dap::ResponseOrError<dap::VariablesResponse> HandleRequest(const dap::VariablesRequest &request)
     {
-        auto varit = dbg->cache->variables.find(request.variablesReference);
+        auto varit = dbg->cache->variable_refs.find(request.variablesReference);
 
-        if (varit == dbg->cache->variables.end())
+        if (varit == dbg->cache->variable_refs.end())
             return dap::Error("invalid variablesReference");
 
-        dap::VariablesResponse response {};
-        auto &varContainer = *varit->second.get();
+        auto varContainer = varit->second.lock();
 
-        varContainer.Cache();
-                
-        for (auto &local : varContainer.named_variables)
+        varContainer->Expand();
+
+        dap::VariablesResponse response {};
+
+        for (auto &local_ptr : varContainer->children)
         {
             auto &var = response.variables.emplace_back();
-            var.name = local.name;
-            var.type = dap::string(local.type);
-            var.value = local.value.empty() ? dbg->cache->GetTypeNameFromType({ local.address.source.typeId, asTM_NONE }) : local.value;
-            var.variablesReference = local.container ? local.container->ref_id : 0;
+            auto local = local_ptr.lock();
+            var.name = local->name;
+            var.type = dap::string(local->typeName);
+            var.value = local->value.empty() ? dbg->cache->GetTypeNameFromType({ local->address.source.typeId, asTM_NONE }) : local->value;
+            var.variablesReference = local->ref_id.value_or(0);
         }
 
         return response;
@@ -253,6 +256,7 @@ public:
     dap::EvaluateResponse HandleRequest(const dap::EvaluateRequest &request)
     {
         dap::EvaluateResponse response {};
+#if 0
         auto result = dbg->cache->ResolveExpression(request.expression, 0);
 
         if (result.has_value())
@@ -260,6 +264,7 @@ public:
             response.result = result.value().value.value.value;
             response.type = std::string(dbg->cache->GetTypeNameFromType({ result.value().idKey.typeId }));
         }
+#endif
         return response;
     }
 

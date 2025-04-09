@@ -28,25 +28,25 @@
 class q2as_asIDBStringTypeEvaluator : public asIDBTypeEvaluator
 {
 public:
-    virtual asIDBVarValue Evaluate(asIDBCache &, const asIDBResolvedVarAddr &id) const override
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
     {
-        const std::string *s = reinterpret_cast<const std::string *>(id.resolved);
+        const std::string *s = var->address.ResolveAs<const std::string>();
 
         if (s->empty())
-            return { "empty", true };
-
-        return { *s, true, asIDBExpandType::Value };
+            var->value = "empty";
+        else
+            var->value = *s;
     }
 };
 
 class q2as_asIDBVec3TypeEvaluator : public asIDBObjectTypeEvaluator
 {
 public:
-    virtual asIDBVarValue Evaluate(asIDBCache &, const asIDBResolvedVarAddr &id) const override
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
     {
-        const vec3_t *s = reinterpret_cast<const vec3_t *>(id.resolved);
-
-        return { fmt::format("{} {} {}", s->x, s->y, s->z), false, asIDBExpandType::Children };
+        const vec3_t *s = var->address.ResolveAs<const vec3_t>();
+        var->value = fmt::format("{} {} {}", s->x, s->y, s->z);
+        var->dbg.cache->LinkVariable(var);
     }
 };
 
@@ -59,9 +59,9 @@ class q2as_asIDBGTimeTypeEvaluator : public asIDBObjectTypeEvaluator
     };
 
 public:
-    virtual asIDBVarValue Evaluate(asIDBCache &, const asIDBResolvedVarAddr &id) const override
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
     {
-        const gtime_t *s = reinterpret_cast<const gtime_t *>(id.resolved);
+        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
 
         const char *sfx = "ms";
         uint64_t divisor = 1;
@@ -74,34 +74,47 @@ public:
                 break;
             }
 
-        return { fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx), false, asIDBExpandType::Entries };
+        var->value = fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx);
+        var->dbg.cache->LinkVariable(var);
     }
 
-    virtual void Expand(asIDBCache &cache, const asIDBResolvedVarAddr &id, asIDBVarState &state) const override
+    virtual void Expand(asIDBVariable::Ptr var) const override
     {
-        const gtime_t *s = reinterpret_cast<const gtime_t *>(id.resolved);
+        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
 
         for (auto &suffix : time_suffixes)
             if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
-                state.entries.push_back({ fmt::format("{} {}", s->milliseconds() / (double) std::get<0>(suffix), std::get<1>(suffix)) });
+            {
+                asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
+                child->owner = var;
+                child->name = std::get<1>(suffix);
+                child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
+                var->children.push_back(child);
+            }
 
-        state.entries.push_back({ fmt::format("{} ms", s->milliseconds()) });
+        {
+            asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
+            child->owner = var;
+            child->name = "ms";
+            child->value = fmt::format("{}", s->milliseconds());
+            var->children.push_back(child);
+        }
     }
 };
 
 class q2as_asIDBArrayTypeEvaluator : public asIDBObjectTypeEvaluator
 {
 public:
-    virtual void Expand(asIDBCache &cache, const asIDBResolvedVarAddr &id, asIDBVarState &state) const override
+    virtual void Expand(asIDBVariable::Ptr var) const override
     {
-        QueryVariableForEach(cache, id, state, 0);
+        QueryVariableForEach(var, 0);
     }
 };
 
 class q2as_asIDBCache : public asIDBCache
 {
 public:
-    q2as_asIDBCache(asIDBDebugger *dbg, asIScriptContext *ctx) :
+    q2as_asIDBCache(asIDBDebugger &dbg, asIScriptContext *ctx) :
         asIDBCache(dbg, ctx)
     {
         auto engine = ctx->GetEngine();
@@ -548,7 +561,7 @@ protected:
     // create a cache for the given context.
     virtual std::unique_ptr<asIDBCache> CreateCache(asIScriptContext *ctx) override
     {
-        return std::make_unique<q2as_asIDBCache>(this, ctx);
+        return std::make_unique<q2as_asIDBCache>(*this, ctx);
     }
 };
 
