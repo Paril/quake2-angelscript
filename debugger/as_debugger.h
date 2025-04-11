@@ -19,6 +19,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <type_traits>
 #include <string>
 #include <set>
@@ -135,18 +136,19 @@ struct asIDBVariable
     using Vector = std::vector<WeakPtr>;
     using Map = std::unordered_map<int64_t, WeakPtr>;
 
-    WeakPtr         ptr;
-    asIDBDebugger   &dbg;
+    WeakPtr       ptr;
+    asIDBDebugger &dbg;
 
     asIDBResolvedVarAddr       address;
     std::string                name;
+    std::string                ns = "::";
     std::string                value;
     std::string_view           typeName;
     std::unique_ptr<uint8_t[]> stackData {};
     WeakPtr                    owner {};
-    size_t                     ownerOffset = 0;
 
-    bool                       expanded = false;
+    bool expanded = false;
+    asUINT stackIndex = 0;
 
     asIDBVariable(asIDBDebugger &dbg) :
         dbg(dbg)
@@ -177,6 +179,9 @@ struct asIDBScope
     asIDBVariable::Ptr parameters;
     asIDBVariable::Ptr locals;
     asIDBVariable::Ptr registers; // "temporaries"
+
+    std::unordered_map<uint32_t, asIDBVariable::WeakPtr> local_by_index;
+    asIDBVariable::WeakPtr this_ptr;
 
     asIDBScope(asUINT offset, asIDBDebugger &dbg, asIScriptFunction *function);
 
@@ -487,11 +492,28 @@ public:
         data(std::in_place_index<1>, std::move(v))
     {
     }
+
+    constexpr asIDBExpected(const T &v) :
+        data(std::in_place_index<1>, v)
+    {
+    }
+
+    constexpr asIDBExpected(asIDBExpected<void> &&v);
     
     asIDBExpected(const asIDBExpected<T> &) = default;
     asIDBExpected(asIDBExpected<T> &&) = default;
     asIDBExpected &operator=(const asIDBExpected<T> &) = default;
     asIDBExpected &operator=(asIDBExpected<T> &&) = default;
+
+    constexpr asIDBExpected &operator=(const T &v)
+    {
+        return *this = asIDBExpected<T>(v);
+    }
+
+    constexpr asIDBExpected &operator=(T &&v)
+    {
+        return *this = asIDBExpected<T>(v);
+    }
     
     constexpr bool has_value() const { return data.index() == 1; }
     constexpr explicit operator bool() const { return has_value(); }
@@ -500,6 +522,35 @@ public:
     constexpr const T &value() const { return std::get<1>(data); }
     constexpr T &value() { return std::get<1>(data); }
 };
+
+template<>
+struct asIDBExpected<void>
+{
+private:
+    std::string_view err;
+
+public:
+    constexpr asIDBExpected() :
+        err("unknown error")
+    {
+    }
+
+    constexpr asIDBExpected(const std::string_view v) :
+        err(v)
+    {
+    }
+
+    constexpr const std::string_view &error() const { return err; }
+};
+
+template<typename T>
+constexpr asIDBExpected<T>::asIDBExpected(asIDBExpected<void> &&v) :
+    data(std::in_place_index<0>, v.error())
+{
+}
+ 
+template<class E> 
+asIDBExpected(E) -> asIDBExpected<void>;
 
 // this class holds the cached state of stuff
 // so that we're not querying things from AS
@@ -580,7 +631,6 @@ public:
     // value that this property points to.
     virtual void *ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int propertyIndex, int offset, int compositeOffset, bool isCompositeIndirect);
 
-#if 0
     // resolve the given expression to a unique var state.
     // `expr` must contain a resolvable expression; it's a limited
     // form of syntax designed solely to resolve a variable.
@@ -604,8 +654,9 @@ public:
     //   Only uint indices are supported. You may also optionally select which
     //   value to retrieve from multiple opValue implementations; if not specified
     //   it will default to zero (that is to say, [0] and [0,0] are equivalent).
-    virtual asIDBExpected<asIDBExprResult> ResolveExpression(const std::string_view expr, int stack_index);
-
+    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveExpression(const std::string_view expr, std::optional<int> stack_index);
+    
+#if 0
     // Resolve the remainder of a sub-expression; see ResolveExpression
     // for the syntax.
     virtual asIDBExpected<asIDBExprResult> ResolveSubExpression(const asIDBResolvedVarAddr &idKey, const std::string_view rest, int stack_index);
@@ -622,7 +673,8 @@ public:
 
 struct asIDBBreakpoint
 {
-    int line;
+    int                line;
+    std::optional<int> column;
 };
 
 using asIDBSectionBreakpoints = std::vector<asIDBBreakpoint>;
@@ -635,6 +687,17 @@ enum class asIDBAction : uint8_t
     StepOut,
     Continue
 };
+    
+struct asIDBLineCol
+{
+    int line, col;
+
+    constexpr bool operator<(const asIDBLineCol &o) const { return line == o.line ? col < o.col : line < o.line; }
+};
+
+using asIDBSectionSet = std::set<std::string, std::less<>>;
+using asIDBEngineSet = std::unordered_set<asIScriptEngine *>;
+using asIDBPotentialBreakpointMap = std::unordered_map<std::string_view, std::set<asIDBLineCol, std::less<>>>;
 
 // The workspace is contains information about the
 // "project" that the debugger is operating within.
@@ -644,19 +707,50 @@ enum class asIDBAction : uint8_t
 // ideas on file paths.
 struct asIDBWorkspace
 {
-    std::string             base_path;
-    std::set<std::string>   sections;
+    // base path for the workspace
+    std::string     base_path;
 
-    std::string PathToSection(const std::string_view v) const
+    // sections that this workspace is working with
+    asIDBSectionSet sections;
+
+    // list of engines that can be hooked.
+    asIDBEngineSet engines;
+
+    // map of breakpoint positions
+    asIDBPotentialBreakpointMap potential_breakpoints;
+
+    asIDBWorkspace(std::string_view base_path, std::initializer_list<asIScriptEngine *> engines) :
+        base_path(base_path)
+    {
+        for (auto &engine : engines)
+            if (engine)
+                this->engines.insert(engine);
+
+        CompileScriptSources();
+        CompileBreakpointPositions();
+    }
+
+    virtual void AddSection(std::string_view section)
+    {
+        if (auto it = sections.find(section); it == sections.end())
+            sections.insert(std::string(section));
+    }
+
+    virtual std::string PathToSection(const std::string_view v) const
     {
         return std::filesystem::relative(v, base_path).generic_string();
     }
 
-    std::string SectionToPath(const std::string_view v) const
+    virtual std::string SectionToPath(const std::string_view v) const
     {
         return (base_path + '/').append(v);
     }
+
+    void CompileScriptSources();
+    void CompileBreakpointPositions();
 };
+
+using asIDBBreakpointMap = std::unordered_map<std::string_view, asIDBSectionBreakpoints>;
 
 // This is the main class for interfacing with
 // the debugger. This manages the debugger thread
@@ -678,15 +772,12 @@ public:
     // if true, line callback will not execute
     // (used to prevent infinite loops)
     std::atomic_bool internal_execution = false;
-    
-    // active breakpoints
-    std::unordered_map<std::string_view, asIDBSectionBreakpoints> breakpoints;
 
     // workspace
-    asIDBWorkspace workspace;
-
-    // list of engines that can be hooked.
-    std::unordered_set<asIScriptEngine *> engines;
+    asIDBWorkspace *workspace;
+    
+    // active breakpoints
+    asIDBBreakpointMap breakpoints;
 
     // cache for the current active broken state.
     // the cache is only kept for the duration of
@@ -697,7 +788,10 @@ public:
     // current frame offset for use by the cache
     std::atomic_int64_t frame_offset = 0;
 
-    asIDBDebugger() { }
+    asIDBDebugger(asIDBWorkspace *workspace) :
+        workspace(workspace)
+    {
+    }
     virtual ~asIDBDebugger() { }
 
     // hooks the context onto the debugger; this will

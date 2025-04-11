@@ -7,6 +7,7 @@
 #include <bitset>
 #include <array>
 #include <charconv>
+#include <../source/as_scriptfunction.h>
 
 void asIDBVariable::MakeExpandable()
 {
@@ -82,8 +83,11 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
             var->name = "this";
             var->address = idKey;
             var->typeName = viewType;
+            var->stackIndex = (asUINT) -1;
             cache.evaluators.Evaluate(var);
             container->PushChild(var);
+
+            this_ptr = var;
         }
     }
 
@@ -116,8 +120,11 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
         var->name = std::move(localName);
         var->address = idKey;
         var->typeName = viewType;
+        var->stackIndex = n;
         cache.evaluators.Evaluate(var);
         container->PushChild(var);
+
+        local_by_index.emplace(n, var);
     }
 
     container->expanded = true;
@@ -193,55 +200,59 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
     return id.ResolveAs<uint8_t>() + offset + compositeOffset;
 }
 
-#if 0
-/*virtual*/ asIDBExpected<asIDBExprResult> asIDBCache::ResolveExpression(const std::string_view expr, int stack_index)
+/*virtual*/ asIDBExpected<asIDBVariable::WeakPtr> asIDBCache::ResolveExpression(const std::string_view expr, std::optional<int> stack_index)
 {
     if (expr.empty())
-        return asIDBExpected<asIDBExprResult>("empty string");
+        return asIDBExpected("empty string");
+
+    CacheCallstack();
 
     // isolate the variable name first
     size_t variable_end = expr.find_first_of(".[", 0);
     std::string_view variable_name = expr.substr(0, variable_end);
-    asIDBVarAddr variable_key;
+    asIDBExpected<asIDBVariable::WeakPtr> variable;
+    asIDBCallStackEntry *stack = nullptr;
+    
+    if (stack_index.has_value())
+        stack = &call_stack[stack_index.value()];
 
     // if it starts with a & it has to be a local variable index
-    if (variable_name[0] == '&')
+    if (stack && variable_name[0] == '&')
     {
-        uint16_t offset;
+        uint32_t offset;
         auto result = std::from_chars(&variable_name.front(), &variable_name.front() + variable_name.size(), offset);
 
         if (result.ec != std::errc())
-            return asIDBExpected<asIDBExprResult>("invalid numerical offset");
+            return asIDBExpected("invalid numerical offset");
 
         // check bounds
-        int m = ctx->GetVarCount(stack_index);
+        int m = ctx->GetVarCount(stack_index.value());
 
         if (offset >= m)
-            return asIDBExpected<asIDBExprResult>("stack offset out of bounds");
+            return asIDBExpected("stack offset out of bounds");
 
-        if (!ctx->IsVarInScope(offset, stack_index))
-            return asIDBExpected<asIDBExprResult>("variable out of scope");
+        if (!ctx->IsVarInScope(offset, stack_index.value()))
+            return asIDBExpected("variable out of scope");
 
-        // grab key
-        asETypeModifiers modifiers;
-        ctx->GetVar(offset, stack_index, 0, &variable_key.typeId, &modifiers);
-        variable_key.constant = (modifiers & asTM_CONST) != 0;
-        variable_key.address = ctx->GetAddressOfVar(offset, stack_index);
+        if (auto varit = stack->scope.local_by_index.find(offset); varit != stack->scope.local_by_index.end())
+            variable = varit->second;
+        else
+            return asIDBExpected("missing local index");
     }
     // check this
-    else if (variable_name == "this")
+    else if (stack && variable_name == "this")
     {
-        if (!(variable_key.address = ctx->GetThisPointer(stack_index)))
-            return asIDBExpected<asIDBExprResult>("not a method");
+        if (stack->scope.this_ptr.expired())
+            return asIDBExpected("not a method");
 
-        variable_key.typeId = ctx->GetThisTypeId(stack_index);
+        variable = stack->scope.this_ptr;
     }
     else
     {
         struct asIDBNamespacedVar {
-            asIDBVarAddr     addr;
-            std::string_view name;
-            std::string_view ns = "::";
+            asIDBVariable::WeakPtr     var;
+            std::string_view           name;
+            std::string_view           ns = "::";
         };
 
         std::vector<asIDBNamespacedVar> matches;
@@ -253,135 +264,96 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
             variable_name = variable_name.substr(ns_end + 1);
         }
 
-        // not an offset; in order, check the following:
-        // - local variables (in reverse order)
-        // - function parameters
-        // - class member properties (if appropriate)
-        // - globals
-        for (int i = ctx->GetVarCount(stack_index) - 1; i >= 0; i--)
+        if (stack)
         {
-            if (!ctx->IsVarInScope(i, stack_index))
-                continue;
-
-            const char *name;
-            int typeId;
-            asETypeModifiers modifiers;
-            ctx->GetVar(i, stack_index, &name, &typeId, &modifiers);
-
-            if (variable_name != name)
-                continue;
-
-            matches.push_back({
-                { typeId, (modifiers & asTM_CONST) != 0, ctx->GetAddressOfVar(i, stack_index) },
-                name
-            });
-            break;
-        }
-
-        // check `this` parameters
-        if (auto thisPtr = ctx->GetThisPointer(stack_index))
-        {
-            auto thisTypeId = ctx->GetThisTypeId(stack_index);
-            auto type = ctx->GetEngine()->GetTypeInfoById(thisTypeId);
-
-            for (asUINT i = 0; i < type->GetPropertyCount(); i++)
+            // not an offset; in order, check the following:
+            // - local variables (in reverse order)
+            // - function parameters
+            // - class member properties (if appropriate)
+            // - globals
+            for (int i = ctx->GetVarCount(stack_index.value()) - 1; i >= 0; i--)
             {
+                if (!ctx->IsVarInScope(i, stack_index.value()))
+                    continue;
+
                 const char *name;
                 int typeId;
-                int offset;
-                int compositeOffset;
-                bool isCompositeIndirect;
-                bool isReadOnly;
-
-                type->GetProperty(i, &name, &typeId, 0, 0, &offset, 0, 0, &compositeOffset, &isCompositeIndirect, &isReadOnly);
+                asETypeModifiers modifiers;
+                ctx->GetVar(i, stack_index.value(), &name, &typeId, &modifiers);
 
                 if (variable_name != name)
                     continue;
-                    
-                matches.push_back({
-                    { typeId, isReadOnly, ResolvePropertyAddress(asIDBVarAddr { thisTypeId, false, thisPtr }, i, offset, compositeOffset, isCompositeIndirect) },
-                    name
-                });
+
+                if (auto varit = stack->scope.local_by_index.find(i); varit != stack->scope.local_by_index.end())
+                    matches.push_back({ varit->second, name });
+
                 break;
+            }
+
+            // check `this` parameters
+            if (!stack->scope.this_ptr.expired())
+            {
+                auto var = stack->scope.this_ptr.lock();
+                var->Expand();
+
+                for (auto &param : var->Children())
+                {
+                    auto paramvar = param.lock();
+
+                    if (variable_name != paramvar->name)
+                        continue;
+
+                    matches.push_back({
+                        paramvar,
+                        paramvar->name
+                    });
+                }
             }
         }
 
         // check globals
+        CacheGlobals();
+
+        for (auto &global : globals->Children())
         {
-            auto main = ctx->GetFunction(0)->GetModule();
-
-            for (asUINT n = 0; n < main->GetGlobalVarCount(); n++)
-            {
-                const char *name;
-                int typeId;
-                bool isConst;
-                const char *ns;
-
-                main->GetGlobalVar(n, &name, &ns, &typeId, &isConst);
-
-                if (variable_name != name)
-                    continue;
+            auto globalvar = global.lock();
                 
+            if (variable_name == globalvar->name)
                 matches.push_back({
-                    { typeId, isConst, main->GetAddressOfGlobalVar(n) },
-                    name,
-                    (ns && *ns) ? ns : "::"
+                    globalvar,
+                    globalvar->name,
+                    globalvar->ns
                 });
-            }
-        }
-
-        // check host properties
-        {
-            auto engine = ctx->GetEngine();
-
-            for (asUINT n = 0; n < engine->GetGlobalPropertyCount(); n++)
-            {
-                const char *name;
-                int typeId;
-                bool isConst;
-                void *ptr;
-                const char *ns;
-
-                engine->GetGlobalPropertyByIndex(n, &name, &ns, &typeId, &isConst, nullptr, &ptr);
-
-                if (variable_name != name)
-                    continue;
-                
-                matches.push_back({
-                    { typeId, isConst, ptr },
-                    name,
-                    (ns && *ns) ? ns : "::"
-                });
-            }
         }
 
         if (matches.size() == 1)
-            variable_key = matches[0].addr;
+            variable = matches[0].var;
         // if we didn't specify a ns but had multiple
         // matches, return an error
         else if (variable_ns.empty())
-            return asIDBExpected<asIDBExprResult>(matches.empty() ? "can't find variable" : "ambiguous variable name");
+            return asIDBExpected(matches.empty() ? "can't find variable" : "ambiguous variable name");
         else
         {
             for (auto &match : matches)
             {
                 if (variable_ns == match.ns)
                 {
-                    variable_key = match.addr;
+                    variable = match.var;
                     break;
                 }
             }
         }
 
-        if (!variable_key.typeId)
-            return asIDBExpected<asIDBExprResult>("can't find variable");
+        if (!variable)
+            return asIDBExpected("can't find variable");
     }
 
     // variable_key should be non-null and with
     // a valid type ID here.
-    return ResolveSubExpression(variable_key, variable_end == std::string_view::npos ? std::string_view{} : expr.substr(variable_end), stack_index);
+    return variable;//ResolveSubExpression(variable_key, variable_end == std::string_view::npos ? std::string_view{} : expr.substr(variable_end), stack_index);
 }
 
+#if 0
 /*virtual*/ asIDBExpected<asIDBExprResult> asIDBCache::ResolveSubExpression(const asIDBResolvedVarAddr &idKey, const std::string_view rest, int stack_index)
 {
     // nothing left, so this is the result.
@@ -482,10 +454,8 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
             section,
             row,
             column,
-            asIDBScope(n, dbg, func)
+            asIDBScope(func->GetFuncType() == asFUNC_SYSTEM ? SCOPE_SYSTEM : n, dbg, func)
         });
-
-        dbg.workspace.sections.insert(section);
     }
 }
 
@@ -528,6 +498,8 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         asIDBVariable::Ptr var = dbg.cache->CreateVariable();
         var->name = std::move(localName);
+        if (nameSpace && nameSpace[0])
+            var->ns = nameSpace;
         var->address = idKey;
         var->typeName = viewType;
         evaluators.Evaluate(var);
@@ -1145,6 +1117,80 @@ void asIDBTypeEvaluatorMap::Register(int typeId, std::unique_ptr<asIDBTypeEvalua
     evaluators.insert_or_assign(typeId, std::move(evaluator));
 }
 
+void asIDBWorkspace::CompileScriptSources()
+{
+    for (auto &engine : engines)
+    {
+        for (size_t i = 0; i < engine->GetModuleCount(); i++)
+        {
+            auto module = engine->GetModuleByIndex(i);
+
+            for (size_t f = 0; f < module->GetFunctionCount(); f++)
+                AddSection(module->GetFunctionByIndex(f)->GetScriptSectionName());
+        }
+    }
+}
+
+void asIDBWorkspace::CompileBreakpointPositions()
+{
+    potential_breakpoints.clear();
+
+    for (auto &engine : engines)
+    {
+        for (size_t i = 0; i < engine->GetModuleCount(); i++)
+        {
+            auto module = engine->GetModuleByIndex(i);
+
+            for (size_t f = 0; f < module->GetFunctionCount(); f++)
+            {
+                auto func = module->GetFunctionByIndex(f);
+                asCScriptFunction *internal_func = reinterpret_cast<asCScriptFunction *>(func);
+
+                // TODO: not supported
+                if (internal_func->scriptData->sectionIdxs.GetLength() > 0)
+                    continue;
+
+                auto section = func->GetScriptSectionName();
+                for (size_t i = 0; i < internal_func->scriptData->lineNumbers.GetLength(); i += 2)
+                {
+                    auto pos = internal_func->scriptData->lineNumbers[i];
+                    auto linecol = internal_func->scriptData->lineNumbers[i + 1];
+                    auto line = linecol & 0xFFFFF;
+                    auto col = linecol >> 20;
+
+                    potential_breakpoints[section].insert(asIDBLineCol { line, col });
+                }
+            }
+
+            for (size_t t = 0; t < module->GetObjectTypeCount(); t++)
+            {
+                asITypeInfo *type = module->GetObjectTypeByIndex(t);
+
+                for (size_t m = 0; m < type->GetMethodCount(); m++)
+                {
+                    auto func = type->GetMethodByIndex(m, false);
+                    asCScriptFunction *internal_func = reinterpret_cast<asCScriptFunction *>(func);
+
+                    // TODO: not supported
+                    if (!internal_func || !internal_func->scriptData || internal_func->scriptData->sectionIdxs.GetLength() > 0)
+                        continue;
+
+                    auto section = func->GetScriptSectionName();
+                    for (size_t i = 0; i < internal_func->scriptData->lineNumbers.GetLength(); i += 2)
+                    {
+                        auto pos = internal_func->scriptData->lineNumbers[i];
+                        auto linecol = internal_func->scriptData->lineNumbers[i + 1];
+                        auto line = linecol & 0xFFFFF;
+                        auto col = linecol >> 20;
+
+                        potential_breakpoints[section].insert(asIDBLineCol { line, col });
+                    }
+                }
+            }
+        }
+    }
+}
+
 /*static*/ void asIDBDebugger::LineCallback(asIScriptContext *ctx, asIDBDebugger *debugger)
 {
     if (debugger->internal_execution)
@@ -1183,7 +1229,8 @@ void asIDBTypeEvaluatorMap::Register(int typeId, std::unique_ptr<asIDBTypeEvalua
     // line.
     bool break_from_bp = false;
     const char *section = nullptr;
-    int row = ctx->GetLineNumber(0, nullptr, &section);
+    int col;
+    int row = ctx->GetLineNumber(0, &col, &section);
 
     if (section)
     {
@@ -1195,8 +1242,11 @@ void asIDBTypeEvaluatorMap::Register(int typeId, std::unique_ptr<asIDBTypeEvalua
             {
                 if (row == lines.line)
                 {
-                    break_from_bp = true;
-                    break;
+                    if (!lines.column.has_value() || lines.column.value() == col)
+                    {
+                        break_from_bp = true;
+                        break;
+                    }
                 }
             }
         }
@@ -1210,13 +1260,13 @@ void asIDBDebugger::HookContext(asIScriptContext *ctx)
 {
     // TODO: is this safe to be called even if
     // the context is being switched?
-    if (ctx->GetState() != asEXECUTION_EXCEPTION && engines.find(ctx->GetEngine()) != engines.end())
+    if (ctx->GetState() != asEXECUTION_EXCEPTION && workspace->engines.find(ctx->GetEngine()) != workspace->engines.end())
         ctx->SetLineCallback(asFUNCTION(asIDBDebugger::LineCallback), this, asCALL_CDECL);
 }
 
 void asIDBDebugger::DebugBreak(asIScriptContext *ctx)
 {
-    if (engines.find(ctx->GetEngine()) == engines.end())
+    if (workspace->engines.find(ctx->GetEngine()) == workspace->engines.end())
         return;
 
     {

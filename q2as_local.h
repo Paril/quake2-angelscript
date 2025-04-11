@@ -139,10 +139,11 @@ static T *Q2AS_assign(const T &in, T *self)
 // no need to have a debugger for each one.
 struct q2as_dbg_state_t
 {
-    std::unique_ptr<asIDBDebugger>       debugger;
-    asIDBWorkspace                       workspace;
-    struct cvar_t *debugger_cvar, *attach_type;
-    int                                  debugger_type; // active debugger type
+    std::unique_ptr<asIDBDebugger>  debugger;
+    std::unique_ptr<asIDBWorkspace> workspace;
+
+    struct cvar_t *cvar, *attach_type;
+    int           active_type; // active debugger type
 
     void CheckDebugger(asIScriptContext *ctx);
     void DebugBreak(asIScriptContext *ctx = nullptr);

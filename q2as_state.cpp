@@ -310,9 +310,6 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
     fs::path script_dir(Q2AS_ScriptPath());
 
-    if (debugger_state.workspace.base_path.empty())
-        debugger_state.workspace.base_path = script_dir.generic_string();
-
     Print("Searching for AS scripts in \"");
     Print(script_dir.string().c_str());
     Print("\"\n");
@@ -326,8 +323,8 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
     asSetGlobalMemoryFunctions(allocFunc, freeFunc);
 
-    if (!debugger_state.debugger_cvar)
-        debugger_state.debugger_cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
+    if (!debugger_state.cvar)
+        debugger_state.cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
     if (!debugger_state.attach_type)
         debugger_state.attach_type = Cvar("q2as_debugger_wait_attach", "0", CVAR_NOFLAGS);
 
@@ -410,8 +407,6 @@ bool q2as_state_t::LoadFilesFromPath(const char *base, const char *path, asIScri
             Destroy();
             return false;
         }
-
-        debugger_state.workspace.sections.insert(relative_section);
     }
 
     return true;

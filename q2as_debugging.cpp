@@ -460,14 +460,9 @@ class q2as_asIDBDebuggerVSCode : public asIDBDebugger
 public:
     std::unique_ptr<asIDBDAPServer> server;
 
-    q2as_asIDBDebuggerVSCode() :
-        asIDBDebugger()
+    q2as_asIDBDebuggerVSCode(asIDBWorkspace *workspace) :
+        asIDBDebugger(workspace)
     {
-        workspace = debugger_state.workspace;
-        if (svas.engine)
-            engines.insert(svas.engine);
-        if (cgas.engine)
-            engines.insert(cgas.engine);
         server = std::make_unique<asIDBDAPServer>(27979, this);
         server->StartServer();
     }
@@ -531,7 +526,7 @@ protected:
 
         {
             dap::StoppedEvent stoppedEvent;
-            stoppedEvent.reason = "breakpoint";
+            stoppedEvent.description = "Paused on breakpoint";
             stoppedEvent.threadId = 1;
             server->SendEventToClient(stoppedEvent);
         }
@@ -601,25 +596,27 @@ q2as_dbg_state_t debugger_state;
 void q2as_dbg_state_t::CheckDebugger(asIScriptContext *ctx)
 {
     // check if the debugger needs to be changed
-    if (debugger_state.debugger_type != debugger_state.debugger_cvar->integer)
+    if (debugger_state.active_type != debugger_state.cvar->integer)
     {
         debugger_state.debugger.reset();
-        debugger_state.debugger_type = debugger_state.debugger_cvar->integer;
+        debugger_state.workspace.reset();
+        debugger_state.active_type = debugger_state.cvar->integer;
     }
 
     // we don't want debugging
-    if (!debugger_state.debugger_cvar->integer)
+    if (!debugger_state.cvar->integer)
         return;
 
     // create the debugger
     if (!debugger)
     {
+        debugger_state.workspace = std::make_unique<asIDBWorkspace>(std::filesystem::path(Q2AS_ScriptPath()).generic_string(), std::initializer_list<asIScriptEngine *> { svas.engine, cgas.engine });
 #ifdef ENABLE_UI_DEBUGGER
         if (debugger_state.debugger_cvar->integer == 1)
-            debugger = std::make_unique<q2as_asIDBDebuggerUI>();
+            debugger = std::make_unique<q2as_asIDBDebuggerUI>(debugger_state.workspace);
         else
 #endif
-            debugger = std::make_unique<q2as_asIDBDebuggerVSCode>();
+            debugger = std::make_unique<q2as_asIDBDebuggerVSCode>(debugger_state.workspace.get());
     }
 
     // hook the context if the debugger

@@ -21,13 +21,13 @@ public:
 
         session->registerHandler([&](const dap::InitializeRequest &request) {
             dap::InitializeResponse response;
-            //response.supportsClipboardContext = true;
             //response.supportsCompletionsRequest = true;
+            response.supportsClipboardContext = true;
             response.supportsConfigurationDoneRequest = true;
             response.supportsDelayedStackTraceLoading = true;
             response.supportsEvaluateForHovers = true;
             //response.supportsFunctionBreakpoints = true;
-            //response.supportsBreakpointLocationsRequest = true;
+            response.supportsBreakpointLocationsRequest = true;
             return response;
         });
 
@@ -52,10 +52,34 @@ public:
 
     dap::BreakpointLocationsResponse HandleRequest(const dap::BreakpointLocationsRequest &request)
     {
-        dap::BreakpointLocationsResponse response;
+        dap::BreakpointLocationsResponse response {};
 
-        for (auto &engine : dbg->engines)
+        if (request.source.name.has_value())
         {
+            if (auto linecols = dbg->workspace->potential_breakpoints.find(request.source.name.value()); linecols != dbg->workspace->potential_breakpoints.end())
+            {
+                // FIXME: STL equal_range maybe?
+                for (auto &lc : linecols->second)
+                {
+                    if (lc.line < request.line)
+                        continue;
+                    else if (request.endLine.has_value() ?
+                        (lc.line > request.endLine.value()) :
+                        (lc.line > request.line))
+                        continue;
+                    else if (request.column.has_value() && lc.col < request.column.value())
+                        continue;
+                    else if (request.endColumn.has_value() && lc.col > request.endColumn.value())
+                        continue;
+
+                    dap::BreakpointLocation bp = response.breakpoints.emplace_back();
+
+                    bp.line = lc.line;
+                    bp.column = lc.col;
+
+                    response.breakpoints.push_back(bp);
+                }
+            }
         }
 
         return response;
@@ -72,20 +96,54 @@ public:
         dap::SetBreakpointsResponse response;
 
         if (request.source.path) {
-            auto rel = std::filesystem::relative(request.source.path.value(), dbg->workspace.base_path);
-            auto pathstr = rel.generic_string();
+            auto rel = dbg->workspace->PathToSection(request.source.path.value());
+            auto pathstr = std::filesystem::path(rel).generic_string();
 
             std::scoped_lock lock(dbg->mutex);
 
-            dbg->workspace.sections.insert(pathstr);
+            dbg->workspace->AddSection(pathstr);
 
             if (auto it = dbg->breakpoints.find(pathstr); it != dbg->breakpoints.end())
                 dbg->breakpoints.erase(it);
 
             if (request.breakpoints && !request.breakpoints->empty()) {
-                auto it = dbg->breakpoints.insert({ *dbg->workspace.sections.find(pathstr), asIDBSectionBreakpoints {} });
+                auto &positions = dbg->workspace->potential_breakpoints[pathstr];
+                auto it = dbg->breakpoints.find(*dbg->workspace->sections.find(pathstr));
+
                 for (auto &bp : *request.breakpoints) {
-                    it.first->second.push_back({ (int) bp.line });
+                    asIDBLineCol closest { -1, -1 };
+
+                    // FIXME: there's probably some STL methods that can
+                    // speed up this lookup.
+                    for (auto &pos : positions)
+                    {
+                        if (pos.line != bp.line)
+                            continue;
+                        else if (bp.column.has_value() && pos.col < bp.column.value())
+                            continue;
+
+                        closest.line = pos.line;
+                        closest.col = (closest.col == -1) ? pos.col : std::min(closest.col, pos.col);
+                    }
+
+                    auto &placed_bp = response.breakpoints.emplace_back();
+
+                    if (closest.line == -1)
+                    {
+                        placed_bp.verified = false;
+                        placed_bp.reason = "failed";
+                        placed_bp.message = "No suspend instruction can be found";
+                        continue;
+                    }
+
+                    placed_bp.line = closest.line;
+                    placed_bp.column = closest.col;
+                    placed_bp.verified = true;
+
+                    if (it == dbg->breakpoints.end())
+                        it = dbg->breakpoints.insert({ *dbg->workspace->sections.find(pathstr), asIDBSectionBreakpoints {} }).first;
+
+                    it->second.push_back({ (int) closest.line, (int) closest.col });
                 }
             }
         }
@@ -100,6 +158,7 @@ public:
 
     dap::ConfigurationDoneResponse HandleRequest(const dap::ConfigurationDoneRequest &request)
     {
+        
         return {};
     }
 
@@ -136,7 +195,7 @@ public:
                 frame.line = stack.row;
                 frame.column = stack.column;
                 dap::Source src;
-                src.path = dbg->workspace.SectionToPath(stack.section);
+                src.path = dbg->workspace->SectionToPath(stack.section);
                 src.name = std::string(stack.section);
                 frame.source = std::move(src);
             }
@@ -222,7 +281,7 @@ public:
             auto local = local_ptr.lock();
             var.name = local->name;
             var.type = dap::string(local->typeName);
-            var.value = local->value.empty() ? dbg->cache->GetTypeNameFromType({ local->address.source.typeId, asTM_NONE }) : local->value;
+            var.value = local->value.empty() ? local->typeName : local->value;
             var.variablesReference = local->RefId();
         }
 
@@ -253,18 +312,33 @@ public:
         return {};
     }
 
-    dap::EvaluateResponse HandleRequest(const dap::EvaluateRequest &request)
+    dap::ResponseOrError<dap::EvaluateResponse> HandleRequest(const dap::EvaluateRequest &request)
     {
         dap::EvaluateResponse response {};
-#if 0
-        auto result = dbg->cache->ResolveExpression(request.expression, 0);
 
-        if (result.has_value())
+        std::optional<int> stack_index = std::nullopt;
+
+        if (request.frameId.has_value())
         {
-            response.result = result.value().value.value.value;
-            response.type = std::string(dbg->cache->GetTypeNameFromType({ result.value().idKey.typeId }));
+            for (size_t i = 0; i < dbg->cache->call_stack.size(); i++)
+                if (request.frameId.value() == dbg->cache->call_stack[i].id)
+                {
+                    stack_index = i;
+                    break;
+                }
         }
-#endif
+
+        auto result = dbg->cache->ResolveExpression(request.expression, stack_index);
+
+        if (!result.has_value())
+            return dap::Error { result.error().data() };
+
+        auto var = result.value().lock();
+        
+        response.type = dap::string(var->typeName);
+        response.result = var->value.empty() ? var->typeName : var->value;
+        response.variablesReference = var->RefId();
+
         return response;
     }
 
