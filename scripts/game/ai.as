@@ -1,5 +1,3 @@
-ASEntity @monster_fakegoal = null;
-
 bool    enemy_vis;
 bool    enemy_infront;
 float   enemy_yaw;
@@ -246,10 +244,10 @@ void ai_walk(ASEntity &self, float dist)
         vec3_t fwd;
         AngleVectors(self.e.s.angles, fwd);
 
-        if (monster_fakegoal is null)
-            @monster_fakegoal = G_Spawn();
+        if (level.monster_fakegoal is null)
+            @level.monster_fakegoal = G_Spawn();
 
-        @temp_goal = monster_fakegoal;
+        @temp_goal = level.monster_fakegoal;
         temp_goal.e.s.origin = self.e.s.origin + fwd * 64;
         @self.goalentity = temp_goal;
     }
@@ -1593,10 +1591,10 @@ void ai_run(ASEntity &self, float dist)
 
     @save = self.goalentity;
 
-    if (monster_fakegoal is null)
-        @monster_fakegoal = G_Spawn();
+    if (level.monster_fakegoal is null)
+        @level.monster_fakegoal = G_Spawn();
 
-    @tempgoal = monster_fakegoal;
+    @tempgoal = level.monster_fakegoal;
     @self.goalentity = tempgoal;
 
     newEnemy = false;

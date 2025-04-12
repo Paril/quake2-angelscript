@@ -105,6 +105,13 @@ class level_locals_t
     // used to track whether we need to update
     // entities for bots or not
     int num_bots = 0;
+
+    // AS_TODO
+    // this is AS-specific, because creating/freeing entities
+    // is a bit slower than native was. in the future we can
+    // fix this by changing how MoveToGoal works to accept
+    // non-entity goals.
+    ASEntity @monster_fakegoal;
 }
 
 level_locals_t level;

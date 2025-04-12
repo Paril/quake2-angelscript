@@ -210,6 +210,10 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
     // isolate the variable name first
     size_t variable_end = expr.find_first_of(".[", 0);
     std::string_view variable_name = expr.substr(0, variable_end);
+
+    if (variable_name.empty())
+        return asIDBExpected("bad expression");
+
     asIDBExpected<asIDBVariable::WeakPtr> variable;
     asIDBCallStackEntry *stack = nullptr;
     
@@ -350,59 +354,42 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
     // variable_key should be non-null and with
     // a valid type ID here.
-    return variable;//ResolveSubExpression(variable_key, variable_end == std::string_view::npos ? std::string_view{} : expr.substr(variable_end), stack_index);
+    return ResolveSubExpression(variable.value(), variable_end == std::string_view::npos ? std::string_view{} : expr.substr(variable_end));
 }
 
-#if 0
-/*virtual*/ asIDBExpected<asIDBExprResult> asIDBCache::ResolveSubExpression(const asIDBResolvedVarAddr &idKey, const std::string_view rest, int stack_index)
+/*virtual*/ asIDBExpected<asIDBVariable::WeakPtr> asIDBCache::ResolveSubExpression(asIDBVariable::WeakPtr var, const std::string_view rest)
 {
     // nothing left, so this is the result.
     if (rest.empty())
-        return asIDBExprResult { idKey.source, evaluators.Evaluate(*this, idKey) };
+        return var;
 
     // make sure we're a type that supports properties
-    auto type = ctx->GetEngine()->GetTypeInfoById(idKey.source.typeId);
+    auto varp = var.lock();
 
-    if (!type || type->GetFlags() & (asOBJ_ENUM | asOBJ_FUNCDEF))
-        return asIDBExpected<asIDBExprResult>("type is not allowed for sub-expressions");
-    // uninitialized, etc
-    else if (!idKey.resolved)
-        return asIDBExpected<asIDBExprResult>("uninitialized or null object");
+    varp->Expand();
+
+    // FIXME: this will also work for "fake" variables like
+    // bits expanded from enums
+    if (varp->Children().empty())
+        return asIDBExpected("type is not allowed for sub-expressions");
 
     // check what kind of sub-evaluator to use
     size_t eval_start = rest.find_first_of(".[", 1);
-    std::string_view eval_name = rest.substr(1, eval_start == std::string_view::npos ? eval_start : (eval_start - 1));
+    std::string_view eval_name = rest.substr(0, eval_start);
 
-    if (rest[0] == '.')
+    if (eval_name[0] == '.')
+        eval_name.remove_prefix(1);
+
+    for (auto &child : varp->Children())
     {
-        for (asUINT i = 0; i < type->GetPropertyCount(); i++)
-        {
-            const char *name;
-            int typeId;
-            int offset;
-            int compositeOffset;
-            bool isCompositeIndirect;
-            bool isReadOnly;
-
-            type->GetProperty(i, &name, &typeId, 0, 0, &offset, 0, 0, &compositeOffset, &isCompositeIndirect, &isReadOnly);
-
-            if (eval_name != name)
-                continue;
-
-            void *propAddr = ResolvePropertyAddress(idKey, i, offset, compositeOffset, isCompositeIndirect);
-
-            return ResolveSubExpression(asIDBVarAddr { typeId, isReadOnly, propAddr }, eval_start == std::string_view::npos ? std::string_view{} : rest.substr(eval_start), stack_index);
-        }
-    }
-    else if (rest[0] == '[')
-    {
-        // TODO
-        return asIDBExpected<asIDBExprResult>("array op not supported yet");
+        auto childp = child.lock();
+        
+        if (childp->name == eval_name)
+            return ResolveSubExpression(child, eval_start == std::string_view::npos ? std::string_view{} : rest.substr(eval_start));
     }
 
-    return asIDBExpected<asIDBExprResult>("can't resolve sub-expression");
+    return asIDBExpected("can't resolve sub-expression");
 }
-#endif
 
 /*virtual*/ void asIDBCache::CacheCallstack()
 {

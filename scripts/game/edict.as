@@ -869,34 +869,40 @@ bool G_EdictExpired(ASEntity &e)
 	return !e.e.inuse && (((server_flags & server_flags_t::LOADING) != 0) || e.freetime < time_sec(2) || level.time - e.freetime > time_ms(500));
 }
 
-void SetupEntityArrays(bool loadgame)
+void SetupEntityArrays(bool backup_clients)
 {
 	num_edicts = max_clients + 1;
     internal::allow_value_assign++;
 
-    if (!loadgame)
-    {
-        entities = array<ASEntity@>(max_edicts);
+    array<ASEntity@> old_players;
 
-        @world = ASEntity(G_EdictForNum(0));
-        @entities[0] = @world;
-    
-        players = array<ASEntity@>(max_clients);
-    }
+    if (backup_clients)
+        old_players = players;
+
+    entities = array<ASEntity@>(max_edicts);
+
+    @world = ASEntity(G_EdictForNum(0));
+    @entities[0] = @world;
+
+    players = array<ASEntity@>(max_clients);
 
     for (uint i = 0; i < max_clients; i++)
     {
         ASEntity p(G_EdictForNum(i + 1));
         ASClient @cl;
 
-        if (loadgame)
-            @p.client = players[i].client;
+        if (backup_clients)
+            @p.client = old_players[i].client;
         else
             @p.client = ASClient(G_ClientForNum(i));
 
         @entities[i + 1] = @p;
         @players[i] = p;
     }
+
+	// wipe all the entities
+    for (uint i = 0; i < max_edicts; i++)
+        G_EdictForNum(i).reset();
 
     internal::allow_value_assign--;
 }

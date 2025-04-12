@@ -458,18 +458,6 @@ public:
     }
 };
 
-#if 0
-// the result of an expression evaluation.
-// note that this currently only supports
-// storing a chain of valid, non-temporary
-// fetches that result in a single value.
-struct asIDBExprResult
-{
-    asIDBVarAddr    idKey;
-    asIDBVarState   value;
-};
-#endif
-
 // simple std::expected-like
 template<typename T>
 struct asIDBExpected
@@ -656,11 +644,9 @@ public:
     //   it will default to zero (that is to say, [0] and [0,0] are equivalent).
     virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveExpression(const std::string_view expr, std::optional<int> stack_index);
     
-#if 0
     // Resolve the remainder of a sub-expression; see ResolveExpression
     // for the syntax.
-    virtual asIDBExpected<asIDBExprResult> ResolveSubExpression(const asIDBResolvedVarAddr &idKey, const std::string_view rest, int stack_index);
-#endif
+    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveSubExpression(asIDBVariable::WeakPtr var, const std::string_view rest);
 
     // Create a variable container.
     asIDBVariable::Ptr CreateVariable()

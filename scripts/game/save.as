@@ -878,6 +878,7 @@ json_mutval WriteLevelLocals(json_mutdoc &doc)
     json_add_optional(doc, obj, "secondary_objective_string", level.secondary_objective_string);
     json_add_optional(doc, obj, "primary_objective_title", level.primary_objective_title);
     json_add_optional(doc, obj, "secondary_objective_title", level.secondary_objective_title);
+    json_add_optional(doc, obj, "monster_fakegoal", level.monster_fakegoal);
 
     return obj;
 }
@@ -942,6 +943,7 @@ void ReadLevelLocals(json_doc &doc, json_val obj)
     obj["secondary_objective_string"].get(level.secondary_objective_string);
     obj["primary_objective_title"].get(level.primary_objective_title);
     obj["secondary_objective_title"].get(level.secondary_objective_title);
+    json_get_optional(doc, obj["monster_fakegoal"], level.monster_fakegoal);
 }
 
 json_mutval WriteEntityMoveInfo(json_mutdoc &doc, const moveinfo_t &info)
@@ -1775,10 +1777,6 @@ void upgrade_level(json_doc &doc, json_val root, uint save_version)
 // not store or modify it.
 void ReadLevel(json_doc &doc)
 {
-	// wipe all the entities
-    for (uint i = 0; i < max_edicts; i++)
-        G_EdictForNum(i).reset();
-
     num_edicts = max_clients + 1;
 
 	SetupEntityArrays(true);
