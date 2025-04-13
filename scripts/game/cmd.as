@@ -1297,10 +1297,8 @@ void Cmd_Wave_f(ASEntity &ent)
 			// send to all teammates
             foreach (ASEntity @player : active_players)
             {
-                if (player is ent)
-                    continue;
-                if (!OnSameTeam(ent, player))
-                    continue;
+				if (player !is ent && !OnSameTeam(ent, player))
+					continue;
 
 				gi_WriteByte(svc_t::poi);
 				gi_WriteShort(pois_t::POI_PING + (ent.e.s.number - 1));

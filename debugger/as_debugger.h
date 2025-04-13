@@ -146,9 +146,9 @@ struct asIDBVariable
     std::string_view           typeName;
     std::unique_ptr<uint8_t[]> stackData {};
     WeakPtr                    owner {};
-
+    
+    bool evaluated = false;
     bool expanded = false;
-    asUINT stackIndex = 0;
 
     asIDBVariable(asIDBDebugger &dbg) :
         dbg(dbg)
@@ -160,6 +160,9 @@ struct asIDBVariable
     void PushChild(WeakPtr ptr);
     int64_t RefId() const { return ref_id.value_or(0); }
 
+    Ptr CreateChildVariable(std::string name, std::string ns, asIDBResolvedVarAddr address, std::string_view typeName);
+
+    void Evaluate();
     void Expand();
 
 private:
@@ -234,6 +237,7 @@ public:
 class asIDBObjectIteratorHelper
 {
 public:
+    asIDBDebugger                       &dbg;
     asITypeInfo                         *type;
     void                                *obj;
     asIScriptFunction                   *opForBegin, *opForEnd, *opForNext;
@@ -358,51 +362,22 @@ public:
         }
     };
 
-    asIDBObjectIteratorHelper(asITypeInfo *type, void *obj);
+    asIDBObjectIteratorHelper(asIDBDebugger &dbg, asITypeInfo *type, void *obj);
 
     constexpr bool IsValid() const { return opForBegin != nullptr; }
     constexpr explicit operator bool() const { return IsValid(); }
     
     // individual access
     IteratorValue Begin(asIScriptContext *ctx) const;
+    void Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const;
     IteratorValue Next(asIScriptContext *ctx, const IteratorValue &val) const;
     bool End(asIScriptContext *ctx, const IteratorValue &val) const;
 
     // O(n) helper for length
-    inline size_t CalculateLength(asIScriptContext *ctx) const
-    {
-        size_t length = 0;
-        for (auto it = Begin(ctx); !End(ctx, it); length++, it = Next(ctx, it)) ;
-        return length;
-    }
+    size_t CalculateLength(asIScriptContext *ctx) const;
 
 private:
-    bool Validate()
-    {
-        if (!opForBegin || !opForEnd || !opForNext)
-            return false;
-
-        iteratorTypeId = opForBegin->GetReturnTypeId();
-
-        if (!iteratorTypeId)
-        {
-            error = "bad iterator return type";
-            return false;
-        }
-
-        if (!(iteratorTypeId & asTYPEID_MASK_OBJECT) &&
-            iteratorTypeId > asTYPEID_DOUBLE)
-        {
-            error = "unsupported iterator type";
-            return false;
-        }
-
-        iteratorType = opForBegin->GetEngine()->GetTypeInfoById(iteratorTypeId);
-
-        // TODO: more validation
-
-        return true;
-    }
+    bool Validate();
 };
 
 class asIDBObjectTypeEvaluator : public asIDBTypeEvaluator
@@ -433,18 +408,10 @@ protected:
 class asIDBTypeEvaluatorMap
 {
     std::unordered_map<int, std::unique_ptr<asIDBTypeEvaluator>> evaluators;
-
+    
+public:
     // fetch the evaluator for the given type id.
     const asIDBTypeEvaluator &GetEvaluator(class asIDBCache &, const asIDBResolvedVarAddr &id) const;
-
-public:
-    // evaluate the given id into a value. this tells
-    // the debugger how to display the object.
-    void Evaluate(asIDBVariable::Ptr var) const;
-
-    // for expandable objects, this is called when the
-    // debugger requests it be expanded.
-    void Expand(asIDBVariable::Ptr var) const;
 
     // Register an evaluator.
     void Register(int typeId, std::unique_ptr<asIDBTypeEvaluator> evaluator);
@@ -642,13 +609,14 @@ public:
     //   Only uint indices are supported. You may also optionally select which
     //   value to retrieve from multiple opValue implementations; if not specified
     //   it will default to zero (that is to say, [0] and [0,0] are equivalent).
-    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveExpression(const std::string_view expr, std::optional<int> stack_index);
+    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveExpression(std::string_view expr, std::optional<int> stack_index);
     
     // Resolve the remainder of a sub-expression; see ResolveExpression
     // for the syntax.
     virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveSubExpression(asIDBVariable::WeakPtr var, const std::string_view rest);
 
-    // Create a variable container.
+    // Create a variable container. Generally you don't call
+    // this directly, unless you need a blank variable.
     asIDBVariable::Ptr CreateVariable()
     {
         asIDBVariable::Ptr ptr = std::make_shared<asIDBVariable>(dbg);
@@ -664,6 +632,9 @@ struct asIDBBreakpoint
 };
 
 using asIDBSectionBreakpoints = std::vector<asIDBBreakpoint>;
+
+// TODO: class/namespace specifier
+using asIDBSectionFunctionBreakpoints = std::unordered_set<std::string>;
 
 enum class asIDBAction : uint8_t
 {
@@ -765,6 +736,9 @@ public:
     // active breakpoints
     asIDBBreakpointMap breakpoints;
 
+    // active function breakpoints
+    asIDBSectionFunctionBreakpoints function_breakpoints;
+
     // cache for the current active broken state.
     // the cache is only kept for the duration of
     // a broken state; resuming in any way destroys
@@ -778,6 +752,7 @@ public:
         workspace(workspace)
     {
     }
+
     virtual ~asIDBDebugger() { }
 
     // hooks the context onto the debugger; this will

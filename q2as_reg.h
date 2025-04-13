@@ -338,8 +338,11 @@ struct q2as_registry
     }
 };
 
-#define Ensure(...) \
-	if (int r = __VA_ARGS__; r < 0) throw q2as_registry_exception("AngelScript registration failed")
+inline void Ensure(bool b)
+{
+    if (!b)
+        throw q2as_registry_exception("AngelScript registration failed");
+}
 
 // factory functions for registration
 

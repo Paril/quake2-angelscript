@@ -71,31 +71,31 @@ struct q2as_edict_t : edict_t
 
 void q2as_sv_state_t::LoadFunctions()
 {
-    PreInitGame = mainModule->GetFunctionByDecl("void PreInitGame()");
-    InitGame = mainModule->GetFunctionByDecl("void InitGame()");
-    ShutdownGame = mainModule->GetFunctionByDecl("void ShutdownGame()");
-    SpawnEntities = mainModule->GetFunctionByDecl("void SpawnEntities(string &in mapname, string &in entstring, string &in spawnpoint)");
-    WriteGameJson = mainModule->GetFunctionByDecl("void WriteGame(bool autosave, json_mutdoc &)");
-    ReadGameJson = mainModule->GetFunctionByDecl("void ReadGame(json_doc &)");
-    WriteLevelJson = mainModule->GetFunctionByDecl("void WriteLevel(bool transition, json_mutdoc &)");
-    ReadLevelJson = mainModule->GetFunctionByDecl("void ReadLevel(json_doc &)");
-    CanSave = mainModule->GetFunctionByDecl("bool CanSave()");
-    ClientChooseSlot = mainModule->GetFunctionByDecl("edict_t @ClientChooseSlot(const string &in userinfo, const string &in social_id, bool isBot, const array<edict_t@> &in ignore, bool cinematic)");
-    ClientConnect = mainModule->GetFunctionByDecl("bool ClientConnect(edict_t @ent, const string &in userinfo, const string &in social_id, bool isBot, string &out reject_error)");
-    ClientBegin = mainModule->GetFunctionByDecl("void ClientBegin(edict_t @ent)");
-    ClientUserinfoChanged = mainModule->GetFunctionByDecl("void ClientUserinfoChanged(edict_t @ent_handle, const string &in userinfo)");
-    ClientDisconnect = mainModule->GetFunctionByDecl("void ClientDisconnect(edict_t @ent_handle)");
-    ClientCommand = mainModule->GetFunctionByDecl("void ClientCommand(edict_t @ent_handle)");
-    ClientThink = mainModule->GetFunctionByDecl("void ClientThink(edict_t @ent_handle, const usercmd_t &in ucmd)");
-    RunFrame = mainModule->GetFunctionByDecl("void RunFrame(bool)");
-    PrepFrame = mainModule->GetFunctionByDecl("void PrepFrame()");
-    Bot_SetWeapon = mainModule->GetFunctionByDecl("void Bot_SetWeapon(edict_t @, int, bool)");
-    Bot_TriggerEdict = mainModule->GetFunctionByDecl("void Bot_TriggerEdict( edict_t @, edict_t @ )");
-    Bot_UseItem = mainModule->GetFunctionByDecl("void Bot_UseItem( edict_t @, int )");
-    Bot_GetItemID = mainModule->GetFunctionByDecl("int Bot_GetItemID( const string &in )");
-    Edict_ForceLookAtPoint = mainModule->GetFunctionByDecl("void Edict_ForceLookAtPoint( edict_t @, const vec3_t &in )");
-    Bot_PickedUpItem = mainModule->GetFunctionByDecl("bool Bot_PickedUpItem( edict_t @, edict_t @ )");
-    Entity_IsVisibleToPlayer = mainModule->GetFunctionByDecl("bool Entity_IsVisibleToPlayer( edict_t @, edict_t @ )");
+    Ensure(PreInitGame              = mainModule->GetFunctionByDecl("void PreInitGame()"));
+    Ensure(InitGame                 = mainModule->GetFunctionByDecl("void InitGame()"));
+    Ensure(ShutdownGame             = mainModule->GetFunctionByDecl("void ShutdownGame()"));
+    Ensure(SpawnEntities            = mainModule->GetFunctionByDecl("void SpawnEntities(string &in mapname, string &in entstring, string &in spawnpoint)"));
+    Ensure(WriteGameJson            = mainModule->GetFunctionByDecl("void WriteGame(bool autosave, json_mutdoc &)"));
+    Ensure(ReadGameJson             = mainModule->GetFunctionByDecl("void ReadGame(json_doc &)"));
+    Ensure(WriteLevelJson           = mainModule->GetFunctionByDecl("void WriteLevel(bool transition, json_mutdoc &)"));
+    Ensure(ReadLevelJson            = mainModule->GetFunctionByDecl("void ReadLevel(json_doc &)"));
+    Ensure(CanSave                  = mainModule->GetFunctionByDecl("bool CanSave()"));
+    Ensure(ClientChooseSlot         = mainModule->GetFunctionByDecl("edict_t @ClientChooseSlot(const string &in userinfo, const string &in social_id, bool isBot, const array<edict_t@> &in ignore, bool cinematic)"));
+    Ensure(ClientConnect            = mainModule->GetFunctionByDecl("bool ClientConnect(edict_t @ent, const string &in userinfo, const string &in social_id, bool isBot, string &out reject_error)"));
+    Ensure(ClientBegin              = mainModule->GetFunctionByDecl("void ClientBegin(edict_t @ent)"));
+    Ensure(ClientUserinfoChanged    = mainModule->GetFunctionByDecl("void ClientUserinfoChanged(edict_t @ent_handle, const string &in userinfo)"));
+    Ensure(ClientDisconnect         = mainModule->GetFunctionByDecl("void ClientDisconnect(edict_t @ent_handle)"));
+    Ensure(ClientCommand            = mainModule->GetFunctionByDecl("void ClientCommand(edict_t @ent_handle)"));
+    Ensure(ClientThink              = mainModule->GetFunctionByDecl("void ClientThink(edict_t @ent_handle, const usercmd_t &in ucmd)"));
+    Ensure(RunFrame                 = mainModule->GetFunctionByDecl("void RunFrame(bool)"));
+    Ensure(PrepFrame                = mainModule->GetFunctionByDecl("void PrepFrame()"));
+    Ensure(Bot_SetWeapon            = mainModule->GetFunctionByDecl("void Bot_SetWeapon(edict_t @, int, bool)"));
+    Ensure(Bot_TriggerEdict         = mainModule->GetFunctionByDecl("void Bot_TriggerEdict( edict_t @, edict_t @ )"));
+    Ensure(Bot_UseItem              = mainModule->GetFunctionByDecl("void Bot_UseItem( edict_t @, int )"));
+    Ensure(Bot_GetItemID            = mainModule->GetFunctionByDecl("int Bot_GetItemID( const string &in )"));
+    Ensure(Edict_ForceLookAtPoint   = mainModule->GetFunctionByDecl("void Edict_ForceLookAtPoint( edict_t @, const vec3_t &in )"));
+    Ensure(Bot_PickedUpItem         = mainModule->GetFunctionByDecl("bool Bot_PickedUpItem( edict_t @, edict_t @ )"));
+    Ensure(Entity_IsVisibleToPlayer = mainModule->GetFunctionByDecl("bool Entity_IsVisibleToPlayer( edict_t @, edict_t @ )"));
 
     q2as_format_init(*this);
 }

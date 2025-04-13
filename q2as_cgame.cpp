@@ -56,29 +56,29 @@ enum
 
 void q2as_cg_state_t::LoadFunctions()
 {
-    CG_TouchPics = mainModule->GetFunctionByDecl("void CG_TouchPics()");
-    CG_Shutdown = mainModule->GetFunctionByDecl("void CG_Shutdown()");
-    CG_ParseConfigString = mainModule->GetFunctionByDecl("void CG_ParseConfigString(int32, const string &in)");
-    CG_ParseCenterPrint = mainModule->GetFunctionByDecl("void CG_ParseCenterPrint (const string &in, int, bool)");
-    CG_NotifyMessage = mainModule->GetFunctionByDecl("void CG_NotifyMessage(int32, const string &in, bool)");
-    CG_LayoutFlags = mainModule->GetFunctionByDecl("layout_flags_t CG_LayoutFlags(const player_state_t &in)");
-    CG_Init = mainModule->GetFunctionByDecl("void CG_Init()");
-    CG_GetWeaponWheelAmmoCount = mainModule->GetFunctionByDecl("int16 CG_GetWeaponWheelAmmoCount(const player_state_t &in, int32)");
-    CG_GetPowerupWheelCount = mainModule->GetFunctionByDecl("int16 CG_GetPowerupWheelCount(const player_state_t &in, int32)");
-    CG_GetOwnedWeaponWheelWeapons = mainModule->GetFunctionByDecl("uint32 CG_GetOwnedWeaponWheelWeapons(const player_state_t &in)");
-    CG_GetMonsterFlashOffset = mainModule->GetFunctionByDecl("void CG_GetMonsterFlashOffset(monster_muzzle_t, vec3_t &out)");
-    CG_GetHitMarkerDamage = mainModule->GetFunctionByDecl("int16 CG_GetHitMarkerDamage(const player_state_t &in)");
-    CG_GetActiveWeaponWheelWeapon = mainModule->GetFunctionByDecl("int32 CG_GetActiveWeaponWheelWeapon(const player_state_t &in)");
-    CG_DrawHUD = mainModule->GetFunctionByDecl("void CG_DrawHUD (int32, const cg_server_data_t &, const vrect_t &in, const vrect_t &in, int32, int32, const player_state_t &in)");
-    CG_ClearNotify = mainModule->GetFunctionByDecl("void CG_ClearNotify(int32)");
-    CG_ClearCenterprint = mainModule->GetFunctionByDecl("void CG_ClearCenterprint(int32)");
-    CG_Pmove = mainModule->GetFunctionByDecl("void Pmove(pmove_t @pmove)");
+    Ensure(CG_TouchPics                  = mainModule->GetFunctionByDecl("void CG_TouchPics()"));
+    Ensure(CG_Shutdown                   = mainModule->GetFunctionByDecl("void CG_Shutdown()"));
+    Ensure(CG_ParseConfigString          = mainModule->GetFunctionByDecl("void CG_ParseConfigString(int32, const string &in)"));
+    Ensure(CG_ParseCenterPrint           = mainModule->GetFunctionByDecl("void CG_ParseCenterPrint (const string &in, int, bool)"));
+    Ensure(CG_NotifyMessage              = mainModule->GetFunctionByDecl("void CG_NotifyMessage(int32, const string &in, bool)"));
+    Ensure(CG_LayoutFlags                = mainModule->GetFunctionByDecl("layout_flags_t CG_LayoutFlags(const player_state_t &in)"));
+    Ensure(CG_Init                       = mainModule->GetFunctionByDecl("void CG_Init()"));
+    Ensure(CG_GetWeaponWheelAmmoCount    = mainModule->GetFunctionByDecl("int16 CG_GetWeaponWheelAmmoCount(const player_state_t &in, int32)"));
+    Ensure(CG_GetPowerupWheelCount       = mainModule->GetFunctionByDecl("int16 CG_GetPowerupWheelCount(const player_state_t &in, int32)"));
+    Ensure(CG_GetOwnedWeaponWheelWeapons = mainModule->GetFunctionByDecl("uint32 CG_GetOwnedWeaponWheelWeapons(const player_state_t &in)"));
+    Ensure(CG_GetMonsterFlashOffset      = mainModule->GetFunctionByDecl("void CG_GetMonsterFlashOffset(monster_muzzle_t, vec3_t &out)"));
+    Ensure(CG_GetHitMarkerDamage         = mainModule->GetFunctionByDecl("int16 CG_GetHitMarkerDamage(const player_state_t &in)"));
+    Ensure(CG_GetActiveWeaponWheelWeapon = mainModule->GetFunctionByDecl("int32 CG_GetActiveWeaponWheelWeapon(const player_state_t &in)"));
+    Ensure(CG_DrawHUD                    = mainModule->GetFunctionByDecl("void CG_DrawHUD (int32, const cg_server_data_t &, const vrect_t &in, const vrect_t &in, int32, int32, const player_state_t &in)"));
+    Ensure(CG_ClearNotify                = mainModule->GetFunctionByDecl("void CG_ClearNotify(int32)"));
+    Ensure(CG_ClearCenterprint           = mainModule->GetFunctionByDecl("void CG_ClearCenterprint(int32)"));
+    Ensure(CG_Pmove                      = mainModule->GetFunctionByDecl("void Pmove(pmove_t @pmove)"));
 
     pmove_inst = reinterpret_cast<as_pmove_t *>(Alloc(sizeof(as_pmove_t)));
     new(pmove_inst) as_pmove_t();
-    pmove_inst->trace_f = engine->GetGlobalFunctionByDecl("trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)");
-    pmove_inst->clip_f = engine->GetGlobalFunctionByDecl("trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)");
-    pmove_inst->pointcontents_f = engine->GetGlobalFunctionByDecl("contents_t _cg_pointcontents(const vec3_t &in)");
+    Ensure(pmove_inst->trace_f         = engine->GetGlobalFunctionByDecl("trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)"));
+    Ensure(pmove_inst->clip_f          = engine->GetGlobalFunctionByDecl("trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)"));
+    Ensure(pmove_inst->pointcontents_f = engine->GetGlobalFunctionByDecl("contents_t _cg_pointcontents(const vec3_t &in)"));
 
     pmove_inst->trace_f->AddRef();
     pmove_inst->clip_f->AddRef();

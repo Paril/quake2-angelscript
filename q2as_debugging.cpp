@@ -527,7 +527,7 @@ protected:
         {
             dap::StoppedEvent stoppedEvent;
             stoppedEvent.description = "Paused on breakpoint";
-            stoppedEvent.threadId = 1;
+            stoppedEvent.allThreadsStopped = true;
             server->SendEventToClient(stoppedEvent);
         }
 

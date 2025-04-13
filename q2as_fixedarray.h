@@ -44,6 +44,26 @@ struct q2as_fixedarray
     {
         return N;
     }
+
+    static uint32_t opForBegin(const array &v)
+    {
+        return 0;
+    }
+
+    static uint32_t opForNext(uint32_t v, const array &a)
+    {
+        return v + 1;
+    }
+
+    static T opForValue(uint32_t v, const array &a)
+    {
+        return IndexRefConst(v, a);
+    }
+
+    static bool opForEnd(uint32_t v, const array &a)
+    {
+        return v >= N;
+    }
 };
 
 template<typename T, size_t... I>
@@ -69,7 +89,12 @@ inline void Q2AS_RegisterFixedArray(q2as_registry &registry, const char *name, c
         .methods({
             { fmt::format("{} &opIndex(uint)", underlying),             asFUNCTION(FT::IndexRef),      asCALL_CDECL_OBJLAST },
             { fmt::format("const {} &opIndex(uint) const", underlying), asFUNCTION(FT::IndexRefConst), asCALL_CDECL_OBJLAST },
-            { "uint32 size() const",                                    asFUNCTION(FT::Size),          asCALL_CDECL_OBJLAST }
+            { "uint32 size() const",                                    asFUNCTION(FT::Size),          asCALL_CDECL_OBJLAST },
+            
+            { "uint opForBegin() const",                            asFUNCTION(FT::opForBegin), asCALL_CDECL_OBJLAST },
+            { "uint opForNext(uint) const",                         asFUNCTION(FT::opForNext),  asCALL_CDECL_OBJLAST },
+            { fmt::format("{} opForValue(uint) const", underlying), asFUNCTION(FT::opForValue), asCALL_CDECL_OBJLAST },
+            { "bool opForEnd(uint) const",                          asFUNCTION(FT::opForEnd),   asCALL_CDECL_OBJLAST },
         });
 
     if (register_constructors)

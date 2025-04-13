@@ -1218,6 +1218,8 @@ public:
 	virtual const char      *GetVarDecl(asUINT index, bool includeNamespace = false) const = 0;
 	virtual int              FindNextLineWithCode(int line) const = 0;
 	virtual int              GetDeclaredAt(const char** scriptSection, int* row, int* col) const = 0;
+	virtual asUINT           GetLineNumberCount() const = 0;
+	virtual int              GetLineNumber(asUINT index, const char** scriptSection, int* row, int* col) const = 0;
 
 	// For JIT compilation
 	virtual asDWORD         *GetByteCode(asUINT *length = 0) = 0;

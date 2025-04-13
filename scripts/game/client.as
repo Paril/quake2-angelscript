@@ -1746,7 +1746,7 @@ ASEntity @SelectLavaCoopSpawnPoint(ASEntity &ent)
 //===============
 
 // [Paril-KEX]
-ASEntity @SelectSingleSpawnPoint(ASEntity &ent)
+ASEntity @SelectSingleSpawnPoint()
 {
 	ASEntity @spot = null;
 
@@ -1834,7 +1834,7 @@ ASEntity @SelectCoopSpawnPoint(ASEntity &ent, bool force_spawn, bool check_playe
 	// ROGUE
 
 	// try the main spawn point first
-	@spot = SelectSingleSpawnPoint(ent);
+	@spot = SelectSingleSpawnPoint();
 
 	if (spot !is null && G_UnsafeSpawnPosition(spot.e.origin, check_players) is null)
 		return spot;
@@ -1913,7 +1913,7 @@ ASEntity @SelectCoopSpawnPoint(ASEntity &ent, bool force_spawn, bool check_playe
 
 	// no safe spots..?
 	if (force_spawn || g_coop_player_collision.integer == 0)
-		return SelectSingleSpawnPoint(spot);
+		return SelectSingleSpawnPoint();
 	
 	return null;
 }
@@ -2518,7 +2518,7 @@ bool SelectSpawnPoint(ASEntity @ent, vec3_t &out origin, vec3_t &out angles, boo
 	}
 	else
 	{
-		@spot = SelectSingleSpawnPoint(ent);
+		@spot = SelectSingleSpawnPoint();
 
 		// in SP, just put us at the origin if spawn fails
 		if (spot is null)
@@ -3525,8 +3525,10 @@ Called when a player drops from the server.
 Will not be called between levels.
 ============
 */
-void ClientDisconnect(ASEntity &ent)
+void ClientDisconnect(edict_t @ent_handle)
 {
+    ASEntity @ent = cast<ASEntity>(ent_handle.as_obj);
+
 	if (ent.client is null)
 		return;
 
@@ -4239,7 +4241,7 @@ class squad_respawn_target_t
     squad_respawn_target_t() { }
     squad_respawn_target_t(ASEntity @player, const vec3_t &in spot)
     {
-        this.player = player;
+        @this.player = player;
         this.spot = spot;
     }
 }

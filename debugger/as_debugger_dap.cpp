@@ -26,7 +26,7 @@ public:
             response.supportsConfigurationDoneRequest = true;
             response.supportsDelayedStackTraceLoading = true;
             response.supportsEvaluateForHovers = true;
-            //response.supportsFunctionBreakpoints = true;
+            response.supportsFunctionBreakpoints = true;
             response.supportsBreakpointLocationsRequest = true;
             return response;
         });
@@ -56,6 +56,7 @@ public:
 
         if (request.source.name.has_value())
         {
+            std::scoped_lock lock(dbg->mutex);
             if (auto linecols = dbg->workspace->potential_breakpoints.find(request.source.name.value()); linecols != dbg->workspace->potential_breakpoints.end())
             {
                 // FIXME: STL equal_range maybe?
@@ -153,7 +154,21 @@ public:
 
     dap::SetFunctionBreakpointsResponse HandleRequest(const dap::SetFunctionBreakpointsRequest &request)
     {
-        return {};
+        std::scoped_lock lock(dbg->mutex);
+        dap::SetFunctionBreakpointsResponse response {};
+        
+        dbg->function_breakpoints.clear();
+
+        for (auto &bp : request.breakpoints) {
+            dbg->function_breakpoints.insert(bp.name);
+
+            dap::Breakpoint bp {};
+            // TODO: validate name
+            // TODO: link line/col
+            bp.verified = true;
+            response.breakpoints.emplace_back(std::move(bp));
+        }
+        return response;
     }
 
     dap::ConfigurationDoneResponse HandleRequest(const dap::ConfigurationDoneRequest &request)
@@ -173,6 +188,7 @@ public:
 
     dap::StackTraceResponse HandleRequest(const dap::StackTraceRequest &request)
     {
+        std::scoped_lock lock(dbg->mutex);
         dap::StackTraceResponse response {};
 
         if (!dbg->cache || !dbg->cache->ctx)
@@ -209,6 +225,7 @@ public:
 
     dap::ResponseOrError<dap::ScopesResponse> HandleRequest(const dap::ScopesRequest &request)
     {
+        std::scoped_lock lock(dbg->mutex);
         dap::ScopesResponse response {};
         bool found = false;
 
@@ -243,15 +260,6 @@ public:
                 scope.namedVariables = stack.scope.registers->Children().size();
                 scope.variablesReference = stack.scope.registers->RefId();
             }
-            if (!dbg->cache->globals->Children().empty())
-            {
-                auto &scope = response.scopes.emplace_back();
-                scope.name = "Globals";
-                scope.presentationHint = "globals";
-                scope.namedVariables = dbg->cache->globals->Children().size();
-                scope.expensive = true;
-                scope.variablesReference = dbg->cache->globals->RefId();
-            }
             found = true;
             break;
         }
@@ -259,11 +267,22 @@ public:
         if (!found)
             return dap::Error { "invalid stack ID" };
 
+        if (!dbg->cache->globals->Children().empty())
+        {
+            auto &scope = response.scopes.emplace_back();
+            scope.name = "Globals";
+            scope.presentationHint = "globals";
+            scope.namedVariables = dbg->cache->globals->Children().size();
+            scope.expensive = true;
+            scope.variablesReference = dbg->cache->globals->RefId();
+        }
+
         return response;
     }
 
     dap::ResponseOrError<dap::VariablesResponse> HandleRequest(const dap::VariablesRequest &request)
     {
+        std::scoped_lock lock(dbg->mutex);
         auto varit = dbg->cache->variable_refs.find(request.variablesReference);
 
         if (varit == dbg->cache->variable_refs.end())
@@ -271,14 +290,20 @@ public:
 
         auto varContainer = varit->second.lock();
 
+        varContainer->Evaluate();
         varContainer->Expand();
 
         dap::VariablesResponse response {};
 
-        for (auto &local_ptr : varContainer->Children())
+        int64_t start = request.start.has_value() ? (int64_t) request.start.value() : 0;
+        int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->Children().size();
+
+        for (size_t i = start; i < count; i++)
         {
+            auto &local_ptr = varContainer->Children()[i];
             auto &var = response.variables.emplace_back();
             auto local = local_ptr.lock();
+            local->Evaluate();
             var.name = local->name;
             var.type = dap::string(local->typeName);
             var.value = local->value.empty() ? local->typeName : local->value;
@@ -314,6 +339,7 @@ public:
 
     dap::ResponseOrError<dap::EvaluateResponse> HandleRequest(const dap::EvaluateRequest &request)
     {
+        std::scoped_lock lock(dbg->mutex);
         dap::EvaluateResponse response {};
 
         std::optional<int> stack_index = std::nullopt;

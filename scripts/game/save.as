@@ -775,8 +775,8 @@ void ReadGame(json_doc &doc)
 
     // if we have no version tag it's bad/not Q2AS
     json_val v = root["as_save_version"];
-    if (!v.is_num)
-        gi_Com_Error("incompatible save version");
+    //if (!v.is_num)
+    //    gi_Com_Error("incompatible save version");
 
 	game = game_locals_t();
 
@@ -1492,7 +1492,7 @@ json_mutval WriteEntity(json_mutdoc &doc, ASEntity &ent)
     json_add_optional(doc, obj, "fog_off", ent.fog_off);
     json_add_optional(doc, obj, "heightfog", ent.heightfog);
     json_add_optional(doc, obj, "heightfog_off", ent.heightfog_off);
-    if (ent.item_picked_up_by.any())
+    if (ent.item_picked_up_by.size != 0)
         json_add_optional(doc, obj, "item_picked_up_by", ent.item_picked_up_by.to_string());
 
     json_add_optional(doc, obj, "slime_debounce_time", ent.slime_debounce_time);
@@ -1779,14 +1779,15 @@ void ReadLevel(json_doc &doc)
 {
     num_edicts = max_clients + 1;
 
+    internal::allow_value_assign++;
 	SetupEntityArrays(true);
 
     json_val root = doc.root;
 
     // if we have no version tag it's bad/not Q2AS
     json_val v = root.obj_get("as_save_version");
-    if (!v.is_num)
-        gi_Com_Error("incompatible save version");
+    //if (!v.is_num)
+    //    gi_Com_Error("incompatible save version");
 
     uint save_version = uint(v.num);
 
@@ -1798,7 +1799,6 @@ void ReadLevel(json_doc &doc)
     json_obj_iter iter(v);
 
 	// read entities
-    internal::allow_value_assign++;
     while (iter.has_next)
 	{
         json_val key = iter.next;

@@ -7,7 +7,6 @@
 #include <bitset>
 #include <array>
 #include <charconv>
-#include <../source/as_scriptfunction.h>
 
 void asIDBVariable::MakeExpandable()
 {
@@ -25,15 +24,38 @@ void asIDBVariable::PushChild(WeakPtr ptr)
     children.push_back(ptr);
 }
 
+void asIDBVariable::Evaluate()
+{
+    if (evaluated)
+        return;
+    
+    auto var = ptr.lock();
+    dbg.cache->evaluators.GetEvaluator(*var->dbg.cache, var->address).Evaluate(var);
+    evaluated = true;
+}
+
 void asIDBVariable::Expand()
 {
     if (expanded)
         return;
     else if (!ref_id)
-        __debugbreak(); // error
-
-    dbg.cache->evaluators.Expand(ptr.lock());
+        return;
+    
+    auto var = ptr.lock();
+    dbg.cache->evaluators.GetEvaluator(*var->dbg.cache, var->address).Expand(var);
     expanded = true;
+}
+
+asIDBVariable::Ptr asIDBVariable::CreateChildVariable(std::string name, std::string ns, asIDBResolvedVarAddr address, std::string_view typeName)
+{
+    asIDBVariable::Ptr child = dbg.cache->CreateVariable();
+    child->owner = ptr;
+    child->name = std::move(name);
+    child->ns = std::move(ns);
+    child->address = address;
+    child->typeName = typeName;
+    PushChild(child);
+    return child;
 }
 
 asIDBScope::asIDBScope(asUINT offset, asIDBDebugger &dbg, asIScriptFunction *function) :
@@ -79,13 +101,7 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
 
             asIDBVarAddr idKey { thisTypeId, false, thisPtr };
 
-            asIDBVariable::Ptr var = cache.CreateVariable();
-            var->name = "this";
-            var->address = idKey;
-            var->typeName = viewType;
-            var->stackIndex = (asUINT) -1;
-            cache.evaluators.Evaluate(var);
-            container->PushChild(var);
+            asIDBVariable::Ptr var = container->CreateChildVariable("this", "", idKey, viewType);
 
             this_ptr = var;
         }
@@ -116,18 +132,12 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
 
         asIDBVarAddr idKey { typeId, (modifiers & asTM_CONST) != 0, ptr };
         
-        asIDBVariable::Ptr var = cache.CreateVariable();
-        var->name = std::move(localName);
-        var->address = idKey;
-        var->typeName = viewType;
-        var->stackIndex = n;
-        cache.evaluators.Evaluate(var);
-        container->PushChild(var);
+        asIDBVariable::Ptr var = container->CreateChildVariable(std::move(localName), "", idKey, viewType);
 
         local_by_index.emplace(n, var);
     }
 
-    container->expanded = true;
+    container->evaluated = container->expanded = true;
 }
 
 /*virtual*/ void asIDBCache::Refresh()
@@ -200,8 +210,12 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
     return id.ResolveAs<uint8_t>() + offset + compositeOffset;
 }
 
-/*virtual*/ asIDBExpected<asIDBVariable::WeakPtr> asIDBCache::ResolveExpression(const std::string_view expr, std::optional<int> stack_index)
+/*virtual*/ asIDBExpected<asIDBVariable::WeakPtr> asIDBCache::ResolveExpression(std::string_view expr, std::optional<int> stack_index)
 {
+    // just in case your IDE sends `@ent` or `&ent` for a hover
+    if (!expr.empty() && (expr[0] == '@' || (expr.size() >= 2 && expr[0] == '&' && !isdigit(expr[1]))))
+        expr.remove_prefix(1);
+
     if (expr.empty())
         return asIDBExpected("empty string");
 
@@ -232,7 +246,10 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
         // check bounds
         int m = ctx->GetVarCount(stack_index.value());
 
-        if (offset >= m)
+        if (m < 0)
+            return asIDBExpected("bad stack index");
+
+        if (offset >= (asUINT) m)
             return asIDBExpected("stack offset out of bounds");
 
         if (!ctx->IsVarInScope(offset, stack_index.value()))
@@ -254,9 +271,9 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
     else
     {
         struct asIDBNamespacedVar {
-            asIDBVariable::WeakPtr     var;
-            std::string_view           name;
-            std::string_view           ns = "::";
+            asIDBVariable::WeakPtr var;
+            std::string_view       name;
+            std::string_view       ns = "::";
         };
 
         std::vector<asIDBNamespacedVar> matches;
@@ -366,12 +383,17 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
     // make sure we're a type that supports properties
     auto varp = var.lock();
 
+    varp->Evaluate();
+
+    if (!varp->RefId())
+        return asIDBExpected("invalid expression");
+
     varp->Expand();
 
     // FIXME: this will also work for "fake" variables like
     // bits expanded from enums
     if (varp->Children().empty())
-        return asIDBExpected("type is not allowed for sub-expressions");
+        return asIDBExpected("no members");
 
     // check what kind of sub-evaluator to use
     size_t eval_start = rest.find_first_of(".[", 1);
@@ -483,14 +505,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         std::string localName = ((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name);
 
-        asIDBVariable::Ptr var = dbg.cache->CreateVariable();
-        var->name = std::move(localName);
-        if (nameSpace && nameSpace[0])
-            var->ns = nameSpace;
-        var->address = idKey;
-        var->typeName = viewType;
-        evaluators.Evaluate(var);
-        globals->PushChild(var);
+        globals->CreateChildVariable(std::move(localName), (nameSpace && nameSpace[0]) ? nameSpace : "", idKey, viewType);
     }
 
     for (asUINT n = 0; n < main->GetEngine()->GetGlobalPropertyCount(); n++)
@@ -510,15 +525,10 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int pro
 
         std::string localName = (nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name;
         
-        asIDBVariable::Ptr var = dbg.cache->CreateVariable();
-        var->name = std::move(localName);
-        var->address = idKey;
-        var->typeName = viewType;
-        evaluators.Evaluate(var);
-        globals->PushChild(var);
+        globals->CreateChildVariable(std::move(localName), "", idKey, viewType);
     }
 
-    globals->expanded = true;
+    globals->evaluated = globals->expanded = true;
 }
 
 class asIDBNullTypeEvaluator : public asIDBTypeEvaluator
@@ -668,11 +678,9 @@ public:
             else
                 rawValue = fmt::format("{}", v);
 
-            auto child = cache.CreateVariable();
-            child->owner = var;
-            child->name = "value";
+            auto child = var->CreateChildVariable("value", "", {}, "");
             child->value = std::move(rawValue);
-            var->PushChild(child);
+            child->evaluated = true;
         }
         
         // find bit names
@@ -717,11 +725,9 @@ public:
                 else
                     bitEntry = fmt::format("{}", 1 << e);
 
-                auto child = cache.CreateVariable();
-                child->owner = var;
-                child->name = fmt::format("[{:2}]", e);
+                auto child = var->CreateChildVariable(fmt::format("[{:2}]", e), "", {}, "");
                 child->value = std::move(bitEntry);
-                var->PushChild(child);
+                child->evaluated = true;
             }
         }
     }
@@ -738,7 +744,8 @@ public:
     }
 };
 
-asIDBObjectIteratorHelper::asIDBObjectIteratorHelper(asITypeInfo *type, void *obj) :
+asIDBObjectIteratorHelper::asIDBObjectIteratorHelper(asIDBDebugger &dbg, asITypeInfo *type, void *obj) :
+    dbg(dbg),
     type(type),
     obj(obj),
     opForBegin(type->GetMethodByName("opForBegin")),
@@ -780,6 +787,14 @@ auto asIDBObjectIteratorHelper::Begin(asIScriptContext *ctx) const -> IteratorVa
     return IteratorValue::FromCtxReturn(this, ctx);
 }
 
+void asIDBObjectIteratorHelper::Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const
+{
+    ctx->Prepare(opForValues[index]);
+    ctx->SetObject(obj);
+    val.SetArg(ctx, 0);
+    ctx->Execute();
+}
+
 auto asIDBObjectIteratorHelper::Next(asIScriptContext *ctx, const IteratorValue &val) const -> IteratorValue
 {
     ctx->Prepare(opForNext);
@@ -799,6 +814,46 @@ bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &
     return !!ctx->GetReturnByte();
 }
 
+size_t asIDBObjectIteratorHelper::CalculateLength(asIScriptContext *ctx) const
+{
+    dbg.internal_execution = true;
+    ctx->PushState();
+
+    size_t length = 0;
+    for (auto it = Begin(ctx); !End(ctx, it); length++, it = Next(ctx, it)) ;
+
+    ctx->PopState();
+    dbg.internal_execution = false;
+    return length;
+}
+
+bool asIDBObjectIteratorHelper::Validate()
+{
+    if (!opForBegin || !opForEnd || !opForNext)
+        return false;
+
+    iteratorTypeId = opForBegin->GetReturnTypeId();
+
+    if (!iteratorTypeId)
+    {
+        error = "bad iterator return type";
+        return false;
+    }
+
+    if (!(iteratorTypeId & asTYPEID_MASK_OBJECT) &&
+        iteratorTypeId > asTYPEID_DOUBLE)
+    {
+        error = "unsupported iterator type";
+        return false;
+    }
+
+    iteratorType = opForBegin->GetEngine()->GetTypeInfoById(iteratorTypeId);
+
+    // TODO: more validation
+
+    return true;
+}
+
 /*virtual*/ void asIDBObjectTypeEvaluator::Evaluate(asIDBVariable::Ptr var) const /*override*/
 {
     auto &dbg = var->dbg;
@@ -809,7 +864,7 @@ bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &
 
     if (ctx->GetState() != asEXECUTION_EXCEPTION)
     {
-        asIDBObjectIteratorHelper it(type, var->address.resolved);
+        asIDBObjectIteratorHelper it(dbg, type, var->address.resolved);
 
         if (!it)
         {
@@ -823,18 +878,12 @@ bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &
         }
         else
         {
-            cache.dbg.internal_execution = true;
-            ctx->PushState();
-
             size_t numElements = it.CalculateLength(ctx);
 
             var->value = fmt::format("{} elements", numElements);
 
             if (numElements)
                 canExpand = true;
-
-            ctx->PopState();
-            cache.dbg.internal_execution = false;
         }
     }
 
@@ -890,18 +939,12 @@ void asIDBObjectTypeEvaluator::QueryVariableProperties(asIDBVariable::Ptr var) c
         // TODO 2.0: this causes an issue with Watch variables
         // because of the way dereferencing works. For now, it
         // will add duplicates, and the old var state cache is gone.
-        asIDBVariable::Ptr child = cache.CreateVariable();
-        child->owner = var;
-        child->address = propId;
-        child->name = name;
-        child->typeName = cache.GetTypeNameFromType({ propTypeId, isReadOnly ? asTM_CONST : asTM_NONE });
-        cache.evaluators.Evaluate(child);
-        var->PushChild(child);
+        var->CreateChildVariable(name, "", propId, cache.GetTypeNameFromType({ propTypeId, isReadOnly ? asTM_CONST : asTM_NONE }));
     }
 }
 
 // convenience function that iterates the opFor* of the given
-// address (and object, if set) of the given type. If non-zero,
+// address (and object, if set) of the given type. If positive,
 // a specific index will be used.
 void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int index) const
 {
@@ -913,71 +956,32 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
         return;
 
     auto type = ctx->GetEngine()->GetTypeInfoById(var->address.source.typeId);
+    asIDBObjectIteratorHelper it(dbg, type, var->address.resolved);
 
-    auto opForBegin = type->GetMethodByName("opForBegin");
-
-    if (!opForBegin || opForBegin->GetReturnTypeId() != asTYPEID_UINT32)
+    if (!it)
         return;
 
-    auto opForEnd = type->GetMethodByName("opForEnd");
-    auto opForNext = type->GetMethodByName("opForNext");
-    auto opForValue = type->GetMethodByName("opForValue");
-
-    std::vector<asIScriptFunction *> opForValues;
-
-    if (!opForValue)
-    {
-        for (int i = 0; ; i++)
-        {
-            auto f = type->GetMethodByName(fmt::format("opForValue{}", i).c_str());
-
-            if (!f)
-                break;
-
-            opForValues.push_back(f);
-        }
-    }
-    else
-        opForValues.push_back(opForValue);
-
-    if (index >= 0 && index < opForValues.size())
-        opForValues = { opForValues[index] };
+    cache.dbg.internal_execution = true;
+    ctx->PushState();
 
     // if we haven't got anything special yet, and we're
     // iterable, we'll show how many elements we have.
     // we'll also just assume the code isn't busted.
+    auto itValue = it.Begin(ctx);
     int elementId = 0;
-    
-    cache.dbg.internal_execution = true;
-    ctx->PushState();
-    ctx->Prepare(opForBegin);
-    ctx->SetObject(var->address.resolved);
-    ctx->Execute();
-
-    uint32_t rtn = ctx->GetReturnDWord();
 
     while (true)
     {
-        ctx->Prepare(opForEnd);
-        ctx->SetObject(var->address.resolved);
-        ctx->SetArgDWord(0, rtn);
-        ctx->Execute();
-        bool finished = ctx->GetReturnByte();
-
-        if (finished)
+        if (it.End(ctx, itValue))
             break;
 
-        int fv = 0;
-        for (auto &opfv : opForValues)
+        for (int offset = (index == -1 ? 0 : index); offset < (index == -1 ? it.opForValues.size() : index + 1); offset++)
         {
-            ctx->Prepare(opfv);
-            ctx->SetObject(var->address.resolved);
-            ctx->SetArgDWord(0, rtn);
-            ctx->Execute();
+            it.Value(ctx, itValue, offset);
 
             void *addr = ctx->GetReturnAddress();
             asDWORD returnFlags;
-            int typeId = opfv->GetReturnTypeId(&returnFlags);
+            int typeId = it.opForValues[offset]->GetReturnTypeId(&returnFlags);
             std::unique_ptr<uint8_t[]> stackMemory;
             
             // non-heap stuff has to be copied somewhere
@@ -993,24 +997,15 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
 
             asIDBVarAddr elemId { typeId, false, addr };
 
-            asIDBVariable::Ptr child = cache.CreateVariable();
-            child->owner = var;
-            child->address = elemId;
-            child->name = fmt::vformat(opForValues.size() == 1 ? "[{0}]" : "[{0},{1}]", fmt::make_format_args(elementId, fv));
-            child->typeName = cache.GetTypeNameFromType({ typeId, asTM_NONE });
+            asIDBVariable::Ptr child = var->CreateChildVariable(
+                fmt::format((index > 0 || it.opForValues.size() == 1) ? "[{0}]" : "[{0},{1}]", elementId, offset),
+                "",
+                elemId,
+                cache.GetTypeNameFromType({ typeId, asTM_NONE }));
             child->stackData = std::move(stackMemory);
-            cache.evaluators.Evaluate(child);
-            var->PushChild(child);
-
-            fv++;
         }
-                
-        ctx->Prepare(opForNext);
-        ctx->SetObject(var->address.resolved);
-        ctx->SetArgDWord(0, rtn);
-        ctx->Execute();
 
-        rtn = ctx->GetReturnDWord();
+        itValue = it.Next(ctx, itValue);
 
         elementId++;
     }
@@ -1087,16 +1082,6 @@ const asIDBTypeEvaluator &asIDBTypeEvaluatorMap::GetEvaluator(asIDBCache &cache,
     return objectType;
 }
 
-void asIDBTypeEvaluatorMap::Evaluate(asIDBVariable::Ptr var) const
-{
-    GetEvaluator(*var->dbg.cache, var->address).Evaluate(var);
-}
-
-void asIDBTypeEvaluatorMap::Expand(asIDBVariable::Ptr var) const
-{
-    GetEvaluator(*var->dbg.cache, var->address).Expand(var);
-}
-
 // Register an evaluator.
 void asIDBTypeEvaluatorMap::Register(int typeId, std::unique_ptr<asIDBTypeEvaluator> evaluator)
 {
@@ -1131,20 +1116,12 @@ void asIDBWorkspace::CompileBreakpointPositions()
             for (size_t f = 0; f < module->GetFunctionCount(); f++)
             {
                 auto func = module->GetFunctionByIndex(f);
-                asCScriptFunction *internal_func = reinterpret_cast<asCScriptFunction *>(func);
 
-                // TODO: not supported
-                if (internal_func->scriptData->sectionIdxs.GetLength() > 0)
-                    continue;
-
-                auto section = func->GetScriptSectionName();
-                for (size_t i = 0; i < internal_func->scriptData->lineNumbers.GetLength(); i += 2)
+                for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
                 {
-                    auto pos = internal_func->scriptData->lineNumbers[i];
-                    auto linecol = internal_func->scriptData->lineNumbers[i + 1];
-                    auto line = linecol & 0xFFFFF;
-                    auto col = linecol >> 20;
-
+                    const char *section;
+                    int line, col;
+                    func->GetLineNumber(i, &section, &line, &col);
                     potential_breakpoints[section].insert(asIDBLineCol { line, col });
                 }
             }
@@ -1156,20 +1133,12 @@ void asIDBWorkspace::CompileBreakpointPositions()
                 for (size_t m = 0; m < type->GetMethodCount(); m++)
                 {
                     auto func = type->GetMethodByIndex(m, false);
-                    asCScriptFunction *internal_func = reinterpret_cast<asCScriptFunction *>(func);
 
-                    // TODO: not supported
-                    if (!internal_func || !internal_func->scriptData || internal_func->scriptData->sectionIdxs.GetLength() > 0)
-                        continue;
-
-                    auto section = func->GetScriptSectionName();
-                    for (size_t i = 0; i < internal_func->scriptData->lineNumbers.GetLength(); i += 2)
+                    for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
                     {
-                        auto pos = internal_func->scriptData->lineNumbers[i];
-                        auto linecol = internal_func->scriptData->lineNumbers[i + 1];
-                        auto line = linecol & 0xFFFFF;
-                        auto col = linecol >> 20;
-
+                        const char *section;
+                        int line, col;
+                        func->GetLineNumber(i, &section, &line, &col);
                         potential_breakpoints[section].insert(asIDBLineCol { line, col });
                     }
                 }
@@ -1237,6 +1206,21 @@ void asIDBWorkspace::CompileBreakpointPositions()
                 }
             }
         }
+
+        if (!debugger->function_breakpoints.empty())
+        {
+            int decl_row;
+            auto func = ctx->GetFunction(0);
+
+            if (func)
+            {
+                func->GetDeclaredAt(nullptr, &decl_row, nullptr);
+
+                if (debugger->function_breakpoints.find(func->GetName()) != debugger->function_breakpoints.end() &&
+                    row == func->FindNextLineWithCode(decl_row))
+                    break_from_bp = true;
+            }
+        }
     }
 
     if (break_from_bp)
@@ -1273,7 +1257,15 @@ void asIDBDebugger::DebugBreak(asIScriptContext *ctx)
 bool asIDBDebugger::HasWork()
 {
     std::scoped_lock lock(mutex);
-    return !breakpoints.empty() && action == asIDBAction::None;
+
+    if (action != asIDBAction::None)
+        return true;
+    else if (!breakpoints.empty())
+        return true;
+    else if (!function_breakpoints.empty())
+        return true;
+
+    return false;
 }
 
 // debugger operations; these set the next breakpoint

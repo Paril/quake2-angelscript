@@ -178,4 +178,24 @@ struct dynamic_bitset
 
         return s;
     }
+
+    uint32_t opForBegin() const
+    {
+        return 0;
+    }
+
+    uint32_t opForNext(uint32_t v) const
+    {
+        return v + 1;
+    }
+
+    bool opForValue(uint32_t v) const
+    {
+        return (*this)[v];
+    }
+
+    bool opForEnd(uint32_t v) const
+    {
+        return v >= _bitset.size();
+    }
 };
