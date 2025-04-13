@@ -114,6 +114,68 @@ static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32
     return Q_strncasecmp(a, b, n);
 }
 
+std::optional<std::string_view> q2as_ParseView(std::string_view &data_p, const char *seps)
+{
+    if (data_p.empty())
+    {
+        data_p = std::string_view();
+        return std::nullopt;
+    }
+
+    // Parse leading separators
+    const size_t start = data_p.find_first_not_of(seps);
+    if (start == std::string_view::npos)
+    {
+        data_p = std::string_view();
+        return std::nullopt;
+    }
+    data_p.remove_prefix(start);
+
+    // Parse comments
+    if (data_p.size() >= 2 && data_p[0] == '/' && data_p[1] == '/')
+    {
+        const size_t newline_pos = data_p.find('\n');
+        if (newline_pos == std::string_view::npos)
+        {
+            return std::nullopt;
+        }
+
+        data_p.remove_prefix(newline_pos + 1);
+        return q2as_ParseView(data_p, seps);
+    }
+
+    // Parse quoted strings
+    if (data_p[0] == '"')
+    {
+        data_p.remove_prefix(1);
+        const size_t end_quote = data_p.find('"');
+        if (end_quote == std::string_view::npos)
+        {
+            std::string_view token = data_p;
+            data_p = std::string_view();
+            return token;
+        }
+
+        std::string_view token = data_p.substr(0, end_quote);
+        data_p.remove_prefix(end_quote + 1);
+
+        return token;
+    }
+
+    // Parse word
+    const size_t end = data_p.find_first_of(seps);
+    if (end == std::string_view::npos)
+    {
+        std::string_view token = data_p;
+        data_p = std::string_view();
+        return token;
+    }
+
+    std::string_view token = data_p.substr(0, end);
+    data_p.remove_prefix(end);
+    return token;
+}
+
 void q2as_format_init(q2as_state_t &state)
 {
     // find matching formatters.
