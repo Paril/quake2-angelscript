@@ -139,8 +139,23 @@ static T *Q2AS_assign(const T &in, T *self)
 // no need to have a debugger for each one.
 struct q2as_dbg_state_t
 {
-    std::unique_ptr<asIDBDebugger>  debugger;
-    std::unique_ptr<asIDBWorkspace> workspace;
+    std::unique_ptr<asIDBDebugger>                               debugger;
+    std::unique_ptr<asIDBWorkspace>                              workspace;
+
+    // evaluators don't take up much memory so we'll just
+    // always keep them around.
+    std::unordered_map<int, std::unique_ptr<asIDBTypeEvaluator>> evaluators;
+
+    // Register an evaluator.
+    void RegisterEvaluator(int typeId, std::unique_ptr<asIDBTypeEvaluator> evaluator);
+
+    // A quick shortcut to make a templated instantiation
+    // of T from the given type name.
+    template<typename T>
+    void RegisterEvaluator(asIScriptEngine *engine, const char *name)
+    {
+        RegisterEvaluator(engine->GetTypeInfoByName(name)->GetTypeId(), std::make_unique<T>());
+    }
 
     struct cvar_t *cvar, *attach_type;
     int           active_type; // active debugger type

@@ -23,104 +23,34 @@
 #include "q2as_game.h"
 #include "q2as_cgame.h"
 
-class q2as_asIDBStringTypeEvaluator : public asIDBTypeEvaluator
-{
-public:
-    virtual void Evaluate(asIDBVariable::Ptr var) const override
-    {
-        const std::string *s = var->address.ResolveAs<const std::string>();
-
-        if (s->empty())
-            var->value = "(empty)";
-        else
-            var->value = *s;
-    }
-};
-
-class q2as_asIDBVec3TypeEvaluator : public asIDBObjectTypeEvaluator
-{
-public:
-    virtual void Evaluate(asIDBVariable::Ptr var) const override
-    {
-        const vec3_t *s = var->address.ResolveAs<const vec3_t>();
-        var->value = fmt::format("{} {} {}", s->x, s->y, s->z);
-        var->MakeExpandable();
-    }
-};
-
-class q2as_asIDBGTimeTypeEvaluator : public asIDBObjectTypeEvaluator
-{
-    static constexpr std::tuple<uint64_t, const char *> time_suffixes[] = {
-        { 1000 * 60 * 60, "hr" },
-        { 1000 * 60, "min" },
-        { 1000, "sec" }
-    };
-
-public:
-    virtual void Evaluate(asIDBVariable::Ptr var) const override
-    {
-        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
-
-        const char *sfx = "ms";
-        uint64_t divisor = 1;
-
-        for (auto &suffix : time_suffixes)
-            if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
-            {
-                divisor = std::get<0>(suffix);
-                sfx = std::get<1>(suffix);
-                break;
-            }
-
-        var->value = fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx);
-        var->MakeExpandable();
-    }
-
-    virtual void Expand(asIDBVariable::Ptr var) const override
-    {
-        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
-
-        for (auto &suffix : time_suffixes)
-            if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
-            {
-                asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
-                child->owner = var;
-                child->name = std::get<1>(suffix);
-                child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
-                var->PushChild(child);
-            }
-
-        {
-            asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
-            child->owner = var;
-            child->name = "ms";
-            child->value = fmt::format("{}", s->milliseconds());
-            var->PushChild(child);
-        }
-    }
-};
-
-class q2as_asIDBArrayTypeEvaluator : public asIDBObjectTypeEvaluator
-{
-public:
-    virtual void Expand(asIDBVariable::Ptr var) const override
-    {
-        QueryVariableForEach(var, 0);
-    }
-};
-
 class q2as_asIDBCache : public asIDBCache
 {
 public:
-    q2as_asIDBCache(asIDBDebugger &dbg, asIScriptContext *ctx) :
-        asIDBCache(dbg, ctx)
-    {
-        auto engine = ctx->GetEngine();
+    using asIDBCache::asIDBCache;
 
-        evaluators.Register<q2as_asIDBStringTypeEvaluator>(engine, "string");
-        evaluators.Register<q2as_asIDBVec3TypeEvaluator>(engine, "vec3_t");
-        evaluators.Register<q2as_asIDBGTimeTypeEvaluator>(engine, "gtime_t");
-        evaluators.Register<q2as_asIDBArrayTypeEvaluator>(engine, "array");
+    const asIDBTypeEvaluator &GetEvaluator(const asIDBVarAddr &id) const
+    {
+        if (id.ResolveAs<void>() == nullptr)
+            return asIDBCache::GetEvaluator(id);
+    
+        auto type = ctx->GetEngine()->GetTypeInfoById(id.typeId);
+
+        // do we have a custom evaluator?
+        if (auto f = debugger_state.evaluators.find(id.typeId & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR)); f != debugger_state.evaluators.end())
+            return *f->second.get();
+
+        // are we a template?
+        if (id.typeId & asTYPEID_TEMPLATE)
+        {
+            // fetch the base type, see if we have a
+            // evaluator for that one
+            auto baseType = ctx->GetEngine()->GetTypeInfoByName(type->GetName());
+
+            if (auto f = debugger_state.evaluators.find(baseType->GetTypeId() & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR)); f != debugger_state.evaluators.end())
+                return *f->second.get();
+        }
+
+        return asIDBCache::GetEvaluator(id);
     }
 };
 
@@ -635,6 +565,13 @@ void q2as_dbg_state_t::DebugBreak(asIScriptContext *ctx)
 
     if (debugger)
         debugger->DebugBreak(ctx);
+}
+
+// Register an evaluator.
+void q2as_dbg_state_t::RegisterEvaluator(int typeId, std::unique_ptr<asIDBTypeEvaluator> evaluator)
+{
+    typeId &= asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR;
+    evaluators.insert_or_assign(typeId, std::move(evaluator));
 }
 
 static void q2as_debugbreak()

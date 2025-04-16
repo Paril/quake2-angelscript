@@ -28,9 +28,13 @@ void asIDBVariable::Evaluate()
 {
     if (evaluated)
         return;
+    // getters don't evaluate and are
+    // just placeholders.
+    else if (getter)
+        return;
     
     auto var = ptr.lock();
-    dbg.cache->evaluators.GetEvaluator(*var->dbg.cache, var->address).Evaluate(var);
+    dbg.cache->GetEvaluator(var->address).Evaluate(var);
     evaluated = true;
 }
 
@@ -42,11 +46,58 @@ void asIDBVariable::Expand()
         return;
     
     auto var = ptr.lock();
-    dbg.cache->evaluators.GetEvaluator(*var->dbg.cache, var->address).Expand(var);
+
+    if (getter)
+    {
+        // getters are a bit special; we have to fetch the variable
+        // that our getter is linked to, & store the result in stack memory.
+        auto ctx = dbg.cache->ctx;
+
+        dbg.internal_execution = true;
+        ctx->PushState();
+        
+        ctx->Prepare(getter);
+        ctx->SetObject(this->owner.lock()->address.ResolveAs<void>());
+        ctx->Execute();
+
+        var->children.clear();
+
+        if (ctx->GetState() != asEXECUTION_FINISHED)
+        {
+            var->get_evaluated = var->CreateChildVariable(var->name, var->ns, {}, "");
+            var->get_evaluated->value = fmt::format("Exception thrown ({})", ctx->GetExceptionString());
+            var->get_evaluated->evaluated = true;
+        }
+        else
+        {
+            asDWORD returnFlags;
+            int typeId = getter->GetReturnTypeId(&returnFlags);
+            asIDBValue returnValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), typeId, (returnFlags & asTM_INOUTREF) != 0);
+
+            asIDBVariable::Ptr child = var->CreateChildVariable(
+                var->name,
+                "",
+                { typeId, (returnFlags & asTM_CONST) != 0, nullptr },
+                dbg.cache->GetTypeNameFromType({ typeId, (asETypeModifiers) returnFlags })
+            );
+            child->stackValue = std::move(returnValue);
+            child->address.address = child->stackValue.GetPointer<void>(true);
+        }
+
+        ctx->PopState();
+        dbg.internal_execution = false;
+
+        evaluated = true;
+    }
+    else
+    {
+        dbg.cache->GetEvaluator(var->address).Expand(var);
+    }
+
     expanded = true;
 }
 
-asIDBVariable::Ptr asIDBVariable::CreateChildVariable(std::string name, std::string ns, asIDBResolvedVarAddr address, std::string_view typeName)
+asIDBVariable::Ptr asIDBVariable::CreateChildVariable(std::string name, std::string ns, asIDBVarAddr address, std::string_view typeName)
 {
     asIDBVariable::Ptr child = dbg.cache->CreateVariable();
     child->owner = ptr;
@@ -176,7 +227,9 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
         rawName = type->GetName();
     }
 
-    std::string name = fmt::format("{}{}{}", (id.modifiers & asTM_CONST) ? "const " : "", rawName,
+    std::string name = fmt::format("{}{}{}{}", (id.modifiers & asTM_CONST) ? "const " : "",
+        rawName,
+        (id.typeId & (asTYPEID_HANDLETOCONST | asTYPEID_OBJHANDLE)) ? "@" : "",
         ((id.modifiers & asTM_INOUTREF) == asTM_INOUTREF) ? "&" :
         ((id.modifiers & asTM_INOUTREF) == asTM_INREF) ? "&in" :
         ((id.modifiers & asTM_INOUTREF) == asTM_OUTREF) ? "&out" :
@@ -185,11 +238,11 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
     return type_names.emplace(id, std::move(name)).first->second;
 }
 
-void *asIDBCache::ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int propertyIndex, int offset, int compositeOffset, bool isCompositeIndirect)
+void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyIndex, int offset, int compositeOffset, bool isCompositeIndirect)
 {
-    if (id.source.typeId & asTYPEID_SCRIPTOBJECT)
+    if (id.typeId & asTYPEID_SCRIPTOBJECT)
     {
-        asIScriptObject *obj = (asIScriptObject *) id.resolved;
+        asIScriptObject *obj = id.ResolveAs<asIScriptObject>();
         return obj->GetAddressOfProperty(propertyIndex);
     }
 
@@ -558,7 +611,7 @@ public:
 
         // for enums where we have a single matched value
         // just display it directly; it might be a mask but that's OK.
-        auto type = dbg.cache->ctx->GetEngine()->GetTypeInfoById(var->address.source.typeId);
+        auto type = dbg.cache->ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
 
         union {
             asINT64 v = 0;
@@ -633,40 +686,38 @@ public:
     {
         auto &dbg = var->dbg;
         auto &cache = *dbg.cache;
-        auto type = cache.ctx->GetEngine()->GetTypeInfoById(var->address.source.typeId);
+        auto type = cache.ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
 
         union {
             asINT64 v = 0;
             asQWORD uv;
         };
 
-        auto resolved = asIDBResolvedVarAddr(var->address);
-        
         switch (type->GetTypedefTypeId())
         {
         case asTYPEID_INT8:
-            v = *resolved.ResolveAs<const int8_t>();
+            v = *var->address.ResolveAs<const int8_t>();
             break;
         case asTYPEID_UINT8:
-            uv = *resolved.ResolveAs<const uint8_t>();
+            uv = *var->address.ResolveAs<const uint8_t>();
             break;
         case asTYPEID_INT16:
-            v = *resolved.ResolveAs<const int16_t>();
+            v = *var->address.ResolveAs<const int16_t>();
             break;
         case asTYPEID_UINT16:
-            uv = *resolved.ResolveAs<const uint16_t>();
+            uv = *var->address.ResolveAs<const uint16_t>();
             break;
         case asTYPEID_INT32:
-            v = *resolved.ResolveAs<const int32_t>();
+            v = *var->address.ResolveAs<const int32_t>();
             break;
         case asTYPEID_UINT32:
-            uv = *resolved.ResolveAs<const uint32_t>();
+            uv = *var->address.ResolveAs<const uint32_t>();
             break;
         case asTYPEID_INT64:
-            v = *resolved.ResolveAs<const int64_t>();
+            v = *var->address.ResolveAs<const int64_t>();
             break;
         case asTYPEID_UINT64:
-            uv = *resolved.ResolveAs<const uint64_t>();
+            uv = *var->address.ResolveAs<const uint64_t>();
             break;
         }
 
@@ -784,7 +835,9 @@ auto asIDBObjectIteratorHelper::Begin(asIScriptContext *ctx) const -> IteratorVa
     ctx->SetObject(obj);
     ctx->Execute();
 
-    return IteratorValue::FromCtxReturn(this, ctx);
+    asDWORD flags;
+    opForBegin->GetReturnTypeId(&flags);
+    return IteratorValue::FromCtxReturn(this, ctx, (asETypeModifiers) flags);
 }
 
 void asIDBObjectIteratorHelper::Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const
@@ -801,8 +854,10 @@ auto asIDBObjectIteratorHelper::Next(asIScriptContext *ctx, const IteratorValue 
     ctx->SetObject(obj);
     val.SetArg(ctx, 0);
     ctx->Execute();
-
-    return IteratorValue::FromCtxReturn(this, ctx);
+    
+    asDWORD flags;
+    opForBegin->GetReturnTypeId(&flags);
+    return IteratorValue::FromCtxReturn(this, ctx, (asETypeModifiers) flags);
 }
 
 bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &val) const
@@ -859,12 +914,12 @@ bool asIDBObjectIteratorHelper::Validate()
     auto &dbg = var->dbg;
     auto &cache = *dbg.cache;
     auto ctx = cache.ctx;
-    auto type = ctx->GetEngine()->GetTypeInfoById(var->address.source.typeId);
-    bool canExpand = type->GetPropertyCount();
+    auto type = ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
+    bool canExpand = CanExpand(var);
 
     if (ctx->GetState() != asEXECUTION_EXCEPTION)
     {
-        asIDBObjectIteratorHelper it(dbg, type, var->address.resolved);
+        asIDBObjectIteratorHelper it(dbg, type, var->address.ResolveAs<void>());
 
         if (!it)
         {
@@ -895,6 +950,8 @@ bool asIDBObjectIteratorHelper::Validate()
 {
     QueryVariableProperties(var);
 
+    QueryVariableGetters(var);
+
     QueryVariableForEach(var);
 }
 
@@ -904,14 +961,9 @@ void asIDBObjectTypeEvaluator::QueryVariableProperties(asIDBVariable::Ptr var) c
 {
     auto &dbg = var->dbg;
     auto &cache = *dbg.cache;
-    auto type = cache.ctx->GetEngine()->GetTypeInfoById(var->address.source.typeId);
+    auto type = cache.ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
 
-    asIScriptObject *obj = nullptr;
-
-    if (var->address.source.typeId & asTYPEID_SCRIPTOBJECT)
-        obj = (asIScriptObject *) var->address.resolved;
-
-    for (asUINT n = 0; n < (obj ? obj->GetPropertyCount() : type->GetPropertyCount()); n++)
+    for (asUINT n = 0; n < type->GetPropertyCount(); n++)
     {
         const char *name;
         int propTypeId;
@@ -943,6 +995,51 @@ void asIDBObjectTypeEvaluator::QueryVariableProperties(asIDBVariable::Ptr var) c
     }
 }
 
+// convenience function that queries for getter property functions.
+void asIDBObjectTypeEvaluator::QueryVariableGetters(asIDBVariable::Ptr var) const
+{
+    auto &dbg = var->dbg;
+    auto &cache = *dbg.cache;
+    auto type = cache.ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
+    
+    for (asUINT n = 0; n < type->GetMethodCount(); n++)
+    {
+        asIScriptFunction *function = type->GetMethodByIndex(n, true);
+
+        if (!IsCompatibleGetter(function))
+            continue;
+
+        auto child = var->CreateChildVariable(std::string(std::string_view(function->GetName()).substr(4)), "", {}, cache.GetTypeNameFromType({ function->GetReturnTypeId(), asTM_NONE }));
+        child->getter = function;
+        child->MakeExpandable();
+    }
+}
+
+bool asIDBObjectTypeEvaluator::CanExpand(asIDBVariable::Ptr var) const
+{
+    auto &dbg = var->dbg;
+    auto &cache = *dbg.cache;
+    auto type = cache.ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
+    
+    if (type->GetPropertyCount())
+        return true;
+
+    for (asUINT n = 0; n < type->GetMethodCount(); n++)
+    {
+        asIScriptFunction *function = type->GetMethodByIndex(n, true);
+
+        if (IsCompatibleGetter(function))
+            return true;
+    }
+
+    return false;
+}
+
+bool asIDBObjectTypeEvaluator::IsCompatibleGetter(asIScriptFunction *function) const
+{
+    return function->IsReadOnly() && function->IsProperty() && function->GetParamCount() == 0;
+}
+
 // convenience function that iterates the opFor* of the given
 // address (and object, if set) of the given type. If positive,
 // a specific index will be used.
@@ -955,8 +1052,8 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
     if (ctx->GetState() == asEXECUTION_EXCEPTION)
         return;
 
-    auto type = ctx->GetEngine()->GetTypeInfoById(var->address.source.typeId);
-    asIDBObjectIteratorHelper it(dbg, type, var->address.resolved);
+    auto type = ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
+    asIDBObjectIteratorHelper it(dbg, type, var->address.ResolveAs<void>());
 
     if (!it)
         return;
@@ -964,45 +1061,46 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
     cache.dbg.internal_execution = true;
     ctx->PushState();
 
-    // if we haven't got anything special yet, and we're
-    // iterable, we'll show how many elements we have.
-    // we'll also just assume the code isn't busted.
     auto itValue = it.Begin(ctx);
     int elementId = 0;
+    bool multiElement = index == -1 && it.opForValues.size() > 1;
 
     while (true)
     {
         if (it.End(ctx, itValue))
             break;
 
-        for (int offset = (index == -1 ? 0 : index); offset < (index == -1 ? it.opForValues.size() : index + 1); offset++)
+        asIDBVariable::Ptr indexVar;
+
+        // if we're a multi-element, the root is fake
+        // and just exists to store the element id.
+        if (multiElement)
+        {
+            indexVar = var->CreateChildVariable(
+                fmt::format("[{}]", elementId),
+                "",
+                {},
+                "" // FIXME: could show types as tuple?
+            );
+            indexVar->expanded = indexVar->evaluated = true;
+        }
+
+        for (int offset = (index == -1 ? 0 : index), visibleOffset = 0; offset < (index == -1 ? it.opForValues.size() : index + 1); offset++, visibleOffset++)
         {
             it.Value(ctx, itValue, offset);
 
-            void *addr = ctx->GetReturnAddress();
             asDWORD returnFlags;
             int typeId = it.opForValues[offset]->GetReturnTypeId(&returnFlags);
-            std::unique_ptr<uint8_t[]> stackMemory;
+            asIDBValue returnValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), typeId, (returnFlags & asTM_INOUTREF) != 0);
             
-            // non-heap stuff has to be copied somewhere
-            // so the debugger can read it.
-            if ((returnFlags & asTM_INOUTREF) == 0)
-            {
-                auto type = ctx->GetEngine()->GetTypeInfoById(typeId);
-                size_t size = type ? type->GetSize() : ctx->GetEngine()->GetSizeOfPrimitiveType(typeId);
-                stackMemory = std::make_unique<uint8_t[]>(size);
-                memcpy(stackMemory.get(), ctx->GetAddressOfReturnValue(), size);
-                addr = stackMemory.get();
-            }
-
-            asIDBVarAddr elemId { typeId, false, addr };
-
-            asIDBVariable::Ptr child = var->CreateChildVariable(
-                fmt::format((index > 0 || it.opForValues.size() == 1) ? "[{0}]" : "[{0},{1}]", elementId, offset),
+            auto child = (multiElement ? indexVar : var)->CreateChildVariable(
+                fmt::format("[{}]", multiElement ? visibleOffset : elementId),
                 "",
-                elemId,
-                cache.GetTypeNameFromType({ typeId, asTM_NONE }));
-            child->stackData = std::move(stackMemory);
+                { typeId, (returnFlags & asTM_CONST) != 0, nullptr },
+                dbg.cache->GetTypeNameFromType({ typeId, (asETypeModifiers) returnFlags })
+            );
+            child->stackValue = std::move(returnValue);
+            child->address.address = child->stackValue.GetPointer<void>(true);
         }
 
         itValue = it.Next(ctx, itValue);
@@ -1014,39 +1112,24 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
     cache.dbg.internal_execution = false;
 }
 
-const asIDBTypeEvaluator &asIDBTypeEvaluatorMap::GetEvaluator(asIDBCache &cache, const asIDBResolvedVarAddr &id) const
+const asIDBTypeEvaluator &asIDBCache::GetEvaluator(const asIDBVarAddr &id) const
 {
     // the only way the base address is null is if
     // it's uninitialized.
     static constexpr const asIDBUninitTypeEvaluator uninitType;
     static constexpr const asIDBNullTypeEvaluator nullType;
 
-    if (id.source.address == nullptr)
+    if (id.address == nullptr)
         return uninitType;
-    else if (id.resolved == nullptr)
+    else if (id.ResolveAs<void>() == nullptr)
         return nullType;
-
-    // do we have a custom evaluator?
-    if (auto f = evaluators.find(id.source.typeId & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR)); f != evaluators.end())
-        return *f->second.get();
-
-    auto type = cache.ctx->GetEngine()->GetTypeInfoById(id.source.typeId);
-
-    // are we a template?
-    if (id.source.typeId & asTYPEID_TEMPLATE)
-    {
-        // fetch the base type, see if we have a
-        // evaluator for that one
-        auto baseType = cache.ctx->GetEngine()->GetTypeInfoByName(type->GetName());
-
-        if (auto f = evaluators.find(baseType->GetTypeId() & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR)); f != evaluators.end())
-            return *f->second.get();
-    }
+    
+    auto type = ctx->GetEngine()->GetTypeInfoById(id.typeId);
 
     // we'll use the fall back evaluators.
     // check primitives first.
 #define CHECK_PRIMITIVE_EVAL(asTypeId, cTypeName) \
-    if (id.source.typeId == asTypeId) \
+    if (id.typeId == asTypeId) \
     { \
         static constexpr const asIDBPrimitiveTypeEvaluator<cTypeName> cTypeName##Type; \
         return cTypeName##Type; \
@@ -1080,13 +1163,6 @@ const asIDBTypeEvaluator &asIDBTypeEvaluatorMap::GetEvaluator(asIDBCache &cache,
     // finally, just return the base one.
     static constexpr const asIDBObjectTypeEvaluator objectType;
     return objectType;
-}
-
-// Register an evaluator.
-void asIDBTypeEvaluatorMap::Register(int typeId, std::unique_ptr<asIDBTypeEvaluator> evaluator)
-{
-    typeId &= asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR;
-    evaluators.insert_or_assign(typeId, std::move(evaluator));
 }
 
 void asIDBWorkspace::CompileScriptSources()

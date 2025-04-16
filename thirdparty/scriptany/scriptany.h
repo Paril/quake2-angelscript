@@ -44,7 +44,7 @@ public:
 	void EnumReferences(asIScriptEngine *engine);
 	void ReleaseAllHandles(asIScriptEngine *engine);
 
-protected:
+//protected:
 	virtual ~CScriptAny();
 	void FreeObject();
 

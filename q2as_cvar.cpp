@@ -12,6 +12,9 @@ static std::string Q2AS_cvar_t_stringval(cvar_t *n)
 
 static std::string Q2AS_cvar_t_latched_stringval(cvar_t *n)
 {
+    if (!n->latched_string)
+        return "";
+
     return n->latched_string;
 }
 

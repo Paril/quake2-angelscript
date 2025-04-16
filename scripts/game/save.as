@@ -232,8 +232,7 @@ void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, 
 
 void json_add_optional(json_mutdoc &doc, json_mutval obj, const string &in key, json_mutval v)
 {
-    if ((v.is_obj && v.obj_size != 0) ||
-        (v.is_arr && v.arr_size != 0))
+    if (v.is_ctn && v.length != 0)
         obj.obj_add(key, v);
 }
 
@@ -750,7 +749,7 @@ void WriteGame(bool autosave, json_mutdoc &doc)
 	// write game
 	game.autosaved = autosave;
     json_mutval locals = WriteGameLocals(doc);
-    if (locals.valid && locals.obj_size != 0)
+    if (locals.valid && locals.length != 0)
         root.obj_add("game", locals);
 	game.autosaved = false;
 
@@ -1726,7 +1725,7 @@ void WriteLevel(bool transition, json_mutdoc &doc)
 	// write level
     json_mutval locals = WriteLevelLocals(doc);
 
-    if (locals.valid && locals.obj_size != 0)
+    if (locals.valid && locals.length != 0)
         root.obj_add("level", locals);
 
     json_mutval ents = doc.val_obj();
@@ -1747,7 +1746,7 @@ void WriteLevel(bool transition, json_mutdoc &doc)
 
         json_mutval ent = WriteEntity(doc, e);
 
-        if (ent.valid && ent.obj_size != 0)
+        if (ent.valid && ent.length != 0)
             ents.obj_add(format("{}", i), ent);
 	}
 

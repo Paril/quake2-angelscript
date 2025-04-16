@@ -7,6 +7,17 @@ static void vec3_formatter(std::string &str, const std::string &args, const vec3
     fmt::format_to(std::back_inserter(str), "{} {} {}", in.x, in.y, in.z);
 }
 
+class q2as_asIDBVec3TypeEvaluator : public asIDBObjectTypeEvaluator
+{
+public:
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
+    {
+        const vec3_t *s = var->address.ResolveAs<const vec3_t>();
+        var->value = fmt::format("{} {} {}", s->x, s->y, s->z);
+        var->MakeExpandable();
+    }
+};
+
 void Q2AS_RegisterVec3(q2as_registry &registry)
 {
     Q2AS_RegisterFixedArray<float, 3>(registry, "vec3_t", "float", asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_AK);
@@ -86,4 +97,6 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
             { "vec3_t lerp(vec3_t, vec3_t, float) nodiscard",                                                                                asFUNCTIONPR(lerp, (vec3_t, vec3_t, float), vec3_t),                              asCALL_CDECL },
             { "void formatter(string &str, const string &in args, const vec3_t &in vec)",                                                    asFUNCTION(vec3_formatter),                                                       asCALL_CDECL }
         });
+
+    debugger_state.RegisterEvaluator<q2as_asIDBVec3TypeEvaluator>(registry.engine, "vec3_t");
 }

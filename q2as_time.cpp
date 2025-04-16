@@ -90,6 +90,60 @@ static void gtime_formatter(std::string &str, const std::string &args, const gti
         fmt::format_to(std::back_inserter(str), "{} ms", time.milliseconds());
 }
 
+class q2as_asIDBGTimeTypeEvaluator : public asIDBObjectTypeEvaluator
+{
+    static constexpr std::tuple<uint64_t, const char *> time_suffixes[] = {
+        { 1000 * 60 * 60, "hr" },
+        { 1000 * 60, "min" },
+        { 1000, "sec" }
+    };
+
+public:
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
+    {
+        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
+
+        const char *sfx = "ms";
+        uint64_t divisor = 1;
+
+        for (auto &suffix : time_suffixes)
+            if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
+            {
+                divisor = std::get<0>(suffix);
+                sfx = std::get<1>(suffix);
+                break;
+            }
+
+        var->value = fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx);
+        var->MakeExpandable();
+    }
+
+    virtual void Expand(asIDBVariable::Ptr var) const override
+    {
+        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
+
+        for (auto &suffix : time_suffixes)
+            if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
+            {
+                asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
+                child->owner = var;
+                child->name = std::get<1>(suffix);
+                child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
+                child->evaluated = true;
+                var->PushChild(child);
+            }
+
+        {
+            asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
+            child->owner = var;
+            child->name = "ms";
+            child->value = fmt::format("{}", s->milliseconds());
+            child->evaluated = true;
+            var->PushChild(child);
+        }
+    }
+};
+
 void Q2AS_RegisterTime(q2as_registry &registry)
 {
     registry
@@ -164,4 +218,6 @@ void Q2AS_RegisterTime(q2as_registry &registry)
 
             { "void formatter(string &str, const string &in args, const gtime_t &in time)", asFUNCTION(gtime_formatter), asCALL_CDECL }
         });
+
+    debugger_state.RegisterEvaluator<q2as_asIDBGTimeTypeEvaluator>(registry.engine, "gtime_t");
 }

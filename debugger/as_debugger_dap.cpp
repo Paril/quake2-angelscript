@@ -173,7 +173,6 @@ public:
 
     dap::ConfigurationDoneResponse HandleRequest(const dap::ConfigurationDoneRequest &request)
     {
-        
         return {};
     }
 
@@ -289,24 +288,35 @@ public:
             return dap::Error("invalid variablesReference");
 
         auto varContainer = varit->second.lock();
+        dap::VariablesResponse response {};
 
         varContainer->Evaluate();
         varContainer->Expand();
 
-        dap::VariablesResponse response {};
-
         int64_t start = request.start.has_value() ? (int64_t) request.start.value() : 0;
         int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->Children().size();
 
-        for (size_t i = start; i < count; i++)
+        for (int64_t i = start; i < count; i++)
         {
             auto &local_ptr = varContainer->Children()[i];
             auto &var = response.variables.emplace_back();
             auto local = local_ptr.lock();
+
             local->Evaluate();
             var.name = local->name;
             var.type = dap::string(local->typeName);
-            var.value = local->value.empty() ? local->typeName : local->value;
+            if (local->getter)
+            {
+                dap::VariablePresentationHint hint {};
+                hint.lazy = true;
+                var.presentationHint = hint;
+                var.value = "(...)";
+            }
+            else
+            {
+                var.value = local->value.empty() ? local->typeName : local->value;
+            }
+            var.namedVariables = local->Children().size();
             var.variablesReference = local->RefId();
         }
 
@@ -360,6 +370,8 @@ public:
             return dap::Error { result.error().data() };
 
         auto var = result.value().lock();
+
+        var->Evaluate();
         
         response.type = dap::string(var->typeName);
         response.result = var->value.empty() ? var->typeName : var->value;

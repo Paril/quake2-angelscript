@@ -93,26 +93,15 @@ struct asIDBVarAddr
     {
         return typeId == other.typeId && address == other.address && constant == other.constant;
     }
-};
-
-// a resolved reference of a `asIDBVarAddr`.
-struct asIDBResolvedVarAddr
-{
-    asIDBVarAddr    source {};
-    void            *resolved = nullptr;
-
-    asIDBResolvedVarAddr() = default;
-
-    constexpr asIDBResolvedVarAddr(asIDBVarAddr source) :
-        source(source),
-        resolved((source.typeId & (asTYPEID_HANDLETOCONST | asTYPEID_OBJHANDLE)) ? *(void **)source.address : source.address)
-    {
-    }
 
     template<typename T>
     T *ResolveAs() const
     {
-        return reinterpret_cast<T *>(resolved);
+        if (!address)
+            return nullptr;
+        else if (typeId & (asTYPEID_HANDLETOCONST | asTYPEID_OBJHANDLE))
+            return *reinterpret_cast<T **>(address);
+        return reinterpret_cast<T*>(address);
     }
 };
 
@@ -124,6 +113,185 @@ struct std::hash<asIDBVarAddr>
         size_t h = std::hash<int>()(key.typeId);
         asIDBHashCombine(h, std::hash<void *>()(key.address));
         return h;
+    }
+};
+
+// helper class that is similar to an any,
+// storing a value of any type returned by AS
+// and managing the ref count.
+struct asIDBValue
+{
+public:
+    asIScriptEngine *engine = nullptr;
+    int typeId = 0;
+    asITypeInfo *type = nullptr;
+
+    union {
+        asBYTE   u8;
+        asWORD   u16;
+        asDWORD  u32;
+        asQWORD  u64;
+        float    flt;
+        double   dbl;
+        void     *obj;
+    } value {};
+
+    asIDBValue() = default;
+
+    asIDBValue(asIScriptEngine *engine, void *ptr, int typeId, bool reference = false) :
+        engine(engine),
+        typeId(typeId)
+    {
+        if (!typeId)
+            return;
+
+        type = engine->GetTypeInfoById(typeId);
+
+        if (type)
+            type->AddRef();
+
+        if (reference)
+            ptr = *reinterpret_cast<void **>(ptr);
+
+        if (typeId & asTYPEID_OBJHANDLE)
+        {
+		    value.obj = *reinterpret_cast<void **>(ptr);
+		    engine->AddRefScriptObject(value.obj, type);
+        }
+	    else if (typeId & asTYPEID_MASK_OBJECT)
+	    {
+		    value.obj = engine->CreateScriptObjectCopy(ptr, type);
+	    }
+	    else
+	    {
+		    value.u64 = 0;
+		    int size = engine->GetSizeOfPrimitiveType(typeId);
+		    memcpy(&value.u64, ptr, size);
+	    }
+    }
+
+    asIDBValue(const asIDBValue &other) :
+        engine(other.engine),
+        typeId(other.typeId),
+        type(other.type)
+    {
+        if (!typeId)
+            return;
+
+        if (type)
+            type->AddRef();
+
+        if (typeId & asTYPEID_OBJHANDLE)
+        {
+            value.obj = other.value.obj;
+		    engine->AddRefScriptObject(value.obj, type);
+        }
+	    else if (typeId & asTYPEID_MASK_OBJECT)
+	    {
+		    value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
+	    }
+	    else
+		    value.u64 = other.value.u64;
+    }
+
+    asIDBValue(asIDBValue &&other) noexcept :
+        engine(other.engine),
+        typeId(other.typeId),
+        type(other.type)
+    {
+        if (!typeId)
+            return;
+
+		value.u64 = other.value.u64;
+
+        other.type = nullptr;
+        other.typeId = 0;
+        other.value.u64 = 0;
+    }
+
+    asIDBValue &operator=(const asIDBValue &other)
+    {
+        engine = other.engine;
+        typeId = other.typeId;
+        type = other.type;
+        value.u64 = 0;
+
+        if (!typeId)
+            return *this;
+
+        if (type)
+            type->AddRef();
+
+        if (typeId & asTYPEID_OBJHANDLE)
+        {
+            value.obj = other.value.obj;
+		    engine->AddRefScriptObject(value.obj, type);
+        }
+	    else if (typeId & asTYPEID_MASK_OBJECT)
+	    {
+		    value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
+	    }
+	    else
+		    value.u64 = other.value.u64;
+
+        return *this;
+    }
+
+    asIDBValue &operator=(asIDBValue &&other) noexcept
+    {
+        engine = other.engine;
+        typeId = other.typeId;
+        type = other.type;
+        value.u64 = 0;
+
+        if (!typeId)
+            return *this;
+
+		value.u64 = other.value.u64;
+
+        other.type = nullptr;
+        other.typeId = 0;
+        other.value.u64 = 0;
+
+        return *this;
+    }
+
+    ~asIDBValue()
+    {
+        Release();
+    }
+
+    void Release()
+    {
+	    if (typeId & asTYPEID_MASK_OBJECT)
+		    engine->ReleaseScriptObject(value.obj, type);
+
+        if (type)
+            type->Release();
+
+        type = nullptr;
+        typeId = 0;
+        value.u64 = 0;
+    }
+
+    bool IsValid() const
+    {
+        return typeId != 0;
+    }
+
+    template<typename T>
+    T *GetPointer(bool as_reference = false) const
+    {
+        if (typeId == 0)
+            throw std::runtime_error("nothing to point to");
+
+        if (typeId & asTYPEID_MASK_OBJECT)
+        {
+            if ((typeId & asTYPEID_OBJHANDLE) && as_reference)
+                return reinterpret_cast<T *>(const_cast<void **>(&value.obj));
+            return reinterpret_cast<T *>(value.obj);
+        }
+        return reinterpret_cast<T *>(const_cast<asQWORD *>(&value.u64));
     }
 };
 
@@ -139,13 +307,28 @@ struct asIDBVariable
     WeakPtr       ptr;
     asIDBDebugger &dbg;
 
-    asIDBResolvedVarAddr       address;
+    // these two are always set, regardless
+    // of what type of variable it is (except
+    // for the special top-level holders for globals/locals)
     std::string                name;
     std::string                ns = "::";
+    // if we are owned by another variable,
+    // it's pointed to here.
+    WeakPtr                    owner {};
+
+    // address will be non-null if we have a value
+    // that can be retrieved. this might be null
+    // for 'fake' variables or ones yet to be fetched.
+    asIDBVarAddr address {};
+
+    // these are only available after `evaluated` is true.
     std::string                value;
     std::string_view           typeName;
-    std::unique_ptr<uint8_t[]> stackData {};
-    WeakPtr                    owner {};
+    asIDBValue                 stackValue;
+
+    // if it's a getter, this will be set.
+    asIScriptFunction          *getter = nullptr;
+    Ptr                        get_evaluated;
     
     bool evaluated = false;
     bool expanded = false;
@@ -160,7 +343,7 @@ struct asIDBVariable
     void PushChild(WeakPtr ptr);
     int64_t RefId() const { return ref_id.value_or(0); }
 
-    Ptr CreateChildVariable(std::string name, std::string ns, asIDBResolvedVarAddr address, std::string_view typeName);
+    Ptr CreateChildVariable(std::string name, std::string ns, asIDBVarAddr address, std::string_view typeName);
 
     void Evaluate();
     void Expand();
@@ -217,11 +400,6 @@ public:
     // for expandable objects, this is called when the
     // debugger requests it be expanded.
     virtual void Expand(asIDBVariable::Ptr var) const { }
-#if 0
-    // for iterable objects, this is called when adding
-    // variables to watch that include [n] or [n,n] selectors.
-    virtual asIDBVariable Index(asIDBCache &, const asIDBVarAddr &id, asIDBVarState &state, size_t iterator, size_t element) const { return {}; }
-#endif
 };
 
 // built-in evaluators you can extend for
@@ -250,114 +428,51 @@ public:
 
     struct IteratorValue
     {
-        const asIDBObjectIteratorHelper   *helper;
-        union {
-            uint8_t u8;
-            uint16_t u16;
-            uint32_t u32;
-            uint64_t u64;
-            float f;
-            double d;
-            asIScriptObject *obj;
-            void *ptr;
-        };
+        const asIDBObjectIteratorHelper *helper;
+        asIDBValue                       value;
 
         IteratorValue() = delete;
 
-        static IteratorValue FromCtxReturn(const asIDBObjectIteratorHelper *helper, asIScriptContext *ctx)
+        static IteratorValue FromCtxReturn(const asIDBObjectIteratorHelper *helper, asIScriptContext *ctx, asETypeModifiers flags)
         {
-            IteratorValue v(helper);
-
-            if (helper->iteratorTypeId & asTYPEID_MASK_OBJECT)
-            {
-                v.ptr = ctx->GetReturnObject();
-                helper->type->GetEngine()->AddRefScriptObject(v.ptr, helper->iteratorType);
-            }
-            else if (helper->iteratorTypeId == asTYPEID_BOOL ||
-                     helper->iteratorTypeId == asTYPEID_INT8 ||
-                     helper->iteratorTypeId == asTYPEID_UINT8)
-                v.u8 = ctx->GetReturnByte();
-            else if (helper->iteratorTypeId == asTYPEID_INT16 ||
-                     helper->iteratorTypeId == asTYPEID_UINT16)
-                v.u16 = ctx->GetReturnWord();
-            else if (helper->iteratorTypeId == asTYPEID_INT32 ||
-                     helper->iteratorTypeId == asTYPEID_UINT32)
-                v.u32 = ctx->GetReturnDWord();
-            else if (helper->iteratorTypeId == asTYPEID_INT64 ||
-                     helper->iteratorTypeId == asTYPEID_UINT64)
-                v.u64 = ctx->GetReturnQWord();
-            else if (helper->iteratorTypeId == asTYPEID_FLOAT)
-                v.f = ctx->GetReturnFloat();
-            else if (helper->iteratorTypeId == asTYPEID_DOUBLE)
-                v.d = ctx->GetReturnDouble();
-
-            return v;
+            return { helper, asIDBValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), helper->iteratorTypeId, flags) };
         }
 
         void SetArg(asIScriptContext *ctx, asUINT index) const
         {
             if (helper->iteratorTypeId & asTYPEID_MASK_OBJECT)
-                ctx->SetArgObject(index, ptr);
+                ctx->SetArgObject(index, value.GetPointer<void *>());
             else if (helper->iteratorTypeId == asTYPEID_BOOL ||
                      helper->iteratorTypeId == asTYPEID_INT8 ||
                      helper->iteratorTypeId == asTYPEID_UINT8)
-                ctx->SetArgByte(index, u8);
+                ctx->SetArgByte(index, *value.GetPointer<uint8_t>());
             else if (helper->iteratorTypeId == asTYPEID_INT16 ||
                      helper->iteratorTypeId == asTYPEID_UINT16)
-                ctx->SetArgWord(index, u16);
+                ctx->SetArgWord(index, *value.GetPointer<uint16_t>());
             else if (helper->iteratorTypeId == asTYPEID_INT32 ||
                      helper->iteratorTypeId == asTYPEID_UINT32)
-                ctx->SetArgDWord(index, u32);
+                ctx->SetArgDWord(index, *value.GetPointer<uint32_t>());
             else if (helper->iteratorTypeId == asTYPEID_INT64 ||
                      helper->iteratorTypeId == asTYPEID_UINT64)
-                ctx->SetArgQWord(index, u64);
+                ctx->SetArgQWord(index, *value.GetPointer<uint64_t>());
             else if (helper->iteratorTypeId == asTYPEID_FLOAT)
-                ctx->SetArgFloat(index, f);
+                ctx->SetArgFloat(index, *value.GetPointer<float>());
             else if (helper->iteratorTypeId == asTYPEID_DOUBLE)
-                ctx->SetArgDouble(index, d);
+                ctx->SetArgDouble(index, *value.GetPointer<double>());
+            else
+                throw std::runtime_error("invalid type");
         }
 
-        ~IteratorValue()
-        {
-            if (ptr && (helper->iteratorTypeId & asTYPEID_MASK_OBJECT))
-                helper->type->GetEngine()->ReleaseScriptObject(obj, helper->iteratorType);
-        }
+        IteratorValue(const IteratorValue &other) = default;
+        IteratorValue(IteratorValue &&move) noexcept = default;
 
-        IteratorValue(const IteratorValue &) :
-            helper(helper),
-            ptr(ptr)
-        {
-            if (ptr && (helper->iteratorTypeId & asTYPEID_MASK_OBJECT))
-                helper->type->GetEngine()->AddRefScriptObject(obj, helper->iteratorType);
-        }
-
-        IteratorValue(IteratorValue &&move) noexcept :
-            helper(helper),
-            ptr(ptr)
-        {
-            move.ptr = nullptr;
-        }
-
-        IteratorValue &operator=(const IteratorValue &other)
-        {
-            helper = other.helper;
-            ptr = other.ptr;
-            if (ptr && (helper->iteratorTypeId & asTYPEID_MASK_OBJECT))
-                helper->type->GetEngine()->AddRefScriptObject(obj, helper->iteratorType);
-            return *this;
-        }
-        IteratorValue &operator=(IteratorValue &&move) noexcept
-        {
-            helper = move.helper;
-            ptr = move.ptr;
-            move.ptr = nullptr;
-            return *this;
-        }
+        IteratorValue &operator=(const IteratorValue &other) = default;
+        IteratorValue &operator=(IteratorValue &&move) noexcept = default;
 
     private:
-        IteratorValue(const asIDBObjectIteratorHelper *helper) :
+        IteratorValue(const asIDBObjectIteratorHelper *helper, asIDBValue &&value) :
             helper(helper),
-            ptr(nullptr)
+            value(value)
         {
         }
     };
@@ -392,37 +507,21 @@ protected:
     // address (and object, if set) of the given type.
     void QueryVariableProperties(asIDBVariable::Ptr var) const;
 
+    // convenience function that queries for getter property functions.
+    void QueryVariableGetters(asIDBVariable::Ptr var) const;
+
+    // convenience function to check the above two
+    // to see if we have anything to expand.
+    bool CanExpand(asIDBVariable::Ptr var) const;
+
+    // convenience function to check if a function is
+    // a compatible getter method
+    bool IsCompatibleGetter(asIScriptFunction *function) const;
+
     // convenience function that iterates the opFor* of the given
     // address (and object, if set) of the given type. If positive,
     // a specific index will be used.
     void QueryVariableForEach(asIDBVariable::Ptr var, int index = -1) const;
-};
-
-// This class manages `asIDBTypeEvaluator` instances
-// and handles the logic of finding the best
-// instance for the given type.
-// You can register existing IDs to replace their implementation.
-// When a type ID is not explicitly registered, a static evaluator
-// will take over. Note that you must register the type ID's
-// sequence number, so remove any additional flags (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR).
-class asIDBTypeEvaluatorMap
-{
-    std::unordered_map<int, std::unique_ptr<asIDBTypeEvaluator>> evaluators;
-    
-public:
-    // fetch the evaluator for the given type id.
-    const asIDBTypeEvaluator &GetEvaluator(class asIDBCache &, const asIDBResolvedVarAddr &id) const;
-
-    // Register an evaluator.
-    void Register(int typeId, std::unique_ptr<asIDBTypeEvaluator> evaluator);
-
-    // A quick shortcut to make a templated instantiation
-    // of T from the given type name.
-    template<typename T>
-    void Register(asIScriptEngine *engine, const char *name)
-    {
-        Register(engine->GetTypeInfoByName(name)->GetTypeId(), std::make_unique<T>());
-    }
 };
 
 // simple std::expected-like
@@ -532,9 +631,6 @@ public:
     // cached call stack
     asIDBCallStackVector call_stack;
 
-    // type evaluators
-    asIDBTypeEvaluatorMap evaluators;
-
     // cached globals
     asIDBVariable::Ptr globals;
 
@@ -546,10 +642,6 @@ public:
 
     // ptr back to debugger
     asIDBDebugger &dbg;
-
-    // pointers to temporary memory, which can be referred
-    // to by a asIDBResolvedVarAddr
-    std::vector<std::unique_ptr<uint8_t[]>> temp_memory;
 
     inline asIDBCache(asIDBDebugger &dbg, asIScriptContext *ctx) :
         dbg(dbg),
@@ -584,7 +676,11 @@ public:
 
     // for the given type + property data, fetch the address of the
     // value that this property points to.
-    virtual void *ResolvePropertyAddress(const asIDBResolvedVarAddr &id, int propertyIndex, int offset, int compositeOffset, bool isCompositeIndirect);
+    virtual void *ResolvePropertyAddress(const asIDBVarAddr &id, int propertyIndex, int offset, int compositeOffset, bool isCompositeIndirect);
+
+    // fetch an evaluator for the given resolved address.
+    // the built-in implementation only handles a few base evaluators.
+    virtual const asIDBTypeEvaluator &GetEvaluator(const asIDBVarAddr &id) const;
 
     // resolve the given expression to a unique var state.
     // `expr` must contain a resolvable expression; it's a limited

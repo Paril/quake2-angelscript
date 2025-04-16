@@ -28,7 +28,7 @@ bool q2as_yyjson_mut_val::check_expire_and_throw() const
         asGetActiveContext()->SetException("Invalid JSON value");
         return true;
     }
-    if (doc_ref.expired())
+    if (!get_valid())
     {
         asGetActiveContext()->SetException("JSON document expired");
         return true;
@@ -88,14 +88,9 @@ q2as_yyjson_val::q2as_yyjson_val(yyjson_val *val, q2as_yyjson_doc *d) :
 
 bool q2as_yyjson_val::check_expire_and_throw() const
 {
-    if (!val)
+    if (!get_valid())
     {
-        asGetActiveContext()->SetException("Invalid JSON value");
-        return true;
-    }
-    if (doc_ref.expired())
-    {
-        asGetActiveContext()->SetException("JSON document expired");
+        asGetActiveContext()->SetException("JSON document expired or invalid value");
         return true;
     }
 
@@ -140,6 +135,89 @@ std::string q2as_yyjson_doc::as_string() const
     return s;
 }
 
+class q2as_asIDBJsonMutValTypeEvaluator : public asIDBTypeEvaluator
+{
+public:
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
+    {
+        const q2as_yyjson_mut_val *v = var->address.ResolveAs<const q2as_yyjson_mut_val>();
+
+        if (!v->get_valid())
+        {
+            var->value = "(null or expired)";
+            return;
+        }
+
+        if (v->is_null())
+            var->value = "(null)";
+        else if (v->is_bool())
+            var->value = fmt::format("{}", v->get_bool());
+        else if (v->is_double())
+            var->value = fmt::format("{}", v->get_double());
+        else if (v->is_uint64())
+            var->value = fmt::format("{}", v->get_uint64());
+        else if (v->is_int64())
+            var->value = fmt::format("{}", v->get_int64());
+        else if (v->is_str())
+            var->value = fmt::format("\"{}\"", v->get_str());
+        else if (v->is_arr())
+        {
+            var->value = fmt::format("array ({} elements)", v->get_length());
+
+            if (v->get_length())
+                var->MakeExpandable();
+        }
+        else if (v->is_obj())
+        {
+            var->value = fmt::format("object ({} elements)", v->get_length());
+
+            if (v->get_length())
+                var->MakeExpandable();
+        }
+        else
+            var->value = "(unknown JSON object)";
+    }
+
+    virtual void Expand(asIDBVariable::Ptr var) const override
+    {
+        const q2as_yyjson_mut_val *v = var->address.ResolveAs<const q2as_yyjson_mut_val>();
+
+        if (!v->get_valid())
+            return;
+
+        if (v->is_arr())
+        {
+            size_t idx, max;
+            yyjson_mut_val *value;
+            yyjson_mut_arr_foreach(v->val, idx, max, value) {
+                q2as_yyjson_mut_val temp(value, v->doc_ref);
+                auto child = var->CreateChildVariable(
+                    fmt::format("[{}]", idx),
+                    "",
+                    asIDBVarAddr { var->address.typeId, false, &temp },
+                    var->typeName);
+                child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
+                child->address.address = child->stackValue.GetPointer<void>();
+            }
+        }
+        else if (v->is_obj())
+        {
+            size_t idx, max;
+            yyjson_mut_val *value, *key;
+            yyjson_mut_obj_foreach(v->val, idx, max, key, value) {
+                q2as_yyjson_mut_val temp(value, v->doc_ref);
+                auto child = var->CreateChildVariable(
+                    fmt::format("[\"{}\"]", yyjson_mut_get_str(key)),
+                    "",
+                    asIDBVarAddr { var->address.typeId, false, &temp },
+                    var->typeName);
+                child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
+                child->address.address = child->stackValue.GetPointer<void>();
+            }
+        }
+    }
+};
+
 static void Q2AS_RegisterMutableJson(q2as_registry &registry)
 {
     // mutable JSON value
@@ -183,6 +261,60 @@ static void Q2AS_RegisterMutableJson(q2as_registry &registry)
             { "bool get_is_null() const property", asMETHOD(q2as_yyjson_mut_val,  is_null), asCALL_THISCALL },
             { "bool get_is_num() const property",  asMETHOD(q2as_yyjson_mut_val,   is_num), asCALL_THISCALL },
 
+            { "bool get_bool_() const property", asMETHOD(q2as_yyjson_mut_val,    get_bool), asCALL_THISCALL },
+
+            { "uint8 get_uint8() const property", asMETHODPR(q2as_yyjson_mut_val, get_uint8, () const, uint8_t),       asCALL_THISCALL },
+            { "void get_uint8(uint8 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_uint8, (uint8_t &) const, void), asCALL_THISCALL },
+
+            { "uint16 get_uint16() const property", asMETHODPR(q2as_yyjson_mut_val, get_uint16, () const, uint16_t),       asCALL_THISCALL },
+            { "void get_uint16(uint16 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_uint16, (uint16_t &) const, void), asCALL_THISCALL },
+
+            { "uint32 get_uint32() const property", asMETHODPR(q2as_yyjson_mut_val, get_uint32, () const, uint32_t),       asCALL_THISCALL },
+            { "void get_uint32(uint32 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_uint32, (uint32_t &) const, void), asCALL_THISCALL },
+
+            { "uint64 get_uint64() const property", asMETHODPR(q2as_yyjson_mut_val, get_uint64, () const, uint64_t),       asCALL_THISCALL },
+            { "void get_uint64(uint64 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_uint64, (uint64_t &) const, void), asCALL_THISCALL },
+
+            { "int8 get_int8() const property", asMETHODPR(q2as_yyjson_mut_val, get_int8, () const, int8_t),       asCALL_THISCALL },
+            { "void get_int8(int8 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_int8, (int8_t &) const, void), asCALL_THISCALL },
+
+            { "int16 get_int16() const property", asMETHODPR(q2as_yyjson_mut_val, get_int16, () const, int16_t),       asCALL_THISCALL },
+            { "void get_int16(int16 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_int16, (int16_t &) const, void), asCALL_THISCALL },
+
+            { "int32 get_int32() const property", asMETHODPR(q2as_yyjson_mut_val, get_int32, () const, int32_t),       asCALL_THISCALL },
+            { "void get_int32(int32 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_int32, (int32_t &) const, void), asCALL_THISCALL },
+
+            { "int64 get_int64() const property", asMETHODPR(q2as_yyjson_mut_val, get_int64, () const, int64_t),       asCALL_THISCALL },
+            { "void get_int64(int64 &out) const", asMETHODPR(q2as_yyjson_mut_val, get_int64, (int64_t &) const, void), asCALL_THISCALL },
+
+            { "float get_float() const property", asMETHODPR(q2as_yyjson_mut_val, get_float, () const, float),       asCALL_THISCALL },
+            { "void get_float(float &out) const", asMETHODPR(q2as_yyjson_mut_val, get_float, (float &) const, void), asCALL_THISCALL },
+
+            { "double get_double() const property", asMETHODPR(q2as_yyjson_mut_val, get_double, () const, double),       asCALL_THISCALL },
+            { "void get_double(double &out) const", asMETHODPR(q2as_yyjson_mut_val, get_double, (double &) const, void), asCALL_THISCALL },
+
+            { "void get(bool &out) const",   asMETHODPR(q2as_yyjson_mut_val, get, (bool &) const, void),     asCALL_THISCALL },
+            { "void get(uint8 &out) const",  asMETHODPR(q2as_yyjson_mut_val, get, (uint8_t &) const, void),  asCALL_THISCALL },
+            { "void get(uint16 &out) const", asMETHODPR(q2as_yyjson_mut_val, get, (uint16_t &) const, void), asCALL_THISCALL },
+            { "void get(uint32 &out) const", asMETHODPR(q2as_yyjson_mut_val, get, (uint32_t &) const, void), asCALL_THISCALL },
+            { "void get(uint64 &out) const", asMETHODPR(q2as_yyjson_mut_val, get, (uint64_t &) const, void), asCALL_THISCALL },
+            { "void get(int8 &out) const",   asMETHODPR(q2as_yyjson_mut_val, get, (int8_t &) const, void),   asCALL_THISCALL },
+            { "void get(int16 &out) const",  asMETHODPR(q2as_yyjson_mut_val, get, (int16_t &) const, void),  asCALL_THISCALL },
+            { "void get(int32 &out) const",  asMETHODPR(q2as_yyjson_mut_val, get, (int32_t &) const, void),  asCALL_THISCALL },
+            { "void get(int64 &out) const",  asMETHODPR(q2as_yyjson_mut_val, get, (int64_t &) const, void),  asCALL_THISCALL },
+            { "void get(float &out) const",  asMETHODPR(q2as_yyjson_mut_val, get, (float &) const, void),    asCALL_THISCALL },
+            { "void get(double &out) const", asMETHODPR(q2as_yyjson_mut_val, get, (double &) const, void),   asCALL_THISCALL },
+            { "void get(string &out) const", asMETHOD(q2as_yyjson_mut_val, get_str),                         asCALL_THISCALL },
+            // TODO: this should be `get` but implicit conversion rules make that not work
+            { "void get_enum(? &out) const", asMETHODPR(q2as_yyjson_mut_val, get, (void *, int) const, void), asCALL_THISCALL },
+
+            { "uint64 get_uint_() const property",  asMETHOD(q2as_yyjson_mut_val, get_uint),   asCALL_THISCALL },
+            { "int64 get_sint() const property",    asMETHOD(q2as_yyjson_mut_val, get_sint),   asCALL_THISCALL },
+            { "int32 get_int_() const property",    asMETHOD(q2as_yyjson_mut_val, get_int),    asCALL_THISCALL },
+            { "double get_real() const property",   asMETHOD(q2as_yyjson_mut_val, get_real),   asCALL_THISCALL },
+            { "double get_num() const property",    asMETHOD(q2as_yyjson_mut_val, get_num),    asCALL_THISCALL },
+            { "string get_str() const property",    asMETHOD(q2as_yyjson_mut_val, get_str),    asCALL_THISCALL },
+
             { "bool arr_insert(json_mutval v, uint64 index)",         asMETHOD(q2as_yyjson_mut_val, arr_insert),       asCALL_THISCALL },
             { "bool arr_append(json_mutval v)",                       asMETHOD(q2as_yyjson_mut_val, arr_append),       asCALL_THISCALL },
             { "bool arr_prepend(json_mutval v)",                      asMETHOD(q2as_yyjson_mut_val, arr_prepend),      asCALL_THISCALL },
@@ -191,15 +323,17 @@ static void Q2AS_RegisterMutableJson(q2as_registry &registry)
             { "json_mutval arr_remove_last()",                        asMETHOD(q2as_yyjson_mut_val, arr_remove_last),  asCALL_THISCALL },
             { "bool arr_remove_range(uint64 index, uint64 len)",      asMETHOD(q2as_yyjson_mut_val, arr_remove_range), asCALL_THISCALL },
             { "bool arr_clear()",                                     asMETHOD(q2as_yyjson_mut_val, arr_clear),        asCALL_THISCALL },
-            { "uint64 get_arr_size() const property",                 asMETHOD(q2as_yyjson_mut_val, arr_size),         asCALL_THISCALL },
 
             { "bool obj_add(const string &in, json_mutval v)",           asMETHOD(q2as_yyjson_mut_val, obj_add),        asCALL_THISCALL },
             { "bool obj_put(const string &in, json_mutval v)",           asMETHOD(q2as_yyjson_mut_val, obj_put),        asCALL_THISCALL },
             { "bool obj_remove(const string &in)",                       asMETHOD(q2as_yyjson_mut_val, obj_remove),     asCALL_THISCALL },
             { "bool obj_rename_key(const string &in, const string &in)", asMETHOD(q2as_yyjson_mut_val, obj_rename_key), asCALL_THISCALL },
             { "bool obj_clear()",                                        asMETHOD(q2as_yyjson_mut_val, obj_clear),      asCALL_THISCALL },
-            { "uint64 get_obj_size() const property",                    asMETHOD(q2as_yyjson_mut_val, obj_size),       asCALL_THISCALL }
+
+            { "uint64 get_length() const property",                      asMETHOD(q2as_yyjson_mut_val, get_length),     asCALL_THISCALL },
         });
+
+    debugger_state.RegisterEvaluator<q2as_asIDBJsonMutValTypeEvaluator>(registry.engine, "json_mutval");
 
     // AS_TODO iterators?
 
@@ -212,7 +346,7 @@ static void Q2AS_RegisterMutableJson(q2as_registry &registry)
             { asBEHAVE_RELEASE, "void f()",         asFUNCTION((Q2AS_Release<q2as_yyjson_mut_doc, q2as_sv_state_t>)), asCALL_GENERIC }
         })
         .methods({
-            { "json_mutval get_root() property",                   asMETHOD(q2as_yyjson_mut_doc, get_root), asCALL_THISCALL },
+            { "json_mutval get_root() const property",             asMETHOD(q2as_yyjson_mut_doc, get_root), asCALL_THISCALL },
             { "void set_root(const json_mutval &in val) property", asMETHOD(q2as_yyjson_mut_doc, set_root), asCALL_THISCALL },
 
             { "void set_str_pool_size(uint64 len)", asMETHOD(q2as_yyjson_mut_doc, set_str_pool_size), asCALL_THISCALL },
@@ -260,6 +394,89 @@ void q2as_yyjson_obj_iter_from_val(q2as_yyjson_val v, q2as_yyjson_obj_iter *self
     new(self) q2as_yyjson_obj_iter(v);
 }
 
+class q2as_asIDBJsonValTypeEvaluator : public asIDBTypeEvaluator
+{
+public:
+    virtual void Evaluate(asIDBVariable::Ptr var) const override
+    {
+        const q2as_yyjson_val *v = var->address.ResolveAs<const q2as_yyjson_val>();
+
+        if (!v->get_valid())
+        {
+            var->value = "(null or expired)";
+            return;
+        }
+
+        if (v->is_null())
+            var->value = "(null)";
+        else if (v->is_bool())
+            var->value = fmt::format("{}", v->get_bool());
+        else if (v->is_double())
+            var->value = fmt::format("{}", v->get_double());
+        else if (v->is_uint64())
+            var->value = fmt::format("{}", v->get_uint64());
+        else if (v->is_int64())
+            var->value = fmt::format("{}", v->get_int64());
+        else if (v->is_str())
+            var->value = fmt::format("\"{}\"", v->get_str());
+        else if (v->is_arr())
+        {
+            var->value = fmt::format("array ({} elements)", v->get_length());
+
+            if (v->get_length())
+                var->MakeExpandable();
+        }
+        else if (v->is_obj())
+        {
+            var->value = fmt::format("object ({} elements)", v->get_length());
+
+            if (v->get_length())
+                var->MakeExpandable();
+        }
+        else
+            var->value = "(unknown JSON object)";
+    }
+
+    virtual void Expand(asIDBVariable::Ptr var) const override
+    {
+        const q2as_yyjson_val *v = var->address.ResolveAs<const q2as_yyjson_val>();
+
+        if (!v->get_valid())
+            return;
+
+        if (v->is_arr())
+        {
+            size_t idx, max;
+            yyjson_val *value;
+            yyjson_arr_foreach(v->val, idx, max, value) {
+                q2as_yyjson_val temp(value, v->doc_ref);
+                auto child = var->CreateChildVariable(
+                    fmt::format("[{}]", idx),
+                    "",
+                    asIDBVarAddr { var->address.typeId, false, &temp },
+                    var->typeName);
+                child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
+                child->address.address = child->stackValue.GetPointer<void>();
+            }
+        }
+        else if (v->is_obj())
+        {
+            size_t idx, max;
+            yyjson_val *value, *key;
+            yyjson_obj_foreach(v->val, idx, max, key, value) {
+                q2as_yyjson_val temp(value, v->doc_ref);
+                auto child = var->CreateChildVariable(
+                    fmt::format("[\"{}\"]", yyjson_get_str(key)),
+                    "",
+                    asIDBVarAddr { var->address.typeId, false, &temp },
+                    var->typeName);
+                child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
+                child->address.address = child->stackValue.GetPointer<void>();
+            }
+        }
+    }
+};
+
 static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
 {
     // immutable JSON value
@@ -276,13 +493,13 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "bool get_valid() const property", asMETHOD(q2as_yyjson_val, get_valid), asCALL_THISCALL },
             { "string to_string() const",        asMETHOD(q2as_yyjson_val, as_string), asCALL_THISCALL },
 
-            { "bool get_is_obj() const property",   asMETHOD(q2as_yyjson_val, is_obj), asCALL_THISCALL },
-            { "bool get_is_arr() const property",   asMETHOD(q2as_yyjson_val, is_arr), asCALL_THISCALL },
-            { "bool get_is_ctn() const property",   asMETHOD(q2as_yyjson_val, is_ctn), asCALL_THISCALL },
-            { "bool get_is_true() const property",  asMETHOD(q2as_yyjson_val, is_true), asCALL_THISCALL },
+            { "bool get_is_obj() const property",   asMETHOD(q2as_yyjson_val, is_obj),   asCALL_THISCALL },
+            { "bool get_is_arr() const property",   asMETHOD(q2as_yyjson_val, is_arr),   asCALL_THISCALL },
+            { "bool get_is_ctn() const property",   asMETHOD(q2as_yyjson_val, is_ctn),   asCALL_THISCALL },
+            { "bool get_is_true() const property",  asMETHOD(q2as_yyjson_val, is_true),  asCALL_THISCALL },
             { "bool get_is_false() const property", asMETHOD(q2as_yyjson_val, is_false), asCALL_THISCALL },
-            { "bool get_is_bool() const property",  asMETHOD(q2as_yyjson_val, is_bool), asCALL_THISCALL },
-            { "bool get_is_str() const property",   asMETHOD(q2as_yyjson_val, is_str), asCALL_THISCALL },
+            { "bool get_is_bool() const property",  asMETHOD(q2as_yyjson_val, is_bool),  asCALL_THISCALL },
+            { "bool get_is_str() const property",   asMETHOD(q2as_yyjson_val, is_str),   asCALL_THISCALL },
 
             { "bool get_is_uint8() const property",  asMETHOD(q2as_yyjson_val, is_uint8),  asCALL_THISCALL },
             { "bool get_is_uint16() const property", asMETHOD(q2as_yyjson_val, is_uint16), asCALL_THISCALL },
@@ -295,57 +512,57 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "bool get_is_float() const property",  asMETHOD(q2as_yyjson_val, is_float),  asCALL_THISCALL },
             { "bool get_is_double() const property", asMETHOD(q2as_yyjson_val, is_double), asCALL_THISCALL },
 
-            { "bool get_is_int() const property",  asMETHOD(q2as_yyjson_val, is_int), asCALL_THISCALL },
+            { "bool get_is_int() const property",  asMETHOD(q2as_yyjson_val, is_int),  asCALL_THISCALL },
             { "bool get_is_uint() const property", asMETHOD(q2as_yyjson_val, is_uint), asCALL_THISCALL },
             { "bool get_is_sint() const property", asMETHOD(q2as_yyjson_val, is_sint), asCALL_THISCALL },
             { "bool get_is_real() const property", asMETHOD(q2as_yyjson_val, is_real), asCALL_THISCALL },
             { "bool get_is_null() const property", asMETHOD(q2as_yyjson_val, is_null), asCALL_THISCALL },
-            { "bool get_is_num() const property",  asMETHOD(q2as_yyjson_val, is_num), asCALL_THISCALL },
+            { "bool get_is_num() const property",  asMETHOD(q2as_yyjson_val, is_num),  asCALL_THISCALL },
 
             { "bool get_bool_() const property", asMETHOD(q2as_yyjson_val,    get_bool), asCALL_THISCALL },
 
-            { "uint8 get_uint8() const property", asMETHODPR(q2as_yyjson_val, get_uint8, () const, uint8_t),      asCALL_THISCALL },
+            { "uint8 get_uint8() const property", asMETHODPR(q2as_yyjson_val, get_uint8, () const, uint8_t),       asCALL_THISCALL },
             { "void get_uint8(uint8 &out) const", asMETHODPR(q2as_yyjson_val, get_uint8, (uint8_t &) const, void), asCALL_THISCALL },
 
-            { "uint16 get_uint16() const property", asMETHODPR(q2as_yyjson_val, get_uint16, () const, uint16_t),      asCALL_THISCALL },
+            { "uint16 get_uint16() const property", asMETHODPR(q2as_yyjson_val, get_uint16, () const, uint16_t),       asCALL_THISCALL },
             { "void get_uint16(uint16 &out) const", asMETHODPR(q2as_yyjson_val, get_uint16, (uint16_t &) const, void), asCALL_THISCALL },
 
-            { "uint32 get_uint32() const property", asMETHODPR(q2as_yyjson_val, get_uint32, () const, uint32_t),      asCALL_THISCALL },
+            { "uint32 get_uint32() const property", asMETHODPR(q2as_yyjson_val, get_uint32, () const, uint32_t),       asCALL_THISCALL },
             { "void get_uint32(uint32 &out) const", asMETHODPR(q2as_yyjson_val, get_uint32, (uint32_t &) const, void), asCALL_THISCALL },
 
-            { "uint64 get_uint64() const property", asMETHODPR(q2as_yyjson_val, get_uint64, () const, uint64_t),      asCALL_THISCALL },
+            { "uint64 get_uint64() const property", asMETHODPR(q2as_yyjson_val, get_uint64, () const, uint64_t),       asCALL_THISCALL },
             { "void get_uint64(uint64 &out) const", asMETHODPR(q2as_yyjson_val, get_uint64, (uint64_t &) const, void), asCALL_THISCALL },
 
-            { "int8 get_int8() const property", asMETHODPR(q2as_yyjson_val, get_int8, () const, int8_t),      asCALL_THISCALL },
+            { "int8 get_int8() const property", asMETHODPR(q2as_yyjson_val, get_int8, () const, int8_t),       asCALL_THISCALL },
             { "void get_int8(int8 &out) const", asMETHODPR(q2as_yyjson_val, get_int8, (int8_t &) const, void), asCALL_THISCALL },
 
-            { "int16 get_int16() const property", asMETHODPR(q2as_yyjson_val, get_int16, () const, int16_t),      asCALL_THISCALL },
+            { "int16 get_int16() const property", asMETHODPR(q2as_yyjson_val, get_int16, () const, int16_t),       asCALL_THISCALL },
             { "void get_int16(int16 &out) const", asMETHODPR(q2as_yyjson_val, get_int16, (int16_t &) const, void), asCALL_THISCALL },
 
-            { "int32 get_int32() const property", asMETHODPR(q2as_yyjson_val, get_int32, () const, int32_t),      asCALL_THISCALL },
+            { "int32 get_int32() const property", asMETHODPR(q2as_yyjson_val, get_int32, () const, int32_t),       asCALL_THISCALL },
             { "void get_int32(int32 &out) const", asMETHODPR(q2as_yyjson_val, get_int32, (int32_t &) const, void), asCALL_THISCALL },
 
-            { "int64 get_int64() const property", asMETHODPR(q2as_yyjson_val, get_int64, () const, int64_t),      asCALL_THISCALL },
+            { "int64 get_int64() const property", asMETHODPR(q2as_yyjson_val, get_int64, () const, int64_t),       asCALL_THISCALL },
             { "void get_int64(int64 &out) const", asMETHODPR(q2as_yyjson_val, get_int64, (int64_t &) const, void), asCALL_THISCALL },
 
-            { "float get_float() const property", asMETHODPR(q2as_yyjson_val, get_float, () const, float),      asCALL_THISCALL },
+            { "float get_float() const property", asMETHODPR(q2as_yyjson_val, get_float, () const, float),       asCALL_THISCALL },
             { "void get_float(float &out) const", asMETHODPR(q2as_yyjson_val, get_float, (float &) const, void), asCALL_THISCALL },
 
-            { "double get_double() const property", asMETHODPR(q2as_yyjson_val, get_double, () const, double),      asCALL_THISCALL },
+            { "double get_double() const property", asMETHODPR(q2as_yyjson_val, get_double, () const, double),       asCALL_THISCALL },
             { "void get_double(double &out) const", asMETHODPR(q2as_yyjson_val, get_double, (double &) const, void), asCALL_THISCALL },
 
-            { "void get(bool &out) const",   asMETHODPR(q2as_yyjson_val, get, (bool &) const, void),       asCALL_THISCALL },
-            { "void get(uint8 &out) const",  asMETHODPR(q2as_yyjson_val, get, (uint8_t &) const, void),    asCALL_THISCALL },
-            { "void get(uint16 &out) const", asMETHODPR(q2as_yyjson_val, get, (uint16_t &) const, void),   asCALL_THISCALL },
-            { "void get(uint32 &out) const", asMETHODPR(q2as_yyjson_val, get, (uint32_t &) const, void),   asCALL_THISCALL },
-            { "void get(uint64 &out) const", asMETHODPR(q2as_yyjson_val, get, (uint64_t &) const, void),   asCALL_THISCALL },
-            { "void get(int8 &out) const",   asMETHODPR(q2as_yyjson_val, get, (int8_t &) const, void),     asCALL_THISCALL },
-            { "void get(int16 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int16_t &) const, void),    asCALL_THISCALL },
-            { "void get(int32 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int32_t &) const, void),    asCALL_THISCALL },
-            { "void get(int64 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int64_t &) const, void),    asCALL_THISCALL },
-            { "void get(float &out) const",  asMETHODPR(q2as_yyjson_val, get, (float &) const, void),      asCALL_THISCALL },
-            { "void get(double &out) const", asMETHODPR(q2as_yyjson_val, get, (double &) const, void),     asCALL_THISCALL },
-            { "void get(string &out) const", asMETHOD(q2as_yyjson_val, get_str),                           asCALL_THISCALL },
+            { "void get(bool &out) const",   asMETHODPR(q2as_yyjson_val, get, (bool &) const, void),     asCALL_THISCALL },
+            { "void get(uint8 &out) const",  asMETHODPR(q2as_yyjson_val, get, (uint8_t &) const, void),  asCALL_THISCALL },
+            { "void get(uint16 &out) const", asMETHODPR(q2as_yyjson_val, get, (uint16_t &) const, void), asCALL_THISCALL },
+            { "void get(uint32 &out) const", asMETHODPR(q2as_yyjson_val, get, (uint32_t &) const, void), asCALL_THISCALL },
+            { "void get(uint64 &out) const", asMETHODPR(q2as_yyjson_val, get, (uint64_t &) const, void), asCALL_THISCALL },
+            { "void get(int8 &out) const",   asMETHODPR(q2as_yyjson_val, get, (int8_t &) const, void),   asCALL_THISCALL },
+            { "void get(int16 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int16_t &) const, void),  asCALL_THISCALL },
+            { "void get(int32 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int32_t &) const, void),  asCALL_THISCALL },
+            { "void get(int64 &out) const",  asMETHODPR(q2as_yyjson_val, get, (int64_t &) const, void),  asCALL_THISCALL },
+            { "void get(float &out) const",  asMETHODPR(q2as_yyjson_val, get, (float &) const, void),    asCALL_THISCALL },
+            { "void get(double &out) const", asMETHODPR(q2as_yyjson_val, get, (double &) const, void),   asCALL_THISCALL },
+            { "void get(string &out) const", asMETHOD(q2as_yyjson_val, get_str),                         asCALL_THISCALL },
             // TODO: this should be `get` but implicit conversion rules make that not work
             { "void get_enum(? &out) const", asMETHODPR(q2as_yyjson_val, get, (void *, int) const, void), asCALL_THISCALL },
 
@@ -367,6 +584,8 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "json_val opIndex(uint64) const",           asMETHOD(q2as_yyjson_val, arr_get), asCALL_THISCALL }
         });
 
+    debugger_state.RegisterEvaluator<q2as_asIDBJsonValTypeEvaluator>(registry.engine, "json_val");
+
     // immutable JSON doc
     registry
         .type("json_doc", sizeof(q2as_yyjson_doc), asOBJ_REF)
@@ -377,7 +596,7 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { asBEHAVE_RELEASE, "void f()",                      asFUNCTION((Q2AS_Release<q2as_yyjson_doc, q2as_sv_state_t>)), asCALL_GENERIC }
         })
         .methods({
-            { "json_val get_root() property", asMETHOD(q2as_yyjson_doc, get_root), asCALL_THISCALL },
+            { "json_val get_root() const property", asMETHOD(q2as_yyjson_doc, get_root), asCALL_THISCALL },
 
             { "uint64 get_read_size() const property", asMETHOD(q2as_yyjson_doc, get_read_size), asCALL_THISCALL },
             { "uint64 get_val_count() const property", asMETHOD(q2as_yyjson_doc, get_val_count), asCALL_THISCALL },
