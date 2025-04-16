@@ -159,6 +159,7 @@ struct q2as_dbg_state_t
 
     struct cvar_t *cvar, *attach_type;
     int           active_type; // active debugger type
+    bool          suspend_immediately = true;
 
     void CheckDebugger(asIScriptContext *ctx);
     void DebugBreak(asIScriptContext *ctx = nullptr);

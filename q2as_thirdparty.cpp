@@ -63,7 +63,7 @@ public:
         else
             id.address = v->value.valueObj;
 
-        var->CreateChildVariable("value", "", id, var->dbg.cache->GetTypeNameFromType({ v->GetTypeId(), asTM_NONE }));
+        var->CreateChildVariable("value", id, var->dbg.cache->GetTypeNameFromType({ v->GetTypeId(), asTM_NONE }));
     }
 };
 
@@ -90,7 +90,6 @@ public:
         {
             auto child = var->CreateChildVariable(
                 fmt::format("[{}]", kvp.GetKey()),
-                "",
                 { kvp.GetTypeId(), false, const_cast<void *>(kvp.GetAddressOfValue()) },
                 var->dbg.cache->GetTypeNameFromType({ kvp.GetTypeId(), asTM_NONE }));
             child->Evaluate();

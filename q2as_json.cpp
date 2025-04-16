@@ -193,7 +193,6 @@ public:
                 q2as_yyjson_mut_val temp(value, v->doc_ref);
                 auto child = var->CreateChildVariable(
                     fmt::format("[{}]", idx),
-                    "",
                     asIDBVarAddr { var->address.typeId, false, &temp },
                     var->typeName);
                 child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
@@ -208,7 +207,6 @@ public:
                 q2as_yyjson_mut_val temp(value, v->doc_ref);
                 auto child = var->CreateChildVariable(
                     fmt::format("[\"{}\"]", yyjson_mut_get_str(key)),
-                    "",
                     asIDBVarAddr { var->address.typeId, false, &temp },
                     var->typeName);
                 child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
@@ -452,7 +450,6 @@ public:
                 q2as_yyjson_val temp(value, v->doc_ref);
                 auto child = var->CreateChildVariable(
                     fmt::format("[{}]", idx),
-                    "",
                     asIDBVarAddr { var->address.typeId, false, &temp },
                     var->typeName);
                 child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);
@@ -467,7 +464,6 @@ public:
                 q2as_yyjson_val temp(value, v->doc_ref);
                 auto child = var->CreateChildVariable(
                     fmt::format("[\"{}\"]", yyjson_get_str(key)),
-                    "",
                     asIDBVarAddr { var->address.typeId, false, &temp },
                     var->typeName);
                 child->stackValue = asIDBValue(var->dbg.cache->ctx->GetEngine(), &temp, var->address.typeId, asTM_NONE);

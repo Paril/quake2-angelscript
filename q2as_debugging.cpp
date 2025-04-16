@@ -414,10 +414,16 @@ public:
 
         if (debugger_state.attach_type->integer)
         {
-            while (!server->ClientConnected() || !asIDBDebugger::HasWork())
+            while (!server->ClientConnected())
             {
                 server->Tick();
                 std::this_thread::sleep_for(std::chrono::milliseconds(2));
+            }
+
+            if (debugger_state.suspend_immediately)
+            {
+                Suspend();
+                debugger_state.suspend_immediately = false;
             }
         }
 
@@ -432,26 +438,29 @@ protected:
         if (!server->ClientConnected())
             return;
 
-        auto ctx = cache->ctx;
-
-        asIScriptFunction *func = nullptr;
-        int col = 0;
-        const char *sec = nullptr;
-        int row = 0;
-
-        if (ctx->GetState() == asEXECUTION_EXCEPTION)
+        if (cache)
         {
-            func = ctx->GetExceptionFunction();
+            auto ctx = cache->ctx;
 
-            if (func)
-                row = ctx->GetExceptionLineNumber(&col, &sec);
-        }
-        else
-        {
-            func = ctx->GetFunction(0);
+            asIScriptFunction *func = nullptr;
+            int col = 0;
+            const char *sec = nullptr;
+            int row = 0;
 
-            if (func)
-                row = ctx->GetLineNumber(0, &col, &sec);
+            if (ctx->GetState() == asEXECUTION_EXCEPTION)
+            {
+                func = ctx->GetExceptionFunction();
+
+                if (func)
+                    row = ctx->GetExceptionLineNumber(&col, &sec);
+            }
+            else
+            {
+                func = ctx->GetFunction(0);
+
+                if (func)
+                    row = ctx->GetLineNumber(0, &col, &sec);
+            }
         }
 
         {

@@ -127,7 +127,7 @@ public:
             {
                 asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
                 child->owner = var;
-                child->name = std::get<1>(suffix);
+                child->identifier = std::get<1>(suffix);
                 child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
                 child->evaluated = true;
                 var->PushChild(child);
@@ -136,7 +136,7 @@ public:
         {
             asIDBVariable::Ptr child = var->dbg.cache->CreateVariable();
             child->owner = var;
-            child->name = "ms";
+            child->identifier = "ms";
             child->value = fmt::format("{}", s->milliseconds());
             child->evaluated = true;
             var->PushChild(child);

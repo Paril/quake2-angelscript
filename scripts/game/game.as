@@ -56,10 +56,7 @@ class cached_soundindex
     cached_soundindex(const string &in name)
     {
         this.name = name;
-
-        if (cached_soundindex_head !is null)
-            @cached_soundindex_head.next = @cached_soundindex_head;
-
+        @this.next = @cached_soundindex_head;
         @cached_soundindex_head = @this;
     }
 
@@ -111,10 +108,7 @@ class cached_modelindex
     cached_modelindex(const string &in name)
     {
         this.name = name;
-
-        if (cached_modelindex_head !is null)
-            @cached_modelindex_head.next = @cached_modelindex_head;
-
+        @this.next = @cached_modelindex_head;
         @cached_modelindex_head = @this;
     }
 
@@ -166,10 +160,7 @@ class cached_imageindex
     cached_imageindex(const string &in name)
     {
         this.name = name;
-
-        if (cached_imageindex_head !is null)
-            @cached_imageindex_head.next = @cached_imageindex_head;
-
+        @this.next = @cached_imageindex_head;
         @cached_imageindex_head = @this;
     }
 

@@ -295,26 +295,71 @@ public:
     }
 };
 
+// a variable name; ns is only non-blank for globals.
+// to make the code simpler, "::" and "" should be equal.
+struct asIDBVarName
+{
+    std::string name;
+    std::string ns;
+
+    asIDBVarName() = default;
+
+    template<typename T>
+    asIDBVarName(T name) :
+        name(name)
+    {
+    }
+    
+    template<typename Ta, typename Tb>
+    asIDBVarName(Ta ns, Tb name) :
+        name(name),
+        ns(ns)
+    {
+    }
+
+    inline bool operator<(const asIDBVarName &b) const
+    {
+        if (ns == b.ns)
+            return name < b.name;
+
+        return ns < b.ns;
+    }
+
+    inline std::string Combine() const
+    {
+        if (!ns.empty())
+            return fmt::format("{}::{}", ns, name);
+        return name;
+    }
+};
+
 // a variable for the debugger.
 struct asIDBVariable
 {
     using Ptr = std::shared_ptr<asIDBVariable>;
     using WeakPtr = std::weak_ptr<asIDBVariable>;
     using Set = std::unordered_set<Ptr>;
-    using Vector = std::vector<WeakPtr>;
+    using WeakVector = std::vector<WeakPtr>;
+    using Vector = std::vector<Ptr>;
     using Map = std::unordered_map<int64_t, WeakPtr>;
+    
+    struct PtrLess
+    {
+        inline bool operator()(const asIDBVariable::Ptr &a, const asIDBVariable::Ptr &b) const
+        {
+            return a->identifier < b->identifier;
+        }
+    };
 
-    WeakPtr       ptr;
+    using SortedSet = std::set<Ptr, PtrLess>;
+
     asIDBDebugger &dbg;
+    WeakPtr       ptr;
 
-    // these two are always set, regardless
-    // of what type of variable it is (except
-    // for the special top-level holders for globals/locals)
-    std::string                name;
-    std::string                ns = "::";
+    asIDBVarName identifier;
     // if we are owned by another variable,
     // it's pointed to here.
-    WeakPtr                    owner {};
+    WeakPtr      owner;
 
     // address will be non-null if we have a value
     // that can be retrieved. this might be null
@@ -322,9 +367,9 @@ struct asIDBVariable
     asIDBVarAddr address {};
 
     // these are only available after `evaluated` is true.
-    std::string                value;
-    std::string_view           typeName;
-    asIDBValue                 stackValue;
+    std::string      value;
+    std::string_view typeName;
+    asIDBValue       stackValue;
 
     // if it's a getter, this will be set.
     asIScriptFunction          *getter = nullptr;
@@ -338,12 +383,12 @@ struct asIDBVariable
     {
     }
 
-    const Vector &Children() const { return children; }
+    const SortedSet &Children() const { return children; }
     void MakeExpandable();
-    void PushChild(WeakPtr ptr);
+    void PushChild(Ptr ptr);
     int64_t RefId() const { return ref_id.value_or(0); }
 
-    Ptr CreateChildVariable(std::string name, std::string ns, asIDBVarAddr address, std::string_view typeName);
+    Ptr CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address, std::string_view typeName);
 
     void Evaluate();
     void Expand();
@@ -352,7 +397,7 @@ private:
     // if ref_id is set, the variable has children.
     // call asIDBCache::LinkVariable to set this.
     std::optional<int64_t>     ref_id {};
-    Vector                     children;
+    SortedSet                  children;
 };
 
 // a local, fetched from GetVar

@@ -108,8 +108,9 @@ public:
                 dbg->breakpoints.erase(it);
 
             if (request.breakpoints && !request.breakpoints->empty()) {
-                auto &positions = dbg->workspace->potential_breakpoints[pathstr];
-                auto it = dbg->breakpoints.find(*dbg->workspace->sections.find(pathstr));
+                auto &pathstrptr = *dbg->workspace->sections.find(pathstr);
+                auto &positions = dbg->workspace->potential_breakpoints[pathstrptr];
+                auto it = dbg->breakpoints.find(pathstrptr);
 
                 for (auto &bp : *request.breakpoints) {
                     asIDBLineCol closest { -1, -1 };
@@ -142,7 +143,7 @@ public:
                     placed_bp.verified = true;
 
                     if (it == dbg->breakpoints.end())
-                        it = dbg->breakpoints.insert({ *dbg->workspace->sections.find(pathstr), asIDBSectionBreakpoints {} }).first;
+                        it = dbg->breakpoints.insert({ pathstrptr, asIDBSectionBreakpoints {} }).first;
 
                     it->second.push_back({ (int) closest.line, (int) closest.col });
                 }
@@ -191,7 +192,14 @@ public:
         dap::StackTraceResponse response {};
 
         if (!dbg->cache || !dbg->cache->ctx)
+        {
+            response.totalFrames = 1;
+            auto &frame = response.stackFrames.emplace_back();
+            frame.id = -1;
+            frame.presentationHint = "label";
+            frame.name = "system func";
             return response;
+        }
 
         dbg->cache->CacheCallstack();
 
@@ -225,7 +233,12 @@ public:
     dap::ResponseOrError<dap::ScopesResponse> HandleRequest(const dap::ScopesRequest &request)
     {
         std::scoped_lock lock(dbg->mutex);
+
         dap::ScopesResponse response {};
+
+        if (!dbg->cache)
+            return response;
+
         bool found = false;
 
         dbg->cache->CacheGlobals();
@@ -296,14 +309,16 @@ public:
         int64_t start = request.start.has_value() ? (int64_t) request.start.value() : 0;
         int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->Children().size();
 
+        auto it = varContainer->Children().begin();
+        std::advance(it, start);
+
         for (int64_t i = start; i < count; i++)
         {
-            auto &local_ptr = varContainer->Children()[i];
+            auto &local = *it;
             auto &var = response.variables.emplace_back();
-            auto local = local_ptr.lock();
 
             local->Evaluate();
-            var.name = local->name;
+            var.name = local->identifier.Combine();
             var.type = dap::string(local->typeName);
             if (local->getter)
             {
@@ -318,6 +333,7 @@ public:
             }
             var.namedVariables = local->Children().size();
             var.variablesReference = local->RefId();
+            it++;
         }
 
         return response;
@@ -351,6 +367,9 @@ public:
     {
         std::scoped_lock lock(dbg->mutex);
         dap::EvaluateResponse response {};
+
+        if (!dbg->cache)
+            return response;
 
         std::optional<int> stack_index = std::nullopt;
 

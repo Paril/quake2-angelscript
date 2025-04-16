@@ -18,10 +18,10 @@ void asIDBVariable::MakeExpandable()
     }
 }
 
-void asIDBVariable::PushChild(WeakPtr ptr)
+void asIDBVariable::PushChild(Ptr ptr)
 {
     MakeExpandable();
-    children.push_back(ptr);
+    children.insert(ptr);
 }
 
 void asIDBVariable::Evaluate()
@@ -64,7 +64,7 @@ void asIDBVariable::Expand()
 
         if (ctx->GetState() != asEXECUTION_FINISHED)
         {
-            var->get_evaluated = var->CreateChildVariable(var->name, var->ns, {}, "");
+            var->get_evaluated = var->CreateChildVariable(var->identifier, {}, "");
             var->get_evaluated->value = fmt::format("Exception thrown ({})", ctx->GetExceptionString());
             var->get_evaluated->evaluated = true;
         }
@@ -75,8 +75,7 @@ void asIDBVariable::Expand()
             asIDBValue returnValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), typeId, (returnFlags & asTM_INOUTREF) != 0);
 
             asIDBVariable::Ptr child = var->CreateChildVariable(
-                var->name,
-                "",
+                var->identifier,
                 { typeId, (returnFlags & asTM_CONST) != 0, nullptr },
                 dbg.cache->GetTypeNameFromType({ typeId, (asETypeModifiers) returnFlags })
             );
@@ -97,12 +96,11 @@ void asIDBVariable::Expand()
     expanded = true;
 }
 
-asIDBVariable::Ptr asIDBVariable::CreateChildVariable(std::string name, std::string ns, asIDBVarAddr address, std::string_view typeName)
+asIDBVariable::Ptr asIDBVariable::CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address, std::string_view typeName)
 {
     asIDBVariable::Ptr child = dbg.cache->CreateVariable();
     child->owner = ptr;
-    child->name = std::move(name);
-    child->ns = std::move(ns);
+    child->identifier = identifier;
     child->address = address;
     child->typeName = typeName;
     PushChild(child);
@@ -152,7 +150,7 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
 
             asIDBVarAddr idKey { thisTypeId, false, thisPtr };
 
-            asIDBVariable::Ptr var = container->CreateChildVariable("this", "", idKey, viewType);
+            asIDBVariable::Ptr var = container->CreateChildVariable("this", idKey, viewType);
 
             this_ptr = var;
         }
@@ -183,7 +181,7 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
 
         asIDBVarAddr idKey { typeId, (modifiers & asTM_CONST) != 0, ptr };
         
-        asIDBVariable::Ptr var = container->CreateChildVariable(std::move(localName), "", idKey, viewType);
+        asIDBVariable::Ptr var = container->CreateChildVariable(std::move(localName), idKey, viewType);
 
         local_by_index.emplace(n, var);
     }
@@ -326,7 +324,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
         struct asIDBNamespacedVar {
             asIDBVariable::WeakPtr var;
             std::string_view       name;
-            std::string_view       ns = "::";
+            std::string_view       ns;
         };
 
         std::vector<asIDBNamespacedVar> matches;
@@ -372,14 +370,12 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
                 for (auto &param : var->Children())
                 {
-                    auto paramvar = param.lock();
-
-                    if (variable_name != paramvar->name)
+                    if (variable_name != param->identifier.name)
                         continue;
 
                     matches.push_back({
-                        paramvar,
-                        paramvar->name
+                        param,
+                        param->identifier.name
                     });
                 }
             }
@@ -390,13 +386,11 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
         for (auto &global : globals->Children())
         {
-            auto globalvar = global.lock();
-                
-            if (variable_name == globalvar->name)
+            if (variable_name == global->identifier.name)
                 matches.push_back({
-                    globalvar,
-                    globalvar->name,
-                    globalvar->ns
+                    global,
+                    global->identifier.name,
+                    global->identifier.ns
                 });
         }
 
@@ -457,9 +451,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
     for (auto &child : varp->Children())
     {
-        auto childp = child.lock();
-        
-        if (childp->name == eval_name)
+        if (child->identifier.name == eval_name)
             return ResolveSubExpression(child, eval_start == std::string_view::npos ? std::string_view{} : rest.substr(eval_start));
     }
 
@@ -556,9 +548,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
         asIDBVarAddr idKey { typeId, isConst, ptr };
 
-        std::string localName = ((nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name);
-
-        globals->CreateChildVariable(std::move(localName), (nameSpace && nameSpace[0]) ? nameSpace : "", idKey, viewType);
+        globals->CreateChildVariable(asIDBVarName((nameSpace && nameSpace[0]) ? nameSpace : "", name), idKey, viewType);
     }
 
     for (asUINT n = 0; n < main->GetEngine()->GetGlobalPropertyCount(); n++)
@@ -578,7 +568,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
         std::string localName = (nameSpace && nameSpace[0]) ? fmt::format("{}::{}", nameSpace, name) : name;
         
-        globals->CreateChildVariable(std::move(localName), "", idKey, viewType);
+        globals->CreateChildVariable(std::move(localName), idKey, viewType);
     }
 
     globals->evaluated = globals->expanded = true;
@@ -729,7 +719,7 @@ public:
             else
                 rawValue = fmt::format("{}", v);
 
-            auto child = var->CreateChildVariable("value", "", {}, "");
+            auto child = var->CreateChildVariable("value", {}, "");
             child->value = std::move(rawValue);
             child->evaluated = true;
         }
@@ -776,7 +766,7 @@ public:
                 else
                     bitEntry = fmt::format("{}", 1 << e);
 
-                auto child = var->CreateChildVariable(fmt::format("[{:2}]", e), "", {}, "");
+                auto child = var->CreateChildVariable(fmt::format("[{:{}}]", e, type->GetSize() == 1 ? 1 : 2), {}, "");
                 child->value = std::move(bitEntry);
                 child->evaluated = true;
             }
@@ -991,7 +981,7 @@ void asIDBObjectTypeEvaluator::QueryVariableProperties(asIDBVariable::Ptr var) c
         // TODO 2.0: this causes an issue with Watch variables
         // because of the way dereferencing works. For now, it
         // will add duplicates, and the old var state cache is gone.
-        var->CreateChildVariable(name, "", propId, cache.GetTypeNameFromType({ propTypeId, isReadOnly ? asTM_CONST : asTM_NONE }));
+        var->CreateChildVariable(name, propId, cache.GetTypeNameFromType({ propTypeId, isReadOnly ? asTM_CONST : asTM_NONE }));
     }
 }
 
@@ -1009,7 +999,7 @@ void asIDBObjectTypeEvaluator::QueryVariableGetters(asIDBVariable::Ptr var) cons
         if (!IsCompatibleGetter(function))
             continue;
 
-        auto child = var->CreateChildVariable(std::string(std::string_view(function->GetName()).substr(4)), "", {}, cache.GetTypeNameFromType({ function->GetReturnTypeId(), asTM_NONE }));
+        auto child = var->CreateChildVariable(std::string(std::string_view(function->GetName()).substr(4)), {}, cache.GetTypeNameFromType({ function->GetReturnTypeId(), asTM_NONE }));
         child->getter = function;
         child->MakeExpandable();
     }
@@ -1078,7 +1068,6 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
         {
             indexVar = var->CreateChildVariable(
                 fmt::format("[{}]", elementId),
-                "",
                 {},
                 "" // FIXME: could show types as tuple?
             );
@@ -1095,7 +1084,6 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
             
             auto child = (multiElement ? indexVar : var)->CreateChildVariable(
                 fmt::format("[{}]", multiElement ? visibleOffset : elementId),
-                "",
                 { typeId, (returnFlags & asTM_CONST) != 0, nullptr },
                 dbg.cache->GetTypeNameFromType({ typeId, (asETypeModifiers) returnFlags })
             );
@@ -1209,6 +1197,32 @@ void asIDBWorkspace::CompileBreakpointPositions()
                 for (size_t m = 0; m < type->GetMethodCount(); m++)
                 {
                     auto func = type->GetMethodByIndex(m, false);
+
+                    for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
+                    {
+                        const char *section;
+                        int line, col;
+                        func->GetLineNumber(i, &section, &line, &col);
+                        potential_breakpoints[section].insert(asIDBLineCol { line, col });
+                    }
+                }
+
+                for (size_t m = 0; m < type->GetBehaviourCount(); m++)
+                {
+                    auto func = type->GetBehaviourByIndex(m, nullptr);
+
+                    for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
+                    {
+                        const char *section;
+                        int line, col;
+                        func->GetLineNumber(i, &section, &line, &col);
+                        potential_breakpoints[section].insert(asIDBLineCol { line, col });
+                    }
+                }
+
+                for (size_t m = 0; m < type->GetFactoryCount(); m++)
+                {
+                    auto func = type->GetFactoryByIndex(m);
 
                     for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
                     {
