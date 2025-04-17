@@ -168,6 +168,14 @@ struct vec3_t
 
 constexpr vec3_t vec3_origin {};
 
+// angle indexes
+enum
+{
+    PITCH,
+    YAW,
+    ROLL
+};
+
 inline void AngleVectors(const vec3_t &angles, vec3_t *forward, vec3_t *right, vec3_t *up)
 {
     float angle = angles[YAW] * (PIf * 2 / 360);

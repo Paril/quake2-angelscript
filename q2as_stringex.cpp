@@ -114,7 +114,7 @@ static int q2as_Q_strncasecmp(const std::string &a, const std::string &b, uint32
     return Q_strncasecmp(a, b, n);
 }
 
-std::optional<std::string_view> q2as_ParseView(std::string_view &data_p, const char *seps)
+std::optional<std::string_view> q2as_ParseView(std::string_view &data_p, const std::string_view seps)
 {
     if (data_p.empty())
     {

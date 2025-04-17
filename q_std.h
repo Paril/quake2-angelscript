@@ -101,14 +101,6 @@ constexpr T lerp(T from, T to, float t)
     return (to * t) + (from * (1.f - t));
 }
 
-// angle indexes
-enum
-{
-    PITCH,
-    YAW,
-    ROLL
-};
-
 /*
 ==============================================================
 
@@ -158,9 +150,5 @@ LerpAngle
 }
 
 #include "q_vec3.h"
-
-//=============================================
-
-std::optional<std::string_view> COM_ParseView(std::string_view &data_p, const char *seps = "\r\n\t ");
 
 // EOF
