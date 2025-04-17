@@ -1,13 +1,14 @@
 // MIT Licensed
 // see https://github.com/Paril/angelscript-ui-debugger
 
-#include "as_debugger.h"
 #include "as_debugger_dap.h"
+#include "as_debugger.h"
+#include <dap/session.h>
 
 class asIDBDAPClient
 {
 public:
-    asIDBDebugger                 *dbg;
+    asIDBDebugger                *dbg;
     std::atomic_bool              configuration_complete = false;
     std::atomic_bool              terminate = false;
     std::unique_ptr<dap::Session> session;
@@ -21,7 +22,6 @@ public:
 
         session->registerHandler([&](const dap::InitializeRequest &request) {
             dap::InitializeResponse response;
-            //response.supportsCompletionsRequest = true;
             response.supportsClipboardContext = true;
             response.supportsConfigurationDoneRequest = true;
             response.supportsDelayedStackTraceLoading = true;
@@ -32,9 +32,12 @@ public:
         });
 
         session->registerHandler([&](const dap::DisconnectRequest &request) { return this->HandleRequest(request); });
-        session->registerHandler([&](const dap::SetBreakpointsRequest &request) { return this->HandleRequest(request); });
-        session->registerHandler([&](const dap::SetFunctionBreakpointsRequest &request) { return this->HandleRequest(request); });
-        session->registerHandler([&](const dap::ConfigurationDoneRequest &request) { return this->HandleRequest(request); });
+        session->registerHandler(
+            [&](const dap::SetBreakpointsRequest &request) { return this->HandleRequest(request); });
+        session->registerHandler(
+            [&](const dap::SetFunctionBreakpointsRequest &request) { return this->HandleRequest(request); });
+        session->registerHandler(
+            [&](const dap::ConfigurationDoneRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::ThreadsRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::StackTraceRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::ScopesRequest &request) { return this->HandleRequest(request); });
@@ -44,10 +47,13 @@ public:
         session->registerHandler([&](const dap::StepInRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::NextRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::EvaluateRequest &request) { return this->HandleRequest(request); });
-        session->registerHandler([&](const dap::BreakpointLocationsRequest &request) { return this->HandleRequest(request); });
-        
-        session->registerSentHandler([&](const dap::ResponseOrError<dap::InitializeResponse> &response) { OnResponseSent(response); });
-        session->registerSentHandler([&](const dap::ResponseOrError<dap::ConfigurationDoneResponse> &response) { OnResponseSent(response); });
+        session->registerHandler(
+            [&](const dap::BreakpointLocationsRequest &request) { return this->HandleRequest(request); });
+
+        session->registerSentHandler(
+            [&](const dap::ResponseOrError<dap::InitializeResponse> &response) { OnResponseSent(response); });
+        session->registerSentHandler(
+            [&](const dap::ResponseOrError<dap::ConfigurationDoneResponse> &response) { OnResponseSent(response); });
     }
 
     dap::BreakpointLocationsResponse HandleRequest(const dap::BreakpointLocationsRequest &request)
@@ -57,16 +63,16 @@ public:
         if (request.source.name.has_value())
         {
             std::scoped_lock lock(dbg->mutex);
-            if (auto linecols = dbg->workspace->potential_breakpoints.find(request.source.name.value()); linecols != dbg->workspace->potential_breakpoints.end())
+            if (auto linecols = dbg->workspace->potential_breakpoints.find(request.source.name.value());
+                linecols != dbg->workspace->potential_breakpoints.end())
             {
                 // FIXME: STL equal_range maybe?
                 for (auto &lc : linecols->second)
                 {
                     if (lc.line < request.line)
                         continue;
-                    else if (request.endLine.has_value() ?
-                        (lc.line > request.endLine.value()) :
-                        (lc.line > request.line))
+                    else if (request.endLine.has_value() ? (lc.line > request.endLine.value())
+                                                         : (lc.line > request.line))
                         continue;
                     else if (request.column.has_value() && lc.col < request.column.value())
                         continue;
@@ -96,7 +102,8 @@ public:
     {
         dap::SetBreakpointsResponse response;
 
-        if (request.source.path) {
+        if (request.source.path)
+        {
             auto rel = dbg->workspace->PathToSection(request.source.path.value());
             auto pathstr = std::filesystem::path(rel).generic_string();
 
@@ -107,12 +114,14 @@ public:
             if (auto it = dbg->breakpoints.find(pathstr); it != dbg->breakpoints.end())
                 dbg->breakpoints.erase(it);
 
-            if (request.breakpoints && !request.breakpoints->empty()) {
+            if (request.breakpoints && !request.breakpoints->empty())
+            {
                 auto &pathstrptr = *dbg->workspace->sections.find(pathstr);
                 auto &positions = dbg->workspace->potential_breakpoints[pathstrptr];
-                auto it = dbg->breakpoints.find(pathstrptr);
+                auto  it = dbg->breakpoints.find(pathstrptr);
 
-                for (auto &bp : *request.breakpoints) {
+                for (auto &bp : *request.breakpoints)
+                {
                     asIDBLineCol closest { -1, -1 };
 
                     // FIXME: there's probably some STL methods that can
@@ -155,12 +164,13 @@ public:
 
     dap::SetFunctionBreakpointsResponse HandleRequest(const dap::SetFunctionBreakpointsRequest &request)
     {
-        std::scoped_lock lock(dbg->mutex);
+        std::scoped_lock                    lock(dbg->mutex);
         dap::SetFunctionBreakpointsResponse response {};
-        
+
         dbg->function_breakpoints.clear();
 
-        for (auto &bp : request.breakpoints) {
+        for (auto &bp : request.breakpoints)
+        {
             dbg->function_breakpoints.insert(bp.name);
 
             dap::Breakpoint bp {};
@@ -180,15 +190,13 @@ public:
     dap::ThreadsResponse HandleRequest(const dap::ThreadsRequest &request)
     {
         dap::ThreadsResponse response {};
-        response.threads.push_back({
-            1, "Main"
-        });
+        response.threads.push_back({ 1, "Main" });
         return response;
     }
 
     dap::StackTraceResponse HandleRequest(const dap::StackTraceRequest &request)
     {
-        std::scoped_lock lock(dbg->mutex);
+        std::scoped_lock        lock(dbg->mutex);
         dap::StackTraceResponse response {};
 
         if (!dbg->cache || !dbg->cache->ctx)
@@ -203,11 +211,12 @@ public:
 
         dbg->cache->CacheCallstack();
 
-        int64_t start = request.startFrame.has_value() ? (int64_t)(*request.startFrame) : (int64_t)0;
-        int64_t levels = (request.levels.has_value() && request.levels.value() > 0) ? (int64_t)(*request.levels) : (int64_t) 9999;
+        int64_t start = request.startFrame.has_value() ? (int64_t) (*request.startFrame) : (int64_t) 0;
+        int64_t levels =
+            (request.levels.has_value() && request.levels.value() > 0) ? (int64_t) (*request.levels) : (int64_t) 9999;
 
         response.totalFrames = dbg->cache->call_stack.size();
-                
+
         for (asUINT i = 0; i < levels && (size_t) (i + start) < dbg->cache->call_stack.size(); i++)
         {
             auto &frame = response.stackFrames.emplace_back();
@@ -295,12 +304,12 @@ public:
     dap::ResponseOrError<dap::VariablesResponse> HandleRequest(const dap::VariablesRequest &request)
     {
         std::scoped_lock lock(dbg->mutex);
-        auto varit = dbg->cache->variable_refs.find(request.variablesReference);
+        auto             varit = dbg->cache->variable_refs.find(request.variablesReference);
 
         if (varit == dbg->cache->variable_refs.end())
             return dap::Error("invalid variablesReference");
 
-        auto varContainer = varit->second.lock();
+        auto                   varContainer = varit->second.lock();
         dap::VariablesResponse response {};
 
         varContainer->Evaluate();
@@ -365,7 +374,7 @@ public:
 
     dap::ResponseOrError<dap::EvaluateResponse> HandleRequest(const dap::EvaluateRequest &request)
     {
-        std::scoped_lock lock(dbg->mutex);
+        std::scoped_lock      lock(dbg->mutex);
         dap::EvaluateResponse response {};
 
         if (!dbg->cache)
@@ -391,7 +400,7 @@ public:
         auto var = result.value().lock();
 
         var->Evaluate();
-        
+
         response.type = dap::string(var->typeName);
         response.result = var->value.empty() ? var->typeName : var->value;
         response.variablesReference = var->RefId();
@@ -443,10 +452,9 @@ void asIDBDAPServer::StartServer()
 {
     server = dap::net::Server::create();
 
-    server->start(port,
-        [&](const std::shared_ptr<dap::ReaderWriter> &socket) { this->ClientConnected(socket); },
-        [&](const char *msg) { this->ClientError(msg); }
-    );
+    server->start(
+        port, [&](const std::shared_ptr<dap::ReaderWriter> &socket) { this->ClientConnected(socket); },
+        [&](const char *msg) { this->ClientError(msg); });
 }
 
 void asIDBDAPServer::StopServer()

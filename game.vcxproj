@@ -403,7 +403,6 @@
     <ClInclude Include="thirdparty\yyjson\yyjson.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".editorconfig" />
     <None Include="scripts\as.predefined" />
     <None Include="scripts\bgame\bg.as" />
     <None Include="scripts\bgame\engine.as" />

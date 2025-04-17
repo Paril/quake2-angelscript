@@ -1,0 +1,20 @@
+---
+BasedOnStyle: Microsoft
+IndentWidth: 4
+---
+Language: Cpp
+DerivePointerAlignment: false
+PointerAlignment: Right
+AccessModifierOffset: -4
+SpaceAfterTemplateKeyword: false
+PackConstructorInitializers: Never
+BreakConstructorInitializers: AfterColon
+AlignConsecutiveDeclarations: Consecutive
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortCaseExpressionOnASingleLine: true
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+SpaceAfterCStyleCast: true
+SpaceBeforeCpp11BracedList: true
+Cpp11BracedListStyle: false
+BreakTemplateDeclarations: Yes

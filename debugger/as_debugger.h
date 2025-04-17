@@ -4,7 +4,7 @@
 #pragma once
 
 /*
- * 
+ *
  * a lightweight debugger for AngelScript. Built originally for Q2AS,
  * but hopefully usable for other purposes.
  * Design philosophy:
@@ -17,18 +17,17 @@
  * - requires either fmt or std::format
  */
 
+#include "angelscript.h"
+#include <filesystem>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <set>
+#include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
-#include <set>
-#include <type_traits>
-#include <string>
-#include <set>
 #include <variant>
-#include <mutex>
-#include <filesystem>
-#include <optional>
-#include <memory>
-#include "angelscript.h"
 
 #ifdef __cpp_lib_format
 #include <format>
@@ -37,12 +36,10 @@ namespace fmt = std;
 #include <fmt/format.h>
 #endif
 
-class asIDBDebugger;
-
 struct asIDBTypeId
 {
-    int                 typeId = 0;
-    asETypeModifiers    modifiers = asTM_NONE;
+    int              typeId = 0;
+    asETypeModifiers modifiers = asTM_NONE;
 
     constexpr bool operator==(const asIDBTypeId &other) const
     {
@@ -50,11 +47,11 @@ struct asIDBTypeId
     }
 };
 
-template <class T>
-inline void asIDBHashCombine(size_t &seed, const T& v)
+template<class T>
+inline void asIDBHashCombine(size_t &seed, const T &v)
 {
     std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 template<>
@@ -75,9 +72,9 @@ using asIDBTypeNameMap = std::unordered_map<asIDBTypeId, std::string>;
 // the debugger is currently broken on a frame.
 struct asIDBVarAddr
 {
-    int     typeId = 0;
-    bool    constant = false;
-    void    *address = nullptr;
+    int   typeId = 0;
+    bool  constant = false;
+    void *address = nullptr;
 
     asIDBVarAddr() = default;
 
@@ -101,7 +98,7 @@ struct asIDBVarAddr
             return nullptr;
         else if (typeId & (asTYPEID_HANDLETOCONST | asTYPEID_OBJHANDLE))
             return *reinterpret_cast<T **>(address);
-        return reinterpret_cast<T*>(address);
+        return reinterpret_cast<T *>(address);
     }
 };
 
@@ -123,17 +120,17 @@ struct asIDBValue
 {
 public:
     asIScriptEngine *engine = nullptr;
-    int typeId = 0;
-    asITypeInfo *type = nullptr;
+    int              typeId = 0;
+    asITypeInfo     *type = nullptr;
 
     union {
-        asBYTE   u8;
-        asWORD   u16;
-        asDWORD  u32;
-        asQWORD  u64;
-        float    flt;
-        double   dbl;
-        void     *obj;
+        asBYTE  u8;
+        asWORD  u16;
+        asDWORD u32;
+        asQWORD u64;
+        float   flt;
+        double  dbl;
+        void   *obj;
     } value {};
 
     asIDBValue() = default;
@@ -155,19 +152,19 @@ public:
 
         if (typeId & asTYPEID_OBJHANDLE)
         {
-		    value.obj = *reinterpret_cast<void **>(ptr);
-		    engine->AddRefScriptObject(value.obj, type);
+            value.obj = *reinterpret_cast<void **>(ptr);
+            engine->AddRefScriptObject(value.obj, type);
         }
-	    else if (typeId & asTYPEID_MASK_OBJECT)
-	    {
-		    value.obj = engine->CreateScriptObjectCopy(ptr, type);
-	    }
-	    else
-	    {
-		    value.u64 = 0;
-		    int size = engine->GetSizeOfPrimitiveType(typeId);
-		    memcpy(&value.u64, ptr, size);
-	    }
+        else if (typeId & asTYPEID_MASK_OBJECT)
+        {
+            value.obj = engine->CreateScriptObjectCopy(ptr, type);
+        }
+        else
+        {
+            value.u64 = 0;
+            int size = engine->GetSizeOfPrimitiveType(typeId);
+            memcpy(&value.u64, ptr, size);
+        }
     }
 
     asIDBValue(const asIDBValue &other) :
@@ -184,14 +181,14 @@ public:
         if (typeId & asTYPEID_OBJHANDLE)
         {
             value.obj = other.value.obj;
-		    engine->AddRefScriptObject(value.obj, type);
+            engine->AddRefScriptObject(value.obj, type);
         }
-	    else if (typeId & asTYPEID_MASK_OBJECT)
-	    {
-		    value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
-	    }
-	    else
-		    value.u64 = other.value.u64;
+        else if (typeId & asTYPEID_MASK_OBJECT)
+        {
+            value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
+        }
+        else
+            value.u64 = other.value.u64;
     }
 
     asIDBValue(asIDBValue &&other) noexcept :
@@ -202,7 +199,7 @@ public:
         if (!typeId)
             return;
 
-		value.u64 = other.value.u64;
+        value.u64 = other.value.u64;
 
         other.type = nullptr;
         other.typeId = 0;
@@ -225,14 +222,14 @@ public:
         if (typeId & asTYPEID_OBJHANDLE)
         {
             value.obj = other.value.obj;
-		    engine->AddRefScriptObject(value.obj, type);
+            engine->AddRefScriptObject(value.obj, type);
         }
-	    else if (typeId & asTYPEID_MASK_OBJECT)
-	    {
-		    value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
-	    }
-	    else
-		    value.u64 = other.value.u64;
+        else if (typeId & asTYPEID_MASK_OBJECT)
+        {
+            value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
+        }
+        else
+            value.u64 = other.value.u64;
 
         return *this;
     }
@@ -247,7 +244,7 @@ public:
         if (!typeId)
             return *this;
 
-		value.u64 = other.value.u64;
+        value.u64 = other.value.u64;
 
         other.type = nullptr;
         other.typeId = 0;
@@ -263,8 +260,8 @@ public:
 
     void Release()
     {
-	    if (typeId & asTYPEID_MASK_OBJECT)
-		    engine->ReleaseScriptObject(value.obj, type);
+        if (typeId & asTYPEID_MASK_OBJECT)
+            engine->ReleaseScriptObject(value.obj, type);
 
         if (type)
             type->Release();
@@ -309,7 +306,7 @@ struct asIDBVarName
         name(name)
     {
     }
-    
+
     template<typename Ta, typename Tb>
     asIDBVarName(Ta ns, Tb name) :
         name(name),
@@ -333,6 +330,8 @@ struct asIDBVarName
     }
 };
 
+class asIDBDebugger;
+
 // a variable for the debugger.
 struct asIDBVariable
 {
@@ -342,7 +341,7 @@ struct asIDBVariable
     using WeakVector = std::vector<WeakPtr>;
     using Vector = std::vector<Ptr>;
     using Map = std::unordered_map<int64_t, WeakPtr>;
-    
+
     struct PtrLess
     {
         inline bool operator()(const asIDBVariable::Ptr &a, const asIDBVariable::Ptr &b) const
@@ -354,12 +353,12 @@ struct asIDBVariable
     using SortedSet = std::set<Ptr, PtrLess>;
 
     asIDBDebugger &dbg;
-    WeakPtr       ptr;
+    WeakPtr        ptr;
 
     asIDBVarName identifier;
     // if we are owned by another variable,
     // it's pointed to here.
-    WeakPtr      owner;
+    WeakPtr owner;
 
     // address will be non-null if we have a value
     // that can be retrieved. this might be null
@@ -372,9 +371,9 @@ struct asIDBVariable
     asIDBValue       stackValue;
 
     // if it's a getter, this will be set.
-    asIScriptFunction          *getter = nullptr;
-    Ptr                        get_evaluated;
-    
+    asIScriptFunction *getter = nullptr;
+    Ptr                get_evaluated;
+
     bool evaluated = false;
     bool expanded = false;
 
@@ -383,10 +382,16 @@ struct asIDBVariable
     {
     }
 
-    const SortedSet &Children() const { return children; }
-    void MakeExpandable();
-    void PushChild(Ptr ptr);
-    int64_t RefId() const { return ref_id.value_or(0); }
+    const SortedSet &Children() const
+    {
+        return children;
+    }
+    void    MakeExpandable();
+    void    PushChild(Ptr ptr);
+    int64_t RefId() const
+    {
+        return ref_id.value_or(0);
+    }
 
     Ptr CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address, std::string_view typeName);
 
@@ -396,8 +401,8 @@ struct asIDBVariable
 private:
     // if ref_id is set, the variable has children.
     // call asIDBCache::LinkVariable to set this.
-    std::optional<int64_t>     ref_id {};
-    SortedSet                  children;
+    std::optional<int64_t> ref_id {};
+    SortedSet              children;
 };
 
 // a local, fetched from GetVar
@@ -412,7 +417,7 @@ struct asIDBScope
     asIDBVariable::Ptr registers; // "temporaries"
 
     std::unordered_map<uint32_t, asIDBVariable::WeakPtr> local_by_index;
-    asIDBVariable::WeakPtr this_ptr;
+    asIDBVariable::WeakPtr                               this_ptr;
 
     asIDBScope(asUINT offset, asIDBDebugger &dbg, asIScriptFunction *function);
 
@@ -422,11 +427,11 @@ private:
 
 struct asIDBCallStackEntry
 {
-    int64_t             id; // unique id during debugging
-    std::string         declaration;
-    std::string_view    section;
-    int                 row, column;
-    asIDBScope          scope;
+    int64_t          id; // unique id during debugging
+    std::string      declaration;
+    std::string_view section;
+    int              row, column;
+    asIDBScope       scope;
 };
 
 using asIDBCallStackVector = std::vector<asIDBCallStackEntry>;
@@ -440,11 +445,15 @@ class asIDBTypeEvaluator
 {
 public:
     // evaluate the given variable.
-    virtual void Evaluate(asIDBVariable::Ptr var) const { }
+    virtual void Evaluate(asIDBVariable::Ptr var) const
+    {
+    }
 
     // for expandable objects, this is called when the
     // debugger requests it be expanded.
-    virtual void Expand(asIDBVariable::Ptr var) const { }
+    virtual void Expand(asIDBVariable::Ptr var) const
+    {
+    }
 };
 
 // built-in evaluators you can extend for
@@ -460,16 +469,16 @@ public:
 class asIDBObjectIteratorHelper
 {
 public:
-    asIDBDebugger                       &dbg;
-    asITypeInfo                         *type;
-    void                                *obj;
-    asIScriptFunction                   *opForBegin, *opForEnd, *opForNext;
-    std::vector<asIScriptFunction *>    opForValues;
+    asIDBDebugger                   &dbg;
+    asITypeInfo                     *type;
+    void                            *obj;
+    asIScriptFunction               *opForBegin, *opForEnd, *opForNext;
+    std::vector<asIScriptFunction *> opForValues;
 
     asITypeInfo *iteratorType = nullptr;
-    int         iteratorTypeId = 0;
+    int          iteratorTypeId = 0;
 
-    std::string_view    error;
+    std::string_view error;
 
     struct IteratorValue
     {
@@ -478,27 +487,25 @@ public:
 
         IteratorValue() = delete;
 
-        static IteratorValue FromCtxReturn(const asIDBObjectIteratorHelper *helper, asIScriptContext *ctx, asETypeModifiers flags)
+        static IteratorValue FromCtxReturn(const asIDBObjectIteratorHelper *helper, asIScriptContext *ctx,
+                                           asETypeModifiers flags)
         {
-            return { helper, asIDBValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), helper->iteratorTypeId, flags) };
+            return { helper,
+                     asIDBValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), helper->iteratorTypeId, flags) };
         }
 
         void SetArg(asIScriptContext *ctx, asUINT index) const
         {
             if (helper->iteratorTypeId & asTYPEID_MASK_OBJECT)
                 ctx->SetArgObject(index, value.GetPointer<void *>());
-            else if (helper->iteratorTypeId == asTYPEID_BOOL ||
-                     helper->iteratorTypeId == asTYPEID_INT8 ||
+            else if (helper->iteratorTypeId == asTYPEID_BOOL || helper->iteratorTypeId == asTYPEID_INT8 ||
                      helper->iteratorTypeId == asTYPEID_UINT8)
                 ctx->SetArgByte(index, *value.GetPointer<uint8_t>());
-            else if (helper->iteratorTypeId == asTYPEID_INT16 ||
-                     helper->iteratorTypeId == asTYPEID_UINT16)
+            else if (helper->iteratorTypeId == asTYPEID_INT16 || helper->iteratorTypeId == asTYPEID_UINT16)
                 ctx->SetArgWord(index, *value.GetPointer<uint16_t>());
-            else if (helper->iteratorTypeId == asTYPEID_INT32 ||
-                     helper->iteratorTypeId == asTYPEID_UINT32)
+            else if (helper->iteratorTypeId == asTYPEID_INT32 || helper->iteratorTypeId == asTYPEID_UINT32)
                 ctx->SetArgDWord(index, *value.GetPointer<uint32_t>());
-            else if (helper->iteratorTypeId == asTYPEID_INT64 ||
-                     helper->iteratorTypeId == asTYPEID_UINT64)
+            else if (helper->iteratorTypeId == asTYPEID_INT64 || helper->iteratorTypeId == asTYPEID_UINT64)
                 ctx->SetArgQWord(index, *value.GetPointer<uint64_t>());
             else if (helper->iteratorTypeId == asTYPEID_FLOAT)
                 ctx->SetArgFloat(index, *value.GetPointer<float>());
@@ -524,14 +531,20 @@ public:
 
     asIDBObjectIteratorHelper(asIDBDebugger &dbg, asITypeInfo *type, void *obj);
 
-    constexpr bool IsValid() const { return opForBegin != nullptr; }
-    constexpr explicit operator bool() const { return IsValid(); }
-    
+    constexpr bool IsValid() const
+    {
+        return opForBegin != nullptr;
+    }
+    constexpr explicit operator bool() const
+    {
+        return IsValid();
+    }
+
     // individual access
     IteratorValue Begin(asIScriptContext *ctx) const;
-    void Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const;
+    void          Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const;
     IteratorValue Next(asIScriptContext *ctx, const IteratorValue &val) const;
-    bool End(asIScriptContext *ctx, const IteratorValue &val) const;
+    bool          End(asIScriptContext *ctx, const IteratorValue &val) const;
 
     // O(n) helper for length
     size_t CalculateLength(asIScriptContext *ctx) const;
@@ -598,7 +611,7 @@ public:
     }
 
     constexpr asIDBExpected(asIDBExpected<void> &&v);
-    
+
     asIDBExpected(const asIDBExpected<T> &) = default;
     asIDBExpected(asIDBExpected<T> &&) = default;
     asIDBExpected &operator=(const asIDBExpected<T> &) = default;
@@ -613,13 +626,28 @@ public:
     {
         return *this = asIDBExpected<T>(v);
     }
-    
-    constexpr bool has_value() const { return data.index() == 1; }
-    constexpr explicit operator bool() const { return has_value(); }
-    
-    constexpr const std::string_view &error() const { return std::get<0>(data); }
-    constexpr const T &value() const { return std::get<1>(data); }
-    constexpr T &value() { return std::get<1>(data); }
+
+    constexpr bool has_value() const
+    {
+        return data.index() == 1;
+    }
+    constexpr explicit operator bool() const
+    {
+        return has_value();
+    }
+
+    constexpr const std::string_view &error() const
+    {
+        return std::get<0>(data);
+    }
+    constexpr const T &value() const
+    {
+        return std::get<1>(data);
+    }
+    constexpr T &value()
+    {
+        return std::get<1>(data);
+    }
 };
 
 template<>
@@ -639,7 +667,10 @@ public:
     {
     }
 
-    constexpr const std::string_view &error() const { return err; }
+    constexpr const std::string_view &error() const
+    {
+        return err;
+    }
 };
 
 template<typename T>
@@ -647,8 +678,8 @@ constexpr asIDBExpected<T>::asIDBExpected(asIDBExpected<void> &&v) :
     data(std::in_place_index<0>, v.error())
 {
 }
- 
-template<class E> 
+
+template<class E>
 asIDBExpected(E) -> asIDBExpected<void>;
 
 // this class holds the cached state of stuff
@@ -694,7 +725,7 @@ public:
     {
         ctx->AddRef();
     }
-    
+
     virtual ~asIDBCache()
     {
         ctx->ClearLineCallback();
@@ -721,7 +752,8 @@ public:
 
     // for the given type + property data, fetch the address of the
     // value that this property points to.
-    virtual void *ResolvePropertyAddress(const asIDBVarAddr &id, int propertyIndex, int offset, int compositeOffset, bool isCompositeIndirect);
+    virtual void *ResolvePropertyAddress(const asIDBVarAddr &id, int propertyIndex, int offset, int compositeOffset,
+                                         bool isCompositeIndirect);
 
     // fetch an evaluator for the given resolved address.
     // the built-in implementation only handles a few base evaluators.
@@ -750,11 +782,13 @@ public:
     //   Only uint indices are supported. You may also optionally select which
     //   value to retrieve from multiple opValue implementations; if not specified
     //   it will default to zero (that is to say, [0] and [0,0] are equivalent).
-    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveExpression(std::string_view expr, std::optional<int> stack_index);
-    
+    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveExpression(std::string_view   expr,
+                                                                    std::optional<int> stack_index);
+
     // Resolve the remainder of a sub-expression; see ResolveExpression
     // for the syntax.
-    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveSubExpression(asIDBVariable::WeakPtr var, const std::string_view rest);
+    virtual asIDBExpected<asIDBVariable::WeakPtr> ResolveSubExpression(asIDBVariable::WeakPtr var,
+                                                                       const std::string_view rest);
 
     // Create a variable container. Generally you don't call
     // this directly, unless you need a blank variable.
@@ -785,12 +819,15 @@ enum class asIDBAction : uint8_t
     StepOut,
     Continue
 };
-    
+
 struct asIDBLineCol
 {
     int line, col;
 
-    constexpr bool operator<(const asIDBLineCol &o) const { return line == o.line ? col < o.col : line < o.line; }
+    constexpr bool operator<(const asIDBLineCol &o) const
+    {
+        return line == o.line ? col < o.col : line < o.line;
+    }
 };
 
 using asIDBSectionSet = std::set<std::string, std::less<>>;
@@ -806,7 +843,7 @@ using asIDBPotentialBreakpointMap = std::unordered_map<std::string_view, std::se
 struct asIDBWorkspace
 {
     // base path for the workspace
-    std::string     base_path;
+    std::string base_path;
 
     // sections that this workspace is working with
     asIDBSectionSet sections;
@@ -864,8 +901,8 @@ public:
 
     // next action to perform
     asIDBAction action = asIDBAction::None;
-    asUINT stack_size = 0; // for certain actions (like Step Over) we have to know
-                           // the size of the old stack.
+    asUINT      stack_size = 0; // for certain actions (like Step Over) we have to know
+                                // the size of the old stack.
 
     // if true, line callback will not execute
     // (used to prevent infinite loops)
@@ -873,7 +910,7 @@ public:
 
     // workspace
     asIDBWorkspace *workspace;
-    
+
     // active breakpoints
     asIDBBreakpointMap breakpoints;
 
@@ -894,7 +931,9 @@ public:
     {
     }
 
-    virtual ~asIDBDebugger() { }
+    virtual ~asIDBDebugger()
+    {
+    }
 
     // hooks the context onto the debugger; this will
     // reset the cache, and unhook the previous context
