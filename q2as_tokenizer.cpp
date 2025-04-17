@@ -81,7 +81,7 @@ struct tokenizer_t : q2as_ref_t
     // returns true if not EOF.
     inline bool next()
     {
-        cur().token = COM_ParseView(cur().view, separators.data());
+        cur().token = q2as_ParseView(cur().view, separators.data());
         return has_token();
     }
 
