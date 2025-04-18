@@ -3,23 +3,28 @@
 
 struct q2as_gtime
 {
-    using milliseconds = std::chrono::milliseconds;
-    milliseconds _duration;
+    using _milliseconds = std::chrono::milliseconds;
+    _milliseconds _duration;
 
-    q2as_gtime(const milliseconds& ms) : _duration(ms) {}
+    q2as_gtime(const _milliseconds& ms) : _duration(ms) {}
     q2as_gtime() = default;
     q2as_gtime(const q2as_gtime&) = default;
 
     template<typename T>
     T minutes() const
     {
-        return std::chrono::duration<T, std::ratio<60>>(_duration).count();
+        return std::chrono::duration_cast<std::chrono::duration<T, std::ratio<60>>>(_duration).count();
     }
 
     template<typename T>
     T seconds() const
     {
-        return std::chrono::duration<T>(_duration).count();
+        return std::chrono::duration_cast<std::chrono::duration<T>>(_duration).count();
+    }
+
+    int64_t milliseconds() const
+    {
+        return _duration.count();
     }
 
     int64_t frames() const
@@ -27,29 +32,34 @@ struct q2as_gtime
         return _duration.count() / gi.frame_time_ms;
     }
 
-    q2as_gtime from_ms(const int64_t& ms)
+    static q2as_gtime from_ms(const int64_t& ms)
     {
-        return q2as_gtime(milliseconds(ms));
+        return q2as_gtime(_milliseconds(ms));
     }
 
     template<typename T>
-    q2as_gtime from_sec(const T& seconds)
+    static q2as_gtime from_sec(const T& seconds)
     {
-        return q2as_gtime(std::chrono::duration_cast<milliseconds>(std::chrono::duration<T>(seconds)));
+        return q2as_gtime(std::chrono::duration_cast<_milliseconds>(std::chrono::duration<T>(seconds)));
     }
 
     template<typename T>
-    q2as_gtime from_min(const T& minutes)
+    static q2as_gtime from_min(const T& minutes)
     {
-        return q2as_gtime(std::chrono::duration_cast<milliseconds>(std::chrono::duration<T, std::ratio<60>>(minutes)));
+        return q2as_gtime(std::chrono::duration_cast<_milliseconds>(std::chrono::duration<T, std::ratio<60>>(minutes)));
     }
 
-    q2as_gtime from_hz(uint64_t hz)
+    static q2as_gtime from_hz(uint64_t hz)
     {
         return from_sec(1.0 / hz);
     }
 
     q2as_gtime& operator=(const q2as_gtime&) = default;
+
+    explicit operator bool() const
+    {
+        return _duration.count() != 0;
+    }
 
     q2as_gtime operator-(const q2as_gtime& rhs) const
     {
@@ -62,15 +72,15 @@ struct q2as_gtime
     }
 
     template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime operator/(T rhs) const
+    q2as_gtime operator/(const T& rhs) const
     {
-        return q2as_gtime(milliseconds(static_cast<int64_t>(_duration.count() / rhs)));
+        return q2as_gtime(_milliseconds(static_cast<int64_t>(_duration.count() / rhs)));
     }
 
     template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime operator*(T rhs) const
+    q2as_gtime operator*(const T& rhs) const
     {
-        return q2as_gtime(milliseconds(static_cast<int64_t>(_duration.count() * rhs)));
+        return q2as_gtime(_milliseconds(static_cast<int64_t>(_duration.count() * rhs)));
     }
 
     q2as_gtime operator-() const
@@ -91,16 +101,16 @@ struct q2as_gtime
     }
 
     template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime& operator/=(T rhs)
+    q2as_gtime& operator/=(const T& rhs)
     {
-        _duration = milliseconds(static_cast<int64_t>(_duration.count() / rhs));
+        _duration = _milliseconds(static_cast<int64_t>(_duration.count() / rhs));
         return *this;
     }
 
     template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime& operator*=(T rhs)
+    q2as_gtime& operator*=(const T& rhs)
     {
-        _duration = milliseconds(static_cast<int64_t>(_duration.count() * rhs));
+        _duration = _milliseconds(static_cast<int64_t>(_duration.count() * rhs));
         return *this;
     }
 
@@ -135,12 +145,12 @@ struct q2as_gtime
     }
 };
 
-static void Q2AS_gtime_t_copy_construct(const gtime_t &t, gtime_t *o)
+static void Q2AS_gtime_t_copy_construct(const q2as_gtime &t, q2as_gtime*o)
 {
     *o = t;
 }
 
-static int Q2AS_gtime_t_compare(const gtime_t &t, gtime_t *o)
+static int Q2AS_gtime_t_compare(const q2as_gtime&t, q2as_gtime*o)
 {
     if (t == *o)
         return 0;
@@ -150,7 +160,7 @@ static int Q2AS_gtime_t_compare(const gtime_t &t, gtime_t *o)
         return 1;
 }
 
-static gtime_t *Q2AS_gtime_t_assign(const gtime_t &t, gtime_t *o)
+static q2as_gtime*Q2AS_gtime_t_assign(const q2as_gtime&t, q2as_gtime*o)
 {
     *o = t;
     return o;
@@ -165,56 +175,56 @@ enum class timeunit_t
 };
 
 template<typename T>
-static void Q2AS_gtime_t_timeunit_construct(T value, timeunit_t unit, gtime_t *t)
+static void Q2AS_gtime_t_timeunit_construct(T value, timeunit_t unit, q2as_gtime*t)
 {
     if (unit == timeunit_t::ms)
-        *t = gtime_t::from_ms((int64_t) value);
+        *t = q2as_gtime::from_ms((int64_t) value);
     else if (unit == timeunit_t::sec)
-        *t = gtime_t::from_sec(value);
+        *t = q2as_gtime::from_sec(value);
     else if (unit == timeunit_t::min)
-        *t = gtime_t::from_min(value);
+        *t = q2as_gtime::from_min(value);
     else
-        *t = gtime_t::from_hz(value);
+        *t = q2as_gtime::from_hz(value);
 }
 
-static gtime_t Q2AS_gtime_t_timeunit_ms(int64_t t)
+static q2as_gtime Q2AS_gtime_t_timeunit_ms(int64_t t)
 {
-    return gtime_t::from_ms(t);
+    return q2as_gtime::from_ms(t);
 }
 
 template<typename T>
-static gtime_t Q2AS_gtime_t_timeunit_sec(T t)
+static q2as_gtime Q2AS_gtime_t_timeunit_sec(T t)
 {
-    return gtime_t::from_sec(t);
+    return q2as_gtime::from_sec(t);
 }
 
 template<typename T>
-static gtime_t Q2AS_gtime_t_timeunit_min(T t)
+static q2as_gtime Q2AS_gtime_t_timeunit_min(T t)
 {
-    return gtime_t::from_min(t);
+    return q2as_gtime::from_min(t);
 }
 
-static gtime_t Q2AS_gtime_t_timeunit_hz(uint64_t t)
+static q2as_gtime Q2AS_gtime_t_timeunit_hz(uint64_t t)
 {
-    return gtime_t::from_hz(t);
+    return q2as_gtime::from_hz(t);
 }
 
-static gtime_t Q2AS_clamp_time(const gtime_t &a, const gtime_t &b, const gtime_t &c)
+static q2as_gtime Q2AS_clamp_time(const q2as_gtime&a, const q2as_gtime&b, const q2as_gtime&c)
 {
     return clamp(a, b, c);
 }
 
-static gtime_t Q2AS_min_time(const gtime_t &a, const gtime_t &b)
+static q2as_gtime Q2AS_min_time(const q2as_gtime&a, const q2as_gtime&b)
 {
     return min(a, b);
 }
 
-static gtime_t Q2AS_max_time(const gtime_t &a, const gtime_t &b)
+static q2as_gtime Q2AS_max_time(const q2as_gtime&a, const q2as_gtime&b)
 {
     return max(a, b);
 }
 
-static void gtime_formatter(std::string &str, const std::string &args, const gtime_t &time)
+static void gtime_formatter(std::string &str, const std::string &args, const q2as_gtime&time)
 {
     if (abs(time.minutes<float>()) >= 1)
         fmt::format_to(std::back_inserter(str), "{} min", time.minutes<float>());
@@ -235,7 +245,7 @@ class q2as_asIDBGTimeTypeEvaluator : public asIDBObjectTypeEvaluator
 public:
     virtual void Evaluate(asIDBVariable::Ptr var) const override
     {
-        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
+        const q2as_gtime*s = var->address.ResolveAs<const q2as_gtime>();
 
         const char *sfx = "ms";
         uint64_t divisor = 1;
@@ -254,7 +264,7 @@ public:
 
     virtual void Expand(asIDBVariable::Ptr var) const override
     {
-        const gtime_t *s = var->address.ResolveAs<const gtime_t>();
+        const q2as_gtime*s = var->address.ResolveAs<const q2as_gtime>();
 
         for (auto &suffix : time_suffixes)
             if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
@@ -290,7 +300,7 @@ void Q2AS_RegisterTime(q2as_registry &registry)
         });
 
     registry
-        .type("gtime_t", sizeof(gtime_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLINTS | asOBJ_APP_CLASS_CAK)
+        .type("gtime_t", sizeof(q2as_gtime), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLINTS | asOBJ_APP_CLASS_CAK)
         .properties({
             { "int64 milliseconds", 0 }
         })
@@ -301,36 +311,36 @@ void Q2AS_RegisterTime(q2as_registry &registry)
         })
         .methods({
             // getters
-            { "int64 secondsi() const", asMETHOD(gtime_t, seconds<int64_t>), asCALL_THISCALL },
-            { "float secondsf() const", asMETHOD(gtime_t, seconds<float>),   asCALL_THISCALL },
-            { "int64 minutesi() const", asMETHOD(gtime_t, minutes<int64_t>), asCALL_THISCALL },
-            { "float minutesf() const", asMETHOD(gtime_t, minutes<float>),   asCALL_THISCALL },
-            { "int64 frames() const",   asMETHOD(gtime_t, frames),           asCALL_THISCALL },
+            { "int64 secondsi() const", asMETHOD(q2as_gtime, seconds<int64_t>), asCALL_THISCALL },
+            { "float secondsf() const", asMETHOD(q2as_gtime, seconds<float>),   asCALL_THISCALL },
+            { "int64 minutesi() const", asMETHOD(q2as_gtime, minutes<int64_t>), asCALL_THISCALL },
+            { "float minutesf() const", asMETHOD(q2as_gtime, minutes<float>),   asCALL_THISCALL },
+            { "int64 frames() const",   asMETHOD(q2as_gtime, frames),           asCALL_THISCALL },
 
             // equality
-            { "bool opEquals(const gtime_t &in) const", asMETHODPR(gtime_t, operator==, (const gtime_t &) const, bool), asCALL_THISCALL },
+            { "bool opEquals(const gtime_t &in) const", asMETHODPR(q2as_gtime, operator==, (const q2as_gtime&) const, bool), asCALL_THISCALL },
             { "int opCmp(const gtime_t &in) const",     asFUNCTION(Q2AS_gtime_t_compare),                               asCALL_CDECL_OBJLAST },
 
             // operators
             { "gtime_t &opAssign(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_assign), asCALL_CDECL_OBJLAST },
 
-            { "gtime_t opSub(const gtime_t &in) const", asMETHODPR(gtime_t, operator-, (const gtime_t &v) const, gtime_t), asCALL_THISCALL },
-            { "gtime_t opAdd(const gtime_t &in) const", asMETHODPR(gtime_t, operator+, (const gtime_t &v) const, gtime_t), asCALL_THISCALL },
-            { "gtime_t opDiv(const int &in) const",     asMETHODPR(gtime_t, operator/, (const int &v) const, gtime_t),     asCALL_THISCALL },
-            { "gtime_t opMul(const int &in) const",     asMETHODPR(gtime_t, operator*, (const int &v) const, gtime_t),     asCALL_THISCALL },
-            { "gtime_t opDiv(const float &in) const",   asMETHODPR(gtime_t, operator/, (const float &v) const, gtime_t),   asCALL_THISCALL },
-            { "gtime_t opMul(const float &in) const",   asMETHODPR(gtime_t, operator*, (const float &v) const, gtime_t),   asCALL_THISCALL },
-            { "gtime_t opNeg() const",                  asMETHODPR(gtime_t, operator-, () const, gtime_t),                 asCALL_THISCALL },
+            { "gtime_t opSub(const gtime_t &in) const", asMETHODPR(q2as_gtime, operator-, (const q2as_gtime & v) const, q2as_gtime), asCALL_THISCALL },
+            { "gtime_t opAdd(const gtime_t &in) const", asMETHODPR(q2as_gtime, operator+, (const q2as_gtime & v) const, q2as_gtime), asCALL_THISCALL },
+            { "gtime_t opDiv(const int &in) const",     asMETHODPR(q2as_gtime, operator/, (const int& v) const, q2as_gtime),     asCALL_THISCALL },
+            { "gtime_t opMul(const int &in) const",     asMETHODPR(q2as_gtime, operator*, (const int& v) const, q2as_gtime),     asCALL_THISCALL },
+            { "gtime_t opDiv(const float &in) const",   asMETHODPR(q2as_gtime, operator/, (const float& v) const, q2as_gtime),   asCALL_THISCALL },
+            { "gtime_t opMul(const float &in) const",   asMETHODPR(q2as_gtime, operator*, (const float& v) const, q2as_gtime),   asCALL_THISCALL },
+            { "gtime_t opNeg() const",                  asMETHODPR(q2as_gtime, operator-, () const, q2as_gtime),                 asCALL_THISCALL },
 
-            { "gtime_t &opSubAssign(const gtime_t &in)", asMETHODPR(gtime_t, operator-=, (const gtime_t &v), gtime_t &), asCALL_THISCALL },
-            { "gtime_t &opAddAssign(const gtime_t &in)", asMETHODPR(gtime_t, operator+=, (const gtime_t &v), gtime_t &), asCALL_THISCALL },
-            { "gtime_t &opDivAssign(const int &in)",     asMETHODPR(gtime_t, operator/=, (const int &v), gtime_t &),     asCALL_THISCALL },
-            { "gtime_t &opMulAssign(const int &in)",     asMETHODPR(gtime_t, operator*=, (const int &v), gtime_t &),     asCALL_THISCALL },
-            { "gtime_t &opDivAssign(const float &in)",   asMETHODPR(gtime_t, operator/=, (const float &v), gtime_t &),   asCALL_THISCALL },
-            { "gtime_t &opMulAssign(const float &in)",   asMETHODPR(gtime_t, operator*=, (const float &v), gtime_t &),   asCALL_THISCALL },
+            { "gtime_t &opSubAssign(const gtime_t &in)", asMETHODPR(q2as_gtime, operator-=, (const q2as_gtime & v), q2as_gtime&), asCALL_THISCALL },
+            { "gtime_t &opAddAssign(const gtime_t &in)", asMETHODPR(q2as_gtime, operator+=, (const q2as_gtime & v), q2as_gtime&), asCALL_THISCALL },
+            { "gtime_t &opDivAssign(const int &in)",     asMETHODPR(q2as_gtime, operator/=, (const int& v), q2as_gtime&),     asCALL_THISCALL },
+            { "gtime_t &opMulAssign(const int &in)",     asMETHODPR(q2as_gtime, operator*=, (const int& v), q2as_gtime&),     asCALL_THISCALL },
+            { "gtime_t &opDivAssign(const float &in)",   asMETHODPR(q2as_gtime, operator/=, (const float& v), q2as_gtime&),   asCALL_THISCALL },
+            { "gtime_t &opMulAssign(const float &in)",   asMETHODPR(q2as_gtime, operator*=, (const float &v), q2as_gtime&),   asCALL_THISCALL },
 
             // conversions
-            { "bool opConv() const", asMETHODPR(gtime_t, operator bool, () const, bool), asCALL_THISCALL }
+            { "bool opConv() const", asMETHODPR(q2as_gtime, operator bool, () const, bool), asCALL_THISCALL }
         });
 
     registry
