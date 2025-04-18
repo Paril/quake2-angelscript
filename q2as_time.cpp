@@ -1,6 +1,140 @@
 #include "q2as_local.h"
 #include "g_local.h"
 
+struct q2as_gtime
+{
+    using milliseconds = std::chrono::milliseconds;
+    milliseconds _duration;
+
+    q2as_gtime(const milliseconds& ms) : _duration(ms) {}
+    q2as_gtime() = default;
+    q2as_gtime(const q2as_gtime&) = default;
+
+    template<typename T>
+    T minutes() const
+    {
+        return std::chrono::duration<T, std::ratio<60>>(_duration).count();
+    }
+
+    template<typename T>
+    T seconds() const
+    {
+        return std::chrono::duration<T>(_duration).count();
+    }
+
+    int64_t frames() const
+    {
+        return _duration.count() / gi.frame_time_ms;
+    }
+
+    q2as_gtime from_ms(const int64_t& ms)
+    {
+        return q2as_gtime(milliseconds(ms));
+    }
+
+    template<typename T>
+    q2as_gtime from_sec(const T& seconds)
+    {
+        return q2as_gtime(std::chrono::duration_cast<milliseconds>(std::chrono::duration<T>(seconds)));
+    }
+
+    template<typename T>
+    q2as_gtime from_min(const T& minutes)
+    {
+        return q2as_gtime(std::chrono::duration_cast<milliseconds>(std::chrono::duration<T, std::ratio<60>>(minutes)));
+    }
+
+    q2as_gtime from_hz(uint64_t hz)
+    {
+        return from_sec(1.0 / hz);
+    }
+
+    q2as_gtime& operator=(const q2as_gtime&) = default;
+
+    q2as_gtime operator-(const q2as_gtime& rhs) const
+    {
+        return q2as_gtime(_duration - rhs._duration);
+    }
+
+    q2as_gtime operator+(const q2as_gtime& rhs) const
+    {
+        return q2as_gtime(_duration + rhs._duration);
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+    q2as_gtime operator/(T rhs) const
+    {
+        return q2as_gtime(milliseconds(static_cast<int64_t>(_duration.count() / rhs)));
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+    q2as_gtime operator*(T rhs) const
+    {
+        return q2as_gtime(milliseconds(static_cast<int64_t>(_duration.count() * rhs)));
+    }
+
+    q2as_gtime operator-() const
+    {
+        return q2as_gtime(-_duration);
+    }
+
+    q2as_gtime& operator-=(const q2as_gtime& rhs)
+    {
+        _duration -= rhs._duration;
+        return *this;
+    }
+
+    q2as_gtime& operator+=(const q2as_gtime& rhs)
+    {
+        _duration += rhs._duration;
+        return *this;
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+    q2as_gtime& operator/=(T rhs)
+    {
+        _duration = milliseconds(static_cast<int64_t>(_duration.count() / rhs));
+        return *this;
+    }
+
+    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+    q2as_gtime& operator*=(T rhs)
+    {
+        _duration = milliseconds(static_cast<int64_t>(_duration.count() * rhs));
+        return *this;
+    }
+
+    bool operator==(const q2as_gtime& rhs) const
+    {
+        return _duration == rhs._duration;
+    }
+
+    bool operator!=(const q2as_gtime& rhs) const
+    {
+        return _duration != rhs._duration;
+    }
+
+    bool operator<(const q2as_gtime& rhs) const
+    {
+        return _duration < rhs._duration;
+    }
+
+    bool operator>(const q2as_gtime& rhs) const
+    {
+        return _duration > rhs._duration;
+    }
+
+    bool operator<=(const q2as_gtime& rhs) const
+    {
+        return _duration <= rhs._duration;
+    }
+
+    bool operator>=(const q2as_gtime& rhs) const
+    {
+        return _duration >= rhs._duration;
+    }
+};
+
 static void Q2AS_gtime_t_copy_construct(const gtime_t &t, gtime_t *o)
 {
     *o = t;
