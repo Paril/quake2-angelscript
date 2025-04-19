@@ -116,8 +116,8 @@ static void Q2AS_InitGame()
     cvar_t *maxclients = gi.cvar("maxclients", G_Fmt("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 
     // seed RNG
-    init_mum_prng();
-    set_mum_prng_seed((uint32_t)std::chrono::system_clock::now().time_since_epoch().count());
+    mum_prng.init_mum_prng();
+    mum_prng.set_mum_prng_seed((uint32_t)std::chrono::system_clock::now().time_since_epoch().count());
 
     // initialize all entities for this game
     svas.maxentities = maxentities->integer;

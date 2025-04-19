@@ -2,32 +2,7 @@
 #include <algorithm>
 #include <random>
 
-struct prng_state
-{
-    using result_type = std::uint64_t;
-
-    static uint64_t min()
-    {
-        return 0;
-    }
-
-    static uint64_t max()
-    {
-        return UINT64_MAX;
-    }
-
-    uint64_t operator()()
-    {
-        return get_mum_prn();
-    }
-
-    explicit prng_state(result_type seed = 0xcafebeefbabe1337ULL)
-    {
-        set_mum_prng_seed((uint32_t)seed);
-    }
-};
-
-extern prng_state mum_prng;
+extern mum_prng_generator mum_prng;
 
 // uniform float [0, 1)
 [[nodiscard]] inline float frandom()
@@ -76,7 +51,7 @@ extern prng_state mum_prng;
 // raw unsigned int32 value from random
 [[nodiscard]] inline uint32_t irandom()
 {
-    return get_mum_prn();
+    return mum_prng.get_mum_prn();
 }
 
 // uniform int [min, max)

@@ -61,97 +61,118 @@
 #define _MUM_PRNG_FRESH_GCC
 #endif
 
-static struct {
-    int count;
-    void (*update_func) (void);
-    /* MUM PRNG state */
-    uint64_t state[MUM_PRNG_UNROLL];
-} _mum_prng_state;
 
-#if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
-/* This code specialized for Haswell generates MULX insns. */
-static inline uint64_t _MUM_TARGET("arch=haswell")
-_mum_avx2(uint64_t v, uint64_t p) {
-    uint64_t hi, lo;
-    __uint128_t r = (__uint128_t)v * (__uint128_t)p;
-    hi = (uint64_t)(r >> 64);
-    lo = (uint64_t)r;
-    return hi + lo;
-}
+struct mum_prng_generator
+{
+    using result_type = std::uint64_t;
 
-static void _MUM_TARGET("arch=haswell")
-_mum_prng_update_avx2(void) {
-    int i;
+    struct _mum_prng_internal_state
+    {
+        int count;
+        std::function<void()> update_func;
+        /* MUM PRNG state */
+        uint64_t state[MUM_PRNG_UNROLL];
+    };
+private:
+    _mum_prng_internal_state _mum_prng_state;
 
-    _mum_prng_state.count = 0;
-    for (i = 0; i < MUM_PRNG_UNROLL - 1; i++)
-        _mum_prng_state.state[i] ^= _mum_avx2(_mum_prng_state.state[i + 1], _mum_primes[i]);
-    _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^= _mum_avx2(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
-}
-#endif
-
-static void _MUM_NOINLINE
-_mum_prng_update(void) {
-    int i;
-
-    _mum_prng_state.count = 0;
-    for (i = 0; i < MUM_PRNG_UNROLL - 1; i++)
-        _mum_prng_state.state[i] ^= _mum(_mum_prng_state.state[i + 1], _mum_primes[i]);
-    _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^= _mum(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
-}
-
-#if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
-static inline void
-_mum_prng_setup_avx2(void) {
-    __builtin_cpu_init();
-    if (__builtin_cpu_supports("avx2"))
-        _mum_prng_state.update_func = _mum_prng_update_avx2;
-    else
-        _mum_prng_state.update_func = _mum_prng_update;
-
-}
-#endif
-
-static inline void
-_start_mum_prng(uint32_t seed) {
-    int i;
-
-    _mum_prng_state.count = MUM_PRNG_UNROLL;
-    for (i = 0; i < MUM_PRNG_UNROLL; i++)
-        _mum_prng_state.state[i] = seed + 1;
-#if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
-    _mum_prng_setup_avx2();
-#else
-    _mum_prng_state.update_func = _mum_prng_update;
-#endif
-}
-
-static inline void
-init_mum_prng(void) {
-    _start_mum_prng(0);
-}
-
-static inline void
-set_mum_prng_seed(uint32_t seed) {
-    _start_mum_prng(seed);
-}
-
-static inline uint64_t
-get_mum_prn(void) {
-    if (EXPECT(_mum_prng_state.count == MUM_PRNG_UNROLL, 0)) {
-        // NOTE(Oskar): The state is not consistent here so sometimes when calling from as our update_func is null.
-        // For now I just always call the normal update function since we won't use the avx2 version anyway.
-        // The only state we lose here is the original seed.
-        //_mum_prng_state.update_func();
-        _mum_prng_update();
-        _mum_prng_state.count = 1;
-        return _mum_prng_state.state[0];
+public:
+    #if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
+    /* This code specialized for Haswell generates MULX insns. */
+    inline uint64_t _MUM_TARGET("arch=haswell")
+    _mum_avx2(uint64_t v, uint64_t p) {
+        uint64_t hi, lo;
+        __uint128_t r = (__uint128_t)v * (__uint128_t)p;
+        hi = (uint64_t)(r >> 64);
+        lo = (uint64_t)r;
+        return hi + lo;
     }
-    return _mum_prng_state.state[_mum_prng_state.count++];
-}
 
-static inline void
-finish_mum_prng(void) {
-}
+    void _MUM_TARGET("arch=haswell")
+    _mum_prng_update_avx2(void) {
+        int i;
+
+        _mum_prng_state.count = 0;
+        for (i = 0; i < MUM_PRNG_UNROLL - 1; i++)
+            _mum_prng_state.state[i] ^= _mum_avx2(_mum_prng_state.state[i + 1], _mum_primes[i]);
+        _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^= _mum_avx2(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
+    }
+    #endif
+
+    void _MUM_NOINLINE
+    _mum_prng_update(void) {
+        int i;
+
+        _mum_prng_state.count = 0;
+        for (i = 0; i < MUM_PRNG_UNROLL - 1; i++)
+            _mum_prng_state.state[i] ^= _mum(_mum_prng_state.state[i + 1], _mum_primes[i]);
+        _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^= _mum(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
+    }
+
+    #if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
+    inline void
+    _mum_prng_setup_avx2(void) {
+        __builtin_cpu_init();
+        if (__builtin_cpu_supports("avx2"))
+            _mum_prng_state.update_func = _mum_prng_update_avx2;
+        else
+            _mum_prng_state.update_func = _mum_prng_update;
+
+    }
+    #endif
+
+    inline void
+    _start_mum_prng(uint32_t seed) {
+        int i;
+
+        _mum_prng_state.count = MUM_PRNG_UNROLL;
+        for (i = 0; i < MUM_PRNG_UNROLL; i++)
+            _mum_prng_state.state[i] = seed + 1;
+    #if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
+        _mum_prng_setup_avx2();
+    #else
+        _mum_prng_state.update_func = std::bind(&mum_prng_generator::_mum_prng_update, this);
+    #endif
+    }
+
+    inline void
+    init_mum_prng(void) {
+        _start_mum_prng(0);
+    }
+
+    inline void
+    set_mum_prng_seed(uint32_t seed) {
+        _start_mum_prng(seed);
+    }
+
+    inline uint64_t
+    get_mum_prn(void) {
+        if (EXPECT(_mum_prng_state.count == MUM_PRNG_UNROLL, 0)) {
+            _mum_prng_state.update_func();
+            _mum_prng_state.count = 1;
+            return _mum_prng_state.state[0];
+        }
+        return _mum_prng_state.state[_mum_prng_state.count++];
+    }
+
+    uint64_t operator()()
+    {
+        return get_mum_prn();
+    }
+
+    inline void
+    finish_mum_prng(void) {
+    }
+
+    static uint64_t min()
+    {
+        return 0;
+    }
+
+    static uint64_t max()
+    {
+        return UINT64_MAX;
+    }
+};
 
 #endif

@@ -6,7 +6,7 @@
 #include "q2as_platform.h"
 #include "q2as_random.h"
 
-prng_state mum_prng;
+mum_prng_generator mum_prng;
 
 
 local_game_import_t  gi;
