@@ -116,7 +116,6 @@ static void Q2AS_InitGame()
     cvar_t *maxclients = gi.cvar("maxclients", G_Fmt("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 
     // seed RNG
-    //mt_rand.seed((uint32_t) std::chrono::system_clock::now().time_since_epoch().count());
     init_mum_prng();
     set_mum_prng_seed((uint32_t)std::chrono::system_clock::now().time_since_epoch().count());
 

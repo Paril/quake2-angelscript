@@ -6,8 +6,7 @@
 #include "q2as_platform.h"
 #include "q2as_random.h"
 
-//std::mt19937 mt_rand;
-//static prng_type mum_prng;
+prng_state mum_prng;
 
 
 local_game_import_t  gi;

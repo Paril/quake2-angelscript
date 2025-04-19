@@ -138,13 +138,12 @@ set_mum_prng_seed(uint32_t seed) {
 
 static inline uint64_t
 get_mum_prn(void) {
-    if (_mum_prng_state.update_func == 0)
-    {
-        _start_mum_prng(0);
-    }
-
     if (EXPECT(_mum_prng_state.count == MUM_PRNG_UNROLL, 0)) {
-        _mum_prng_state.update_func();
+        // NOTE(Oskar): The state is not consistent here so sometimes when calling from as our update_func is null.
+        // For now I just always call the normal update function since we won't use the avx2 version anyway.
+        // The only state we lose here is the original seed.
+        //_mum_prng_state.update_func();
+        _mum_prng_update();
         _mum_prng_state.count = 1;
         return _mum_prng_state.state[0];
     }

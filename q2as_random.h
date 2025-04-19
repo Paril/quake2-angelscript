@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <random>
 
-struct prng_type
+struct prng_state
 {
     using result_type = std::uint64_t;
 
@@ -21,13 +21,13 @@ struct prng_type
         return get_mum_prn();
     }
 
-    explicit prng_type(result_type seed = 0xcafebeefbabe1337ULL)
+    explicit prng_state(result_type seed = 0xcafebeefbabe1337ULL)
     {
         set_mum_prng_seed((uint32_t)seed);
     }
 };
 
-static prng_type mum_prng;
+extern prng_state mum_prng;
 
 // uniform float [0, 1)
 [[nodiscard]] inline float frandom()
