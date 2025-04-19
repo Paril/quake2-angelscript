@@ -54,9 +54,11 @@ typedef unsigned __int64 uint64_t;
 #ifdef __GNUC__
 #define _MUM_ATTRIBUTE_UNUSED __attribute__ ((unused))
 #define _MUM_INLINE inline __attribute__ ((always_inline))
+#define _MUM_NOINLINE __attribute__((noinline))
 #else
 #define _MUM_ATTRIBUTE_UNUSED
 #define _MUM_INLINE inline
+#define _MUM_NOINLINE
 #endif
 
 #if defined(MUM_QUALITY) && !defined(MUM_TARGET_INDEPENDENT_HASH)

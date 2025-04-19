@@ -90,7 +90,7 @@ _mum_prng_update_avx2(void) {
 }
 #endif
 
-static void __attribute__((noinline))
+static void _MUM_NOINLINE
 _mum_prng_update(void) {
     int i;
 
