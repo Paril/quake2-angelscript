@@ -257,29 +257,29 @@ public:
             if (stack.id != request.frameId)
                 continue;
 
-            if (!stack.scope.locals->Children().empty())
+            if (!stack.scope.locals->namedProps.empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Locals";
                 scope.presentationHint = "locals";
-                scope.namedVariables = stack.scope.locals->Children().size();
-                scope.variablesReference = stack.scope.locals->RefId();
+                scope.namedVariables = stack.scope.locals->namedProps.size();
+                scope.variablesReference = stack.scope.locals->expandRefId.value();
             }
-            if (!stack.scope.parameters->Children().empty())
+            if (!stack.scope.parameters->namedProps.empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Parameters";
                 scope.presentationHint = "parameters";
-                scope.namedVariables = stack.scope.parameters->Children().size();
-                scope.variablesReference = stack.scope.parameters->RefId();
+                scope.namedVariables = stack.scope.parameters->namedProps.size();
+                scope.variablesReference = stack.scope.parameters->expandRefId.value();
             }
-            if (!stack.scope.registers->Children().empty())
+            if (!stack.scope.registers->namedProps.empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Registers";
                 scope.presentationHint = "registers";
-                scope.namedVariables = stack.scope.registers->Children().size();
-                scope.variablesReference = stack.scope.registers->RefId();
+                scope.namedVariables = stack.scope.registers->namedProps.size();
+                scope.variablesReference = stack.scope.registers->expandRefId.value();
             }
             found = true;
             break;
@@ -288,14 +288,14 @@ public:
         if (!found)
             return dap::Error { "invalid stack ID" };
 
-        if (!dbg->cache->globals->Children().empty())
+        if (!dbg->cache->globals->namedProps.empty())
         {
             auto &scope = response.scopes.emplace_back();
             scope.name = "Globals";
             scope.presentationHint = "globals";
-            scope.namedVariables = dbg->cache->globals->Children().size();
+            scope.namedVariables = dbg->cache->globals->namedProps.size();
             scope.expensive = true;
-            scope.variablesReference = dbg->cache->globals->RefId();
+            scope.variablesReference = dbg->cache->globals->expandRefId.value();
         }
 
         return response;
@@ -316,9 +316,9 @@ public:
         varContainer->Expand();
 
         int64_t start = request.start.has_value() ? (int64_t) request.start.value() : 0;
-        int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->Children().size();
+        int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->namedProps.size();
 
-        auto it = varContainer->Children().begin();
+        auto it = varContainer->namedProps.begin();
         std::advance(it, start);
 
         for (int64_t i = start; i < count; i++)
@@ -340,8 +340,8 @@ public:
             {
                 var.value = local->value.empty() ? local->typeName : local->value;
             }
-            var.namedVariables = local->Children().size();
-            var.variablesReference = local->RefId();
+            var.namedVariables = local->namedProps.size();
+            var.variablesReference = local->expandRefId.value_or(0);
             it++;
         }
 
@@ -403,7 +403,7 @@ public:
 
         response.type = dap::string(var->typeName);
         response.result = var->value.empty() ? var->typeName : var->value;
-        response.variablesReference = var->RefId();
+        response.variablesReference = var->expandRefId.value_or(0);
 
         return response;
     }

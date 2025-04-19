@@ -45,7 +45,7 @@ public:
         }
         
         var->value = fmt::format("any<{}>", var->dbg.cache->GetTypeNameFromType({ v->GetTypeId(), asTM_NONE }));
-        var->MakeExpandable();
+        var->expandable = true;
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override
@@ -77,9 +77,7 @@ public:
         size_t size = v->GetSize();
 
         var->value = fmt::format("{{{} key/value pairs}}", size);
-
-        if (size)
-            var->MakeExpandable();
+        var->expandable = size != 0;
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override

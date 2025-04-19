@@ -366,6 +366,8 @@ struct asIDBVariable
     asIDBVarAddr address {};
 
     // these are only available after `evaluated` is true.
+    bool             evaluated = false;
+    bool             expandable = false;
     std::string      value;
     std::string_view typeName;
     asIDBValue       stackValue;
@@ -374,23 +376,18 @@ struct asIDBVariable
     asIScriptFunction *getter = nullptr;
     Ptr                get_evaluated;
 
-    bool evaluated = false;
-    bool expanded = false;
+    // automatically set after evaluation if
+    // expandable is true.
+    std::optional<int64_t> expandRefId {};
+
+    // named properties & indexed variables
+    bool      expanded = false;
+    SortedSet namedProps;
+    Vector    indexedProps;
 
     asIDBVariable(asIDBDebugger &dbg) :
         dbg(dbg)
     {
-    }
-
-    const SortedSet &Children() const
-    {
-        return children;
-    }
-    void    MakeExpandable();
-    void    PushChild(Ptr ptr);
-    int64_t RefId() const
-    {
-        return ref_id.value_or(0);
     }
 
     Ptr CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address, std::string_view typeName);
@@ -398,11 +395,11 @@ struct asIDBVariable
     void Evaluate();
     void Expand();
 
-private:
-    // if ref_id is set, the variable has children.
-    // call asIDBCache::LinkVariable to set this.
-    std::optional<int64_t> ref_id {};
-    SortedSet              children;
+    // normally you don't need to call this directly
+    // but if you're manually creating a variable you
+    // may need to do this. This marks the object as
+    // expandable and sets the ref id.
+    void SetRefId();
 };
 
 // a local, fetched from GetVar

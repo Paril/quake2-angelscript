@@ -7,33 +7,6 @@
     <ClCompile Include="debugger\as_debugger.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="debugger\as_debugger_imgui.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_demo.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_draw.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_impl_dx9.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_impl_win32.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_tables.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_widgets.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\TextEditor.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\angelscript\source\as_builder.cpp">
       <Filter>thirdparty\angelscript\source</Filter>
     </ClCompile>
@@ -258,36 +231,6 @@
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
     <ClInclude Include="debugger\as_debugger.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\as_debugger_imgui.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imconfig.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui_impl_dx9.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui_impl_win32.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui_internal.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imstb_rectpack.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imstb_textedit.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imstb_truetype.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\TextEditor.h">
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\angelscript\include\angelscript.h">

@@ -167,11 +167,12 @@ static void Q2AS_ShutdownGame()
 
     // disconnect all entities
     for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
+    {
         if (e->as_obj)
             e->as_obj->Release();
-    
-    for (q2as_edict_t *e = svas.edicts; e < svas.edicts + svas.maxentities; e++)
+
         e->~q2as_edict_t();
+    }
 
     svas.Destroy();
 }
@@ -1161,7 +1162,7 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
     }
 
     registry
-        .type("sv_entity_t", sizeof(sv_entity_t), asOBJ_VALUE | asOBJ_POD)
+        .type("sv_entity_t", sizeof(sv_entity_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
         .properties({
             { "bool init",                   asOFFSET(sv_entity_t, init)  },
             { "uint64 ent_flags",            asOFFSET(sv_entity_t, ent_flags) },
@@ -1189,6 +1190,9 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
             { "edict_t @ ground_entity",     asOFFSET(sv_entity_t, ground_entity) },
             { "inventoryArray_t inventory",  asOFFSET(sv_entity_t, inventory) },
             { "armorInfoArray_t armor_info", asOFFSET(sv_entity_t, armor_info) }
+        })
+        .behaviors({
+            { asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<sv_entity_t>), asCALL_CDECL_OBJLAST }
         })
         .methods({
             { "void set_classname(const string &in) property", asFUNCTION(q2as_sv_entity_t_set_classname), asCALL_CDECL_OBJLAST },
@@ -1805,11 +1809,7 @@ static void Q2AS_RegisterShadowLightData(q2as_registry &registry)
     registry
         .type("shadow_light_data_t", sizeof(shadow_light_data_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<shadow_light_data_t>), asCALL_CDECL_OBJLAST },
-            { asBEHAVE_CONSTRUCT, "void f(const shadow_light_data_t &in)", asFUNCTION(Q2AS_init_construct_copy<shadow_light_data_t>), asCALL_CDECL_OBJLAST }
-        })
-        .methods({
-            { "shadow_light_data_t &opAssign (const shadow_light_data_t &in)", asFUNCTION(Q2AS_assign<shadow_light_data_t>), asCALL_CDECL_OBJLAST }
+            { asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<shadow_light_data_t>), asCALL_CDECL_OBJLAST }
         })
         .properties({
             { "shadow_light_type_t lighttype", asOFFSET(shadow_light_data_t, lighttype) },
@@ -1930,20 +1930,16 @@ static void Q2AS_RegisterPathFinding(q2as_registry &registry)
         });
 
     registry
-        .type("PathDebugSettings", sizeof(PathRequest::DebugSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::DebugSettings>())
+        .type("PathDebugSettings", sizeof(PathRequest::DebugSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C)
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f()",                            asFUNCTION(Q2AS_init_construct<PathRequest::DebugSettings>),      asCALL_CDECL_OBJLAST },
-            { asBEHAVE_CONSTRUCT, "void f(const PathDebugSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST }
-        })
-        .methods({
-            { "PathDebugSettings &opAssign (const PathDebugSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::DebugSettings>), asCALL_CDECL_OBJLAST }
+            { asBEHAVE_CONSTRUCT, "void f()",                            asFUNCTION(Q2AS_init_construct<PathRequest::DebugSettings>),      asCALL_CDECL_OBJLAST }
         })
         .properties({
             { "float drawTime", asOFFSET(PathRequest::DebugSettings, drawTime) }
         });
 
     registry
-        .type("PathNodeSettings", sizeof(PathRequest::NodeSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::NodeSettings>())
+        .type("PathNodeSettings", sizeof(PathRequest::NodeSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
         .properties({
             { "bool ignoreNodeFlags", asOFFSET(PathRequest::NodeSettings, ignoreNodeFlags) },
             { "float minHeight",      asOFFSET(PathRequest::NodeSettings, minHeight) },
@@ -1951,29 +1947,21 @@ static void Q2AS_RegisterPathFinding(q2as_registry &registry)
             { "float radius",         asOFFSET(PathRequest::NodeSettings, radius) }
         })
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f()",                           asFUNCTION(Q2AS_init_construct<PathRequest::NodeSettings>),      asCALL_CDECL_OBJLAST },
-            { asBEHAVE_CONSTRUCT, "void f(const PathNodeSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST }
-        })
-        .methods({
-            { "PathNodeSettings &opAssign (const PathNodeSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::NodeSettings>), asCALL_CDECL_OBJLAST }
+            { asBEHAVE_CONSTRUCT, "void f()",                           asFUNCTION(Q2AS_init_construct<PathRequest::NodeSettings>),      asCALL_CDECL_OBJLAST }
         });
 
     registry
-        .type("PathTraversalSettings", sizeof(PathRequest::TraversalSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest::TraversalSettings>())
+        .type("PathTraversalSettings", sizeof(PathRequest::TraversalSettings), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_C)
         .properties({
             { "float dropHeight", asOFFSET(PathRequest::TraversalSettings, dropHeight) },
             { "float jumpHeight", asOFFSET(PathRequest::TraversalSettings, jumpHeight) }
         })
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f()",                                asFUNCTION(Q2AS_init_construct<PathRequest::TraversalSettings>),      asCALL_CDECL_OBJLAST },
-            { asBEHAVE_CONSTRUCT, "void f(const PathTraversalSettings &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST }
-        })
-        .methods({
-            { "PathTraversalSettings &opAssign (const PathTraversalSettings &in)", asFUNCTION(Q2AS_assign<PathRequest::TraversalSettings>), asCALL_CDECL_OBJLAST }
+            { asBEHAVE_CONSTRUCT, "void f()",                                asFUNCTION(Q2AS_init_construct<PathRequest::TraversalSettings>),      asCALL_CDECL_OBJLAST }
         });
 
     registry
-        .type("PathRequest", sizeof(PathRequest), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C | asGetTypeTraits<PathRequest>())
+        .type("PathRequest", sizeof(PathRequest), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
         .properties({
             { "vec3_t start",        asOFFSET(PathRequest, start) },
             { "vec3_t goal",         asOFFSET(PathRequest, goal) },
@@ -1987,11 +1975,7 @@ static void Q2AS_RegisterPathFinding(q2as_registry &registry)
             { "int64 maxPathPoints", asOFFSET(PathRequest, pathPoints.count) }
         })
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f()",                      asFUNCTION(Q2AS_init_construct<PathRequest>),      asCALL_CDECL_OBJLAST },
-            { asBEHAVE_CONSTRUCT, "void f(const PathRequest &in)", asFUNCTION(Q2AS_init_construct_copy<PathRequest>), asCALL_CDECL_OBJLAST }
-        })
-        .methods({
-            { "PathRequest &opAssign (const PathRequest &in)", asFUNCTION(Q2AS_assign<PathRequest>), asCALL_CDECL_OBJLAST }
+            { asBEHAVE_CONSTRUCT, "void f()",                      asFUNCTION(Q2AS_init_construct<PathRequest>),      asCALL_CDECL_OBJLAST }
         });
 
     registry
@@ -2005,13 +1989,16 @@ static void Q2AS_RegisterPathFinding(q2as_registry &registry)
             { "PathReturnCode returnCode", asOFFSET(q2as_PathInfo, info.returnCode) }
         })
         .behaviors({
-            { asBEHAVE_FACTORY, "PathInfo@ f()", asFUNCTION((Q2AS_Factory<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC },
+            { asBEHAVE_FACTORY, "PathInfo@ f()",                 asFUNCTION((Q2AS_Factory<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC },
+            { asBEHAVE_FACTORY, "PathInfo@ f(const PathInfo &)", asFUNCTION((Q2AS_FactoryCopy<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC },
+
             { asBEHAVE_ADDREF, "void f()",       asFUNCTION((Q2AS_AddRef<q2as_PathInfo>)),                   asCALL_GENERIC },
             { asBEHAVE_RELEASE, "void f()",      asFUNCTION((Q2AS_Release<q2as_PathInfo, q2as_sv_state_t>)), asCALL_GENERIC }
         })
         .methods({
-            { "PathInfo &opAssign (const PathInfo &in)",  asFUNCTION(Q2AS_assign<q2as_PathInfo>), asCALL_CDECL_OBJLAST },
-            { "const vec3_t &getPathPoint(uint i) const", asMETHOD(q2as_PathInfo, getPathPoint),  asCALL_THISCALL }
+            { "const vec3_t &getPathPoint(uint i) const", asMETHOD(q2as_PathInfo, getPathPoint),  asCALL_THISCALL },
+
+            { "PathInfo &opAssign (const PathInfo &in)", asFUNCTION(Q2AS_assign<PathInfo>), asCALL_CDECL_OBJLAST },
         });
 
     registry

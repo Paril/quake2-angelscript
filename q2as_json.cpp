@@ -163,16 +163,12 @@ public:
         else if (v->is_arr())
         {
             var->value = fmt::format("array ({} elements)", v->get_length());
-
-            if (v->get_length())
-                var->MakeExpandable();
+            var->expandable = v->get_length() != 0;
         }
         else if (v->is_obj())
         {
             var->value = fmt::format("object ({} elements)", v->get_length());
-
-            if (v->get_length())
-                var->MakeExpandable();
+            var->expandable = v->get_length() != 0;
         }
         else
             var->value = "(unknown JSON object)";
@@ -220,7 +216,7 @@ static void Q2AS_RegisterMutableJson(q2as_registry &registry)
 {
     // mutable JSON value
     registry
-        .type("json_mutval", sizeof(q2as_yyjson_mut_val), asOBJ_VALUE | asOBJ_APP_CLASS_CD)
+        .type("json_mutval", sizeof(q2as_yyjson_mut_val), asOBJ_VALUE | asOBJ_APP_CLASS_CDAK)
         .behaviors({
             { asBEHAVE_CONSTRUCT, "void f()",                      asFUNCTION(Q2AS_init_construct<q2as_yyjson_mut_val>),      asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const json_mutval &in)", asFUNCTION(Q2AS_init_construct_copy<q2as_yyjson_mut_val>), asCALL_CDECL_OBJLAST },
@@ -420,16 +416,12 @@ public:
         else if (v->is_arr())
         {
             var->value = fmt::format("array ({} elements)", v->get_length());
-
-            if (v->get_length())
-                var->MakeExpandable();
+            var->expandable = v->get_length() != 0;
         }
         else if (v->is_obj())
         {
             var->value = fmt::format("object ({} elements)", v->get_length());
-
-            if (v->get_length())
-                var->MakeExpandable();
+            var->expandable = v->get_length() != 0;
         }
         else
             var->value = "(unknown JSON object)";
@@ -477,7 +469,7 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
 {
     // immutable JSON value
     registry
-        .type("json_val", sizeof(q2as_yyjson_val), asOBJ_VALUE | asOBJ_APP_CLASS_CD)
+        .type("json_val", sizeof(q2as_yyjson_val), asOBJ_VALUE | asOBJ_APP_CLASS_CDAK)
         .behaviors({
             { asBEHAVE_CONSTRUCT, "void f()",                   asFUNCTION(Q2AS_init_construct<q2as_yyjson_val>),      asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const json_val &in)", asFUNCTION(Q2AS_init_construct_copy<q2as_yyjson_val>), asCALL_CDECL_OBJLAST },
@@ -602,7 +594,7 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
 
     // immutable JSON array iterator
     registry
-        .type("json_arr_iter", sizeof(q2as_yyjson_arr_iter), asOBJ_VALUE | asOBJ_APP_CLASS_CD)
+        .type("json_arr_iter", sizeof(q2as_yyjson_arr_iter), asOBJ_VALUE | asOBJ_APP_CLASS_CDAK)
         .behaviors({
             { asBEHAVE_CONSTRUCT, "void f()",                        asFUNCTION(Q2AS_init_construct<q2as_yyjson_arr_iter>),      asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const json_arr_iter &in)", asFUNCTION(Q2AS_init_construct_copy<q2as_yyjson_arr_iter>), asCALL_CDECL_OBJLAST },
@@ -617,7 +609,7 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
 
     // immutable JSON object iterator
     registry
-        .type("json_obj_iter", sizeof(q2as_yyjson_obj_iter), asOBJ_VALUE | asOBJ_APP_CLASS_CD)
+        .type("json_obj_iter", sizeof(q2as_yyjson_obj_iter), asOBJ_VALUE | asOBJ_APP_CLASS_CDAK)
         .behaviors({
             { asBEHAVE_CONSTRUCT, "void f()",                        asFUNCTION(Q2AS_init_construct<q2as_yyjson_obj_iter>),      asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const json_obj_iter &in)", asFUNCTION(Q2AS_init_construct_copy<q2as_yyjson_obj_iter>), asCALL_CDECL_OBJLAST },

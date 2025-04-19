@@ -115,7 +115,7 @@ public:
             }
 
         var->value = fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx);
-        var->MakeExpandable();
+        var->expandable = true;
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override
@@ -130,7 +130,7 @@ public:
                 child->identifier = std::get<1>(suffix);
                 child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
                 child->evaluated = true;
-                var->PushChild(child);
+                var->namedProps.insert(child);
             }
 
         {
@@ -139,7 +139,7 @@ public:
             child->identifier = "ms";
             child->value = fmt::format("{}", s->milliseconds());
             child->evaluated = true;
-            var->PushChild(child);
+            var->namedProps.insert(child);
         }
     }
 };
@@ -161,6 +161,7 @@ void Q2AS_RegisterTime(q2as_registry &registry)
             { "int64 milliseconds", 0 }
         })
         .behaviors({
+            { asBEHAVE_CONSTRUCT, "void f()",                  asFUNCTION(Q2AS_init_construct<gtime_t>),             asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(int64, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<int64_t>), asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(float, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<float>),   asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_copy_construct),              asCALL_CDECL_OBJLAST }

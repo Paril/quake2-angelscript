@@ -3,21 +3,6 @@
 
 // DEBUGGER
 
-#include "debugger/as_debugger_imgui.h"
-
-#define WIN32_LEAN_AND_MEAN
-#include "debugger/imgui.h"
-#include "debugger/imgui_impl_dx9.h"
-#include "debugger/imgui_impl_win32.h"
-#include <d3d9.h>
-#include <tchar.h>
-
-#pragma comment(lib, "d3d9.lib")
-
-#undef min
-#undef max
-#undef hyper
-
 #include "g_local.h"
 
 #include "q2as_game.h"
@@ -55,6 +40,20 @@ public:
 };
 
 #ifdef ENABLE_UI_DEBUGGER
+#define WIN32_LEAN_AND_MEAN
+#include "debugger/imgui.h"
+#include "debugger/imgui_impl_dx9.h"
+#include "debugger/imgui_impl_win32.h"
+#include <d3d9.h>
+#include <tchar.h>
+
+#pragma comment(lib, "d3d9.lib")
+
+#undef min
+#undef max
+#undef hyper
+
+#include "debugger/as_debugger_imgui.h"
 #include <thread>
 
 class q2as_imguiDebuggerUI : public asIDBImGuiFrontend
