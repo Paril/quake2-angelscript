@@ -4,8 +4,11 @@
 #include "g_local.h"
 #include "q2as_main.h"
 #include "q2as_platform.h"
+#include "q2as_random.h"
 
-std::mt19937 mt_rand;
+//std::mt19937 mt_rand;
+prng_type mum_prng;
+
 
 local_game_import_t  gi;
 
