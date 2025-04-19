@@ -27,7 +27,7 @@ struct prng_type
     }
 };
 
-extern prng_type mum_prng;
+static prng_type mum_prng;
 
 // uniform float [0, 1)
 [[nodiscard]] inline float frandom()

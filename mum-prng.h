@@ -138,6 +138,11 @@ set_mum_prng_seed(uint32_t seed) {
 
 static inline uint64_t
 get_mum_prn(void) {
+    if (_mum_prng_state.update_func == 0)
+    {
+        _start_mum_prng(0);
+    }
+
     if (EXPECT(_mum_prng_state.count == MUM_PRNG_UNROLL, 0)) {
         _mum_prng_state.update_func();
         _mum_prng_state.count = 1;
