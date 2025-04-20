@@ -2,8 +2,9 @@
 #include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
 #include "q2as_platform.h"
-#include "thirdparty/lop/include/profiler.h"
 #include "debugger/as_debugger.h"
+
+static std::chrono::high_resolution_clock cl;
 
 static void InstrumentationCallback(asSFunctionInfo *info)
 {
@@ -14,17 +15,25 @@ static void InstrumentationCallback(asSFunctionInfo *info)
     declhash_t *hashed;
 
     if (auto f = decls.find(info->function); f != decls.end())
+    {
         hashed = &f->second;
+
+        if (info->popped)
+            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: 1 }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", cl.now().time_since_epoch().count());
+        else
+            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: 1 name_iid: {} }} trusted_packet_sequence_id: 1 }}\n", cl.now().time_since_epoch().count(), hashed->h);
+    }
     else
     {
         const char *decl = info->function->GetDeclaration();
-        hashed = &decls.emplace(info->function, declhash_t { decl, /*plPriv::hashString(decl)*/ 0 }).first->second;
+        hashed = &decls.emplace(info->function, declhash_t { decl, decls.size() + 1 }).first->second;
+
+        if (info->popped)
+            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: 1 }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", cl.now().time_since_epoch().count());
+        else
+            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: 1 name_iid: {} }} trusted_packet_sequence_id: 1 interned_data {{ event_names: {{ iid: {} name: \"{}\" }} }} }}\n", cl.now().time_since_epoch().count(), hashed->h, hashed->h, hashed->s);
     }
 
-    if (info->popped)
-        LOP::emit_end_event(hashed->s.c_str());
-    else
-        LOP::emit_begin_event(hashed->s.c_str());
 }
 
 static void InstrumentationGarbageCallback(q2as_state_t *state, bool pop)
@@ -32,16 +41,14 @@ static void InstrumentationGarbageCallback(q2as_state_t *state, bool pop)
     static declhash_t garbage_hash { "GC", /*plPriv::hashString("GC")*/ 0 };
 
     if (pop)
-        LOP::emit_end_event(garbage_hash.s.c_str());
+        fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: 4 }} trusted_packet_sequence_id: 1 }}\n", cl.now().time_since_epoch().count());
     else
-        LOP::emit_begin_event(garbage_hash.s.c_str());
+        fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: 4 name: \"{}\" }} trusted_packet_sequence_id: 1 }}\n", cl.now().time_since_epoch().count(), "GC");
 }
 
 static void WriteInstrumentation()
 {
-    LOP::profiler_flush();
-    LOP::profiler_disable();
-
+    debugger_state.instru_of.close();
     debugger_state.instrumenting = false;
 }
 
@@ -54,7 +61,11 @@ static void StartInstrumentation(q2as_state_t &as)
     if (debugger_state.instrumenting)
         return;
 
-    LOP::profiler_enable();
+    debugger_state.instru_of.open("profile.trace");
+    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ track_descriptor: {{ uuid: 2 process: {{ pid: 1 process_name: \"Angelscript\" }} }} }}\n");
+    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ track_descriptor: {{ uuid: 1 thread: {{ pid: 1 tid: 2 thread_name: \"Server\" }} }} }}\n");
+    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ track_descriptor: {{ uuid: 4 thread: {{ pid: 1 tid: 3 thread_name: \"GC\" }} }} }}\n");
+    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} trusted_packet_sequence_id: 1 first_packet_on_sequence: true previous_packet_dropped: true sequence_flags: 3 }}\n", cl.now().time_since_epoch().count());
     debugger_state.instrumenting = true;
 }
 

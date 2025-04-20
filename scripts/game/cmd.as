@@ -401,15 +401,23 @@ void Cmd_Spawn_f(ASEntity &ent)
 
 	if (gi_argc() > 3)
 	{
-		for (int i = 2; i < gi_argc(); i += 2)
+        tokenizer_t parser(gi_args());
+
+        // skip spawn & classname
+        parser.next();
+
+        while (parser.next())
         {
-            tokenizer_t parser(gi_argv(i + 1));
+            string key = parser.as_string();
             parser.next();
-			ED_ParseField(gi_argv(i), parser, other, st);
+			if (ED_ParseField(key, parser, other, st))
+                st.keys_specified.add(key);
         }
 	}
 
 	ED_CallSpawn(other, st);
+
+    st.keys_specified.clear();
 
 	if (other.e.inuse)
 	{

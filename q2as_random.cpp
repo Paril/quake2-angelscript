@@ -1,15 +1,16 @@
 #include "q2as_local.h"
+#include "q2as_time.h"
 #include "g_local.h"
 
 // FIXME: new randomness system
-static int64_t q2as_random_time_2(const int64_t &a, const int64_t &b)
+static q2as_gtime q2as_random_time_2(const q2as_gtime &a, const q2as_gtime &b)
 {
-    return irandom(min(a, b), max(a, b));
+    return q2as_gtime::from_ms(irandom(min(a.milliseconds(), b.milliseconds()), max(a.milliseconds(), b.milliseconds())));
 }
 
-static int64_t q2as_random_time_1(const int64_t &a)
+static q2as_gtime q2as_random_time_1(const q2as_gtime &a)
 {
-    return irandom(a);
+    return q2as_gtime::from_ms(irandom(a.milliseconds()));
 }
 
 void Q2AS_RegisterRandom(q2as_registry &registry)

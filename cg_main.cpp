@@ -30,7 +30,7 @@ Q2GAME_API cgame_export_t *GetCGameAPI(cgame_import_t *import)
         return api;
     }
 
-    import->Com_Error("Failed to load AngelScript CGame API\n");
+    import->Com_Print("Failed to load AngelScript CGame API\n");
 
     // Fall back to loading baseq2 cgame api.
     GetCGameAPIEXTERNAL external_cgame_api = Q2AS_GetCGameAPI(import);

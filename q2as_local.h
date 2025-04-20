@@ -38,7 +38,7 @@ struct q2as_ctx_t
 struct declhash_t
 {
     std::string s;
-    uint32_t    h;
+    size_t      h;
 };
 
 using library_reg_t = void(q2as_registry &);
@@ -134,6 +134,7 @@ static T *Q2AS_assign(const T &in, T *self)
 }
 
 #include "debugger/as_debugger.h"
+#include <fstream>
 
 // stores the debugger state for both Q2AS modules.
 // no need to have a debugger for each one.
@@ -144,6 +145,7 @@ struct q2as_dbg_state_t
 
     cvar_t *instrumentation;
     bool    instrumenting = false;
+    std::ofstream instru_of;
 
     // evaluators don't take up much memory so we'll just
     // always keep them around.

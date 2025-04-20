@@ -269,7 +269,6 @@
     <ClCompile Include="thirdparty\cppdap\src\yyjson_json_serializer.cpp" />
     <ClCompile Include="thirdparty\datetime\datetime.cpp" />
     <ClCompile Include="thirdparty\fmt\src\os.cc" />
-    <ClCompile Include="thirdparty\lop\src\profiler.cpp" />
     <ClCompile Include="thirdparty\scriptany\scriptany.cpp" />
     <ClCompile Include="thirdparty\scriptarray\scriptarray.cpp" />
     <ClCompile Include="thirdparty\scriptdictionary\scriptdictionary.cpp" />
@@ -298,6 +297,7 @@
     <ClInclude Include="q2as_predefined.h" />
     <ClInclude Include="q2as_reg.h" />
     <ClInclude Include="q2as_stringex.h" />
+    <ClInclude Include="q2as_time.h" />
     <ClInclude Include="q2as_vec2.h" />
     <ClInclude Include="q2as_vec3.h" />
     <ClInclude Include="q_std.h" />
@@ -485,7 +485,6 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm" />
-    <MASM Include="thirdparty\lop\src\profiler_asm.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
