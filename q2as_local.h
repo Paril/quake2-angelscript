@@ -7,7 +7,6 @@
 #include "game.h"
 #include "q2as_reg.h"
 #include <memory>
-#include <set>
 
 // auto-destruct wrapper for an execution context
 struct q2as_ctx_t
@@ -35,12 +34,6 @@ struct q2as_ctx_t
     }
 };
 
-struct declhash_t
-{
-    std::string s;
-    size_t      h;
-};
-
 using library_reg_t = void(q2as_registry &);
 
 using formatter_map = std::unordered_map<int, asIScriptFunction *>;
@@ -48,7 +41,6 @@ using formatter_map = std::unordered_map<int, asIScriptFunction *>;
 // stores the state for each Q2AS engine.
 struct q2as_state_t
 {
-    std::unordered_map<asIScriptFunction *, declhash_t> instru;
     asIScriptEngine                                    *engine;
     asIScriptModule                                    *mainModule; // the main module
     formatter_map                                       formatters;
@@ -134,7 +126,19 @@ static T *Q2AS_assign(const T &in, T *self)
 }
 
 #include "debugger/as_debugger.h"
-#include <fstream>
+
+struct instrumentation_event_t
+{
+    int64_t             stamp;
+    asIScriptFunction   *func;
+    bool                begin : 1;
+    uint8_t             tid : 7;
+};
+
+constexpr int INSTRU_SERVER   = 1;
+constexpr int INSTRU_CLIENT   = 2;
+constexpr int INSTRU_MOVEMENT = 4;
+constexpr int INSTRU_GC       = 8;
 
 // stores the debugger state for both Q2AS modules.
 // no need to have a debugger for each one.
@@ -143,9 +147,10 @@ struct q2as_dbg_state_t
     std::unique_ptr<asIDBDebugger>  debugger;
     std::unique_ptr<asIDBWorkspace> workspace;
 
-    cvar_t *instrumentation;
-    bool    instrumenting = false;
-    std::ofstream instru_of;
+    cvar_t *instrumentation_type, *instrumentation_modules, *instrumentation_granularity;
+    int active_instrumentation = 0;
+    std::vector<instrumentation_event_t> events;
+    uint8_t current_tid = 0;
 
     // evaluators don't take up much memory so we'll just
     // always keep them around.

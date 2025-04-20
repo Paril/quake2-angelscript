@@ -323,6 +323,8 @@ static void Q2AS_CG_ClearCenterprint(int32_t isplit)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+    debugger_state.current_tid = 2;
+
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_ClearCenterprint);
     ctx->SetArgDWord(0, isplit);
@@ -333,6 +335,8 @@ static void Q2AS_CG_ClearNotify(int32_t isplit)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_ClearNotify);
@@ -358,6 +362,8 @@ static void Q2AS_CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect
         cgi.SCR_DrawFontString(q2as_state_t::GetExceptionData().c_str(), x - (160 * scale), y, 1, rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 }, false, text_align_t::LEFT);
         return;
     }
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_DrawHUD);
@@ -375,6 +381,8 @@ static int32_t Q2AS_CG_GetActiveWeaponWheelWeapon(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_GetActiveWeaponWheelWeapon);
@@ -388,6 +396,8 @@ static int16_t Q2AS_CG_GetHitMarkerDamage(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_GetHitMarkerDamage);
@@ -401,6 +411,8 @@ static void Q2AS_CG_GetMonsterFlashOffset(monster_muzzleflash_id_t id, gvec3_ref
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_GetMonsterFlashOffset);
@@ -413,6 +425,8 @@ static uint32_t Q2AS_CG_GetOwnedWeaponWheelWeapons(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_GetOwnedWeaponWheelWeapons);
@@ -426,6 +440,8 @@ static int16_t Q2AS_CG_GetPowerupWheelCount(const player_state_t *ps, int32_t po
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_GetPowerupWheelCount);
@@ -440,6 +456,8 @@ static int16_t Q2AS_CG_GetWeaponWheelAmmoCount(const player_state_t *ps, int32_t
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_GetWeaponWheelAmmoCount);
@@ -454,6 +472,8 @@ static void Q2AS_CG_Init()
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_Init);
@@ -464,6 +484,8 @@ static layout_flags_t Q2AS_CG_LayoutFlags(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return LAYOUTS_NONE;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_LayoutFlags);
@@ -477,6 +499,8 @@ static void Q2AS_CG_NotifyMessage(int32_t isplit, const char *msg, bool is_chat)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     std::string msg_ = msg;
 
@@ -492,6 +516,8 @@ static void Q2AS_CG_ParseConfigString(int32_t i, const char *s)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     std::string s_ = s;
 
@@ -507,6 +533,8 @@ static void Q2AS_CG_ParseCenterPrint(const char *s, int32_t i, bool instant)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     std::string s_ = s;
 
@@ -520,6 +548,8 @@ static void Q2AS_CG_ParseCenterPrint(const char *s, int32_t i, bool instant)
 
 static void Q2AS_CG_Shutdown()
 {
+    debugger_state.current_tid = 2;
+
     if (!q2as_state_t::CheckExceptionState())
     {
         auto ctx = cgas.RequestContext();
@@ -536,6 +566,8 @@ static void Q2AS_CG_TouchPics()
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_TouchPics);
@@ -546,6 +578,8 @@ static void Q2AS_CG_Pmove(pmove_t *pm)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
+    
+    debugger_state.current_tid = 2;
 
     cgas.pmove_inst->pm = *pm;
 
@@ -566,9 +600,6 @@ cgame_export_t *Q2AS_GetCGameAPI()
 
     if (!cgas.Load(q2as_cg_state_t::AllocStatic, q2as_cg_state_t::FreeStatic))
         return nullptr;
-
-    if (!debugger_state.instrumentation)
-        debugger_state.instrumentation = cgi.cvar("q2as_instrumentation", "0", CVAR_NOFLAGS);
 
     constexpr library_reg_t *const libraries[] = {
         Q2AS_RegisterThirdParty,

@@ -891,7 +891,7 @@ int asCScriptFunction::FindNextLineWithCode(int line) const
 // interface
 int asCScriptFunction::GetDeclaredAt(const char** scriptSection, int* row, int* col) const
 {
-	if (!scriptData)
+	if (!scriptData || scriptData->scriptSectionIdx == -1)
 	{
 		if (scriptSection) *scriptSection = 0;
 		if (row) *row = 0;

@@ -3,70 +3,182 @@
 #include "thirdparty/scripthelper/scripthelper.h"
 #include "q2as_platform.h"
 #include "debugger/as_debugger.h"
+#include <fstream>
+
+#define TRACY_ENABLE
+#define TRACY_ON_DEMAND
+#define TRACY_DELAYED_INIT
+#define TRACY_MANUAL_LIFETIME
+
+#include "thirdparty/tracy/TracyClient.cpp"
+#include "thirdparty/tracy/tracy/Tracy.hpp"
+#include "thirdparty/tracy/tracy/TracyC.h"
 
 static std::chrono::high_resolution_clock cl;
 
+struct TracyCallerHashedData
+{
+    asIScriptFunction   *self;
+    asIScriptFunction   *caller;
+    int                 caller_line;
+
+    TracyCallerHashedData(asSFunctionInfo *info)
+    {
+        self = info->function;
+        caller = info->context->GetFunction(0);
+        caller_line = info->context->GetLineNumber(0);
+    }
+
+    bool operator==(const TracyCallerHashedData &b) const
+    {
+        return self == b.self && caller == b.caller && caller_line == b.caller_line;
+    }
+};
+
+struct TracyCallerInfo
+{
+    std::string                     decl;
+    ___tracy_source_location_data   source;
+
+    TracyCallerInfo(const TracyCallerHashedData &hashed)
+    {
+        decl = hashed.self->GetDeclaration();
+
+        source.color = 0;
+        hashed.self->GetDeclaredAt(&source.file, nullptr, nullptr);
+        source.function = decl.c_str();
+        source.line = hashed.caller_line;
+        source.name = nullptr;
+    }
+};
+
+template<>
+struct std::hash<TracyCallerHashedData>
+{
+    inline size_t operator()(const TracyCallerHashedData &a) const
+    {
+        size_t s = std::hash<void *>()(a.self);
+        asIDBHashCombine(s, std::hash<void *>()(a.caller));
+        asIDBHashCombine(s, std::hash<int>()(a.caller_line));
+        return s;
+    }
+};
+
+static std::unordered_map<TracyCallerHashedData, TracyCallerInfo> tracy_caller_info;
+static std::vector<TracyCZoneCtx>                                 tracy_zone_ctx;
+
 static void InstrumentationCallback(asSFunctionInfo *info)
 {
+    if (debugger_state.instrumentation_granularity->integer == 0 && info->function->GetFuncType() == asFUNC_SYSTEM)
+        return;
+
     q2as_state_t *state = (q2as_state_t *) info->context->GetEngine()->GetUserData(0);
-    
-    static std::unordered_map<asIScriptFunction *, declhash_t> decls;
 
-    declhash_t *hashed;
-
-    if (auto f = decls.find(info->function); f != decls.end())
+    if (debugger_state.instrumentation_type->integer == 1)
     {
-        hashed = &f->second;
-
         if (info->popped)
-            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: 1 }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", cl.now().time_since_epoch().count());
+        {
+            ___tracy_emit_zone_end(tracy_zone_ctx.back());
+            tracy_zone_ctx.pop_back();
+        }
         else
-            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: 1 name_iid: {} }} trusted_packet_sequence_id: 1 }}\n", cl.now().time_since_epoch().count(), hashed->h);
+        {
+            TracyCallerHashedData data(info);
+            auto it = tracy_caller_info.find(data);
+
+            if (it == tracy_caller_info.end())
+                it = tracy_caller_info.emplace(data, TracyCallerInfo(data)).first;
+            
+            tracy_zone_ctx.push_back(___tracy_emit_zone_begin( &it->second.source, 1 ));
+        }
     }
     else
     {
-        const char *decl = info->function->GetDeclaration();
-        hashed = &decls.emplace(info->function, declhash_t { decl, decls.size() + 1 }).first->second;
-
-        if (info->popped)
-            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: 1 }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", cl.now().time_since_epoch().count());
-        else
-            fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: 1 name_iid: {} }} trusted_packet_sequence_id: 1 interned_data {{ event_names: {{ iid: {} name: \"{}\" }} }} }}\n", cl.now().time_since_epoch().count(), hashed->h, hashed->h, hashed->s);
+        debugger_state.events.push_back({ cl.now().time_since_epoch().count(), info->function, !info->popped, debugger_state.current_tid });
     }
-
 }
 
 static void InstrumentationGarbageCallback(q2as_state_t *state, bool pop)
 {
-    static declhash_t garbage_hash { "GC", /*plPriv::hashString("GC")*/ 0 };
-
-    if (pop)
-        fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: 4 }} trusted_packet_sequence_id: 1 }}\n", cl.now().time_since_epoch().count());
+    if (debugger_state.instrumentation_type->integer == 1)
+    {
+    }
     else
-        fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: 4 name: \"{}\" }} trusted_packet_sequence_id: 1 }}\n", cl.now().time_since_epoch().count(), "GC");
+    {
+        debugger_state.events.push_back({ cl.now().time_since_epoch().count(), nullptr, !pop, 4 });
+    }
 }
+
+struct declhash_t
+{
+    std::string s;
+    size_t      h;
+};
 
 static void WriteInstrumentation()
 {
-    debugger_state.instru_of.close();
-    debugger_state.instrumenting = false;
-}
+    if (debugger_state.active_instrumentation == 1)
+    {
+        tracy::ShutdownProfiler();
+    }
+    else
+    {
+        std::unordered_map<asIScriptFunction *, declhash_t> decls;
 
-static void FlushInstrumentation()
-{
+        std::ofstream instru_of("profile.trace");
+        std::ostream_iterator<char> it(instru_of);
+
+        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 5 process: {{ pid: 1 process_name: \"Angelscript\" }} }} }}\n");
+        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 1 thread: {{ pid: 1 tid: 1 thread_name: \"Server\" }} }} }}\n");
+        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 2 thread: {{ pid: 1 tid: 2 thread_name: \"Client\" }} }} }}\n");
+        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 3 thread: {{ pid: 1 tid: 3 thread_name: \"Movement\" }} }} }}\n");
+        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 4 thread: {{ pid: 1 tid: 4 thread_name: \"GC\" }} }} }}\n");
+        fmt::format_to(it, "packet {{ timestamp: {} trusted_packet_sequence_id: 1 first_packet_on_sequence: true previous_packet_dropped: true sequence_flags: 3 }}\n", cl.now().time_since_epoch().count());
+
+        for (auto &event : debugger_state.events)
+        {
+            declhash_t *hashed;
+
+            if (auto f = decls.find(event.func); f != decls.end())
+            {
+                hashed = &f->second;
+
+                if (!event.begin)
+                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: {} }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", event.stamp, (uint8_t) event.tid);
+                else
+                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: {} name_iid: {} }} trusted_packet_sequence_id: 1 }}\n", event.stamp, (uint8_t) event.tid, hashed->h);
+            }
+            else
+            {
+                const char *decl = event.func ? event.func->GetDeclaration() : "GC";
+                hashed = &decls.emplace(event.func, declhash_t { decl, decls.size() + 1 }).first->second;
+
+                if (!event.begin)
+                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: {} }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", event.stamp, (uint8_t) event.tid);
+                else
+                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: {} name_iid: {} }} trusted_packet_sequence_id: 1 interned_data {{ event_names: {{ iid: {} name: \"{}\" }} }} }}\n", event.stamp, (uint8_t) event.tid, hashed->h, hashed->h, hashed->s);
+            }
+        }
+
+        debugger_state.events.clear();
+        debugger_state.events.shrink_to_fit();
+    }
+
+    debugger_state.active_instrumentation = 0;
 }
 
 static void StartInstrumentation(q2as_state_t &as)
 {
-    if (debugger_state.instrumenting)
+    if (debugger_state.active_instrumentation)
         return;
 
-    debugger_state.instru_of.open("profile.trace");
-    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ track_descriptor: {{ uuid: 2 process: {{ pid: 1 process_name: \"Angelscript\" }} }} }}\n");
-    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ track_descriptor: {{ uuid: 1 thread: {{ pid: 1 tid: 2 thread_name: \"Server\" }} }} }}\n");
-    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ track_descriptor: {{ uuid: 4 thread: {{ pid: 1 tid: 3 thread_name: \"GC\" }} }} }}\n");
-    fmt::format_to(std::ostream_iterator<char>(debugger_state.instru_of), "packet {{ timestamp: {} trusted_packet_sequence_id: 1 first_packet_on_sequence: true previous_packet_dropped: true sequence_flags: 3 }}\n", cl.now().time_since_epoch().count());
-    debugger_state.instrumenting = true;
+    debugger_state.active_instrumentation = debugger_state.instrumentation_type->integer;
+
+    if (debugger_state.active_instrumentation == 1)
+    {
+        tracy::StartupProfiler();
+        TracyCSetThreadName("AngelScript");
+    }
 }
 
 static void MessageCallback(const asSMessageInfo *msg, void *param)
@@ -112,13 +224,6 @@ bool q2as_state_t::CreateEngine()
     if (int r = engine->SetMessageCallback(asFUNCTION(MessageCallback), this, asCALL_CDECL); r < 0)
     {
         Print("Couldn't set AngelScript message callback.\n");
-        Destroy();
-        return false;
-    }
-
-    if (int r = engine->SetGarbageCollectionCallback(asFUNCTION(GarbageCallback), this, asCALL_CDECL); r < 0)
-    {
-        Print("Couldn't set AngelScript garbage callback.\n");
         Destroy();
         return false;
     }
@@ -199,6 +304,13 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
         debugger_state.cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
     if (!debugger_state.attach_type)
         debugger_state.attach_type = Cvar("q2as_debugger_wait_attach", "0", CVAR_NOFLAGS);
+    if (!debugger_state.instrumentation_type)
+        debugger_state.instrumentation_type = Cvar("q2as_instrumentation_type", "0", CVAR_NOFLAGS);
+    if (!debugger_state.instrumentation_modules)
+        debugger_state.instrumentation_modules = Cvar("q2as_instrumentation_modules", "1", CVAR_NOFLAGS);
+    if (!debugger_state.instrumentation_granularity)
+        debugger_state.instrumentation_granularity = Cvar("q2as_instrumentation_granularity", "0", CVAR_NOFLAGS);
+
 
     return CreateEngine();
 }
@@ -320,8 +432,6 @@ bool q2as_state_t::Build()
         }
     }
 
-    StartInstrumentation();
-
     return true;
 }
 
@@ -332,9 +442,6 @@ void q2as_state_t::Destroy()
 
     if (engine)
         engine->ShutDownAndRelease();
-
-    WriteInstrumentation();
-    instru.clear();
 
     mainModule = nullptr;
     engine = nullptr;
@@ -354,8 +461,25 @@ q2as_ctx_t q2as_state_t::RequestContext()
 {
     auto ctx = engine->RequestContext();
 
-    if (debugger_state.instrumentation->integer & instrumentation_bit)
-        ctx->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
+    if (debugger_state.instrumentation_type->integer)
+    {
+        if (debugger_state.instrumentation_modules->integer & instrumentation_bit)
+        {
+            if (!debugger_state.active_instrumentation)
+                StartInstrumentation();
+            ctx->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
+
+            if (int r = engine->SetGarbageCollectionCallback(asFUNCTION(GarbageCallback), this, asCALL_CDECL); r < 0)
+            {
+                Print("Couldn't set AngelScript garbage callback.\n");
+            }
+        }
+    }
+    else if (debugger_state.active_instrumentation)
+    {
+        WriteInstrumentation();
+        engine->ClearGarbageCollectionCallback();
+    }
 
     debugger_state.CheckDebugger(ctx);
 
@@ -384,7 +508,7 @@ bool q2as_state_t::Execute(asIScriptContext *context)
 
 void q2as_state_t::StartInstrumentation()
 {
-    if (debugger_state.instrumentation->integer & instrumentation_bit)
+    if (debugger_state.instrumentation_modules->integer & instrumentation_bit)
         ::StartInstrumentation(*this);
 }
 
