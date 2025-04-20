@@ -1,6 +1,7 @@
 #include "mum-prng.h"
 #include <algorithm>
 #include <random>
+#include "q2as_time.h"
 
 extern mum_prng_generator mum_prng;
 
@@ -23,15 +24,15 @@ extern mum_prng_generator mum_prng;
 }
 
 // uniform time [min_inclusive, max_exclusive)
-[[nodiscard]] inline gtime_t random_time(gtime_t min_inclusive, gtime_t max_exclusive)
+[[nodiscard]] inline q2as_gtime random_time(q2as_gtime min_inclusive, q2as_gtime max_exclusive)
 {
-    return gtime_t::from_ms(std::uniform_int_distribution<int64_t>(min_inclusive.milliseconds(), max_exclusive.milliseconds())(mum_prng));
+    return q2as_gtime::from_ms(std::uniform_int_distribution<int64_t>(min_inclusive.milliseconds(), max_exclusive.milliseconds())(mum_prng));
 }
 
 // uniform time [0, max_exclusive)
-[[nodiscard]] inline gtime_t random_time(gtime_t max_exclusive)
+[[nodiscard]] inline q2as_gtime random_time(q2as_gtime max_exclusive)
 {
-    return gtime_t::from_ms(std::uniform_int_distribution<int64_t>(0, max_exclusive.milliseconds())(mum_prng));
+    return q2as_gtime::from_ms(std::uniform_int_distribution<int64_t>(0, max_exclusive.milliseconds())(mum_prng));
 }
 
 // uniform float [-1, 1)
