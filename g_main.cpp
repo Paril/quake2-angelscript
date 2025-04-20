@@ -7,9 +7,9 @@
 
 std::mt19937 mt_rand;
 
-local_game_import_t  gi;
+local_game_import_t gi;
 
-game_export_t  globals;
+game_export_t globals;
 
 /*
 =================
@@ -37,4 +37,3 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
     GetGameAPIEXTERNAL external_game_api = Q2AS_GetGameAPI(import);
     return external_game_api(import);
 }
-

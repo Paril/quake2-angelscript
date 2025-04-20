@@ -4,11 +4,12 @@
 struct q2as_gtime
 {
     using _milliseconds = std::chrono::milliseconds;
-    _milliseconds _duration;
-
-    q2as_gtime(const _milliseconds& ms) : _duration(ms) {}
+    _milliseconds _duration = _milliseconds(0);
+    
     q2as_gtime() = default;
+    q2as_gtime(const _milliseconds& ms) : _duration(ms) {}
     q2as_gtime(const q2as_gtime&) = default;
+    q2as_gtime& operator=(const q2as_gtime&) = default;
 
     template<typename T>
     T minutes() const
@@ -53,8 +54,6 @@ struct q2as_gtime
     {
         return from_sec(1.0 / hz);
     }
-
-    q2as_gtime& operator=(const q2as_gtime&) = default;
 
     explicit operator bool() const
     {
@@ -305,7 +304,7 @@ void Q2AS_RegisterTime(q2as_registry &registry)
             { "int64 milliseconds", 0 }
         })
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f()",                  asFUNCTION(Q2AS_init_construct<gtime_t>),             asCALL_CDECL_OBJLAST },
+            { asBEHAVE_CONSTRUCT, "void f()",                  asFUNCTION(Q2AS_init_construct<q2as_gtime>),          asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(int64, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<int64_t>), asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(float, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<float>),   asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_copy_construct),              asCALL_CDECL_OBJLAST }

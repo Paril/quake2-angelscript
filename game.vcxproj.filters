@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="g_main.cpp" />
-    <ClCompile Include="q_std.cpp" />
     <ClCompile Include="debugger\as_debugger.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
@@ -224,6 +223,12 @@
     </ClCompile>
     <ClCompile Include="q2as_dynamic_bitset.cpp" />
     <ClCompile Include="q2as_vec2.cpp" />
+    <ClCompile Include="debugger\as_helpers.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\lop\src\profiler.cpp">
+      <Filter>thirdparty\lop</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="g_local.h" />
@@ -488,12 +493,6 @@
     <ClInclude Include="thirdparty\cppdap\src\rwmutex.h">
       <Filter>thirdparty\cppdap</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\palanteer\palinteer.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\spall\spall.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="thirdparty\yyjson\yyjson.h">
       <Filter>thirdparty</Filter>
     </ClInclude>
@@ -504,11 +503,11 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="q2as_dynamic_bitset.h" />
-    <ClInclude Include="ctrack.hpp">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="q2as_vec3.h" />
     <ClInclude Include="q2as_vec2.h" />
+    <ClInclude Include="debugger\as_helpers.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
@@ -576,6 +575,9 @@
     </Filter>
     <Filter Include="thirdparty\cppdap">
       <UniqueIdentifier>{1fb43641-083f-436a-867a-9c63c356cf4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\lop">
+      <UniqueIdentifier>{024a6d49-c223-44e1-b6b4-16faeb9b470d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -868,6 +870,9 @@
   <ItemGroup>
     <MASM Include="thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm">
       <Filter>thirdparty\angelscript\source</Filter>
+    </MASM>
+    <MASM Include="thirdparty\lop\src\profiler_asm.asm">
+      <Filter>thirdparty\lop</Filter>
     </MASM>
   </ItemGroup>
 </Project>

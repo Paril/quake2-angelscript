@@ -2,35 +2,13 @@
 #include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
 #include "q2as_platform.h"
-
-//#define RUNFRAME_PROFILING
-
-#ifdef RUNFRAME_PROFILING
-#include "ctrack.hpp"
-#endif
-
-#define INSTRUMENTATION 1
-
-#if defined(INSTRUMENTATION) && INSTRUMENTATION == 1
-#define PL_IMPLEMENTATION 1
-#define USE_PL 1
-#define PL_IMPL_COLLECTION_BUFFER_BYTE_QTY 10000000
-#define PL_COMPACT_MODEL 1
-#include "thirdparty/palanteer/palinteer.h"
-
-#undef min
-#undef max
-#undef GetObject
-
+#include "thirdparty/lop/include/profiler.h"
 #include "debugger/as_debugger.h"
 
 static void InstrumentationCallback(asSFunctionInfo *info)
 {
     q2as_state_t *state = (q2as_state_t *) info->context->GetEngine()->GetUserData(0);
-
-    if (!plIsEnabled() || !state->InstrumentationEnabled())
-        return;
-
+    
     static std::unordered_map<asIScriptFunction *, declhash_t> decls;
 
     declhash_t *hashed;
@@ -40,35 +18,31 @@ static void InstrumentationCallback(asSFunctionInfo *info)
     else
     {
         const char *decl = info->function->GetDeclaration();
-        hashed = &decls.emplace(info->function, declhash_t { decl, plPriv::hashString(decl) }).first->second;
+        hashed = &decls.emplace(info->function, declhash_t { decl, /*plPriv::hashString(decl)*/ 0 }).first->second;
     }
 
     if (info->popped)
-        plPriv::eventLogRaw(PL_STRINGHASH(PL_BASEFILENAME), hashed->h, PL_EXTERNAL_STRINGS?0:PL_BASEFILENAME, PL_EXTERNAL_STRINGS?0:(hashed->s.c_str()), __LINE__,
-                            PL_STORE_COLLECT_CASE_, PL_FLAG_SCOPE_END | PL_FLAG_TYPE_DATA_TIMESTAMP, PL_GET_CLOCK_TICK_FUNC());
+        LOP::emit_end_event(hashed->s.c_str());
     else
-        plPriv::eventLogRaw(PL_STRINGHASH(PL_BASEFILENAME), hashed->h, PL_EXTERNAL_STRINGS?0:PL_BASEFILENAME, PL_EXTERNAL_STRINGS?0:(hashed->s.c_str()), __LINE__,
-                            PL_STORE_COLLECT_CASE_, PL_FLAG_SCOPE_BEGIN | PL_FLAG_TYPE_DATA_TIMESTAMP, PL_GET_CLOCK_TICK_FUNC());
+        LOP::emit_begin_event(hashed->s.c_str());
 }
 
 static void InstrumentationGarbageCallback(q2as_state_t *state, bool pop)
 {
-    static declhash_t garbage_hash { "GC", plPriv::hashString("GC") };
-
-    if (!plIsEnabled() || !state->InstrumentationEnabled())
-        return;
+    static declhash_t garbage_hash { "GC", /*plPriv::hashString("GC")*/ 0 };
 
     if (pop)
-        plPriv::eventLogRaw(PL_STRINGHASH(PL_BASEFILENAME), garbage_hash.h, PL_EXTERNAL_STRINGS?0:PL_BASEFILENAME, PL_EXTERNAL_STRINGS?0:(garbage_hash.s.c_str()), __LINE__,
-                            PL_STORE_COLLECT_CASE_, PL_FLAG_SCOPE_END | PL_FLAG_TYPE_DATA_TIMESTAMP, PL_GET_CLOCK_TICK_FUNC());
+        LOP::emit_end_event(garbage_hash.s.c_str());
     else
-        plPriv::eventLogRaw(PL_STRINGHASH(PL_BASEFILENAME), garbage_hash.h, PL_EXTERNAL_STRINGS?0:PL_BASEFILENAME, PL_EXTERNAL_STRINGS?0:(garbage_hash.s.c_str()), __LINE__,
-                            PL_STORE_COLLECT_CASE_, PL_FLAG_SCOPE_BEGIN | PL_FLAG_TYPE_DATA_TIMESTAMP, PL_GET_CLOCK_TICK_FUNC());
+        LOP::emit_begin_event(garbage_hash.s.c_str());
 }
 
 static void WriteInstrumentation()
 {
-    plStopAndUninit();
+    LOP::profiler_flush();
+    LOP::profiler_disable();
+
+    debugger_state.instrumenting = false;
 }
 
 static void FlushInstrumentation()
@@ -77,125 +51,12 @@ static void FlushInstrumentation()
 
 static void StartInstrumentation(q2as_state_t &as)
 {
-    if (!plIsEnabled())
-    {
-        plSetFilename("record.pltraw");
-        plInitAndStart("q2as", PL_MODE_STORE_IN_FILE);
-        plDeclareThread("main");
-        plFreezePoint();
-    }
-}
-#elif defined(INSTRUMENTATION) && INSTRUMENTATION == 2
-#include "spall.h"
-
-static SpallProfile spall_ctx;
-static SpallBuffer spall_buffer;
-
-#include <Windows.h>
-double get_time_in_micros(void)
-{
-    static double invfreq;
-    if (!invfreq) {
-        LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
-        invfreq = 1000000.0 / frequency.QuadPart;
-    }
-    LARGE_INTEGER counter;
-    QueryPerformanceCounter(&counter);
-    return counter.QuadPart * invfreq;
-}
-
-#undef GetObject
-
-static void InstrumentationCallback(asSFunctionInfo *info)
-{
-    q2as_state_t *state = (q2as_state_t *) info->context->GetEngine()->GetUserData(0);
-    int bit = state == &svas ? 1 : 2;
-
-    if ((q2as_instrumentation->integer & bit) == 0)
+    if (debugger_state.instrumenting)
         return;
 
-    static std::chrono::high_resolution_clock clk;
-
-    if (info->popped)
-    {
-        spall_buffer_end_ex(&spall_ctx, &spall_buffer, get_time_in_micros(), 0, 0);
-    }
-    else
-    {
-
-        static std::unordered_map<asIScriptFunction *, std::string> decls;
-
-        std::string *hashed;
-
-        if (auto f = decls.find(info->function); f != decls.end())
-            hashed = &f->second;
-        else
-        {
-            const char *decl = info->function->GetDeclaration();
-            hashed = &decls.emplace(info->function, std::string(decl)).first->second;
-        }
-
-        spall_buffer_begin_ex(&spall_ctx, &spall_buffer, hashed->c_str(), hashed->size(), get_time_in_micros(), 0, 0);
-    }
+    LOP::profiler_enable();
+    debugger_state.instrumenting = true;
 }
-
-static void FlushInstrumentation()
-{
-    if (!q2as_instrumentation->integer)
-        return;
-
-    spall_flush(&spall_ctx);
-}
-
-static void WriteInstrumentation()
-{
-    if (!q2as_instrumentation->integer)
-        return;
-
-    spall_buffer_flush(&spall_ctx, &spall_buffer);
-    spall_quit(&spall_ctx);
-}
-
-static void StartInstrumentation(q2as_state_t &as)
-{
-    if (!q2as_instrumentation->integer)
-        return;
-
-    spall_ctx = spall_init_file("spall_sample.spall", 1);
-
-    /*
-        Fun fact: You don't actually *need* a buffer, you can just pass NULL!
-        Passing a buffer clumps flushing overhead, so individual functions are faster and less noisy
-
-        If you notice big variance in events, you can try bumping the buffer size so you do fewer flushes
-        while your code runs, or you can shrink it if you need to save some memory
-    */
-#define BUFFER_SIZE (10 * 1024 * 1024)
-    unsigned char *buffer = (unsigned char *) malloc(BUFFER_SIZE);
-    spall_buffer = {
-        buffer,
-        BUFFER_SIZE
-    };
-
-    /*
-        Here's another neat trick:
-        We're touching the pages ahead of time here, so we get a smoother trace.
-        By pre-faulting all the pages in our event buffer, we avoid waiting for pages to load
-        while user code runs. This can make a noticable difference for data consistency, especially
-        with bigger buffers
-    */
-    memset(spall_buffer.data, 1, spall_buffer.length);
-
-    spall_buffer_init(&spall_ctx, &spall_buffer);
-
-    as.context->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
-}
-#else
-#define WriteInstrumentation()
-#define FlushInstrumentation()
-#define StartInstrumentation(a)
-#endif
 
 static void MessageCallback(const asSMessageInfo *msg, void *param)
 {
@@ -206,7 +67,7 @@ static void MessageCallback(const asSMessageInfo *msg, void *param)
     else if (msg->type == asMSGTYPE_INFORMATION)
         type = "INFO";
 
-    ((q2as_state_t *) param)->Print(G_Fmt("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, type, msg->message).data());
+    ((q2as_state_t *) param)->Print(fmt::format("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, type, msg->message).data());
 
     //if (msg->type == asMSGTYPE_ERROR)
         //__debugbreak();
@@ -482,10 +343,8 @@ q2as_ctx_t q2as_state_t::RequestContext()
 {
     auto ctx = engine->RequestContext();
 
-#ifdef INSTRUMENTATION
-    if (InstrumentationEnabled())
+    if (debugger_state.instrumentation->integer & instrumentation_bit)
         ctx->SetFunctionCallback(asFUNCTION(InstrumentationCallback), nullptr, asCALL_CDECL);
-#endif
 
     debugger_state.CheckDebugger(ctx);
 
@@ -514,7 +373,7 @@ bool q2as_state_t::Execute(asIScriptContext *context)
 
 void q2as_state_t::StartInstrumentation()
 {
-    if (InstrumentationEnabled())
+    if (debugger_state.instrumentation->integer & instrumentation_bit)
         ::StartInstrumentation(*this);
 }
 

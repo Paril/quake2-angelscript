@@ -40,14 +40,16 @@ struct q2as_sv_state_t : q2as_state_t
     asIScriptFunction *Bot_PickedUpItem = nullptr;
     asIScriptFunction *Entity_IsVisibleToPlayer = nullptr;
 
-    cvar_t *instrumentation;
-    bool instrumenting = false;
+    q2as_sv_state_t() :
+        q2as_state_t()
+    {
+        instrumentation_bit = 1;
+    }
 
     void LoadFunctions();
 
     virtual void Print(const char *text) override;
     virtual void Error(const char *text) override;
-    virtual bool InstrumentationEnabled() override;
     virtual void *Alloc(size_t size) override;
     virtual void Free(void *ptr) override;
     virtual cvar_t *Cvar(const char *name, const char *value, cvar_flags_t flags) override;

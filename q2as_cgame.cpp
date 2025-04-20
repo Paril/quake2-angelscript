@@ -15,11 +15,6 @@
     cgi.Com_Error(text);
 }
 
-/*virtual*/ bool q2as_cg_state_t::InstrumentationEnabled() /*override*/
-{
-    return instrumenting;
-}
-
 /*virtual*/ cvar_t *q2as_cg_state_t::Cvar(const char *name, const char *value, cvar_flags_t flags) /*override*/
 {
     return cgi.cvar(name, value, flags);
@@ -364,10 +359,6 @@ static void Q2AS_CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect
         return;
     }
 
-#ifdef RUNFRAME_PROFILING
-    CTRACK;
-#endif
-
     auto ctx = cgas.RequestContext();
     ctx->Prepare(cgas.CG_DrawHUD);
     ctx->SetArgDWord(0, isplit);
@@ -576,8 +567,8 @@ cgame_export_t *Q2AS_GetCGameAPI()
     if (!cgas.Load(q2as_cg_state_t::AllocStatic, q2as_cg_state_t::FreeStatic))
         return nullptr;
 
-    cgas.instrumentation = cgi.cvar("q2as_instrumentation", "0", CVAR_NOFLAGS);
-    cgas.instrumenting = cgas.instrumentation->integer & 2;
+    if (!debugger_state.instrumentation)
+        debugger_state.instrumentation = cgi.cvar("q2as_instrumentation", "0", CVAR_NOFLAGS);
 
     constexpr library_reg_t *const libraries[] = {
         Q2AS_RegisterThirdParty,

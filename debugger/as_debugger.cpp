@@ -1,9 +1,7 @@
 // MIT Licensed
-// see https://github.com/Paril/angelscript-ui-debugger
+// see https://github.com/Paril/angelscript-debugger
 
-#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 #include "as_debugger.h"
-#include <angelscript.h>
 #include <array>
 #include <bitset>
 #include <charconv>
@@ -746,120 +744,6 @@ public:
     }
 };
 
-asIDBObjectIteratorHelper::asIDBObjectIteratorHelper(asIDBDebugger &dbg, asITypeInfo *type, void *obj) :
-    dbg(dbg),
-    type(type),
-    obj(obj),
-    opForBegin(type->GetMethodByName("opForBegin")),
-    opForEnd(type->GetMethodByName("opForEnd")),
-    opForNext(type->GetMethodByName("opForNext"))
-{
-    if (!Validate())
-    {
-        opForBegin = nullptr;
-        return;
-    }
-
-    // TODO: don't need opForValues unless we're iterating
-    // TODO: verify opForValue{n} selection
-    auto opForValue = type->GetMethodByName("opForValue");
-
-    if (!opForValue)
-    {
-        for (int i = 0;; i++)
-        {
-            auto f = type->GetMethodByName(fmt::format("opForValue{}", i).c_str());
-
-            if (!f)
-                break;
-
-            opForValues.push_back(f);
-        }
-    }
-    else
-        opForValues.push_back(opForValue);
-}
-
-auto asIDBObjectIteratorHelper::Begin(asIScriptContext *ctx) const -> IteratorValue
-{
-    ctx->Prepare(opForBegin);
-    ctx->SetObject(obj);
-    ctx->Execute();
-
-    asDWORD flags;
-    opForBegin->GetReturnTypeId(&flags);
-    return IteratorValue::FromCtxReturn(this, ctx, (asETypeModifiers) flags);
-}
-
-void asIDBObjectIteratorHelper::Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const
-{
-    ctx->Prepare(opForValues[index]);
-    ctx->SetObject(obj);
-    val.SetArg(ctx, 0);
-    ctx->Execute();
-}
-
-auto asIDBObjectIteratorHelper::Next(asIScriptContext *ctx, const IteratorValue &val) const -> IteratorValue
-{
-    ctx->Prepare(opForNext);
-    ctx->SetObject(obj);
-    val.SetArg(ctx, 0);
-    ctx->Execute();
-
-    asDWORD flags;
-    opForBegin->GetReturnTypeId(&flags);
-    return IteratorValue::FromCtxReturn(this, ctx, (asETypeModifiers) flags);
-}
-
-bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &val) const
-{
-    ctx->Prepare(opForEnd);
-    ctx->SetObject(obj);
-    val.SetArg(ctx, 0);
-    ctx->Execute();
-    return !!ctx->GetReturnByte();
-}
-
-size_t asIDBObjectIteratorHelper::CalculateLength(asIScriptContext *ctx) const
-{
-    dbg.internal_execution = true;
-    ctx->PushState();
-
-    size_t length = 0;
-    for (auto it = Begin(ctx); !End(ctx, it); length++, it = Next(ctx, it))
-        ;
-
-    ctx->PopState();
-    dbg.internal_execution = false;
-    return length;
-}
-
-bool asIDBObjectIteratorHelper::Validate()
-{
-    if (!opForBegin || !opForEnd || !opForNext)
-        return false;
-
-    iteratorTypeId = opForBegin->GetReturnTypeId();
-
-    if (!iteratorTypeId)
-    {
-        error = "bad iterator return type";
-        return false;
-    }
-
-    if (!(iteratorTypeId & asTYPEID_MASK_OBJECT) && iteratorTypeId > asTYPEID_DOUBLE)
-    {
-        error = "unsupported iterator type";
-        return false;
-    }
-
-    iteratorType = opForBegin->GetEngine()->GetTypeInfoById(iteratorTypeId);
-
-    // TODO: more validation
-
-    return true;
-}
-
 /*virtual*/ void asIDBObjectTypeEvaluator::Evaluate(asIDBVariable::Ptr var) const /*override*/
 {
     auto &dbg = var->dbg;
@@ -871,7 +755,7 @@ bool asIDBObjectIteratorHelper::Validate()
 
     if (ctx->GetState() != asEXECUTION_EXCEPTION)
     {
-        asIDBObjectIteratorHelper it(dbg, type, var->address.ResolveAs<void>());
+        asIDBObjectIteratorHelper it(type, var->address.ResolveAs<void>());
 
         if (!it)
         {
@@ -886,7 +770,9 @@ bool asIDBObjectIteratorHelper::Validate()
         }
         else
         {
+            dbg.internal_execution = true;
             size_t numElements = it.CalculateLength(ctx);
+            dbg.internal_execution = false;
             
             if (var->value.empty())
                 var->value = fmt::format("{} elements", numElements);
@@ -1007,12 +893,16 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
         return;
 
     auto                      type = ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
-    asIDBObjectIteratorHelper it(dbg, type, var->address.ResolveAs<void>());
+
+    dbg.internal_execution = true;
+    asIDBObjectIteratorHelper it(type, var->address.ResolveAs<void>());
 
     if (!it)
+    {
+        dbg.internal_execution = false;
         return;
+    }
 
-    cache.dbg.internal_execution = true;
     ctx->PushState();
 
     auto itValue = it.Begin(ctx);

@@ -35,11 +35,6 @@ struct q2as_edict_t : edict_t
     gi.Com_Error(text);
 }
 
-/*virtual*/ bool q2as_sv_state_t::InstrumentationEnabled() /*override*/
-{
-    return instrumenting;
-}
-
 /*virtual*/ cvar_t *q2as_sv_state_t::Cvar(const char *name, const char *value, cvar_flags_t flags) /*override*/
 {
     return gi.cvar(name, value, flags);
@@ -111,8 +106,8 @@ static void Q2AS_PreInitGame()
 
 static void Q2AS_InitGame()
 {
-    cvar_t *maxentities = gi.cvar("maxentities", G_Fmt("{}", MAX_EDICTS).data(), CVAR_LATCH);
-    cvar_t *maxclients = gi.cvar("maxclients", G_Fmt("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
+    cvar_t *maxentities = gi.cvar("maxentities", fmt::format("{}", MAX_EDICTS).data(), CVAR_LATCH);
+    cvar_t *maxclients = gi.cvar("maxclients", fmt::format("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 
     // seed RNG
     mt_rand.seed((uint32_t) std::chrono::system_clock::now().time_since_epoch().count());
@@ -154,15 +149,9 @@ static void Q2AS_ShutdownGame()
 
     if (!q2as_state_t::CheckExceptionState())
     {
-        {
-            auto ctx = svas.RequestContext();
-            ctx->Prepare(svas.ShutdownGame);
-            ctx.Execute();
-        }
-
-#ifdef RUNFRAME_PROFILING
-        gi.Com_Print(ctrack::result_as_string().c_str());
-#endif
+        auto ctx = svas.RequestContext();
+        ctx->Prepare(svas.ShutdownGame);
+        ctx.Execute();
     }
 
     // disconnect all entities
@@ -425,10 +414,6 @@ void Q2AS_RunFrame(bool main_loop)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-
-#ifdef RUNFRAME_PROFILING
-    CTRACK;
-#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.RunFrame);
@@ -871,7 +856,7 @@ static void q2as_sv_entity_t_set_netname(const std::string &s, sv_entity_t &sv)
 
 static void q2as_sv_entity_t_set_classname(const std::string &s, sv_entity_t &sv)
 {
-    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<byte *>(&sv) - offsetof(edict_t, sv));
+    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<uint8_t *>(&sv) - offsetof(edict_t, sv));
 
     // make sure it's an sv_entity_t owned by an edict
     if (e < globals.edicts || e >= globals.edicts + globals.num_edicts)
@@ -894,7 +879,7 @@ static void q2as_sv_entity_t_set_classname(const std::string &s, sv_entity_t &sv
 
 static void q2as_sv_entity_t_set_targetname(const std::string &s, sv_entity_t &sv)
 {
-    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<byte *>(&sv) - offsetof(edict_t, sv));
+    q2as_edict_t *e = reinterpret_cast<q2as_edict_t *>(reinterpret_cast<uint8_t *>(&sv) - offsetof(edict_t, sv));
 
     // make sure it's an sv_entity_t owned by an edict
     if (e < globals.edicts || e >= globals.edicts + globals.num_edicts)
@@ -2032,8 +2017,8 @@ game_export_t *Q2AS_GetGameAPI()
     if (!svas.Load(q2as_sv_state_t::AllocStatic, q2as_sv_state_t::FreeStatic))
         return nullptr;
 
-    svas.instrumentation = gi.cvar("q2as_instrumentation", "0", CVAR_NOFLAGS);
-    svas.instrumenting = svas.instrumentation->integer & 1;
+    if (!debugger_state.instrumentation)
+        debugger_state.instrumentation = gi.cvar("q2as_instrumentation", "0", CVAR_NOFLAGS);
 
     constexpr library_reg_t *const libraries[] = {
         Q2AS_RegisterThirdParty,
