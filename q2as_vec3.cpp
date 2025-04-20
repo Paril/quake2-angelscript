@@ -14,7 +14,7 @@ public:
     {
         const vec3_t *s = var->address.ResolveAs<const vec3_t>();
         var->value = fmt::format("{} {} {}", s->x, s->y, s->z);
-        var->MakeExpandable();
+        asIDBObjectTypeEvaluator::Evaluate(var);
     }
 };
 

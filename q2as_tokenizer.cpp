@@ -110,13 +110,16 @@ struct tokenizer_t : q2as_ref_t
         static const char *arg_buffers[MAX_LOCALIZATION_ARGS];
 
         // parse base
-        G_FmtTo(arg_tokens[0], "{}", cur().token.value_or(""));
+        auto end = fmt::format_to_n(arg_tokens[0], sizeof(arg_tokens[0]), "{}", cur().token.value_or(""));
+        *end.out = '\0';
 
         // parse args
         for (int32_t i = 0; i < num_args; i++)
         {
             next();
-            G_FmtTo(arg_tokens[i + 1], "{}", cur().token.value_or(""));
+            auto end = fmt::format_to_n(arg_tokens[i + 1], sizeof(arg_tokens[0]), "{}", cur().token.value_or(""));
+            *end.out = '\0';
+
             arg_buffers[i] = arg_tokens[1 + i];
         }
 

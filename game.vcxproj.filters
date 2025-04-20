@@ -1,37 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="g_main.cpp" />
-    <ClCompile Include="q_std.cpp" />
     <ClCompile Include="debugger\as_debugger.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\as_debugger_imgui.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_demo.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_draw.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_impl_dx9.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_impl_win32.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_tables.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\imgui_widgets.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\TextEditor.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\angelscript\source\as_builder.cpp">
@@ -251,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="q2as_dynamic_bitset.cpp" />
     <ClCompile Include="q2as_vec2.cpp" />
+    <ClCompile Include="debugger\as_helpers.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="g_local.h" />
@@ -258,36 +233,6 @@
     <ClInclude Include="q_std.h" />
     <ClInclude Include="q_vec3.h" />
     <ClInclude Include="debugger\as_debugger.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\as_debugger_imgui.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imconfig.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui_impl_dx9.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui_impl_win32.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imgui_internal.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imstb_rectpack.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imstb_textedit.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\imstb_truetype.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\TextEditor.h">
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\angelscript\include\angelscript.h">
@@ -545,12 +490,6 @@
     <ClInclude Include="thirdparty\cppdap\src\rwmutex.h">
       <Filter>thirdparty\cppdap</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\palanteer\palinteer.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\spall\spall.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="thirdparty\yyjson\yyjson.h">
       <Filter>thirdparty</Filter>
     </ClInclude>
@@ -561,9 +500,6 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="q2as_dynamic_bitset.h" />
-    <ClInclude Include="ctrack.hpp">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="q2as_vec3.h" />
     <ClInclude Include="q2as_vec2.h" />
     <ClInclude Include="mum.h">
@@ -573,6 +509,10 @@
       <Filter>thirdparty\mum-hash</Filter>
     </ClInclude>
     <ClInclude Include="q2as_random.h" />
+    <ClInclude Include="debugger\as_helpers.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="q2as_time.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">

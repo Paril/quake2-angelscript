@@ -43,7 +43,7 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
             if (!ns || !*ns)
                 str = name;
             else
-                str = G_Fmt("{}::{}", ns, name);
+                str = fmt::format("{}::{}", ns, name);
 
             if (*in_name != str)
                 continue;
@@ -55,7 +55,7 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
     }
 
     if (!silent)
-        asGetActiveContext()->SetException(G_Fmt("Missing global {}", *in_name).data());
+        asGetActiveContext()->SetException(fmt::format("Missing global {}", *in_name).data());
 }
 
 static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
@@ -80,7 +80,7 @@ static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
         if (!ns || !*ns)
             str = name;
         else
-            str = G_Fmt("{}::{}", ns, name);
+            str = fmt::format("{}::{}", ns, name);
 
         new(gen->GetAddressOfReturnLocation()) std::string(std::move(str));
 
@@ -100,7 +100,7 @@ static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
                 if (!ns || !*ns)
                     str = name;
                 else
-                    str = G_Fmt("{}::{}", ns, name);
+                    str = fmt::format("{}::{}", ns, name);
 
                 new(gen->GetAddressOfReturnLocation()) std::string(std::move(str));
                 ((asIScriptObject *) addr)->Release();

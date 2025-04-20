@@ -32,64 +32,9 @@
 #ifdef USE_CPP20_FORMAT
 #include <format>
 namespace fmt = std;
-#define FMT_STRING(s) s
 #else
 #include <fmt/format.h>
 #endif
-
-struct g_fmt_data_t
-{
-    char string[2][4096];
-    int  istr;
-};
-
-// static data for fmt; internal, do not touch
-extern g_fmt_data_t g_fmt_data;
-
-// like fmt::format_to_n, but automatically null terminates the output;
-// returns the length of the string written (up to N)
-#ifdef USE_CPP20_FORMAT
-#define G_FmtTo_ G_FmtTo
-
-template<size_t N, typename... Args>
-inline size_t G_FmtTo(char(&buffer)[N], std::format_string<Args...> format_str, Args &&... args)
-#else
-#define G_FmtTo(buffer, str, ...) \
-	G_FmtTo_(buffer, FMT_STRING(str), __VA_ARGS__)
-
-template<size_t N, typename S, typename... Args>
-inline size_t G_FmtTo_(char(&buffer)[N], const S &format_str, Args &&... args)
-#endif
-{
-    auto end = fmt::format_to_n(buffer, N - 1, format_str, std::forward<Args>(args)...);
-
-    *(end.out) = '\0';
-
-    return end.out - buffer;
-}
-
-// format to temp buffers; doesn't use heap allocation
-// unlike `fmt::format` does directly
-#ifdef USE_CPP20_FORMAT
-template<typename... Args>
-[[nodiscard]] inline std::string_view G_Fmt(std::format_string<Args...> format_str, Args &&... args)
-#else
-
-#define G_Fmt(str, ...) \
-	G_Fmt_(FMT_STRING(str), __VA_ARGS__)
-
-template<typename S, typename... Args>
-[[nodiscard]] inline std::string_view G_Fmt_(const S &format_str, Args &&... args)
-#endif
-{
-    g_fmt_data.istr ^= 1;
-
-    size_t len = G_FmtTo_(g_fmt_data.string[g_fmt_data.istr], format_str, std::forward<Args>(args)...);
-
-    return std::string_view(g_fmt_data.string[g_fmt_data.istr], len);
-}
-
-using byte = uint8_t;
 
 using std::max;
 using std::min;

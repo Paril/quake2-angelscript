@@ -1,5 +1,5 @@
 // MIT Licensed
-// see https://github.com/Paril/angelscript-ui-debugger
+// see https://github.com/Paril/angelscript-debugger
 
 #pragma once
 
@@ -17,7 +17,7 @@
  * - requires either fmt or std::format
  */
 
-#include "angelscript.h"
+#include <angelscript.h>
 #include <filesystem>
 #include <memory>
 #include <mutex>
@@ -27,14 +27,8 @@
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
-#include <variant>
 
-#ifdef __cpp_lib_format
-#include <format>
-namespace fmt = std;
-#else
-#include <fmt/format.h>
-#endif
+#include "as_helpers.h"
 
 struct asIDBTypeId
 {
@@ -50,8 +44,7 @@ struct asIDBTypeId
 template<class T>
 inline void asIDBHashCombine(size_t &seed, const T &v)
 {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 template<>
@@ -86,11 +79,6 @@ struct asIDBVarAddr
     }
     asIDBVarAddr(const asIDBVarAddr &) = default;
 
-    constexpr bool operator==(const asIDBVarAddr &other) const
-    {
-        return typeId == other.typeId && address == other.address && constant == other.constant;
-    }
-
     template<typename T>
     T *ResolveAs() const
     {
@@ -99,196 +87,6 @@ struct asIDBVarAddr
         else if (typeId & (asTYPEID_HANDLETOCONST | asTYPEID_OBJHANDLE))
             return *reinterpret_cast<T **>(address);
         return reinterpret_cast<T *>(address);
-    }
-};
-
-template<>
-struct std::hash<asIDBVarAddr>
-{
-    inline std::size_t operator()(const asIDBVarAddr &key) const
-    {
-        size_t h = std::hash<int>()(key.typeId);
-        asIDBHashCombine(h, std::hash<void *>()(key.address));
-        return h;
-    }
-};
-
-// helper class that is similar to an any,
-// storing a value of any type returned by AS
-// and managing the ref count.
-struct asIDBValue
-{
-public:
-    asIScriptEngine *engine = nullptr;
-    int              typeId = 0;
-    asITypeInfo     *type = nullptr;
-
-    union {
-        asBYTE  u8;
-        asWORD  u16;
-        asDWORD u32;
-        asQWORD u64;
-        float   flt;
-        double  dbl;
-        void   *obj;
-    } value {};
-
-    asIDBValue() = default;
-
-    asIDBValue(asIScriptEngine *engine, void *ptr, int typeId, bool reference = false) :
-        engine(engine),
-        typeId(typeId)
-    {
-        if (!typeId)
-            return;
-
-        type = engine->GetTypeInfoById(typeId);
-
-        if (type)
-            type->AddRef();
-
-        if (reference)
-            ptr = *reinterpret_cast<void **>(ptr);
-
-        if (typeId & asTYPEID_OBJHANDLE)
-        {
-            value.obj = *reinterpret_cast<void **>(ptr);
-            engine->AddRefScriptObject(value.obj, type);
-        }
-        else if (typeId & asTYPEID_MASK_OBJECT)
-        {
-            value.obj = engine->CreateScriptObjectCopy(ptr, type);
-        }
-        else
-        {
-            value.u64 = 0;
-            int size = engine->GetSizeOfPrimitiveType(typeId);
-            memcpy(&value.u64, ptr, size);
-        }
-    }
-
-    asIDBValue(const asIDBValue &other) :
-        engine(other.engine),
-        typeId(other.typeId),
-        type(other.type)
-    {
-        if (!typeId)
-            return;
-
-        if (type)
-            type->AddRef();
-
-        if (typeId & asTYPEID_OBJHANDLE)
-        {
-            value.obj = other.value.obj;
-            engine->AddRefScriptObject(value.obj, type);
-        }
-        else if (typeId & asTYPEID_MASK_OBJECT)
-        {
-            value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
-        }
-        else
-            value.u64 = other.value.u64;
-    }
-
-    asIDBValue(asIDBValue &&other) noexcept :
-        engine(other.engine),
-        typeId(other.typeId),
-        type(other.type)
-    {
-        if (!typeId)
-            return;
-
-        value.u64 = other.value.u64;
-
-        other.type = nullptr;
-        other.typeId = 0;
-        other.value.u64 = 0;
-    }
-
-    asIDBValue &operator=(const asIDBValue &other)
-    {
-        engine = other.engine;
-        typeId = other.typeId;
-        type = other.type;
-        value.u64 = 0;
-
-        if (!typeId)
-            return *this;
-
-        if (type)
-            type->AddRef();
-
-        if (typeId & asTYPEID_OBJHANDLE)
-        {
-            value.obj = other.value.obj;
-            engine->AddRefScriptObject(value.obj, type);
-        }
-        else if (typeId & asTYPEID_MASK_OBJECT)
-        {
-            value.obj = engine->CreateScriptObjectCopy(other.value.obj, type);
-        }
-        else
-            value.u64 = other.value.u64;
-
-        return *this;
-    }
-
-    asIDBValue &operator=(asIDBValue &&other) noexcept
-    {
-        engine = other.engine;
-        typeId = other.typeId;
-        type = other.type;
-        value.u64 = 0;
-
-        if (!typeId)
-            return *this;
-
-        value.u64 = other.value.u64;
-
-        other.type = nullptr;
-        other.typeId = 0;
-        other.value.u64 = 0;
-
-        return *this;
-    }
-
-    ~asIDBValue()
-    {
-        Release();
-    }
-
-    void Release()
-    {
-        if (typeId & asTYPEID_MASK_OBJECT)
-            engine->ReleaseScriptObject(value.obj, type);
-
-        if (type)
-            type->Release();
-
-        type = nullptr;
-        typeId = 0;
-        value.u64 = 0;
-    }
-
-    bool IsValid() const
-    {
-        return typeId != 0;
-    }
-
-    template<typename T>
-    T *GetPointer(bool as_reference = false) const
-    {
-        if (typeId == 0)
-            throw std::runtime_error("nothing to point to");
-
-        if (typeId & asTYPEID_MASK_OBJECT)
-        {
-            if ((typeId & asTYPEID_OBJHANDLE) && as_reference)
-                return reinterpret_cast<T *>(const_cast<void **>(&value.obj));
-            return reinterpret_cast<T *>(value.obj);
-        }
-        return reinterpret_cast<T *>(const_cast<asQWORD *>(&value.u64));
     }
 };
 
@@ -366,6 +164,8 @@ struct asIDBVariable
     asIDBVarAddr address {};
 
     // these are only available after `evaluated` is true.
+    bool             evaluated = false;
+    bool             expandable = false;
     std::string      value;
     std::string_view typeName;
     asIDBValue       stackValue;
@@ -374,23 +174,18 @@ struct asIDBVariable
     asIScriptFunction *getter = nullptr;
     Ptr                get_evaluated;
 
-    bool evaluated = false;
-    bool expanded = false;
+    // automatically set after evaluation if
+    // expandable is true.
+    std::optional<int64_t> expandRefId {};
+
+    // named properties & indexed variables
+    bool      expanded = false;
+    SortedSet namedProps;
+    Vector    indexedProps;
 
     asIDBVariable(asIDBDebugger &dbg) :
         dbg(dbg)
     {
-    }
-
-    const SortedSet &Children() const
-    {
-        return children;
-    }
-    void    MakeExpandable();
-    void    PushChild(Ptr ptr);
-    int64_t RefId() const
-    {
-        return ref_id.value_or(0);
     }
 
     Ptr CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address, std::string_view typeName);
@@ -398,11 +193,11 @@ struct asIDBVariable
     void Evaluate();
     void Expand();
 
-private:
-    // if ref_id is set, the variable has children.
-    // call asIDBCache::LinkVariable to set this.
-    std::optional<int64_t> ref_id {};
-    SortedSet              children;
+    // normally you don't need to call this directly
+    // but if you're manually creating a variable you
+    // may need to do this. This marks the object as
+    // expandable and sets the ref id.
+    void SetRefId();
 };
 
 // a local, fetched from GetVar
@@ -436,8 +231,6 @@ struct asIDBCallStackEntry
 
 using asIDBCallStackVector = std::vector<asIDBCallStackEntry>;
 
-class asIDBCache;
-
 // This interface handles evaluation of asIDBVarAddr's.
 // It is used when the debugger wishes to evaluate
 // the value of, or the children/entries of, a var.
@@ -463,94 +256,6 @@ class asIDBPrimitiveTypeEvaluator : public asIDBTypeEvaluator
 {
 public:
     virtual void Evaluate(asIDBVariable::Ptr var) const override;
-};
-
-// helper class to deal with foreach iteration.
-class asIDBObjectIteratorHelper
-{
-public:
-    asIDBDebugger                   &dbg;
-    asITypeInfo                     *type;
-    void                            *obj;
-    asIScriptFunction               *opForBegin, *opForEnd, *opForNext;
-    std::vector<asIScriptFunction *> opForValues;
-
-    asITypeInfo *iteratorType = nullptr;
-    int          iteratorTypeId = 0;
-
-    std::string_view error;
-
-    struct IteratorValue
-    {
-        const asIDBObjectIteratorHelper *helper;
-        asIDBValue                       value;
-
-        IteratorValue() = delete;
-
-        static IteratorValue FromCtxReturn(const asIDBObjectIteratorHelper *helper, asIScriptContext *ctx,
-                                           asETypeModifiers flags)
-        {
-            return { helper,
-                     asIDBValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), helper->iteratorTypeId, flags) };
-        }
-
-        void SetArg(asIScriptContext *ctx, asUINT index) const
-        {
-            if (helper->iteratorTypeId & asTYPEID_MASK_OBJECT)
-                ctx->SetArgObject(index, value.GetPointer<void *>());
-            else if (helper->iteratorTypeId == asTYPEID_BOOL || helper->iteratorTypeId == asTYPEID_INT8 ||
-                     helper->iteratorTypeId == asTYPEID_UINT8)
-                ctx->SetArgByte(index, *value.GetPointer<uint8_t>());
-            else if (helper->iteratorTypeId == asTYPEID_INT16 || helper->iteratorTypeId == asTYPEID_UINT16)
-                ctx->SetArgWord(index, *value.GetPointer<uint16_t>());
-            else if (helper->iteratorTypeId == asTYPEID_INT32 || helper->iteratorTypeId == asTYPEID_UINT32)
-                ctx->SetArgDWord(index, *value.GetPointer<uint32_t>());
-            else if (helper->iteratorTypeId == asTYPEID_INT64 || helper->iteratorTypeId == asTYPEID_UINT64)
-                ctx->SetArgQWord(index, *value.GetPointer<uint64_t>());
-            else if (helper->iteratorTypeId == asTYPEID_FLOAT)
-                ctx->SetArgFloat(index, *value.GetPointer<float>());
-            else if (helper->iteratorTypeId == asTYPEID_DOUBLE)
-                ctx->SetArgDouble(index, *value.GetPointer<double>());
-            else
-                throw std::runtime_error("invalid type");
-        }
-
-        IteratorValue(const IteratorValue &other) = default;
-        IteratorValue(IteratorValue &&move) noexcept = default;
-
-        IteratorValue &operator=(const IteratorValue &other) = default;
-        IteratorValue &operator=(IteratorValue &&move) noexcept = default;
-
-    private:
-        IteratorValue(const asIDBObjectIteratorHelper *helper, asIDBValue &&value) :
-            helper(helper),
-            value(value)
-        {
-        }
-    };
-
-    asIDBObjectIteratorHelper(asIDBDebugger &dbg, asITypeInfo *type, void *obj);
-
-    constexpr bool IsValid() const
-    {
-        return opForBegin != nullptr;
-    }
-    constexpr explicit operator bool() const
-    {
-        return IsValid();
-    }
-
-    // individual access
-    IteratorValue Begin(asIScriptContext *ctx) const;
-    void          Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const;
-    IteratorValue Next(asIScriptContext *ctx, const IteratorValue &val) const;
-    bool          End(asIScriptContext *ctx, const IteratorValue &val) const;
-
-    // O(n) helper for length
-    size_t CalculateLength(asIScriptContext *ctx) const;
-
-private:
-    bool Validate();
 };
 
 class asIDBObjectTypeEvaluator : public asIDBTypeEvaluator
@@ -581,106 +286,6 @@ protected:
     // a specific index will be used.
     void QueryVariableForEach(asIDBVariable::Ptr var, int index = -1) const;
 };
-
-// simple std::expected-like
-template<typename T>
-struct asIDBExpected
-{
-private:
-    std::variant<std::string_view, T> data;
-
-public:
-    constexpr asIDBExpected() :
-        data("unknown error")
-    {
-    }
-
-    constexpr asIDBExpected(const std::string_view v) :
-        data(std::in_place_index<0>, v)
-    {
-    }
-
-    constexpr asIDBExpected(T &&v) :
-        data(std::in_place_index<1>, std::move(v))
-    {
-    }
-
-    constexpr asIDBExpected(const T &v) :
-        data(std::in_place_index<1>, v)
-    {
-    }
-
-    constexpr asIDBExpected(asIDBExpected<void> &&v);
-
-    asIDBExpected(const asIDBExpected<T> &) = default;
-    asIDBExpected(asIDBExpected<T> &&) = default;
-    asIDBExpected &operator=(const asIDBExpected<T> &) = default;
-    asIDBExpected &operator=(asIDBExpected<T> &&) = default;
-
-    constexpr asIDBExpected &operator=(const T &v)
-    {
-        return *this = asIDBExpected<T>(v);
-    }
-
-    constexpr asIDBExpected &operator=(T &&v)
-    {
-        return *this = asIDBExpected<T>(v);
-    }
-
-    constexpr bool has_value() const
-    {
-        return data.index() == 1;
-    }
-    constexpr explicit operator bool() const
-    {
-        return has_value();
-    }
-
-    constexpr const std::string_view &error() const
-    {
-        return std::get<0>(data);
-    }
-    constexpr const T &value() const
-    {
-        return std::get<1>(data);
-    }
-    constexpr T &value()
-    {
-        return std::get<1>(data);
-    }
-};
-
-template<>
-struct asIDBExpected<void>
-{
-private:
-    std::string_view err;
-
-public:
-    constexpr asIDBExpected() :
-        err("unknown error")
-    {
-    }
-
-    constexpr asIDBExpected(const std::string_view v) :
-        err(v)
-    {
-    }
-
-    constexpr const std::string_view &error() const
-    {
-        return err;
-    }
-};
-
-template<typename T>
-constexpr asIDBExpected<T>::asIDBExpected(asIDBExpected<void> &&v) :
-    data(std::in_place_index<0>, v.error())
-{
-}
-
-template<class E>
-asIDBExpected(E) -> asIDBExpected<void>;
 
 // this class holds the cached state of stuff
 // so that we're not querying things from AS

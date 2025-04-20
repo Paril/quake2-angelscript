@@ -1,3 +1,6 @@
+// MIT Licensed
+// see https://github.com/Paril/angelscript-debugger
+
 #pragma once
 
 #include <dap/io.h>

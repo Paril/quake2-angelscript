@@ -354,6 +354,14 @@ void Q2AS_Factory(asIScriptGeneric *gen)
     new(ptr) T();
 }
 
+template<typename T, typename A>
+void Q2AS_FactoryCopy(asIScriptGeneric *gen)
+{
+    T *ptr = reinterpret_cast<T *>(A::AllocStatic(sizeof(T)));
+    *(T **) gen->GetAddressOfReturnLocation() = ptr;
+    new(ptr) T(*(const T *) gen->GetArgObject(0));
+}
+
 template<typename T>
 void Q2AS_AddRefObject(T *object)
 {

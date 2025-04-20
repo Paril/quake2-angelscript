@@ -1,98 +1,99 @@
 // MIT Licensed
-// see https://github.com/Paril/angelscript-ui-debugger
+// see https://github.com/Paril/angelscript-debugger
 
-#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 #include "as_debugger.h"
-#include <angelscript.h>
 #include <array>
 #include <bitset>
 #include <charconv>
-
-void asIDBVariable::MakeExpandable()
-{
-    if (!ref_id)
-    {
-        int64_t next_id = dbg.cache->variable_refs.size() + 1;
-        ref_id = next_id;
-        dbg.cache->variable_refs.emplace(next_id, ptr);
-    }
-}
-
-void asIDBVariable::PushChild(Ptr ptr)
-{
-    MakeExpandable();
-    children.insert(ptr);
-}
 
 void asIDBVariable::Evaluate()
 {
     if (evaluated)
         return;
     // getters don't evaluate and are
-    // just placeholders.
+    // just placeholders, but they need
+    // a ref ID.
     else if (getter)
+    {
+        SetRefId();
         return;
+    }
 
     auto var = ptr.lock();
     dbg.cache->GetEvaluator(var->address).Evaluate(var);
     evaluated = true;
+
+    if (expandable)
+        SetRefId();
+}
+
+void asIDBVariable::SetRefId()
+{
+    if (expandRefId.has_value())
+        return;
+
+    auto &refs = dbg.cache->variable_refs;
+
+    int64_t next_id = refs.size() + 1;
+    expandRefId = next_id;
+    refs.emplace(next_id, ptr);
 }
 
 void asIDBVariable::Expand()
 {
+    Evaluate();
+
     if (expanded)
         return;
-    else if (!ref_id)
+    else if (!expandRefId)
         return;
+
+    expanded = true;
 
     auto var = ptr.lock();
 
-    if (getter)
+    if (!getter)
     {
-        // getters are a bit special; we have to fetch the variable
-        // that our getter is linked to, & store the result in stack memory.
-        auto ctx = dbg.cache->ctx;
+        dbg.cache->GetEvaluator(var->address).Expand(var);
+        return;
+    }
 
-        dbg.internal_execution = true;
-        ctx->PushState();
+    // getters are a bit special; we have to fetch the variable
+    // that our getter is linked to, & store the result in stack memory.
+    auto ctx = dbg.cache->ctx;
 
-        ctx->Prepare(getter);
-        ctx->SetObject(this->owner.lock()->address.ResolveAs<void>());
-        ctx->Execute();
+    dbg.internal_execution = true;
+    ctx->PushState();
 
-        var->children.clear();
+    ctx->Prepare(getter);
+    ctx->SetObject(this->owner.lock()->address.ResolveAs<void>());
+    ctx->Execute();
+        
+    var->namedProps.clear();
+    var->indexedProps.clear();
 
-        if (ctx->GetState() != asEXECUTION_FINISHED)
-        {
-            var->get_evaluated = var->CreateChildVariable(var->identifier, {}, "");
-            var->get_evaluated->value = fmt::format("Exception thrown ({})", ctx->GetExceptionString());
-            var->get_evaluated->evaluated = true;
-        }
-        else
-        {
-            asDWORD    returnFlags;
-            int        typeId = getter->GetReturnTypeId(&returnFlags);
-            asIDBValue returnValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), typeId,
-                                   (returnFlags & asTM_INOUTREF) != 0);
-
-            asIDBVariable::Ptr child =
-                var->CreateChildVariable(var->identifier, { typeId, (returnFlags & asTM_CONST) != 0, nullptr },
-                                         dbg.cache->GetTypeNameFromType({ typeId, (asETypeModifiers) returnFlags }));
-            child->stackValue = std::move(returnValue);
-            child->address.address = child->stackValue.GetPointer<void>(true);
-        }
-
-        ctx->PopState();
-        dbg.internal_execution = false;
-
-        evaluated = true;
+    if (ctx->GetState() != asEXECUTION_FINISHED)
+    {
+        var->get_evaluated = var->CreateChildVariable(var->identifier, {}, "");
+        var->get_evaluated->value = fmt::format("Exception thrown ({})", ctx->GetExceptionString());
+        var->get_evaluated->evaluated = true;
     }
     else
     {
-        dbg.cache->GetEvaluator(var->address).Expand(var);
+        asDWORD    returnFlags;
+        int        typeId = getter->GetReturnTypeId(&returnFlags);
+        asIDBValue returnValue(ctx->GetEngine(), ctx->GetAddressOfReturnValue(), typeId,
+                                (returnFlags & asTM_INOUTREF) != 0);
+
+        asIDBVariable::Ptr child =
+            var->CreateChildVariable(var->identifier, { typeId, (returnFlags & asTM_CONST) != 0, nullptr },
+                                        dbg.cache->GetTypeNameFromType({ typeId, (asETypeModifiers) returnFlags }));
+        child->stackValue = std::move(returnValue);
+        child->address.address = child->stackValue.GetPointer<void>(true);
     }
 
-    expanded = true;
+    ctx->PopState();
+    dbg.internal_execution = false;
 }
 
 asIDBVariable::Ptr asIDBVariable::CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address,
@@ -103,7 +104,7 @@ asIDBVariable::Ptr asIDBVariable::CreateChildVariable(asIDBVarName identifier, a
     child->identifier = identifier;
     child->address = address;
     child->typeName = typeName;
-    PushChild(child);
+    namedProps.insert(child);
     return child;
 }
 
@@ -187,6 +188,9 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
     }
 
     container->evaluated = container->expanded = true;
+
+    if (!container->namedProps.empty())
+        container->SetRefId();
 }
 
 /*virtual*/ void asIDBCache::Refresh()
@@ -370,7 +374,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
                 auto var = stack->scope.this_ptr.lock();
                 var->Expand();
 
-                for (auto &param : var->Children())
+                for (auto &param : var->namedProps)
                 {
                     if (variable_name != param->identifier.name)
                         continue;
@@ -383,11 +387,9 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
         // check globals
         CacheGlobals();
 
-        for (auto &global : globals->Children())
-        {
+        for (auto &global : globals->namedProps)
             if (variable_name == global->identifier.name)
                 matches.push_back({ global, global->identifier.name, global->identifier.ns });
-        }
 
         if (matches.size() == 1)
             variable = matches[0].var;
@@ -429,14 +431,12 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
     varp->Evaluate();
 
-    if (!varp->RefId())
+    if (!varp->expandRefId)
         return asIDBExpected("invalid expression");
 
     varp->Expand();
 
-    // FIXME: this will also work for "fake" variables like
-    // bits expanded from enums
-    if (varp->Children().empty())
+    if (varp->namedProps.empty())
         return asIDBExpected("no members");
 
     // check what kind of sub-evaluator to use
@@ -446,7 +446,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
     if (eval_name[0] == '.')
         eval_name.remove_prefix(1);
 
-    for (auto &child : varp->Children())
+    for (auto &child : varp->namedProps)
     {
         if (child->identifier.name == eval_name)
             return ResolveSubExpression(child, eval_start == std::string_view::npos ? std::string_view {}
@@ -560,6 +560,9 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
     }
 
     globals->evaluated = globals->expanded = true;
+
+    if (!globals->namedProps.empty())
+        globals->SetRefId();
 }
 
 class asIDBNullTypeEvaluator : public asIDBTypeEvaluator
@@ -641,7 +644,7 @@ public:
         }
 
         var->value = fmt::format("{} bits", bits.count());
-        var->MakeExpandable();
+        var->expandable = true;
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override
@@ -741,131 +744,18 @@ public:
     }
 };
 
-asIDBObjectIteratorHelper::asIDBObjectIteratorHelper(asIDBDebugger &dbg, asITypeInfo *type, void *obj) :
-    dbg(dbg),
-    type(type),
-    obj(obj),
-    opForBegin(type->GetMethodByName("opForBegin")),
-    opForEnd(type->GetMethodByName("opForEnd")),
-    opForNext(type->GetMethodByName("opForNext"))
-{
-    if (!Validate())
-    {
-        opForBegin = nullptr;
-        return;
-    }
-
-    // TODO: don't need opForValues unless we're iterating
-    // TODO: verify opForValue{n} selection
-    auto opForValue = type->GetMethodByName("opForValue");
-
-    if (!opForValue)
-    {
-        for (int i = 0;; i++)
-        {
-            auto f = type->GetMethodByName(fmt::format("opForValue{}", i).c_str());
-
-            if (!f)
-                break;
-
-            opForValues.push_back(f);
-        }
-    }
-    else
-        opForValues.push_back(opForValue);
-}
-
-auto asIDBObjectIteratorHelper::Begin(asIScriptContext *ctx) const -> IteratorValue
-{
-    ctx->Prepare(opForBegin);
-    ctx->SetObject(obj);
-    ctx->Execute();
-
-    asDWORD flags;
-    opForBegin->GetReturnTypeId(&flags);
-    return IteratorValue::FromCtxReturn(this, ctx, (asETypeModifiers) flags);
-}
-
-void asIDBObjectIteratorHelper::Value(asIScriptContext *ctx, const IteratorValue &val, size_t index) const
-{
-    ctx->Prepare(opForValues[index]);
-    ctx->SetObject(obj);
-    val.SetArg(ctx, 0);
-    ctx->Execute();
-}
-
-auto asIDBObjectIteratorHelper::Next(asIScriptContext *ctx, const IteratorValue &val) const -> IteratorValue
-{
-    ctx->Prepare(opForNext);
-    ctx->SetObject(obj);
-    val.SetArg(ctx, 0);
-    ctx->Execute();
-
-    asDWORD flags;
-    opForBegin->GetReturnTypeId(&flags);
-    return IteratorValue::FromCtxReturn(this, ctx, (asETypeModifiers) flags);
-}
-
-bool asIDBObjectIteratorHelper::End(asIScriptContext *ctx, const IteratorValue &val) const
-{
-    ctx->Prepare(opForEnd);
-    ctx->SetObject(obj);
-    val.SetArg(ctx, 0);
-    ctx->Execute();
-    return !!ctx->GetReturnByte();
-}
-
-size_t asIDBObjectIteratorHelper::CalculateLength(asIScriptContext *ctx) const
-{
-    dbg.internal_execution = true;
-    ctx->PushState();
-
-    size_t length = 0;
-    for (auto it = Begin(ctx); !End(ctx, it); length++, it = Next(ctx, it))
-        ;
-
-    ctx->PopState();
-    dbg.internal_execution = false;
-    return length;
-}
-
-bool asIDBObjectIteratorHelper::Validate()
-{
-    if (!opForBegin || !opForEnd || !opForNext)
-        return false;
-
-    iteratorTypeId = opForBegin->GetReturnTypeId();
-
-    if (!iteratorTypeId)
-    {
-        error = "bad iterator return type";
-        return false;
-    }
-
-    if (!(iteratorTypeId & asTYPEID_MASK_OBJECT) && iteratorTypeId > asTYPEID_DOUBLE)
-    {
-        error = "unsupported iterator type";
-        return false;
-    }
-
-    iteratorType = opForBegin->GetEngine()->GetTypeInfoById(iteratorTypeId);
-
-    // TODO: more validation
-
-    return true;
-}
-
 /*virtual*/ void asIDBObjectTypeEvaluator::Evaluate(asIDBVariable::Ptr var) const /*override*/
 {
     auto &dbg = var->dbg;
     auto &cache = *dbg.cache;
     auto  ctx = cache.ctx;
     auto  type = ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
-    bool  canExpand = CanExpand(var);
+
+    var->expandable = CanExpand(var);
 
     if (ctx->GetState() != asEXECUTION_EXCEPTION)
     {
-        asIDBObjectIteratorHelper it(dbg, type, var->address.ResolveAs<void>());
+        asIDBObjectIteratorHelper it(type, var->address.ResolveAs<void>());
 
         if (!it)
         {
@@ -875,21 +765,22 @@ bool asIDBObjectIteratorHelper::Validate()
                 return;
             }
 
-            var->value = fmt::format("{{{}}}", var->typeName);
+            if (var->value.empty())
+                var->value = fmt::format("{{{}}}", var->typeName);
         }
         else
         {
+            dbg.internal_execution = true;
             size_t numElements = it.CalculateLength(ctx);
-
-            var->value = fmt::format("{} elements", numElements);
+            dbg.internal_execution = false;
+            
+            if (var->value.empty())
+                var->value = fmt::format("{} elements", numElements);
 
             if (numElements)
-                canExpand = true;
+                var->expandable = true;
         }
     }
-
-    if (canExpand)
-        var->MakeExpandable();
 }
 
 /*virtual*/ void asIDBObjectTypeEvaluator::Expand(asIDBVariable::Ptr var) const /*override*/
@@ -960,7 +851,7 @@ void asIDBObjectTypeEvaluator::QueryVariableGetters(asIDBVariable::Ptr var) cons
         auto child = var->CreateChildVariable(std::string(std::string_view(function->GetName()).substr(4)), {},
                                               cache.GetTypeNameFromType({ function->GetReturnTypeId(), asTM_NONE }));
         child->getter = function;
-        child->MakeExpandable();
+        child->Evaluate();
     }
 }
 
@@ -1002,12 +893,16 @@ void asIDBObjectTypeEvaluator::QueryVariableForEach(asIDBVariable::Ptr var, int 
         return;
 
     auto                      type = ctx->GetEngine()->GetTypeInfoById(var->address.typeId);
-    asIDBObjectIteratorHelper it(dbg, type, var->address.ResolveAs<void>());
+
+    dbg.internal_execution = true;
+    asIDBObjectIteratorHelper it(type, var->address.ResolveAs<void>());
 
     if (!it)
+    {
+        dbg.internal_execution = false;
         return;
+    }
 
-    cache.dbg.internal_execution = true;
     ctx->PushState();
 
     auto itValue = it.Begin(ctx);
@@ -1130,67 +1025,38 @@ void asIDBWorkspace::CompileBreakpointPositions()
 {
     potential_breakpoints.clear();
 
+    auto addFunctionBreakpointLocations = [&](asIScriptFunction *func)
+    {
+        for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
+        {
+            const char *section;
+            int         line, col;
+            func->GetLineNumber(i, &section, &line, &col);
+            potential_breakpoints[section].insert(asIDBLineCol { line, col });
+        }
+    };
+
     for (auto &engine : engines)
     {
         for (size_t i = 0; i < engine->GetModuleCount(); i++)
         {
-            auto module = engine->GetModuleByIndex(i);
+            asIScriptModule *module = engine->GetModuleByIndex(i);
 
             for (size_t f = 0; f < module->GetFunctionCount(); f++)
-            {
-                auto func = module->GetFunctionByIndex(f);
-
-                for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
-                {
-                    const char *section;
-                    int         line, col;
-                    func->GetLineNumber(i, &section, &line, &col);
-                    potential_breakpoints[section].insert(asIDBLineCol { line, col });
-                }
-            }
+                addFunctionBreakpointLocations(module->GetFunctionByIndex(f));
 
             for (size_t t = 0; t < module->GetObjectTypeCount(); t++)
             {
                 asITypeInfo *type = module->GetObjectTypeByIndex(t);
 
                 for (size_t m = 0; m < type->GetMethodCount(); m++)
-                {
-                    auto func = type->GetMethodByIndex(m, false);
-
-                    for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
-                    {
-                        const char *section;
-                        int         line, col;
-                        func->GetLineNumber(i, &section, &line, &col);
-                        potential_breakpoints[section].insert(asIDBLineCol { line, col });
-                    }
-                }
+                    addFunctionBreakpointLocations(type->GetMethodByIndex(m, false));
 
                 for (size_t m = 0; m < type->GetBehaviourCount(); m++)
-                {
-                    auto func = type->GetBehaviourByIndex(m, nullptr);
-
-                    for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
-                    {
-                        const char *section;
-                        int         line, col;
-                        func->GetLineNumber(i, &section, &line, &col);
-                        potential_breakpoints[section].insert(asIDBLineCol { line, col });
-                    }
-                }
+                    addFunctionBreakpointLocations(type->GetBehaviourByIndex(m, nullptr));
 
                 for (size_t m = 0; m < type->GetFactoryCount(); m++)
-                {
-                    auto func = type->GetFactoryByIndex(m);
-
-                    for (asUINT i = 0; i < func->GetLineNumberCount(); i++)
-                    {
-                        const char *section;
-                        int         line, col;
-                        func->GetLineNumber(i, &section, &line, &col);
-                        potential_breakpoints[section].insert(asIDBLineCol { line, col });
-                    }
-                }
+                    addFunctionBreakpointLocations(type->GetFactoryByIndex(m));
             }
         }
     }

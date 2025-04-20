@@ -231,7 +231,7 @@ void Q2AS_RegisterPlayerState(q2as_registry &registry)
         });
 
     registry
-        .type("player_state_t", sizeof(player_state_t), asOBJ_VALUE | asOBJ_POD)
+        .type("player_state_t", sizeof(player_state_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
         .behaviors({
             { asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<player_state_t>), asCALL_CDECL_OBJLAST }
         })

@@ -3,7 +3,7 @@
 void Q2AS_RegisterTrace(q2as_registry &registry)
 {
     registry
-        .type("trace_t", sizeof(trace_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_COPY_CONSTRUCTOR | asOBJ_APP_CLASS_ASSIGNMENT)
+        .type("trace_t", sizeof(trace_t), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_C)
         .properties({
             { "bool allsolid",        asOFFSET(trace_t, allsolid) },
             { "bool startsolid",      asOFFSET(trace_t, startsolid) },
@@ -17,9 +17,6 @@ void Q2AS_RegisterTrace(q2as_registry &registry)
             { "csurface_t @surface2", asOFFSET(trace_t, surface2) }
         })
         .behaviors({
-            { asBEHAVE_CONSTRUCT, "void f(const trace_t &in)", asFUNCTION(Q2AS_init_construct_copy<trace_t>), asCALL_CDECL_OBJLAST }
-        })
-        .methods({
-            { "trace_t &opAssign (const trace_t &in)", asFUNCTION(Q2AS_assign<trace_t>), asCALL_CDECL_OBJLAST }
+            { asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Q2AS_init_construct<trace_t>), asCALL_CDECL_OBJLAST }
         });
 }

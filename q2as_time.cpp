@@ -1,149 +1,11 @@
 #include "q2as_local.h"
+#include "q2as_time.h"
 #include "g_local.h"
 
-struct q2as_gtime
+int64_t q2as_gtime::frames() const
 {
-    using _milliseconds = std::chrono::milliseconds;
-    _milliseconds _duration;
-
-    q2as_gtime(const _milliseconds& ms) : _duration(ms) {}
-    q2as_gtime() = default;
-    q2as_gtime(const q2as_gtime&) = default;
-
-    template<typename T>
-    T minutes() const
-    {
-        return std::chrono::duration_cast<std::chrono::duration<T, std::ratio<60>>>(_duration).count();
-    }
-
-    template<typename T>
-    T seconds() const
-    {
-        return std::chrono::duration_cast<std::chrono::duration<T>>(_duration).count();
-    }
-
-    int64_t milliseconds() const
-    {
-        return _duration.count();
-    }
-
-    int64_t frames() const
-    {
-        return _duration.count() / gi.frame_time_ms;
-    }
-
-    static q2as_gtime from_ms(const int64_t& ms)
-    {
-        return q2as_gtime(_milliseconds(ms));
-    }
-
-    template<typename T>
-    static q2as_gtime from_sec(const T& seconds)
-    {
-        return q2as_gtime(std::chrono::duration_cast<_milliseconds>(std::chrono::duration<T>(seconds)));
-    }
-
-    template<typename T>
-    static q2as_gtime from_min(const T& minutes)
-    {
-        return q2as_gtime(std::chrono::duration_cast<_milliseconds>(std::chrono::duration<T, std::ratio<60>>(minutes)));
-    }
-
-    static q2as_gtime from_hz(uint64_t hz)
-    {
-        return from_sec(1.0 / hz);
-    }
-
-    q2as_gtime& operator=(const q2as_gtime&) = default;
-
-    explicit operator bool() const
-    {
-        return _duration.count() != 0;
-    }
-
-    q2as_gtime operator-(const q2as_gtime& rhs) const
-    {
-        return q2as_gtime(_duration - rhs._duration);
-    }
-
-    q2as_gtime operator+(const q2as_gtime& rhs) const
-    {
-        return q2as_gtime(_duration + rhs._duration);
-    }
-
-    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime operator/(const T& rhs) const
-    {
-        return q2as_gtime(_milliseconds(static_cast<int64_t>(_duration.count() / rhs)));
-    }
-
-    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime operator*(const T& rhs) const
-    {
-        return q2as_gtime(_milliseconds(static_cast<int64_t>(_duration.count() * rhs)));
-    }
-
-    q2as_gtime operator-() const
-    {
-        return q2as_gtime(-_duration);
-    }
-
-    q2as_gtime& operator-=(const q2as_gtime& rhs)
-    {
-        _duration -= rhs._duration;
-        return *this;
-    }
-
-    q2as_gtime& operator+=(const q2as_gtime& rhs)
-    {
-        _duration += rhs._duration;
-        return *this;
-    }
-
-    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime& operator/=(const T& rhs)
-    {
-        _duration = _milliseconds(static_cast<int64_t>(_duration.count() / rhs));
-        return *this;
-    }
-
-    template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-    q2as_gtime& operator*=(const T& rhs)
-    {
-        _duration = _milliseconds(static_cast<int64_t>(_duration.count() * rhs));
-        return *this;
-    }
-
-    bool operator==(const q2as_gtime& rhs) const
-    {
-        return _duration == rhs._duration;
-    }
-
-    bool operator!=(const q2as_gtime& rhs) const
-    {
-        return _duration != rhs._duration;
-    }
-
-    bool operator<(const q2as_gtime& rhs) const
-    {
-        return _duration < rhs._duration;
-    }
-
-    bool operator>(const q2as_gtime& rhs) const
-    {
-        return _duration > rhs._duration;
-    }
-
-    bool operator<=(const q2as_gtime& rhs) const
-    {
-        return _duration <= rhs._duration;
-    }
-
-    bool operator>=(const q2as_gtime& rhs) const
-    {
-        return _duration >= rhs._duration;
-    }
-};
+    return _duration.count() / gi.frame_time_ms;
+}
 
 static void Q2AS_gtime_t_copy_construct(const q2as_gtime &t, q2as_gtime*o)
 {
@@ -259,7 +121,7 @@ public:
             }
 
         var->value = fmt::format("{} {}", s->milliseconds() / (double) divisor, sfx);
-        var->MakeExpandable();
+        var->expandable = true;
     }
 
     virtual void Expand(asIDBVariable::Ptr var) const override
@@ -274,7 +136,7 @@ public:
                 child->identifier = std::get<1>(suffix);
                 child->value = fmt::format("{}", s->milliseconds() / (double) std::get<0>(suffix));
                 child->evaluated = true;
-                var->PushChild(child);
+                var->namedProps.insert(child);
             }
 
         {
@@ -283,7 +145,7 @@ public:
             child->identifier = "ms";
             child->value = fmt::format("{}", s->milliseconds());
             child->evaluated = true;
-            var->PushChild(child);
+            var->namedProps.insert(child);
         }
     }
 };
@@ -305,6 +167,7 @@ void Q2AS_RegisterTime(q2as_registry &registry)
             { "int64 milliseconds", 0 }
         })
         .behaviors({
+            { asBEHAVE_CONSTRUCT, "void f()",                  asFUNCTION(Q2AS_init_construct<q2as_gtime>),          asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(int64, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<int64_t>), asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(float, timeunit_t)", asFUNCTION(Q2AS_gtime_t_timeunit_construct<float>),   asCALL_CDECL_OBJLAST },
             { asBEHAVE_CONSTRUCT, "void f(const gtime_t &in)", asFUNCTION(Q2AS_gtime_t_copy_construct),              asCALL_CDECL_OBJLAST }

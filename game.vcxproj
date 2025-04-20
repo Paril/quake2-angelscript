@@ -108,6 +108,7 @@
     <Link>
       <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug+ASAN|x64'">
@@ -131,6 +132,7 @@
     <Link>
       <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug+AS_DEBUG|x64'">
@@ -154,6 +156,7 @@
     <Link>
       <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -177,21 +180,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
     <ClCompile Include="debugger\as_debugger.cpp" />
     <ClCompile Include="debugger\as_debugger_dap.cpp" />
-    <ClCompile Include="debugger\as_debugger_imgui.cpp" />
-    <ClCompile Include="debugger\imgui.cpp" />
-    <ClCompile Include="debugger\imgui_demo.cpp" />
-    <ClCompile Include="debugger\imgui_draw.cpp" />
-    <ClCompile Include="debugger\imgui_impl_dx9.cpp" />
-    <ClCompile Include="debugger\imgui_impl_win32.cpp" />
-    <ClCompile Include="debugger\imgui_tables.cpp" />
-    <ClCompile Include="debugger\imgui_widgets.cpp" />
-    <ClCompile Include="debugger\TextEditor.cpp" />
+    <ClCompile Include="debugger\as_helpers.cpp" />
     <ClCompile Include="g_main.cpp" />
     <ClCompile Include="q2as_cgame.cpp" />
     <ClCompile Include="q2as_cvar.cpp" />
@@ -218,7 +214,6 @@
     <ClCompile Include="q2as_util.cpp" />
     <ClCompile Include="q2as_vec2.cpp" />
     <ClCompile Include="q2as_vec3.cpp" />
-    <ClCompile Include="q_std.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_atomic.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_builder.cpp" />
     <ClCompile Include="thirdparty\angelscript\source\as_bytecode.cpp" />
@@ -284,19 +279,9 @@
     <ClCompile Include="thirdparty\yyjson\yyjson.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ctrack.hpp" />
     <ClInclude Include="debugger\as_debugger.h" />
     <ClInclude Include="debugger\as_debugger_dap.h" />
-    <ClInclude Include="debugger\as_debugger_imgui.h" />
-    <ClInclude Include="debugger\imconfig.h" />
-    <ClInclude Include="debugger\imgui.h" />
-    <ClInclude Include="debugger\imgui_impl_dx9.h" />
-    <ClInclude Include="debugger\imgui_impl_win32.h" />
-    <ClInclude Include="debugger\imgui_internal.h" />
-    <ClInclude Include="debugger\imstb_rectpack.h" />
-    <ClInclude Include="debugger\imstb_textedit.h" />
-    <ClInclude Include="debugger\imstb_truetype.h" />
-    <ClInclude Include="debugger\TextEditor.h" />
+    <ClInclude Include="debugger\as_helpers.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="mum-prng.h" />
@@ -315,6 +300,7 @@
     <ClInclude Include="q2as_random.h" />
     <ClInclude Include="q2as_reg.h" />
     <ClInclude Include="q2as_stringex.h" />
+    <ClInclude Include="q2as_time.h" />
     <ClInclude Include="q2as_vec2.h" />
     <ClInclude Include="q2as_vec3.h" />
     <ClInclude Include="q_std.h" />
@@ -395,13 +381,11 @@
     <ClInclude Include="thirdparty\fmt\include\fmt\ranges.h" />
     <ClInclude Include="thirdparty\fmt\include\fmt\std.h" />
     <ClInclude Include="thirdparty\fmt\include\fmt\xchar.h" />
-    <ClInclude Include="thirdparty\palanteer\palinteer.h" />
     <ClInclude Include="thirdparty\scriptany\scriptany.h" />
     <ClInclude Include="thirdparty\scriptarray\scriptarray.h" />
     <ClInclude Include="thirdparty\scriptdictionary\scriptdictionary.h" />
     <ClInclude Include="thirdparty\scripthelper\scripthelper.h" />
     <ClInclude Include="thirdparty\scriptstdstring\scriptstdstring.h" />
-    <ClInclude Include="thirdparty\spall\spall.h" />
     <ClInclude Include="thirdparty\weakref\weakref.h" />
     <ClInclude Include="thirdparty\yyjson\yyjson.h" />
   </ItemGroup>

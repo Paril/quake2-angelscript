@@ -26,14 +26,17 @@ struct q2as_cg_state_t : q2as_state_t
     asIScriptFunction *CG_TouchPics = nullptr;
     asIScriptFunction *CG_Pmove = nullptr;
     as_pmove_t *pmove_inst;
-    cvar_t *instrumentation;
-    bool instrumenting = false;
+
+    q2as_cg_state_t() :
+        q2as_state_t()
+    {
+        instrumentation_bit = 2;
+    }
 
     void LoadFunctions();
 
     virtual void Print(const char *text) override;
     virtual void Error(const char *text) override;
-    virtual bool InstrumentationEnabled() override;
     virtual void *Alloc(size_t size) override;
     virtual void Free(void *ptr) override;
     virtual cvar_t *Cvar(const char *name, const char *value, cvar_flags_t flags) override;
