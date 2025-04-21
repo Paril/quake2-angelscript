@@ -1,6 +1,7 @@
 #include "q2as_local.h"
 #include "q2as_time.h"
 #include "g_local.h"
+#include "q2as_random.h"
 
 // FIXME: new randomness system
 static q2as_gtime q2as_random_time_2(const q2as_gtime &a, const q2as_gtime &b)

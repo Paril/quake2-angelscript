@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="cg_main.cpp" />
@@ -502,6 +502,13 @@
     <ClInclude Include="q2as_dynamic_bitset.h" />
     <ClInclude Include="q2as_vec3.h" />
     <ClInclude Include="q2as_vec2.h" />
+    <ClInclude Include="mum.h">
+      <Filter>thirdparty\mum-hash</Filter>
+    </ClInclude>
+    <ClInclude Include="mum-prng.h">
+      <Filter>thirdparty\mum-hash</Filter>
+    </ClInclude>
+    <ClInclude Include="q2as_random.h" />
     <ClInclude Include="debugger\as_helpers.h">
       <Filter>debugger</Filter>
     </ClInclude>
@@ -573,6 +580,9 @@
     </Filter>
     <Filter Include="thirdparty\cppdap">
       <UniqueIdentifier>{1fb43641-083f-436a-867a-9c63c356cf4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\mum-hash">
+      <UniqueIdentifier>{2ca83bba-601d-408f-b7b0-15924a1c9374}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
