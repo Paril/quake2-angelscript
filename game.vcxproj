@@ -284,6 +284,8 @@
     <ClInclude Include="debugger\as_helpers.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
+    <ClInclude Include="mum-prng.h" />
+    <ClInclude Include="mum.h" />
     <ClInclude Include="q2as_cgame.h" />
     <ClInclude Include="q2as_dynamic_bitset.h" />
     <ClInclude Include="q2as_fixedarray.h" />
@@ -295,6 +297,7 @@
     <ClInclude Include="q2as_platform.h" />
     <ClInclude Include="q2as_pmove.h" />
     <ClInclude Include="q2as_predefined.h" />
+    <ClInclude Include="q2as_random.h" />
     <ClInclude Include="q2as_reg.h" />
     <ClInclude Include="q2as_stringex.h" />
     <ClInclude Include="q2as_time.h" />

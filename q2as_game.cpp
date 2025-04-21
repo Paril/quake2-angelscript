@@ -7,6 +7,7 @@
 #include "q2as_json.h"
 #include "thirdparty/scriptany/scriptany.h"
 #include "thirdparty/scriptarray/scriptarray.h"
+#include "q2as_random.h"
 
 #include "q2as_modules.h"
 #include "q2as_pmove.h"
@@ -110,7 +111,8 @@ static void Q2AS_InitGame()
     cvar_t *maxclients = gi.cvar("maxclients", fmt::format("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 
     // seed RNG
-    mt_rand.seed((uint32_t) std::chrono::system_clock::now().time_since_epoch().count());
+    mum_prng.init_mum_prng();
+    mum_prng.set_mum_prng_seed((uint32_t)std::chrono::system_clock::now().time_since_epoch().count());
 
     // initialize all entities for this game
     svas.maxentities = maxentities->integer;
