@@ -43,6 +43,8 @@
 
 #include "mum.h"
 
+#include <functional>
+
 #ifndef MUM_PRNG_UNROLL
 #define MUM_PRNG_UNROLL 16
 #endif
@@ -63,7 +65,7 @@
 
 struct mum_prng_generator
 {
-    using result_type = std::uint64_t;
+    using result_type = uint64_t;
 
     struct _mum_prng_internal_state
     {

@@ -7,12 +7,12 @@ int64_t q2as_gtime::frames() const
     return _duration.count() / gi.frame_time_ms;
 }
 
-static void Q2AS_gtime_t_copy_construct(const q2as_gtime &t, q2as_gtime*o)
+static void Q2AS_gtime_t_copy_construct(const q2as_gtime &t, q2as_gtime *o)
 {
     *o = t;
 }
 
-static int Q2AS_gtime_t_compare(const q2as_gtime&t, q2as_gtime*o)
+static int Q2AS_gtime_t_compare(const q2as_gtime &t, q2as_gtime *o)
 {
     if (t == *o)
         return 0;
@@ -22,7 +22,7 @@ static int Q2AS_gtime_t_compare(const q2as_gtime&t, q2as_gtime*o)
         return 1;
 }
 
-static q2as_gtime*Q2AS_gtime_t_assign(const q2as_gtime&t, q2as_gtime*o)
+static q2as_gtime *Q2AS_gtime_t_assign(const q2as_gtime &t, q2as_gtime *o)
 {
     *o = t;
     return o;
@@ -37,7 +37,7 @@ enum class timeunit_t
 };
 
 template<typename T>
-static void Q2AS_gtime_t_timeunit_construct(T value, timeunit_t unit, q2as_gtime*t)
+static void Q2AS_gtime_t_timeunit_construct(T value, timeunit_t unit, q2as_gtime *t)
 {
     if (unit == timeunit_t::ms)
         *t = q2as_gtime::from_ms((int64_t) value);
@@ -71,22 +71,22 @@ static q2as_gtime Q2AS_gtime_t_timeunit_hz(uint64_t t)
     return q2as_gtime::from_hz(t);
 }
 
-static q2as_gtime Q2AS_clamp_time(const q2as_gtime&a, const q2as_gtime&b, const q2as_gtime&c)
+static q2as_gtime Q2AS_clamp_time(const q2as_gtime &a, const q2as_gtime &b, const q2as_gtime &c)
 {
     return clamp(a, b, c);
 }
 
-static q2as_gtime Q2AS_min_time(const q2as_gtime&a, const q2as_gtime&b)
+static q2as_gtime Q2AS_min_time(const q2as_gtime &a, const q2as_gtime &b)
 {
     return min(a, b);
 }
 
-static q2as_gtime Q2AS_max_time(const q2as_gtime&a, const q2as_gtime&b)
+static q2as_gtime Q2AS_max_time(const q2as_gtime &a, const q2as_gtime &b)
 {
     return max(a, b);
 }
 
-static void gtime_formatter(std::string &str, const std::string &args, const q2as_gtime&time)
+static void gtime_formatter(std::string &str, const std::string &args, const q2as_gtime &time)
 {
     if (abs(time.minutes<float>()) >= 1)
         fmt::format_to(std::back_inserter(str), "{} min", time.minutes<float>());
@@ -98,19 +98,17 @@ static void gtime_formatter(std::string &str, const std::string &args, const q2a
 
 class q2as_asIDBGTimeTypeEvaluator : public asIDBObjectTypeEvaluator
 {
-    static constexpr std::tuple<uint64_t, const char *> time_suffixes[] = {
-        { 1000 * 60 * 60, "hr" },
-        { 1000 * 60, "min" },
-        { 1000, "sec" }
-    };
+    static constexpr std::tuple<uint64_t, const char *> time_suffixes[] = { { 1000 * 60 * 60, "hr" },
+                                                                            { 1000 * 60, "min" },
+                                                                            { 1000, "sec" } };
 
 public:
     virtual void Evaluate(asIDBVariable::Ptr var) const override
     {
-        const q2as_gtime*s = var->address.ResolveAs<const q2as_gtime>();
+        const q2as_gtime *s = var->address.ResolveAs<const q2as_gtime>();
 
         const char *sfx = "ms";
-        uint64_t divisor = 1;
+        uint64_t    divisor = 1;
 
         for (auto &suffix : time_suffixes)
             if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))
@@ -126,7 +124,7 @@ public:
 
     virtual void Expand(asIDBVariable::Ptr var) const override
     {
-        const q2as_gtime*s = var->address.ResolveAs<const q2as_gtime>();
+        const q2as_gtime *s = var->address.ResolveAs<const q2as_gtime>();
 
         for (auto &suffix : time_suffixes)
             if ((uint64_t) abs(s->milliseconds()) >= std::get<0>(suffix))

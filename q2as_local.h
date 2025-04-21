@@ -41,10 +41,10 @@ using formatter_map = std::unordered_map<int, asIScriptFunction *>;
 // stores the state for each Q2AS engine.
 struct q2as_state_t
 {
-    asIScriptEngine                                    *engine;
-    asIScriptModule                                    *mainModule; // the main module
-    formatter_map                                       formatters;
-    int                                                 instrumentation_bit = 0;
+    asIScriptEngine *engine;
+    asIScriptModule *mainModule; // the main module
+    formatter_map    formatters;
+    int              instrumentation_bit = 0;
 
     int stringTypeId;
 
@@ -129,16 +129,16 @@ static T *Q2AS_assign(const T &in, T *self)
 
 struct instrumentation_event_t
 {
-    int64_t             stamp;
-    asIScriptFunction   *func;
-    bool                begin : 1;
-    uint8_t             tid : 7;
+    int64_t            stamp;
+    asIScriptFunction *func;
+    bool               begin : 1;
+    uint8_t            tid : 7;
 };
 
-constexpr int INSTRU_SERVER   = 1;
-constexpr int INSTRU_CLIENT   = 2;
+constexpr int INSTRU_SERVER = 1;
+constexpr int INSTRU_CLIENT = 2;
 constexpr int INSTRU_MOVEMENT = 4;
-constexpr int INSTRU_GC       = 8;
+constexpr int INSTRU_GC = 8;
 
 // stores the debugger state for both Q2AS modules.
 // no need to have a debugger for each one.
@@ -147,10 +147,10 @@ struct q2as_dbg_state_t
     std::unique_ptr<asIDBDebugger>  debugger;
     std::unique_ptr<asIDBWorkspace> workspace;
 
-    cvar_t *instrumentation_type, *instrumentation_modules, *instrumentation_granularity;
-    int active_instrumentation = 0;
+    cvar_t                              *instrumentation_type, *instrumentation_modules, *instrumentation_granularity;
+    int                                  active_instrumentation = 0;
     std::vector<instrumentation_event_t> events;
-    uint8_t current_tid = 0;
+    uint8_t                              current_tid = 0;
 
     // evaluators don't take up much memory so we'll just
     // always keep them around.

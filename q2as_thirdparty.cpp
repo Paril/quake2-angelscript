@@ -1,12 +1,12 @@
 #include "q2as_local.h"
 
-#include "thirdparty/scriptstdstring/scriptstdstring.h"
+#include "thirdparty/datetime/datetime.h"
 #include "thirdparty/scriptany/scriptany.h"
 #include "thirdparty/scriptarray/scriptarray.h"
 #include "thirdparty/scriptdictionary/scriptdictionary.h"
-#include "thirdparty/datetime/datetime.h"
-#include "thirdparty/weakref/weakref.h"
 #include "thirdparty/scripthelper/scripthelper.h"
+#include "thirdparty/scriptstdstring/scriptstdstring.h"
+#include "thirdparty/weakref/weakref.h"
 
 class q2as_asIDBStringTypeEvaluator : public asIDBTypeEvaluator
 {
@@ -43,7 +43,7 @@ public:
             var->value = "(no stored value)";
             return;
         }
-        
+
         var->value = fmt::format("any<{}>", var->dbg.cache->GetTypeNameFromType({ v->GetTypeId(), asTM_NONE }));
         var->expandable = true;
     }
@@ -86,10 +86,10 @@ public:
 
         for (auto &kvp : *v)
         {
-            auto child = var->CreateChildVariable(
-                fmt::format("[{}]", kvp.GetKey()),
-                { kvp.GetTypeId(), false, const_cast<void *>(kvp.GetAddressOfValue()) },
-                var->dbg.cache->GetTypeNameFromType({ kvp.GetTypeId(), asTM_NONE }));
+            auto child =
+                var->CreateChildVariable(fmt::format("[{}]", kvp.GetKey()),
+                                         { kvp.GetTypeId(), false, const_cast<void *>(kvp.GetAddressOfValue()) },
+                                         var->dbg.cache->GetTypeNameFromType({ kvp.GetTypeId(), asTM_NONE }));
             child->Evaluate();
         }
     }

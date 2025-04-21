@@ -22,30 +22,30 @@
 
 enum
 {
-    TAG_ANGELSCRIPT_CG = 765//768
+    TAG_ANGELSCRIPT_CG = 765 // 768
 };
 
 /*virtual*/ void *q2as_cg_state_t::Alloc(size_t size) /*override*/
 {
-    //return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
+    // return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
     return calloc(size, 1);
 }
 
 /*virtual*/ void q2as_cg_state_t::Free(void *ptr) /*override*/
 {
-    //cgi.TagFree(ptr);
+    // cgi.TagFree(ptr);
     free(ptr);
 }
 
 /*static*/ void *q2as_cg_state_t::AllocStatic(size_t size)
 {
-    //return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
+    // return cgi.TagMalloc(size, TAG_ANGELSCRIPT_CG);
     return calloc(size, 1);
 }
 
 /*static*/ void q2as_cg_state_t::FreeStatic(void *ptr)
 {
-    //cgi.TagFree(ptr);
+    // cgi.TagFree(ptr);
     return free(ptr);
 }
 
@@ -70,7 +70,7 @@ void q2as_cg_state_t::LoadFunctions()
     Ensure(CG_Pmove                      = mainModule->GetFunctionByDecl("void Pmove(pmove_t @pmove)"));
 
     pmove_inst = reinterpret_cast<as_pmove_t *>(Alloc(sizeof(as_pmove_t)));
-    new(pmove_inst) as_pmove_t();
+    new (pmove_inst) as_pmove_t();
     Ensure(pmove_inst->trace_f         = engine->GetGlobalFunctionByDecl("trace_t _cg_trace(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, edict_t@, contents_t)"));
     Ensure(pmove_inst->clip_f          = engine->GetGlobalFunctionByDecl("trace_t _cg_clip(const vec3_t &in, const vec3_t &in, const vec3_t &in, const vec3_t &in, contents_t)"));
     Ensure(pmove_inst->pointcontents_f = engine->GetGlobalFunctionByDecl("contents_t _cg_pointcontents(const vec3_t &in)"));
@@ -114,7 +114,8 @@ static void q2as_CG_SCR_DrawColorPic(int x, int y, int w, int h, const std::stri
     cgi.SCR_DrawColorPic(x, y, w, h, name.c_str(), color);
 }
 
-static void q2as_CG_SCR_DrawFontString(const std::string &str, int x, int y, int scale, rgba_t color, bool shadow, text_align_t align)
+static void q2as_CG_SCR_DrawFontString(const std::string &str, int x, int y, int scale, rgba_t color, bool shadow,
+                                       text_align_t align)
 {
     cgi.SCR_DrawFontString(str.c_str(), x, y, scale, color, shadow, align);
 }
@@ -123,7 +124,7 @@ static void q2as_CG_SCR_MeasureFontString(asIScriptGeneric *gen)
 {
     // vec2_t(const std::string &str, int scale)
     std::string *s = (std::string *) gen->GetArgAddress(0);
-    int scale = gen->GetArgDWord(1);
+    int          scale = gen->GetArgDWord(1);
 
     *((vec2_t *) gen->GetAddressOfReturnLocation()) = cgi.SCR_MeasureFontString(s->c_str(), scale);
 }
@@ -159,7 +160,7 @@ static std::string q2as_CG_Localize_zero(const std::string &s)
 
 static void q2as_CG_Localize(asIScriptGeneric *gen)
 {
-    std::string result;
+    std::string        result;
     static const char *arg_buffers[MAX_LOCALIZATION_ARGS];
 
     std::string *base = (std::string *) gen->GetAddressOfArg(0);
@@ -170,10 +171,12 @@ static void q2as_CG_Localize(asIScriptGeneric *gen)
         arg_buffers[i] = arg->data();
     }
 
-    *((std::string *) gen->GetAddressOfReturnLocation()) = cgi.Localize(base->c_str(), arg_buffers, gen->GetArgCount() - 1);
+    *((std::string *) gen->GetAddressOfReturnLocation()) =
+        cgi.Localize(base->c_str(), arg_buffers, gen->GetArgCount() - 1);
 }
 
-static int32_t q2as_CG_SCR_DrawBind(int32_t isplit, const std::string &binding, const std::string &purpose, int x, int y, int scale)
+static int32_t q2as_CG_SCR_DrawBind(int32_t isplit, const std::string &binding, const std::string &purpose, int x,
+                                    int y, int scale)
 {
     return cgi.SCR_DrawBind(isplit, binding.c_str(), purpose.c_str(), x, y, scale);
 }
@@ -181,7 +184,7 @@ static int32_t q2as_CG_SCR_DrawBind(int32_t isplit, const std::string &binding, 
 static bool q2as_CG_CL_GetTextInput(std::string &out_str, bool &out_isteam)
 {
     const char *msg;
-    bool is_team;
+    bool        is_team;
 
     bool result = cgi.CL_GetTextInput(&msg, &is_team);
 
@@ -203,12 +206,14 @@ static std::string q2as_CG_CL_GetClientName(int index)
     return cgi.CL_GetClientName(index);
 }
 
-static trace_t Q2AS_CG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, edict_t *passent, contents_t contentmask)
+static trace_t Q2AS_CG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
+                             edict_t *passent, contents_t contentmask)
 {
     return cgas.pmove_inst->pm.trace(start, &mins, &maxs, end, passent, contentmask);
 }
 
-static trace_t Q2AS_CG_Clip(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, contents_t contentmask)
+static trace_t Q2AS_CG_Clip(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
+                            contents_t contentmask)
 {
     return cgas.pmove_inst->pm.clip(start, &mins, &maxs, end, contentmask);
 }
@@ -289,33 +294,26 @@ static void Q2AS_RegisterCGameUtil(q2as_registry &registry)
 {
     Q2AS_RegisterFixedArray<int32_t, 4>(registry, "vrect_t", "int32", asOBJ_APP_CLASS_ALLINTS);
 
-    registry
-        .for_type("vrect_t")
-        .properties({
-            { "int32 x",      asOFFSET(vrect_t, x) },
-            { "int32 y",      asOFFSET(vrect_t, y) },
-            { "int32 width",  asOFFSET(vrect_t, width) },
-            { "int32 height", asOFFSET(vrect_t, height) },
-        });
+    registry.for_type("vrect_t").properties({
+        { "int32 x", asOFFSET(vrect_t, x) },
+        { "int32 y", asOFFSET(vrect_t, y) },
+        { "int32 width", asOFFSET(vrect_t, width) },
+        { "int32 height", asOFFSET(vrect_t, height) },
+    });
 
     Q2AS_RegisterFixedArray<int16_t, MAX_ITEMS>(registry, "item_array_t", "int16", asOBJ_APP_CLASS_ALLINTS, false);
 
     // special handle, always active and allocated
     // by the host, wrapped by AngelScript.
-    registry
-        .type("cg_server_data_t", sizeof(cg_server_data_t), asOBJ_REF | asOBJ_NOCOUNT)
-        .properties({
-            { "item_array_t inventory", asOFFSET(cg_server_data_t, inventory) }
-        })
-        .methods({
-            { "string get_layout() const property", asFUNCTION(q2as_cg_server_data_t_get_layout), asCALL_CDECL_OBJLAST }
-        });
+    registry.type("cg_server_data_t", sizeof(cg_server_data_t), asOBJ_REF | asOBJ_NOCOUNT)
+        .properties({ { "item_array_t inventory", asOFFSET(cg_server_data_t, inventory) } })
+        .methods({ { "string get_layout() const property", asFUNCTION(q2as_cg_server_data_t_get_layout),
+                     asCALL_CDECL_OBJLAST } });
 
     // entity handle; special handle, always active and allocated
     // by the host, wrapped by AngelScript.
     // the cgame just has a blank version.
-    registry
-        .type("edict_t", 0, asOBJ_REF | asOBJ_NOCOUNT);
+    registry.type("edict_t", 0, asOBJ_REF | asOBJ_NOCOUNT);
 }
 
 static void Q2AS_CG_ClearCenterprint(int32_t isplit)
@@ -335,7 +333,7 @@ static void Q2AS_CG_ClearNotify(int32_t isplit)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -344,25 +342,34 @@ static void Q2AS_CG_ClearNotify(int32_t isplit)
     ctx.Execute();
 }
 
-static void Q2AS_CG_DrawHUD (int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect, vrect_t hud_safe, int32_t scale, int32_t playernum, const player_state_t *ps)
+static void Q2AS_CG_DrawHUD(int32_t isplit, const cg_server_data_t *data, vrect_t hud_vrect, vrect_t hud_safe,
+                            int32_t scale, int32_t playernum, const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
     {
         auto measure = cgi.SCR_MeasureFontString("AngelScript", scale);
-        int x = (hud_vrect.width / 2) * scale;
-        int y = ((hud_vrect.height / 2) - 100) * scale;
-        cgi.SCR_DrawColorPic(x - (measure.x / 2) - (scale * 4), y, measure.x + (scale * 8), measure.y, "_white", rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 });
+        int  x = (hud_vrect.width / 2) * scale;
+        int  y = ((hud_vrect.height / 2) - 100) * scale;
+        cgi.SCR_DrawColorPic(x - (measure.x / 2) - (scale * 4), y, measure.x + (scale * 8), measure.y, "_white",
+                             rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 });
         cgi.SCR_DrawFontString("AngelScript", x, y, scale,
-            rgba_t { (uint8_t) 0, (uint8_t) 0, (uint8_t) 190, (uint8_t) 255 }, false, text_align_t::CENTER);
+                               rgba_t { (uint8_t) 0, (uint8_t) 0, (uint8_t) 190, (uint8_t) 255 }, false,
+                               text_align_t::CENTER);
 
         y += cgi.SCR_FontLineHeight(scale) * 3;
-        cgi.SCR_DrawFontString("Quake II has encountered an unhandled exception and must be shut down.\nPlease take a screenshot of this and send it to Paril.\nUse the console or press ESCAPE/START to quit.\n\n", x - (160 * scale), y, 1, rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 }, false, text_align_t::LEFT);
+        cgi.SCR_DrawFontString(
+            "Quake II has encountered an unhandled exception and must be shut down.\nPlease take a screenshot of this "
+            "and send it to Paril.\nUse the console or press ESCAPE/START to quit.\n\n",
+            x - (160 * scale), y, 1, rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 }, false,
+            text_align_t::LEFT);
 
         y += cgi.SCR_FontLineHeight(1) * 6;
-        cgi.SCR_DrawFontString(q2as_state_t::GetExceptionData().c_str(), x - (160 * scale), y, 1, rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 }, false, text_align_t::LEFT);
+        cgi.SCR_DrawFontString(q2as_state_t::GetExceptionData().c_str(), x - (160 * scale), y, 1,
+                               rgba_t { (uint8_t) 200, (uint8_t) 200, (uint8_t) 200, (uint8_t) 255 }, false,
+                               text_align_t::LEFT);
         return;
     }
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -381,7 +388,7 @@ static int32_t Q2AS_CG_GetActiveWeaponWheelWeapon(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -396,7 +403,7 @@ static int16_t Q2AS_CG_GetHitMarkerDamage(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -411,7 +418,7 @@ static void Q2AS_CG_GetMonsterFlashOffset(monster_muzzleflash_id_t id, gvec3_ref
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -425,7 +432,7 @@ static uint32_t Q2AS_CG_GetOwnedWeaponWheelWeapons(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -440,7 +447,7 @@ static int16_t Q2AS_CG_GetPowerupWheelCount(const player_state_t *ps, int32_t po
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -456,7 +463,7 @@ static int16_t Q2AS_CG_GetWeaponWheelAmmoCount(const player_state_t *ps, int32_t
 {
     if (q2as_state_t::CheckExceptionState())
         return 0;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -472,7 +479,7 @@ static void Q2AS_CG_Init()
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -484,7 +491,7 @@ static layout_flags_t Q2AS_CG_LayoutFlags(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
         return LAYOUTS_NONE;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -499,7 +506,7 @@ static void Q2AS_CG_NotifyMessage(int32_t isplit, const char *msg, bool is_chat)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     std::string msg_ = msg;
@@ -516,7 +523,7 @@ static void Q2AS_CG_ParseConfigString(int32_t i, const char *s)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     std::string s_ = s;
@@ -528,12 +535,12 @@ static void Q2AS_CG_ParseConfigString(int32_t i, const char *s)
     ctx.Execute();
 }
 
-//void CG_ParseCenterPrint (const string &in str, int isplit, bool instant)
+// void CG_ParseCenterPrint (const string &in str, int isplit, bool instant)
 static void Q2AS_CG_ParseCenterPrint(const char *s, int32_t i, bool instant)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     std::string s_ = s;
@@ -566,7 +573,7 @@ static void Q2AS_CG_TouchPics()
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     auto ctx = cgas.RequestContext();
@@ -578,7 +585,7 @@ static void Q2AS_CG_Pmove(pmove_t *pm)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
-    
+
     debugger_state.current_tid = 2;
 
     cgas.pmove_inst->pm = *pm;
@@ -601,31 +608,29 @@ cgame_export_t *Q2AS_GetCGameAPI()
     if (!cgas.Load(q2as_cg_state_t::AllocStatic, q2as_cg_state_t::FreeStatic))
         return nullptr;
 
-    constexpr library_reg_t *const libraries[] = {
-        Q2AS_RegisterThirdParty,
-        Q2AS_RegisterLimits,
-        Q2AS_RegisterMath,
-        Q2AS_RegisterVec2,
-        Q2AS_RegisterVec3,
-        Q2AS_RegisterDynamicBitset,
-        Q2AS_RegisterUtil,
-        Q2AS_RegisterTime,
-        Q2AS_RegisterRandom,
-        Q2AS_RegisterStringEx,
-        Q2AS_RegisterCvar,
-        Q2AS_RegisterDebugging,
-        Q2AS_RegisterReflection,
-        Q2AS_RegisterStringHashSet,
-        Q2AS_RegisterPlayerState,
-        Q2AS_RegisterCGameUtil,
-        Q2AS_RegisterTrace,
-        Q2AS_RegisterPmove,
-        Q2AS_RegisterPmoveFactory<q2as_cg_state_t>,
-        Q2AS_RegisterCGamePmove,
-        Q2AS_RegisterImportTypes,
-        Q2AS_RegisterTokenizer,
-        Q2AS_RegisterCGame
-    };
+    constexpr library_reg_t *const libraries[] = { Q2AS_RegisterThirdParty,
+                                                   Q2AS_RegisterLimits,
+                                                   Q2AS_RegisterMath,
+                                                   Q2AS_RegisterVec2,
+                                                   Q2AS_RegisterVec3,
+                                                   Q2AS_RegisterDynamicBitset,
+                                                   Q2AS_RegisterUtil,
+                                                   Q2AS_RegisterTime,
+                                                   Q2AS_RegisterRandom,
+                                                   Q2AS_RegisterStringEx,
+                                                   Q2AS_RegisterCvar,
+                                                   Q2AS_RegisterDebugging,
+                                                   Q2AS_RegisterReflection,
+                                                   Q2AS_RegisterStringHashSet,
+                                                   Q2AS_RegisterPlayerState,
+                                                   Q2AS_RegisterCGameUtil,
+                                                   Q2AS_RegisterTrace,
+                                                   Q2AS_RegisterPmove,
+                                                   Q2AS_RegisterPmoveFactory<q2as_cg_state_t>,
+                                                   Q2AS_RegisterCGamePmove,
+                                                   Q2AS_RegisterImportTypes,
+                                                   Q2AS_RegisterTokenizer,
+                                                   Q2AS_RegisterCGame };
 
     if (!cgas.LoadLibraries(libraries, std::extent_v<decltype(libraries)>))
         return nullptr;

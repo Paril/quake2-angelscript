@@ -1,6 +1,7 @@
 #pragma once
 
 #include <angelscript.h>
+#include <stdexcept>
 
 struct q2as_registry_exception : public std::runtime_error
 {
@@ -10,7 +11,7 @@ struct q2as_registry_exception : public std::runtime_error
 struct q2as_type_registry
 {
     asIScriptEngine *engine;
-    std::string name;
+    std::string      name;
 
     q2as_type_registry(asIScriptEngine *engine, const std::string &name) :
         engine(engine),
@@ -21,30 +22,30 @@ struct q2as_type_registry
     struct property_defn
     {
         std::string decl {};
-        int offset = 0;
-        int compositeOffset = 0;
-        bool isCompositeIndirect = false;
+        int         offset = 0;
+        int         compositeOffset = 0;
+        bool        isCompositeIndirect = false;
     };
 
     struct behavior_defn
     {
         asEBehaviours beh = (asEBehaviours) 0;
-        std::string decl {};
-        asSFuncPtr funcPointer {};
-        asDWORD callConv = 0;
-        void *auxiliary = nullptr;
-        int compositeOffset = 0;
-        bool isCompositeIndirect = false;
+        std::string   decl {};
+        asSFuncPtr    funcPointer {};
+        asDWORD       callConv = 0;
+        void         *auxiliary = nullptr;
+        int           compositeOffset = 0;
+        bool          isCompositeIndirect = false;
     };
 
     struct method_defn
     {
         std::string decl {};
-        asSFuncPtr funcPointer {};
-        asDWORD callConv = 0;
-        void *auxiliary = nullptr;
-        int compositeOffset = 0;
-        bool isCompositeIndirect = false;
+        asSFuncPtr  funcPointer {};
+        asDWORD     callConv = 0;
+        void       *auxiliary = nullptr;
+        int         compositeOffset = 0;
+        bool        isCompositeIndirect = false;
     };
 
     q2as_type_registry &property(const property_defn &prop)
@@ -52,7 +53,8 @@ struct q2as_type_registry
         if (name.empty())
             throw q2as_registry_exception("missing type name");
 
-        if (engine->RegisterObjectProperty(name.data(), prop.decl.c_str(), prop.offset, prop.compositeOffset, prop.isCompositeIndirect) < 0)
+        if (engine->RegisterObjectProperty(name.data(), prop.decl.c_str(), prop.offset, prop.compositeOffset,
+                                           prop.isCompositeIndirect) < 0)
             throw q2as_registry_exception("can't register property");
 
         return *this;
@@ -70,7 +72,9 @@ struct q2as_type_registry
         if (name.empty())
             throw q2as_registry_exception("missing type name");
 
-        if (engine->RegisterObjectBehaviour(name.data(), behavior.beh, behavior.decl.c_str(), behavior.funcPointer, behavior.callConv, behavior.auxiliary, behavior.compositeOffset, behavior.isCompositeIndirect) < 0)
+        if (engine->RegisterObjectBehaviour(name.data(), behavior.beh, behavior.decl.c_str(), behavior.funcPointer,
+                                            behavior.callConv, behavior.auxiliary, behavior.compositeOffset,
+                                            behavior.isCompositeIndirect) < 0)
             throw q2as_registry_exception("can't register property");
 
         return *this;
@@ -88,7 +92,8 @@ struct q2as_type_registry
         if (name.empty())
             throw q2as_registry_exception("missing type name");
 
-        if (engine->RegisterObjectMethod(name.data(), method.decl.c_str(), method.funcPointer, method.callConv, method.auxiliary, method.compositeOffset, method.isCompositeIndirect) < 0)
+        if (engine->RegisterObjectMethod(name.data(), method.decl.c_str(), method.funcPointer, method.callConv,
+                                         method.auxiliary, method.compositeOffset, method.isCompositeIndirect) < 0)
             throw q2as_registry_exception("can't register property");
 
         return *this;
@@ -130,16 +135,16 @@ struct q2as_global_registry
         {
         }
 
-        void *ptr = nullptr;
+        void       *ptr = nullptr;
         const void *cptr = nullptr;
     };
 
     struct function_defn
     {
         std::string decl;
-        asSFuncPtr funcPointer {};
-        asDWORD callConv = 0;
-        void *auxiliary = nullptr;
+        asSFuncPtr  funcPointer {};
+        asDWORD     callConv = 0;
+        void       *auxiliary = nullptr;
     };
 
     q2as_global_registry &property(const global_property_defn &prop)
@@ -164,7 +169,8 @@ struct q2as_global_registry
     }
     q2as_global_registry &function(const function_defn &method)
     {
-        if (engine->RegisterGlobalFunction(method.decl.c_str(), method.funcPointer, method.callConv, method.auxiliary) < 0)
+        if (engine->RegisterGlobalFunction(method.decl.c_str(), method.funcPointer, method.callConv, method.auxiliary) <
+            0)
             throw q2as_registry_exception("can't register property");
 
         return *this;
@@ -182,7 +188,7 @@ struct q2as_global_registry
 struct q2as_enum_registry
 {
     asIScriptEngine *engine;
-    std::string name;
+    std::string      name;
 
     q2as_enum_registry(asIScriptEngine *engine, const std::string &name) :
         engine(engine),
@@ -193,7 +199,7 @@ struct q2as_enum_registry
     struct enum_defn
     {
         std::string name;
-        asINT64 value;
+        asINT64     value;
     };
 
     q2as_enum_registry &value(const enum_defn &val)
@@ -214,7 +220,7 @@ struct q2as_enum_registry
 struct q2as_interface_registry
 {
     asIScriptEngine *engine;
-    std::string name;
+    std::string      name;
 
     q2as_interface_registry(asIScriptEngine *engine, const std::string &name) :
         engine(engine),
@@ -351,7 +357,7 @@ void Q2AS_Factory(asIScriptGeneric *gen)
 {
     T *ptr = reinterpret_cast<T *>(A::AllocStatic(sizeof(T)));
     *(T **) gen->GetAddressOfReturnLocation() = ptr;
-    new(ptr) T();
+    new (ptr) T();
 }
 
 template<typename T, typename A>
@@ -359,7 +365,7 @@ void Q2AS_FactoryCopy(asIScriptGeneric *gen)
 {
     T *ptr = reinterpret_cast<T *>(A::AllocStatic(sizeof(T)));
     *(T **) gen->GetAddressOfReturnLocation() = ptr;
-    new(ptr) T(*(const T *) gen->GetArgObject(0));
+    new (ptr) T(*(const T *) gen->GetArgObject(0));
 }
 
 template<typename T>

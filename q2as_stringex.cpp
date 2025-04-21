@@ -7,12 +7,12 @@ static std::string *q2as_string_append_char(uint8_t c, std::string *s)
     return &(*s += (char) c);
 }
 
-constexpr char to_upper(char c) 
+constexpr char to_upper(char c)
 {
     return (c >= 'A' && c <= 'Z') ? c : (c - ('a' - 'A'));
 }
 
-constexpr char to_lower(char c) 
+constexpr char to_lower(char c)
 {
     return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
 }
@@ -211,7 +211,7 @@ void q2as_format_init(q2as_state_t &state)
 
         // check the string inputs
         {
-            int otherParamTypeId;
+            int     otherParamTypeId;
             asDWORD paramFlags;
 
             if (func->GetParam(0, &otherParamTypeId, &paramFlags) < 0)
@@ -262,7 +262,7 @@ static bool q2as_call_builtin_formatter(std::string &str, const std::string_view
         // through this function (this is only
         // used for primitives + strings).
         static char format_str[128] { 0 };
-        auto end = fmt::format_to_n(format_str, sizeof(format_str) - 1, "{{:{}}}", args);
+        auto        end = fmt::format_to_n(format_str, sizeof(format_str) - 1, "{{:{}}}", args);
         *(end.out) = '\0';
         fmt::vformat_to(std::back_inserter(str), format_str, fmt::make_format_args(*reinterpret_cast<const T *>(addr)));
     }
@@ -272,21 +272,33 @@ static bool q2as_call_builtin_formatter(std::string &str, const std::string_view
 
 bool q2as_call_formatter(std::string &str, q2as_state_t &as, const std::string_view args, int typeId, const void *addr)
 {
-    if (typeId == asTYPEID_BOOL) return q2as_call_builtin_formatter<bool>(str, args, addr);
-    else if (typeId == asTYPEID_INT8) return q2as_call_builtin_formatter<int8_t>(str, args, addr);
-    else if (typeId == asTYPEID_INT16) return q2as_call_builtin_formatter<int16_t>(str, args, addr);
-    else if (typeId == asTYPEID_INT32) return q2as_call_builtin_formatter<int32_t>(str, args, addr);
-    else if (typeId == asTYPEID_INT64) return q2as_call_builtin_formatter<int64_t>(str, args, addr);
-    else if (typeId == asTYPEID_UINT8) return q2as_call_builtin_formatter<uint8_t>(str, args, addr);
-    else if (typeId == asTYPEID_UINT16) return q2as_call_builtin_formatter<uint16_t>(str, args, addr);
-    else if (typeId == asTYPEID_UINT32) return q2as_call_builtin_formatter<uint32_t>(str, args, addr);
-    else if (typeId == asTYPEID_UINT64) return q2as_call_builtin_formatter<uint64_t>(str, args, addr);
-    else if (typeId == asTYPEID_FLOAT) return q2as_call_builtin_formatter<float>(str, args, addr);
-    else if (typeId == asTYPEID_DOUBLE) return q2as_call_builtin_formatter<double>(str, args, addr);
-    else if (typeId == as.stringTypeId) return q2as_call_builtin_formatter<std::string>(str, args, addr);
+    if (typeId == asTYPEID_BOOL)
+        return q2as_call_builtin_formatter<bool>(str, args, addr);
+    else if (typeId == asTYPEID_INT8)
+        return q2as_call_builtin_formatter<int8_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT16)
+        return q2as_call_builtin_formatter<int16_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT32)
+        return q2as_call_builtin_formatter<int32_t>(str, args, addr);
+    else if (typeId == asTYPEID_INT64)
+        return q2as_call_builtin_formatter<int64_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT8)
+        return q2as_call_builtin_formatter<uint8_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT16)
+        return q2as_call_builtin_formatter<uint16_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT32)
+        return q2as_call_builtin_formatter<uint32_t>(str, args, addr);
+    else if (typeId == asTYPEID_UINT64)
+        return q2as_call_builtin_formatter<uint64_t>(str, args, addr);
+    else if (typeId == asTYPEID_FLOAT)
+        return q2as_call_builtin_formatter<float>(str, args, addr);
+    else if (typeId == asTYPEID_DOUBLE)
+        return q2as_call_builtin_formatter<double>(str, args, addr);
+    else if (typeId == as.stringTypeId)
+        return q2as_call_builtin_formatter<std::string>(str, args, addr);
 
     // check type
-    auto typeInfo = as.engine->GetTypeInfoById(typeId);
+    auto        typeInfo = as.engine->GetTypeInfoById(typeId);
     std::string arg_string(args);
 
     if (auto funcdef = typeInfo->GetFuncdefSignature())
@@ -316,8 +328,8 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
 
     size_t start = 0;
     size_t next_position = 0;
-    bool uses_manual_positioning = false;
-    bool uses_automatic_positioning = false;
+    bool   uses_manual_positioning = false;
+    bool   uses_automatic_positioning = false;
 
     // estimate resulting `str`'s length.
     size_t estimated_length = base->size();
@@ -382,7 +394,7 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
             uses_manual_positioning = true;
 
             const char *start = &(*(base->begin() + c));
-            auto result = std::from_chars(start, base->data() + base->size(), arg);
+            auto        result = std::from_chars(start, base->data() + base->size(), arg);
 
             if (result.ec != std::errc())
             {
@@ -431,9 +443,9 @@ void q2as_impl_format_to(q2as_state_t &as, asIScriptContext *ctx, asIScriptGener
         }
 
         // do the formatting
-        int typeId = gen->GetArgTypeId(base_arg + 1 + arg);
+        int   typeId = gen->GetArgTypeId(base_arg + 1 + arg);
         void *addr = gen->GetArgAddress(base_arg + 1 + arg);
-        
+
         if (!q2as_call_formatter(str, as, args, typeId, addr))
         {
             asGetActiveContext()->SetException("unformattable type");
@@ -458,7 +470,7 @@ std::string q2as_impl_format(q2as_state_t &as, asIScriptGeneric *gen, int start)
 static void q2as_format(asIScriptGeneric *gen)
 {
     std::string result = q2as_impl_format(*(q2as_state_t *) gen->GetEngine()->GetUserData(), gen, 0);
-    new(gen->GetAddressOfReturnLocation()) std::string(std::move(result));
+    new (gen->GetAddressOfReturnLocation()) std::string(std::move(result));
 }
 
 static void q2as_format_to(asIScriptGeneric *gen)
@@ -533,10 +545,7 @@ static int32_t FindStartOfUTF8Codepoint(const std::string &str, int32_t pos)
     }
 
     uint8_t c = str[start];
-    if ((c & 0x80) == 0 ||
-        (c & 0xE0) == 0xC0 ||
-        (c & 0xF0) == 0xE0 ||
-        (c & 0xF8) == 0xF0)
+    if ((c & 0x80) == 0 || (c & 0xE0) == 0xC0 || (c & 0xF0) == 0xE0 || (c & 0xF8) == 0xF0)
     {
         return start;
     }

@@ -6,21 +6,21 @@
 // q_std.h -- 'standard' library stuff for game module
 // not meant to be included by engine, etc
 
-#include <cmath>
-#include <cstdio>
-#include <cstdarg>
-#include <cstring>
-#include <cstdlib>
-#include <cstddef>
-#include <cinttypes>
-#include <ctime>
-#include <type_traits>
 #include <algorithm>
 #include <array>
-#include <string_view>
-#include <numeric>
+#include <cinttypes>
+#include <cmath>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <functional>
+#include <numeric>
 #include <optional>
+#include <string_view>
+#include <type_traits>
 
 // format!
 #ifndef USE_CPP20_FORMAT
@@ -36,9 +36,9 @@ namespace fmt = std;
 #include <fmt/format.h>
 #endif
 
+using std::clamp;
 using std::max;
 using std::min;
-using std::clamp;
 
 template<typename T>
 constexpr T lerp(T from, T to, float t)
@@ -55,7 +55,7 @@ MATHLIB
 */
 
 constexpr double PI = 3.14159265358979323846; // matches value in gcc v2 math.h
-constexpr float PIf = static_cast<float>(PI);
+constexpr float  PIf = static_cast<float>(PI);
 
 [[nodiscard]] constexpr float RAD2DEG(float x)
 {

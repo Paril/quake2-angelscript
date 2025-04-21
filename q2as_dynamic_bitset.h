@@ -51,7 +51,6 @@ struct dynamic_bitset
         _bitset.resize(n);
     }
 
-
     // return internal array size in bits
     uint32_t size() const
     {
@@ -165,7 +164,7 @@ struct dynamic_bitset
 
         return true;
     }
-    
+
     // TODO: compress this a bit more efficiently
     // maybe using nibbles
     std::string to_string() const

@@ -21,9 +21,8 @@ module_path_result_t Q2AS_GetModulePath()
 
     HMODULE hm = nullptr;
 
-    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-        (LPCSTR) &Q2AS_GetModulePath, &hm) == 0)
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                          (LPCSTR) &Q2AS_GetModulePath, &hm) == 0)
     {
         return result;
     }

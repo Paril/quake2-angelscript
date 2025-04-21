@@ -1,13 +1,14 @@
+#include "q2as_predefined.h"
+#include "q2as_platform.h"
 #include <angelscript.h>
 #include <fstream>
-#include <vector>
 #include <map>
 #include <string>
 #include <string_view>
-#include "q2as_predefined.h"
-#include "q2as_platform.h"
+#include <vector>
 
-static std::string TypeToTypeName(asIScriptEngine *engine, int typeId, asETypeModifiers modifiers, bool variadic, std::string_view right_name)
+static std::string TypeToTypeName(asIScriptEngine *engine, int typeId, asETypeModifiers modifiers, bool variadic,
+                                  std::string_view right_name)
 {
     asITypeInfo *type = engine->GetTypeInfoById(typeId);
 
@@ -61,7 +62,8 @@ static std::string TypeToTypeName(asIScriptEngine *engine, int typeId, asETypeMo
 
     /*if (modifiers & asTM_HANDLE_TO_AUTO)
         name += " @+";
-    else */if (!variadic && (typeId & (asTYPEID_OBJHANDLE | asTYPEID_HANDLETOCONST)))
+    else */
+    if (!variadic && (typeId & (asTYPEID_OBJHANDLE | asTYPEID_HANDLETOCONST)))
     {
         // TODO: why are variadics handles?
 
@@ -69,14 +71,14 @@ static std::string TypeToTypeName(asIScriptEngine *engine, int typeId, asETypeMo
         is_handle = true;
     }
     else if (modifiers || variadic || !right_name.empty())
-    name += " ";
+        name += " ";
 
     if (modifiers & asTM_INOUTREF)
     {
-        name += (modifiers & asTM_INOUTREF) == asTM_INOUTREF ? "&" :
-            (modifiers & asTM_INOUTREF) == asTM_OUTREF ? "&out" :
-            (modifiers & asTM_INOUTREF) == asTM_INREF ? "&in" :
-            "";
+        name += (modifiers & asTM_INOUTREF) == asTM_INOUTREF ? "&"
+                : (modifiers & asTM_INOUTREF) == asTM_OUTREF ? "&out"
+                : (modifiers & asTM_INOUTREF) == asTM_INREF  ? "&in"
+                                                             : "";
 
         if (variadic || (!right_name.empty() && (modifiers & asTM_INOUTREF) != asTM_INOUTREF))
             name += " ";
@@ -95,7 +97,8 @@ static std::string TypeToTypeName(asIScriptEngine *engine, int typeId, asETypeMo
     return name;
 }
 
-static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *func, asITypeInfo *type = nullptr, bool factory = false)
+static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *func, asITypeInfo *type = nullptr,
+                                    bool factory = false)
 {
     std::string f;
 
@@ -106,7 +109,7 @@ static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *
     else
     {
         asDWORD returnTypeFlags;
-        int returnTypeId = func->GetReturnTypeId(&returnTypeFlags);
+        int     returnTypeId = func->GetReturnTypeId(&returnTypeFlags);
 
         std::string templateParameters, prefix;
 
@@ -127,15 +130,16 @@ static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *
             templateParameters += ">";
         }
 
-        std::string returnType = TypeToTypeName(engine, returnTypeId, (asETypeModifiers) returnTypeFlags, false, fmt::format("{}{}", prefix, func->GetName()));
+        std::string returnType = TypeToTypeName(engine, returnTypeId, (asETypeModifiers) returnTypeFlags, false,
+                                                fmt::format("{}{}", prefix, func->GetName()));
 
         f = fmt::format("{}{}(", returnType, templateParameters);
     }
 
     for (asUINT p = 0; p < func->GetParamCount(); p++)
     {
-        int paramTypeId;
-        asDWORD paramFlags;
+        int         paramTypeId;
+        asDWORD     paramFlags;
         const char *paramName;
         const char *paramDefault;
 
@@ -146,7 +150,8 @@ static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *
 
         bool is_variadic = p == func->GetParamCount() - 1 && func->IsVariadic();
 
-        std::string paramType = TypeToTypeName(engine, paramTypeId, (asETypeModifiers) paramFlags, is_variadic, paramName);
+        std::string paramType =
+            TypeToTypeName(engine, paramTypeId, (asETypeModifiers) paramFlags, is_variadic, paramName);
 
         f += fmt::format("{}", paramType);
 
@@ -176,8 +181,8 @@ static std::string FunctionToString(asIScriptEngine *engine, asIScriptFunction *
 
 struct EnumInfo
 {
-    std::string                 decl;
-    std::vector<std::string>	values;
+    std::string              decl;
+    std::vector<std::string> values;
 };
 
 static std::string EnumToDecl(asITypeInfo *type)
@@ -186,11 +191,12 @@ static std::string EnumToDecl(asITypeInfo *type)
 
     switch (type->GetTypedefTypeId())
     {
-    case asTYPEID_INT8: primType = "int8"; break;
-    case asTYPEID_INT16: primType = "int16"; break;
-    default: case asTYPEID_INT32: primType = "int32"; break;
-    case asTYPEID_INT64: primType = "int64"; break;
-    case asTYPEID_UINT8: primType = "uint8"; break;
+    case asTYPEID_INT8:   primType = "int8"; break;
+    case asTYPEID_INT16:  primType = "int16"; break;
+    default:
+    case asTYPEID_INT32:  primType = "int32"; break;
+    case asTYPEID_INT64:  primType = "int64"; break;
+    case asTYPEID_UINT8:  primType = "uint8"; break;
     case asTYPEID_UINT16: primType = "uint16"; break;
     case asTYPEID_UINT32: primType = "uint32"; break;
     case asTYPEID_UINT64: primType = "uint64"; break;
@@ -204,7 +210,7 @@ static void GetEnumInfo(EnumInfo &enuminfo, asITypeInfo *type)
     for (asUINT v = 0; v < type->GetEnumValueCount(); v++)
     {
         // TODO: proper signedness
-        asINT64 ev;
+        asINT64     ev;
         const char *name = type->GetEnumValueByIndex(v, &ev);
         std::string val = fmt::format("{} = {}", name, ev);
 
@@ -230,12 +236,12 @@ static std::vector<std::string> EnumToLines(const EnumInfo &enuminfo)
 
 struct ObjectInfo
 {
-    std::string						decl;
-    std::vector<std::string>		funcdefs;
-    std::vector<std::string>		properties;
-    std::vector<std::string>		behaviors;
-    std::vector<std::string>		factories;
-    std::vector<std::string>		methods;
+    std::string              decl;
+    std::vector<std::string> funcdefs;
+    std::vector<std::string> properties;
+    std::vector<std::string> behaviors;
+    std::vector<std::string> factories;
+    std::vector<std::string> methods;
 };
 
 static std::string ObjectToDecl(asITypeInfo *type)
@@ -269,7 +275,8 @@ static void stream_line(std::ofstream &of, int depth, const std::string_view v)
     of << '\n';
 }
 
-static void stream_block(std::ofstream &of, int depth, const std::string_view header, const std::vector<std::vector<std::string>> &lines)
+static void stream_block(std::ofstream &of, int depth, const std::string_view header,
+                         const std::vector<std::vector<std::string>> &lines)
 {
     if (!header.empty())
         stream_line(of, depth, fmt::format("// {}", header));
@@ -279,7 +286,8 @@ static void stream_block(std::ofstream &of, int depth, const std::string_view he
             stream_line(of, depth, l);
 }
 
-static void stream_block(std::ofstream &of, int depth, const std::string_view header, const std::vector<std::string> &lines)
+static void stream_block(std::ofstream &of, int depth, const std::string_view header,
+                         const std::vector<std::string> &lines)
 {
     if (!header.empty())
         stream_line(of, depth, fmt::format("// {}", header));
@@ -293,7 +301,7 @@ static void GetObjectInfo(ObjectInfo &obj, asIScriptEngine *engine, asITypeInfo 
     for (asUINT f = 0; f < type->GetChildFuncdefCount(); f++)
     {
         asITypeInfo *funcdef = type->GetChildFuncdef(f);
-        std::string decl = "funcdef " + FunctionToString(engine, funcdef->GetFuncdefSignature(), funcdef);
+        std::string  decl = "funcdef " + FunctionToString(engine, funcdef->GetFuncdefSignature(), funcdef);
 
         if (std::find(obj.funcdefs.begin(), obj.funcdefs.end(), decl) == obj.funcdefs.end())
             obj.funcdefs.push_back(decl);
@@ -302,19 +310,25 @@ static void GetObjectInfo(ObjectInfo &obj, asIScriptEngine *engine, asITypeInfo 
     for (asUINT p = 0; p < type->GetPropertyCount(); p++)
     {
         const char *propName;
-        int propTypeId;
-        bool propIsPrivate;
-        bool propIsProtected;
-        int propOffset;
-        bool propReference;
-        asDWORD propAccessMask;
-        int propCompositeOffset;
-        bool propIsCompositeIndirect;
-        bool propReadOnly;
-        type->GetProperty(p, &propName, &propTypeId, &propIsPrivate, &propIsProtected, &propOffset, &propReference, &propAccessMask, &propCompositeOffset, &propIsCompositeIndirect, &propReadOnly);
+        int         propTypeId;
+        bool        propIsPrivate;
+        bool        propIsProtected;
+        int         propOffset;
+        bool        propReference;
+        asDWORD     propAccessMask;
+        int         propCompositeOffset;
+        bool        propIsCompositeIndirect;
+        bool        propReadOnly;
+        type->GetProperty(p, &propName, &propTypeId, &propIsPrivate, &propIsProtected, &propOffset, &propReference,
+                          &propAccessMask, &propCompositeOffset, &propIsCompositeIndirect, &propReadOnly);
 
-        std::string typeName = TypeToTypeName(engine, propTypeId, (asETypeModifiers) (propReference ? asTM_INOUTREF : 0), false, propName);
-        std::string decl = fmt::format("{}{}{};", propIsPrivate ? "private " : propIsProtected ? "protected " : "", propReadOnly ? "const " : "", typeName);
+        std::string typeName =
+            TypeToTypeName(engine, propTypeId, (asETypeModifiers) (propReference ? asTM_INOUTREF : 0), false, propName);
+        std::string decl = fmt::format("{}{}{};",
+                                       propIsPrivate     ? "private "
+                                       : propIsProtected ? "protected "
+                                                         : "",
+                                       propReadOnly ? "const " : "", typeName);
 
         if (std::find(obj.properties.begin(), obj.properties.end(), decl) == obj.properties.end())
             obj.properties.push_back(decl);
@@ -322,32 +336,25 @@ static void GetObjectInfo(ObjectInfo &obj, asIScriptEngine *engine, asITypeInfo 
 
     for (asUINT f = 0; f < type->GetBehaviourCount(); f++)
     {
-        asEBehaviours beh;
+        asEBehaviours      beh;
         asIScriptFunction *func = type->GetBehaviourByIndex(f, &beh);
 
-        if (beh == asEBehaviours::asBEHAVE_ADDREF ||
-            beh == asEBehaviours::asBEHAVE_ENUMREFS ||
-            beh == asEBehaviours::asBEHAVE_FIRST_GC ||
-            beh == asEBehaviours::asBEHAVE_GETGCFLAG ||
-            beh == asEBehaviours::asBEHAVE_GETREFCOUNT ||
-            beh == asEBehaviours::asBEHAVE_GET_WEAKREF_FLAG ||
-            beh == asEBehaviours::asBEHAVE_LAST_GC ||
-            beh == asEBehaviours::asBEHAVE_RELEASE ||
-            beh == asEBehaviours::asBEHAVE_RELEASEREFS ||
-            beh == asEBehaviours::asBEHAVE_SETGCFLAG ||
+        if (beh == asEBehaviours::asBEHAVE_ADDREF || beh == asEBehaviours::asBEHAVE_ENUMREFS ||
+            beh == asEBehaviours::asBEHAVE_FIRST_GC || beh == asEBehaviours::asBEHAVE_GETGCFLAG ||
+            beh == asEBehaviours::asBEHAVE_GETREFCOUNT || beh == asEBehaviours::asBEHAVE_GET_WEAKREF_FLAG ||
+            beh == asEBehaviours::asBEHAVE_LAST_GC || beh == asEBehaviours::asBEHAVE_RELEASE ||
+            beh == asEBehaviours::asBEHAVE_RELEASEREFS || beh == asEBehaviours::asBEHAVE_SETGCFLAG ||
             beh == asEBehaviours::asBEHAVE_TEMPLATE_CALLBACK)
             continue;
 
         std::string decl = func->GetDeclaration(false, false, true);
 
-        if (beh == asEBehaviours::asBEHAVE_LIST_CONSTRUCT ||
-            beh == asEBehaviours::asBEHAVE_LIST_FACTORY)
+        if (beh == asEBehaviours::asBEHAVE_LIST_CONSTRUCT || beh == asEBehaviours::asBEHAVE_LIST_FACTORY)
             decl = type->GetName() + decl.substr(decl.find("$list") + 5);
 
-        if (type->GetSubTypeCount() != 0 && (beh == asEBehaviours::asBEHAVE_LIST_CONSTRUCT ||
-            beh == asEBehaviours::asBEHAVE_LIST_FACTORY ||
-            beh == asEBehaviours::asBEHAVE_FACTORY ||
-            beh == asEBehaviours::asBEHAVE_CONSTRUCT))
+        if (type->GetSubTypeCount() != 0 &&
+            (beh == asEBehaviours::asBEHAVE_LIST_CONSTRUCT || beh == asEBehaviours::asBEHAVE_LIST_FACTORY ||
+             beh == asEBehaviours::asBEHAVE_FACTORY || beh == asEBehaviours::asBEHAVE_CONSTRUCT))
         {
             size_t s = decl.find_first_of('(');
             size_t i = decl.find_first_of(",)");
@@ -437,11 +444,11 @@ static std::vector<std::string> ObjectToLines(std::ofstream &of, int depth, cons
 struct NamespaceInfo
 {
     std::vector<std::vector<std::string>> typedefs;
-    std::vector<EnumInfo> enums;
-    std::vector<std::string> funcdefs;
-    std::vector<ObjectInfo> objects;
-    std::vector<std::string> properties;
-    std::vector<std::string> functions;
+    std::vector<EnumInfo>                 enums;
+    std::vector<std::string>              funcdefs;
+    std::vector<ObjectInfo>               objects;
+    std::vector<std::string>              properties;
+    std::vector<std::string>              functions;
 
     void block(std::ofstream &of, int depth, const std::string_view header, const decltype(enums) &enuminfos)
     {
@@ -500,9 +507,9 @@ static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, con
         for (asUINT i = 0; i < engine->GetEnumCount(); i++)
         {
             asITypeInfo *type = engine->GetEnumByIndex(i);
-            auto &ns = namespaces[type->GetNamespace()];
-            std::string decl = EnumToDecl(type);
-            EnumInfo *info = nullptr;
+            auto        &ns = namespaces[type->GetNamespace()];
+            std::string  decl = EnumToDecl(type);
+            EnumInfo    *info = nullptr;
 
             for (auto &e : ns.enums)
                 if (e.decl == decl)
@@ -538,9 +545,9 @@ static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, con
         for (asUINT i = 0; i < engine->GetObjectTypeCount(); i++)
         {
             asITypeInfo *type = engine->GetObjectTypeByIndex(i);
-            auto &ns = namespaces[type->GetNamespace()];
-            std::string decl = ObjectToDecl(type);
-            ObjectInfo *info = nullptr;
+            auto        &ns = namespaces[type->GetNamespace()];
+            std::string  decl = ObjectToDecl(type);
+            ObjectInfo  *info = nullptr;
 
             for (auto &e : ns.objects)
                 if (e.decl == decl)
@@ -562,15 +569,17 @@ static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, con
         {
             const char *name;
             const char *nameSpace;
-            int typeId;
-            bool isConst;
+            int         typeId;
+            bool        isConst;
             const char *configGroup;
-            void *pointer;
-            asDWORD accessMask;
-            engine->GetGlobalPropertyByIndex(i, &name, &nameSpace, &typeId, &isConst, &configGroup, &pointer, &accessMask);
+            void       *pointer;
+            asDWORD     accessMask;
+            engine->GetGlobalPropertyByIndex(i, &name, &nameSpace, &typeId, &isConst, &configGroup, &pointer,
+                                             &accessMask);
 
-            auto &ns = namespaces[nameSpace];
-            std::string typeName = TypeToTypeName(engine, typeId, (asETypeModifiers) (isConst ? asTM_CONST : 0), false, name) + ';';
+            auto       &ns = namespaces[nameSpace];
+            std::string typeName =
+                TypeToTypeName(engine, typeId, (asETypeModifiers) (isConst ? asTM_CONST : 0), false, name) + ';';
 
             if (std::find(ns.properties.begin(), ns.properties.end(), typeName) == ns.properties.end())
                 ns.properties.emplace_back(typeName);
@@ -579,8 +588,8 @@ static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, con
         for (asUINT i = 0; i < engine->GetGlobalFunctionCount(); i++)
         {
             asIScriptFunction *func = engine->GetGlobalFunctionByIndex(i);
-            auto &ns = namespaces[func->GetNamespace()];
-            std::string line = FunctionToString(engine, engine->GetGlobalFunctionByIndex(i));
+            auto              &ns = namespaces[func->GetNamespace()];
+            std::string        line = FunctionToString(engine, engine->GetGlobalFunctionByIndex(i));
 
             if (std::find(ns.functions.begin(), ns.functions.end(), line) == ns.functions.end())
                 ns.functions.push_back(line);
@@ -600,13 +609,14 @@ static void WritePredefinedEngines(std::array<asIScriptEngine *, N> engines, con
     of << '\n';
 }
 
-#include "q2as_game.h"
 #include "q2as_cgame.h"
+#include "q2as_game.h"
 #include "thirdparty/scripthelper/scripthelper.h"
 
 void WritePredefined()
 {
     WritePredefinedEngines(std::array<asIScriptEngine *, 2>({ svas.engine, cgas.engine }), "as.predefined");
 
-    WriteConfigToFile(svas.engine, (Q2AS_GetModulePath().path.parent_path() / "engine.config").generic_string().c_str());
+    WriteConfigToFile(svas.engine,
+                      (Q2AS_GetModulePath().path.parent_path() / "engine.config").generic_string().c_str());
 }

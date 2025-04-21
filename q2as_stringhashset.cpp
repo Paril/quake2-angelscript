@@ -5,7 +5,7 @@ using StringHashSet = std::unordered_set<std::string>;
 
 static void ConstructStringHashSet(StringHashSet *s)
 {
-    new(s) StringHashSet;
+    new (s) StringHashSet;
 }
 
 static void DestructStringHashSet(StringHashSet *s)

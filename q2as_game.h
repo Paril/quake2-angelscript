@@ -2,16 +2,16 @@
 
 #include "q2as_local.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 struct q2as_sv_state_t : q2as_state_t
 {
-    uint32_t maxentities, maxclients;
+    uint32_t             maxentities, maxclients;
     struct q2as_edict_t *edicts;
-    gclient_t *clients;
+    gclient_t           *clients;
 
-    std::string cmd_args;
+    std::string              cmd_args;
     std::vector<std::string> cmd_argv;
 
     asIScriptFunction *PreInitGame = nullptr;
@@ -48,14 +48,14 @@ struct q2as_sv_state_t : q2as_state_t
 
     void LoadFunctions();
 
-    virtual void Print(const char *text) override;
-    virtual void Error(const char *text) override;
-    virtual void *Alloc(size_t size) override;
-    virtual void Free(void *ptr) override;
+    virtual void    Print(const char *text) override;
+    virtual void    Error(const char *text) override;
+    virtual void   *Alloc(size_t size) override;
+    virtual void    Free(void *ptr) override;
     virtual cvar_t *Cvar(const char *name, const char *value, cvar_flags_t flags) override;
 
     static void *AllocStatic(size_t size);
-    static void FreeStatic(void *ptr);
+    static void  FreeStatic(void *ptr);
 };
 
 extern q2as_sv_state_t svas;

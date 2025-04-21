@@ -16,8 +16,8 @@ struct tokenizer_t : q2as_ref_t
 
     struct state_t
     {
-        std::string_view base;
-        std::string_view view = base;
+        std::string_view                base;
+        std::string_view                view = base;
         std::optional<std::string_view> token;
     };
 
@@ -64,7 +64,7 @@ struct tokenizer_t : q2as_ref_t
 
     // returns true if the top of the tokenizer stack
     // is empty; this will occur *as* the last token is parsed,
-    // not after. 
+    // not after.
     inline bool has_next() const
     {
         return !cur().view.empty();
@@ -90,7 +90,7 @@ struct tokenizer_t : q2as_ref_t
     inline T as_primitive() const
     {
         std::string_view ot = cur().token.value_or("");
-        T value {};
+        T                value {};
         std::from_chars(ot.data(), ot.data() + ot.size(), value);
         return value;
     }
@@ -106,7 +106,7 @@ struct tokenizer_t : q2as_ref_t
     // the parser.
     inline std::string as_localized(int num_args)
     {
-        static char arg_tokens[MAX_LOCALIZATION_ARGS + 1][MAX_TOKEN_CHARS];
+        static char        arg_tokens[MAX_LOCALIZATION_ARGS + 1][MAX_TOKEN_CHARS];
         static const char *arg_buffers[MAX_LOCALIZATION_ARGS];
 
         // parse base
@@ -195,7 +195,7 @@ void Q2AS_tokenizer_t_factory_cgcs(asIScriptGeneric *gen)
 {
     tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_cg_state_t::AllocStatic(sizeof(tokenizer_t)));
     *(tokenizer_t **) gen->GetAddressOfReturnLocation() = ptr;
-    new(ptr) tokenizer_t(cgi.get_configstring(gen->GetArgDWord(0)));
+    new (ptr) tokenizer_t(cgi.get_configstring(gen->GetArgDWord(0)));
 }
 
 // TODO: move to factory (see pmove)
@@ -203,14 +203,14 @@ void Q2AS_tokenizer_t_factory_svcs(asIScriptGeneric *gen)
 {
     tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
     *(tokenizer_t **) gen->GetAddressOfReturnLocation() = ptr;
-    new(ptr) tokenizer_t(gi.get_configstring(gen->GetArgDWord(0)));
+    new (ptr) tokenizer_t(gi.get_configstring(gen->GetArgDWord(0)));
 }
 
 void Q2AS_tokenizer_t_factory_str(asIScriptGeneric *gen)
 {
     tokenizer_t *ptr = reinterpret_cast<tokenizer_t *>(q2as_sv_state_t::AllocStatic(sizeof(tokenizer_t)));
     *(tokenizer_t **) gen->GetAddressOfReturnLocation() = ptr;
-    new(ptr) tokenizer_t(*((std::string *) gen->GetArgAddress(0)));
+    new (ptr) tokenizer_t(*((std::string *) gen->GetArgAddress(0)));
 }
 
 void Q2AS_RegisterTokenizer(q2as_registry &registry)

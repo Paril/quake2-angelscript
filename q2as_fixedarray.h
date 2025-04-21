@@ -1,5 +1,9 @@
 #pragma once
 
+#include <array>
+#include "q_std.h"
+#include "q2as_reg.h"
+
 template<typename T, size_t N>
 struct q2as_fixedarray
 {
@@ -11,8 +15,8 @@ struct q2as_fixedarray
         v = *reinterpret_cast<array *>(gen->GetArgAddress(0));
     }
 
-    template<typename ...Args>
-    static void PackConstruct(Args ...args, array &v)
+    template<typename... Args>
+    static void PackConstruct(Args... args, array &v)
     {
         size_t i = 0;
         ((v[i++] = args), ...);
@@ -108,10 +112,10 @@ inline void Q2AS_RegisterFixedArray(q2as_registry &registry, const char *name, c
 
             list += underlying;
         }
-        
-        type.behaviors({
-            { asBEHAVE_CONSTRUCT, fmt::format("void f({})", list), asFUNCTION((q2as_get_fixed_constructor<T, N>())), asCALL_CDECL_OBJLAST },
-            { asBEHAVE_LIST_CONSTRUCT, fmt::format("void f(int &in) {{ {} }}", list), asFUNCTION(FT::ListConstruct), asCALL_GENERIC }
-        });
+
+        type.behaviors({ { asBEHAVE_CONSTRUCT, fmt::format("void f({})", list),
+                           asFUNCTION((q2as_get_fixed_constructor<T, N>())), asCALL_CDECL_OBJLAST },
+                         { asBEHAVE_LIST_CONSTRUCT, fmt::format("void f(int &in) {{ {} }}", list),
+                           asFUNCTION(FT::ListConstruct), asCALL_GENERIC } });
     }
 }

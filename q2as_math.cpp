@@ -1,6 +1,6 @@
 #include "q2as_local.h"
 
-static const float q2as_pif = PIf;
+static const float  q2as_pif = PIf;
 static const double q2as_pi = PI;
 
 static const double q2as_RAD2DEG = 180.0 / PI;
@@ -54,8 +54,8 @@ T Q2AS_nexttoward(T v, double a)
 inline std::string replace_all(std::string_view str, const char *replace, const char *with)
 {
     std::string s(str);
-    size_t pos = s.rfind(replace);
-    size_t l = strlen(replace);
+    size_t      pos = s.rfind(replace);
+    size_t      l = strlen(replace);
 
     while (pos != std::string::npos)
     {

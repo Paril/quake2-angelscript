@@ -1,18 +1,15 @@
 #include "q2as_game.h"
 #include "g_local.h"
-#include <chrono>
-
 #include "q2as_fixedarray.h"
-#include "q2as_stringex.h"
 #include "q2as_json.h"
-#include "thirdparty/scriptany/scriptany.h"
-#include "thirdparty/scriptarray/scriptarray.h"
-#include "q2as_random.h"
-
 #include "q2as_modules.h"
 #include "q2as_pmove.h"
-
 #include "q2as_predefined.h"
+#include "q2as_random.h"
+#include "q2as_stringex.h"
+#include "thirdparty/scriptany/scriptany.h"
+#include "thirdparty/scriptarray/scriptarray.h"
+#include <chrono>
 
 // server game stuff
 struct q2as_edict_t : edict_t
@@ -43,25 +40,25 @@ struct q2as_edict_t : edict_t
 
 /*virtual*/ void *q2as_sv_state_t::Alloc(size_t size) /*override*/
 {
-    //return gi.TagMalloc(size, TAG_GAME);
+    // return gi.TagMalloc(size, TAG_GAME);
     return calloc(size, 1);
 }
 
 /*virtual*/ void q2as_sv_state_t::Free(void *ptr) /*override*/
 {
-    //gi.TagFree(ptr);
+    // gi.TagFree(ptr);
     free(ptr);
 }
 
 /*virtual*/ void *q2as_sv_state_t::AllocStatic(size_t size) /*override*/
 {
-    //return gi.TagMalloc(size, TAG_GAME);
+    // return gi.TagMalloc(size, TAG_GAME);
     return calloc(size, 1);
 }
 
 /*virtual*/ void q2as_sv_state_t::FreeStatic(void *ptr) /*override*/
 {
-    //gi.TagFree(ptr);
+    // gi.TagFree(ptr);
     free(ptr);
 }
 
@@ -110,15 +107,16 @@ static void Q2AS_PreInitGame()
 static void Q2AS_InitGame()
 {
     cvar_t *maxentities = gi.cvar("maxentities", fmt::format("{}", MAX_EDICTS).data(), CVAR_LATCH);
-    cvar_t *maxclients = gi.cvar("maxclients", fmt::format("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
+    cvar_t *maxclients =
+        gi.cvar("maxclients", fmt::format("{}", MAX_SPLIT_PLAYERS).data(), CVAR_SERVERINFO | CVAR_LATCH);
 
     // seed RNG
     mum_prng.init_mum_prng();
-    mum_prng.set_mum_prng_seed((uint32_t)std::chrono::system_clock::now().time_since_epoch().count());
+    mum_prng.set_mum_prng_seed((uint32_t) std::chrono::system_clock::now().time_since_epoch().count());
 
     // initialize all entities for this game
     svas.maxentities = maxentities->integer;
-    //svas.edicts = (q2as_edict_t *) gi.TagMalloc(svas.maxentities * sizeof(q2as_edict_t), TAG_GAME);
+    // svas.edicts = (q2as_edict_t *) gi.TagMalloc(svas.maxentities * sizeof(q2as_edict_t), TAG_GAME);
     svas.edicts = (q2as_edict_t *) calloc(svas.maxentities, sizeof(q2as_edict_t));
 
     globals.edicts = (edict_t *) svas.edicts;
@@ -126,13 +124,13 @@ static void Q2AS_InitGame()
 
     // initialize all clients for this game
     svas.maxclients = maxclients->integer;
-    //svas.clients = (gclient_t *) gi.TagMalloc(svas.maxclients * sizeof(gclient_t), TAG_GAME);
+    // svas.clients = (gclient_t *) gi.TagMalloc(svas.maxclients * sizeof(gclient_t), TAG_GAME);
     svas.clients = (gclient_t *) calloc(svas.maxclients, sizeof(gclient_t));
     globals.num_edicts = svas.maxclients + 1;
 
     for (uint32_t i = 0; i < svas.maxentities; i++)
     {
-        new(&svas.edicts[i]) q2as_edict_t;
+        new (&svas.edicts[i]) q2as_edict_t;
 
         svas.edicts[i].s.number = i;
 
@@ -203,7 +201,7 @@ static char *Q2AS_WriteGameJson(bool autosave, size_t *out_size)
 
     debugger_state.current_tid = 1;
 
-    auto ti = svas.engine->GetTypeInfoByName("json_mutdoc");
+    auto                 ti = svas.engine->GetTypeInfoByName("json_mutdoc");
     q2as_yyjson_mut_doc *doc = (q2as_yyjson_mut_doc *) svas.engine->CreateScriptObject(ti);
 
     {
@@ -228,9 +226,9 @@ static void Q2AS_ReadGameJson(const char *json)
 
     debugger_state.current_tid = 1;
 
-    auto ti = svas.engine->GetTypeInfoByName("json_doc");
+    auto             ti = svas.engine->GetTypeInfoByName("json_doc");
     q2as_yyjson_doc *doc = (q2as_yyjson_doc *) q2as_sv_state_t::AllocStatic(sizeof(q2as_yyjson_doc));
-    new(doc) q2as_yyjson_doc(std::string_view(json));
+    new (doc) q2as_yyjson_doc(std::string_view(json));
 
     {
         auto ctx = svas.RequestContext();
@@ -252,7 +250,7 @@ static char *Q2AS_WriteLevelJson(bool transition, size_t *out_size)
 
     debugger_state.current_tid = 1;
 
-    auto ti = svas.engine->GetTypeInfoByName("json_mutdoc");
+    auto                 ti = svas.engine->GetTypeInfoByName("json_mutdoc");
     q2as_yyjson_mut_doc *doc = (q2as_yyjson_mut_doc *) svas.engine->CreateScriptObject(ti);
 
     {
@@ -277,9 +275,9 @@ static void Q2AS_ReadLevelJson(const char *json)
 
     debugger_state.current_tid = 1;
 
-    auto ti = svas.engine->GetTypeInfoByName("json_doc");
+    auto             ti = svas.engine->GetTypeInfoByName("json_doc");
     q2as_yyjson_doc *doc = (q2as_yyjson_doc *) q2as_sv_state_t::AllocStatic(sizeof(q2as_yyjson_doc));
-    new(doc) q2as_yyjson_doc(std::string_view(json));
+    new (doc) q2as_yyjson_doc(std::string_view(json));
 
     {
         auto ctx = svas.RequestContext();
@@ -310,7 +308,8 @@ static void *Q2AS_GetExtension(const char *name)
     return nullptr;
 }
 
-static edict_t *Q2AS_ClientChooseSlot(const char *userinfo, const char *social_id, bool isBot, edict_t **ignore, size_t num_ignore, bool cinematic)
+static edict_t *Q2AS_ClientChooseSlot(const char *userinfo, const char *social_id, bool isBot, edict_t **ignore,
+                                      size_t num_ignore, bool cinematic)
 {
     if (q2as_state_t::CheckExceptionState())
         return nullptr;
@@ -507,7 +506,7 @@ static void Q2AS_ServerCommand()
         WritePredefined();
 }
 
-static void    Q2AS_Bot_SetWeapon(edict_t *botEdict, const int weaponIndex, const bool instantSwitch)
+static void Q2AS_Bot_SetWeapon(edict_t *botEdict, const int weaponIndex, const bool instantSwitch)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
@@ -522,7 +521,7 @@ static void    Q2AS_Bot_SetWeapon(edict_t *botEdict, const int weaponIndex, cons
     ctx.Execute();
 }
 
-static void    Q2AS_Bot_TriggerEdict(edict_t *botEdict, edict_t *edict)
+static void Q2AS_Bot_TriggerEdict(edict_t *botEdict, edict_t *edict)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
@@ -536,7 +535,7 @@ static void    Q2AS_Bot_TriggerEdict(edict_t *botEdict, edict_t *edict)
     ctx.Execute();
 }
 
-static void    Q2AS_Bot_UseItem(edict_t *botEdict, const int32_t itemID)
+static void Q2AS_Bot_UseItem(edict_t *botEdict, const int32_t itemID)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
@@ -567,7 +566,7 @@ static int32_t Q2AS_Bot_GetItemID(const char *classname)
     return ctx->GetReturnDWord();
 }
 
-static void    Q2AS_Edict_ForceLookAtPoint(edict_t *edict, gvec3_cref_t point)
+static void Q2AS_Edict_ForceLookAtPoint(edict_t *edict, gvec3_cref_t point)
 {
     if (q2as_state_t::CheckExceptionState())
         return;
@@ -581,7 +580,7 @@ static void    Q2AS_Edict_ForceLookAtPoint(edict_t *edict, gvec3_cref_t point)
     ctx.Execute();
 }
 
-static bool    Q2AS_Bot_PickedUpItem(edict_t *botEdict, edict_t *itemEdict)
+static bool Q2AS_Bot_PickedUpItem(edict_t *botEdict, edict_t *itemEdict)
 {
     if (q2as_state_t::CheckExceptionState())
         return false;
@@ -879,7 +878,7 @@ static void q2as_edict_t_reset(q2as_edict_t *ed)
 
     ed->~q2as_edict_t();
     memset(ed, 0, sizeof(*ed));
-    new(ed) q2as_edict_t;
+    new (ed) q2as_edict_t;
 
     ed->s.number = ed - svas.edicts;
 
@@ -1129,7 +1128,7 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
         for (asUINT prop = 0; prop < ti->GetPropertyCount(); prop++)
         {
             const char *decl = ti->GetPropertyDeclaration(prop, false);
-            int offset;
+            int         offset;
             ti->GetProperty(prop, nullptr, nullptr, nullptr, nullptr, &offset);
 
             Ensure(registry.engine->RegisterObjectProperty("gclient_t", decl, offset));
@@ -1189,11 +1188,10 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
         {
             const char *name;
             const char *decl = ti->GetPropertyDeclaration(prop, false);
-            int offset;
+            int         offset;
             ti->GetProperty(prop, &name, nullptr, nullptr, nullptr, &offset);
 
-            if (strcmp(name, "solid_bits") == 0 ||
-                strcmp(name, "owner_id") == 0)
+            if (strcmp(name, "solid_bits") == 0 || strcmp(name, "owner_id") == 0)
                 continue;
 
             Ensure(registry.engine->RegisterObjectProperty("edict_t", decl, offset));
@@ -1269,13 +1267,13 @@ static void Q2AS_RegisterEntity(q2as_registry &registry)
 
 static void q2as_find_by_str(asIScriptGeneric *gen)
 {
-    int c = gen->GetArgCount();
-    asIScriptObject *from = (asIScriptObject *) gen->GetArgAddress(0);
+    int                c = gen->GetArgCount();
+    asIScriptObject   *from = (asIScriptObject *) gen->GetArgAddress(0);
     const std::string *key = (std::string *) gen->GetArgAddress(1);
     const std::string *value = (std::string *) gen->GetArgAddress(2);
 
     q2as_edict_t *edict;
-    asITypeInfo *typeinfo;
+    asITypeInfo  *typeinfo;
 
     typeinfo = svas.engine->GetTypeInfoById(gen->GetArgTypeId(0));
 
@@ -1352,7 +1350,8 @@ static void q2as_find_by_str(asIScriptGeneric *gen)
     *(asIScriptObject **) gen->GetAddressOfReturnLocation() = nullptr;
 }
 
-static trace_t q2as_traceline(const vec3_t &start, const vec3_t &end, const q2as_edict_t *passent, contents_t contentmask)
+static trace_t q2as_traceline(const vec3_t &start, const vec3_t &end, const q2as_edict_t *passent,
+                              contents_t contentmask)
 {
     return gi.traceline(start, end, (edict_t *) passent, contentmask);
 }
@@ -1400,7 +1399,7 @@ static void q2as_cvar_forceset(const std::string &n, const std::string &v)
 static uint32_t q2as_Info_ValueForKey(const std::string &userinfo, const std::string &name, std::string &value)
 {
     static char info_buffer[MAX_INFO_VALUE];
-    size_t v;
+    size_t      v;
 
     if ((v = gi.Info_ValueForKey(userinfo.c_str(), name.c_str(), info_buffer, sizeof(info_buffer))))
         value = info_buffer;
@@ -1417,7 +1416,7 @@ static bool q2as_Info_SetValueForKey(std::string &userinfo, const std::string &n
         return false;
 
     static char userinfo_cstr[MAX_INFO_STRING];
-    size_t len = min(MAX_INFO_STRING - 1, userinfo.size());
+    size_t      len = min(MAX_INFO_STRING - 1, userinfo.size());
     memcpy(userinfo_cstr, userinfo.c_str(), len);
     userinfo_cstr[len] = '\0';
     bool set = gi.Info_SetValueForKey(userinfo_cstr, name.c_str(), value.c_str());
@@ -1438,7 +1437,7 @@ static void q2as_configstring(int index, const std::string &value)
 
 static void q2as_configstringfmt(asIScriptGeneric *gen)
 {
-    int index = gen->GetArgDWord(0);
+    int         index = gen->GetArgDWord(0);
     std::string result = q2as_impl_format(svas, gen, 1);
     gi.configstring(index, result.c_str());
 }
@@ -1448,11 +1447,12 @@ static std::string q2as_get_configstring(int index)
     return gi.get_configstring(index);
 }
 
-static uint32_t q2as_boxedicts(const vec3_t &mins, const vec3_t &maxs, CScriptArray *array, uint32_t max_count, solidity_area_t solidity, asIScriptFunction *cb, CScriptAny *any, bool append)
+static uint32_t q2as_boxedicts(const vec3_t &mins, const vec3_t &maxs, CScriptArray *array, uint32_t max_count,
+                               solidity_area_t solidity, asIScriptFunction *cb, CScriptAny *any, bool append)
 {
     static std::array<edict_t *, MAX_EDICTS> results;
-    static asIScriptFunction *filter_cb;
-    static asIScriptContext *ctxptr;
+    static asIScriptFunction                *filter_cb;
+    static asIScriptContext                 *ctxptr;
 
     filter_cb = cb;
 
@@ -1460,14 +1460,17 @@ static uint32_t q2as_boxedicts(const vec3_t &mins, const vec3_t &maxs, CScriptAr
 
     ctxptr->PushState();
 
-    size_t num = gi.BoxEdicts(mins, maxs, array ? results.data() : nullptr, max_count, solidity, [](edict_t *ent, void *obj) {
-        ctxptr->Prepare(filter_cb);
-        ctxptr->SetArgAddress(0, ent);
-        ctxptr->SetArgObject(1, obj);
-        svas.Execute(ctxptr);
+    size_t num = gi.BoxEdicts(
+        mins, maxs, array ? results.data() : nullptr, max_count, solidity,
+        [](edict_t *ent, void *obj) {
+            ctxptr->Prepare(filter_cb);
+            ctxptr->SetArgAddress(0, ent);
+            ctxptr->SetArgObject(1, obj);
+            svas.Execute(ctxptr);
 
-        return (BoxEdictsResult_t) ctxptr->GetReturnDWord();
-    }, (void *) any);
+            return (BoxEdictsResult_t) ctxptr->GetReturnDWord();
+        },
+        (void *) any);
 
     ctxptr->PopState();
 
@@ -1509,10 +1512,10 @@ static const std::string &q2as_argv(int i)
 
 static void q2as_gi_Client_Print(asIScriptGeneric *gen)
 {
-    edict_t *ent = (edict_t *) gen->GetArgAddress(0);
-    print_type_t level = (print_type_t) gen->GetArgDWord(1);
+    edict_t           *ent = (edict_t *) gen->GetArgAddress(0);
+    print_type_t       level = (print_type_t) gen->GetArgDWord(1);
     const std::string *base = (std::string *) gen->GetArgAddress(2);
-    std::string result = q2as_impl_format(svas, gen, 3);
+    std::string        result = q2as_impl_format(svas, gen, 3);
     gi.Client_Print(ent, level, result.c_str());
 }
 
@@ -1523,8 +1526,8 @@ static void q2as_gi_Client_Print_Zero(edict_t *e, print_type_t t, const std::str
 
 struct loc_args_t
 {
-    std::array<std::string, MAX_LOCALIZATION_ARGS> args;
-    bool error = false;
+    std::array<std::string, MAX_LOCALIZATION_ARGS>  args;
+    bool                                            error = false;
     std::array<const char *, MAX_LOCALIZATION_ARGS> ptrs()
     {
         return { args[0].data(), args[1].data(), args[2].data(), args[3].data(),
@@ -1540,7 +1543,7 @@ static loc_args_t &q2as_set_loc_args(q2as_state_t &as, asIScriptGeneric *gen, in
 
     for (int i = start_arg, o = 0; i < gen->GetArgCount(); i++, o++)
     {
-        int typeId = gen->GetArgTypeId(i);
+        int         typeId = gen->GetArgTypeId(i);
         const void *ref = gen->GetArgAddress(i);
         args.args[o].clear();
 
@@ -1570,15 +1573,15 @@ static void q2as_Com_PrintFmt(asIScriptGeneric *gen)
 static void q2as_sv_format(asIScriptGeneric *gen)
 {
     std::string result = q2as_impl_format(svas, gen, 0);
-    new(gen->GetAddressOfReturnLocation()) std::string(std::move(result));
+    new (gen->GetAddressOfReturnLocation()) std::string(std::move(result));
 }
 
 static void q2as_gi_LocClient_Print(asIScriptGeneric *gen)
 {
-    edict_t *ent = (edict_t *) gen->GetArgAddress(0);
-    print_type_t t = (print_type_t) gen->GetArgDWord(1);
+    edict_t           *ent = (edict_t *) gen->GetArgAddress(0);
+    print_type_t       t = (print_type_t) gen->GetArgDWord(1);
     const std::string *base = (std::string *) gen->GetArgAddress(2);
-    auto &args = q2as_set_loc_args(svas, gen, 3);
+    auto              &args = q2as_set_loc_args(svas, gen, 3);
 
     if (args.error)
         return;
@@ -1593,9 +1596,9 @@ static void q2as_gi_LocClient_Print_Zero(edict_t *e, print_type_t t, const std::
 
 static void q2as_gi_LocCenter_Print(asIScriptGeneric *gen)
 {
-    edict_t *ent = (edict_t *) gen->GetArgAddress(0);
+    edict_t           *ent = (edict_t *) gen->GetArgAddress(0);
     const std::string *base = (std::string *) gen->GetArgAddress(1);
-    auto &args = q2as_set_loc_args(svas, gen, 2);
+    auto              &args = q2as_set_loc_args(svas, gen, 2);
 
     if (args.error)
         return;
@@ -1610,9 +1613,9 @@ static void q2as_gi_LocCenter_Print_Zero(edict_t *e, const std::string &base)
 
 static void q2as_gi_Center_Print(asIScriptGeneric *gen)
 {
-    edict_t *ent = (edict_t *) gen->GetArgAddress(0);
+    edict_t           *ent = (edict_t *) gen->GetArgAddress(0);
     const std::string *base = (std::string *) gen->GetArgAddress(1);
-    std::string result = q2as_impl_format(svas, gen, 2);
+    std::string        result = q2as_impl_format(svas, gen, 2);
     gi.Center_Print(ent, result.c_str());
 }
 
@@ -1623,10 +1626,10 @@ static void q2as_gi_Center_Print_Zero(edict_t *e, const std::string &base)
 
 static void q2as_gi_Loc_Print(asIScriptGeneric *gen)
 {
-    edict_t *ent = (edict_t *) gen->GetArgAddress(0);
-    print_type_t t = (print_type_t) gen->GetArgDWord(1);
+    edict_t           *ent = (edict_t *) gen->GetArgAddress(0);
+    print_type_t       t = (print_type_t) gen->GetArgDWord(1);
     const std::string *base = (std::string *) gen->GetArgAddress(2);
-    auto &args = q2as_set_loc_args(svas, gen, 3);
+    auto              &args = q2as_set_loc_args(svas, gen, 3);
 
     if (args.error)
         return;
@@ -1641,14 +1644,15 @@ static void q2as_gi_Loc_Print_Zero(edict_t *ent, print_type_t t, const std::stri
 
 static void q2as_gi_LocBroadcast_Print(asIScriptGeneric *gen)
 {
-    print_type_t t = (print_type_t) gen->GetArgDWord(0);
+    print_type_t       t = (print_type_t) gen->GetArgDWord(0);
     const std::string *base = (std::string *) gen->GetArgAddress(1);
-    auto &args = q2as_set_loc_args(svas, gen, 2);
+    auto              &args = q2as_set_loc_args(svas, gen, 2);
 
     if (args.error)
         return;
 
-    gi.Loc_Print(nullptr, (print_type_t) (t | print_type_t::PRINT_BROADCAST), base->c_str(), args.ptrs().data(), gen->GetArgCount() - 1);
+    gi.Loc_Print(nullptr, (print_type_t) (t | print_type_t::PRINT_BROADCAST), base->c_str(), args.ptrs().data(),
+                 gen->GetArgCount() - 1);
 }
 
 static void q2as_gi_LocBroadcast_Print_Zero(print_type_t t, const std::string &base)
@@ -1659,18 +1663,19 @@ static void q2as_gi_LocBroadcast_Print_Zero(print_type_t t, const std::string &b
 static void q2as_gi_Broadcast_Print(asIScriptGeneric *gen)
 {
     print_type_t t = (print_type_t) gen->GetArgDWord(0);
-    std::string result = q2as_impl_format(svas, gen, 1);
+    std::string  result = q2as_impl_format(svas, gen, 1);
     gi.Broadcast_Print(t, result.c_str());
 }
 
 static void q2as_gi_Broadcast_Print_Zero(asIScriptGeneric *gen)
 {
-    print_type_t t = (print_type_t) gen->GetArgDWord(0);
+    print_type_t       t = (print_type_t) gen->GetArgDWord(0);
     const std::string *base = (std::string *) gen->GetArgAddress(1);
     gi.Broadcast_Print(t, base->c_str());
 }
 
-static void q2as_local_sound_nullptr(edict_t *target, edict_t *ent, soundchan_t channel, int soundindex, float volume, float attenuation, float timeofs, uint32_t dupe_key)
+static void q2as_local_sound_nullptr(edict_t *target, edict_t *ent, soundchan_t channel, int soundindex, float volume,
+                                     float attenuation, float timeofs, uint32_t dupe_key)
 {
     gi.game_import_t::local_sound(target, nullptr, ent, channel, soundindex, volume, attenuation, timeofs, dupe_key);
 }
@@ -1690,12 +1695,14 @@ static cvar_t *Q2AS_cvar(const std::string &name, const std::string &value, cvar
     return gi.cvar(name.c_str(), value.c_str(), flags);
 }
 
-static void Q2AS_Draw_OrientedWorldText(gvec3_cref_t origin, const std::string &text, const rgba_t &color, const float size, const float lifeTime, const bool depthTest)
+static void Q2AS_Draw_OrientedWorldText(gvec3_cref_t origin, const std::string &text, const rgba_t &color,
+                                        const float size, const float lifeTime, const bool depthTest)
 {
     gi.Draw_OrientedWorldText(origin, text.c_str(), color, size, lifeTime, depthTest);
 }
 
-static void Q2AS_Draw_StaticWorldText(gvec3_cref_t origin, gvec3_cref_t angles, const std::string &text, const rgba_t &color, const float size, const float lifeTime, const bool depthTest)
+static void Q2AS_Draw_StaticWorldText(gvec3_cref_t origin, gvec3_cref_t angles, const std::string &text,
+                                      const rgba_t &color, const float size, const float lifeTime, const bool depthTest)
 {
     gi.Draw_StaticWorldText(origin, angles, text.c_str(), color, size, lifeTime, depthTest);
 }
@@ -1871,7 +1878,7 @@ static void Q2AS_RegisterShadowLightData(q2as_registry &registry)
 
 struct q2as_PathInfo : q2as_ref_t
 {
-    PathInfo info;
+    PathInfo            info;
     std::vector<vec3_t> points;
 
     const vec3_t &getPathPoint(uint32_t n) const
@@ -1885,11 +1892,12 @@ struct q2as_PathInfo : q2as_ref_t
 
 static bool q2as_gi_GetPathToGoal(const PathRequest &in, q2as_PathInfo &out)
 {
-    new(&out) q2as_PathInfo {};
+    new (&out) q2as_PathInfo {};
     // just to be sure nobody does any fun nonsense...
     // 256 should be more than enough.
     static vec3_t points[256];
-    const_cast<PathRequest &>(in).pathPoints = { points, min((int64_t) std::extent_v<decltype(points)>, in.pathPoints.count) };
+    const_cast<PathRequest &>(in).pathPoints = { points,
+                                                 min((int64_t) std::extent_v<decltype(points)>, in.pathPoints.count) };
 
     bool result = gi.GetPathToGoal(in, out.info);
 
@@ -2069,34 +2077,32 @@ game_export_t *Q2AS_GetGameAPI()
     if (!svas.Load(q2as_sv_state_t::AllocStatic, q2as_sv_state_t::FreeStatic))
         return nullptr;
 
-    constexpr library_reg_t *const libraries[] = {
-        Q2AS_RegisterThirdParty,
-        Q2AS_RegisterLimits,
-        Q2AS_RegisterMath,
-        Q2AS_RegisterVec2,
-        Q2AS_RegisterVec3,
-        Q2AS_RegisterDynamicBitset,
-        Q2AS_RegisterUtil,
-        Q2AS_RegisterTime,
-        Q2AS_RegisterRandom,
-        Q2AS_RegisterStringEx,
-        Q2AS_RegisterCvar,
-        Q2AS_RegisterDebugging,
-        Q2AS_RegisterReflection,
-        Q2AS_RegisterStringHashSet,
-        Q2AS_RegisterPlayerState,
-        Q2AS_RegisterGameImports,
-        Q2AS_RegisterEntity,
-        Q2AS_RegisterTrace,
-        Q2AS_RegisterPmove,
-        Q2AS_RegisterPmoveFactory<q2as_sv_state_t>,
-        Q2AS_RegisterImportTypes,
-        Q2AS_RegisterJson,
-        Q2AS_RegisterGame,
-        Q2AS_RegisterPathFinding,
-        Q2AS_RegisterShadowLightData,
-        Q2AS_RegisterTokenizer
-    };
+    constexpr library_reg_t *const libraries[] = { Q2AS_RegisterThirdParty,
+                                                   Q2AS_RegisterLimits,
+                                                   Q2AS_RegisterMath,
+                                                   Q2AS_RegisterVec2,
+                                                   Q2AS_RegisterVec3,
+                                                   Q2AS_RegisterDynamicBitset,
+                                                   Q2AS_RegisterUtil,
+                                                   Q2AS_RegisterTime,
+                                                   Q2AS_RegisterRandom,
+                                                   Q2AS_RegisterStringEx,
+                                                   Q2AS_RegisterCvar,
+                                                   Q2AS_RegisterDebugging,
+                                                   Q2AS_RegisterReflection,
+                                                   Q2AS_RegisterStringHashSet,
+                                                   Q2AS_RegisterPlayerState,
+                                                   Q2AS_RegisterGameImports,
+                                                   Q2AS_RegisterEntity,
+                                                   Q2AS_RegisterTrace,
+                                                   Q2AS_RegisterPmove,
+                                                   Q2AS_RegisterPmoveFactory<q2as_sv_state_t>,
+                                                   Q2AS_RegisterImportTypes,
+                                                   Q2AS_RegisterJson,
+                                                   Q2AS_RegisterGame,
+                                                   Q2AS_RegisterPathFinding,
+                                                   Q2AS_RegisterShadowLightData,
+                                                   Q2AS_RegisterTokenizer };
 
     if (!svas.LoadLibraries(libraries, std::extent_v<decltype(libraries)>))
         return nullptr;

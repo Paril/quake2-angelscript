@@ -1,8 +1,8 @@
+#include "debugger/as_debugger.h"
 #include "q2as_local.h"
+#include "q2as_platform.h"
 #include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
-#include "q2as_platform.h"
-#include "debugger/as_debugger.h"
 #include <fstream>
 
 #define TRACY_ENABLE
@@ -18,9 +18,9 @@ static std::chrono::high_resolution_clock cl;
 
 struct TracyCallerHashedData
 {
-    asIScriptFunction   *self;
-    asIScriptFunction   *caller;
-    int                 caller_line;
+    asIScriptFunction *self;
+    asIScriptFunction *caller;
+    int                caller_line;
 
     TracyCallerHashedData(asSFunctionInfo *info)
     {
@@ -37,8 +37,8 @@ struct TracyCallerHashedData
 
 struct TracyCallerInfo
 {
-    std::string                     decl;
-    ___tracy_source_location_data   source;
+    std::string                   decl;
+    ___tracy_source_location_data source;
 
     TracyCallerInfo(const TracyCallerHashedData &hashed)
     {
@@ -84,17 +84,18 @@ static void InstrumentationCallback(asSFunctionInfo *info)
         else
         {
             TracyCallerHashedData data(info);
-            auto it = tracy_caller_info.find(data);
+            auto                  it = tracy_caller_info.find(data);
 
             if (it == tracy_caller_info.end())
                 it = tracy_caller_info.emplace(data, TracyCallerInfo(data)).first;
-            
-            tracy_zone_ctx.push_back(___tracy_emit_zone_begin( &it->second.source, 1 ));
+
+            tracy_zone_ctx.push_back(___tracy_emit_zone_begin(&it->second.source, 1));
         }
     }
     else
     {
-        debugger_state.events.push_back({ cl.now().time_since_epoch().count(), info->function, !info->popped, debugger_state.current_tid });
+        debugger_state.events.push_back(
+            { cl.now().time_since_epoch().count(), info->function, !info->popped, debugger_state.current_tid });
     }
 }
 
@@ -125,15 +126,23 @@ static void WriteInstrumentation()
     {
         std::unordered_map<asIScriptFunction *, declhash_t> decls;
 
-        std::ofstream instru_of("profile.trace");
+        std::ofstream               instru_of("profile.trace");
         std::ostream_iterator<char> it(instru_of);
 
-        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 5 process: {{ pid: 1 process_name: \"Angelscript\" }} }} }}\n");
-        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 1 thread: {{ pid: 1 tid: 1 thread_name: \"Server\" }} }} }}\n");
-        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 2 thread: {{ pid: 1 tid: 2 thread_name: \"Client\" }} }} }}\n");
-        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 3 thread: {{ pid: 1 tid: 3 thread_name: \"Movement\" }} }} }}\n");
-        fmt::format_to(it, "packet {{ track_descriptor: {{ uuid: 4 thread: {{ pid: 1 tid: 4 thread_name: \"GC\" }} }} }}\n");
-        fmt::format_to(it, "packet {{ timestamp: {} trusted_packet_sequence_id: 1 first_packet_on_sequence: true previous_packet_dropped: true sequence_flags: 3 }}\n", cl.now().time_since_epoch().count());
+        fmt::format_to(
+            it, "packet {{ track_descriptor: {{ uuid: 5 process: {{ pid: 1 process_name: \"Angelscript\" }} }} }}\n");
+        fmt::format_to(
+            it, "packet {{ track_descriptor: {{ uuid: 1 thread: {{ pid: 1 tid: 1 thread_name: \"Server\" }} }} }}\n");
+        fmt::format_to(
+            it, "packet {{ track_descriptor: {{ uuid: 2 thread: {{ pid: 1 tid: 2 thread_name: \"Client\" }} }} }}\n");
+        fmt::format_to(
+            it, "packet {{ track_descriptor: {{ uuid: 3 thread: {{ pid: 1 tid: 3 thread_name: \"Movement\" }} }} }}\n");
+        fmt::format_to(
+            it, "packet {{ track_descriptor: {{ uuid: 4 thread: {{ pid: 1 tid: 4 thread_name: \"GC\" }} }} }}\n");
+        fmt::format_to(it,
+                       "packet {{ timestamp: {} trusted_packet_sequence_id: 1 first_packet_on_sequence: true "
+                       "previous_packet_dropped: true sequence_flags: 3 }}\n",
+                       cl.now().time_since_epoch().count());
 
         for (auto &event : debugger_state.events)
         {
@@ -144,9 +153,15 @@ static void WriteInstrumentation()
                 hashed = &f->second;
 
                 if (!event.begin)
-                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: {} }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", event.stamp, (uint8_t) event.tid);
+                    fmt::format_to(it,
+                                   "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: {} }} "
+                                   "trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n",
+                                   event.stamp, (uint8_t) event.tid);
                 else
-                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: {} name_iid: {} }} trusted_packet_sequence_id: 1 }}\n", event.stamp, (uint8_t) event.tid, hashed->h);
+                    fmt::format_to(it,
+                                   "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: {} "
+                                   "name_iid: {} }} trusted_packet_sequence_id: 1 }}\n",
+                                   event.stamp, (uint8_t) event.tid, hashed->h);
             }
             else
             {
@@ -154,9 +169,16 @@ static void WriteInstrumentation()
                 hashed = &decls.emplace(event.func, declhash_t { decl, decls.size() + 1 }).first->second;
 
                 if (!event.begin)
-                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: {} }} trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n", event.stamp, (uint8_t) event.tid);
+                    fmt::format_to(it,
+                                   "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_END track_uuid: {} }} "
+                                   "trusted_packet_sequence_id: 1 sequence_flags: 2 }}\n",
+                                   event.stamp, (uint8_t) event.tid);
                 else
-                    fmt::format_to(it, "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: {} name_iid: {} }} trusted_packet_sequence_id: 1 interned_data {{ event_names: {{ iid: {} name: \"{}\" }} }} }}\n", event.stamp, (uint8_t) event.tid, hashed->h, hashed->h, hashed->s);
+                    fmt::format_to(it,
+                                   "packet {{ timestamp: {} track_event {{ type: TYPE_SLICE_BEGIN track_uuid: {} "
+                                   "name_iid: {} }} trusted_packet_sequence_id: 1 interned_data {{ event_names: {{ "
+                                   "iid: {} name: \"{}\" }} }} }}\n",
+                                   event.stamp, (uint8_t) event.tid, hashed->h, hashed->h, hashed->s);
             }
         }
 
@@ -190,10 +212,11 @@ static void MessageCallback(const asSMessageInfo *msg, void *param)
     else if (msg->type == asMSGTYPE_INFORMATION)
         type = "INFO";
 
-    ((q2as_state_t *) param)->Print(fmt::format("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, type, msg->message).data());
+    ((q2as_state_t *) param)
+        ->Print(fmt::format("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, type, msg->message).data());
 
-    //if (msg->type == asMSGTYPE_ERROR)
-        //__debugbreak();
+    // if (msg->type == asMSGTYPE_ERROR)
+    //__debugbreak();
 }
 
 static void GarbageCallback(const asSGarbageCollectionInfo *msg, void *param)
@@ -310,7 +333,6 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
         debugger_state.instrumentation_modules = Cvar("q2as_instrumentation_modules", "1", CVAR_NOFLAGS);
     if (!debugger_state.instrumentation_granularity)
         debugger_state.instrumentation_granularity = Cvar("q2as_instrumentation_granularity", "0", CVAR_NOFLAGS);
-
 
     return CreateEngine();
 }

@@ -5,8 +5,8 @@
 
 #include "g_local.h"
 
-#include "q2as_game.h"
 #include "q2as_cgame.h"
+#include "q2as_game.h"
 
 #include "debugger/as_debugger_dap.h"
 
@@ -19,11 +19,12 @@ public:
     {
         if (id.ResolveAs<void>() == nullptr)
             return asIDBCache::GetEvaluator(id);
-    
+
         auto type = ctx->GetEngine()->GetTypeInfoById(id.typeId);
 
         // do we have a custom evaluator?
-        if (auto f = debugger_state.evaluators.find(id.typeId & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR)); f != debugger_state.evaluators.end())
+        if (auto f = debugger_state.evaluators.find(id.typeId & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR));
+            f != debugger_state.evaluators.end())
             return *f->second.get();
 
         // are we a template?
@@ -33,7 +34,9 @@ public:
             // evaluator for that one
             auto baseType = ctx->GetEngine()->GetTypeInfoByName(type->GetName());
 
-            if (auto f = debugger_state.evaluators.find(baseType->GetTypeId() & (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR)); f != debugger_state.evaluators.end())
+            if (auto f = debugger_state.evaluators.find(baseType->GetTypeId() &
+                                                        (asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR));
+                f != debugger_state.evaluators.end())
                 return *f->second.get();
         }
 
@@ -101,9 +104,9 @@ protected:
             auto ctx = cache->ctx;
 
             asIScriptFunction *func = nullptr;
-            int col = 0;
-            const char *sec = nullptr;
-            int row = 0;
+            int                col = 0;
+            const char        *sec = nullptr;
+            int                row = 0;
 
             if (ctx->GetState() == asEXECUTION_EXCEPTION)
             {
@@ -155,7 +158,7 @@ protected:
     }
 };
 
-static std::chrono::high_resolution_clock profile_clock;
+static std::chrono::high_resolution_clock             profile_clock;
 static std::chrono::high_resolution_clock::time_point profile_time;
 
 static void q2as_profile_start(const std::string &s)
@@ -167,22 +170,24 @@ static void q2as_profile_end()
 {
     auto result = profile_clock.now() - profile_time;
 
-    ((q2as_state_t *) asGetActiveContext()->GetEngine()->GetUserData())->Print(fmt::format("{}\n", result.count()).data());
+    ((q2as_state_t *) asGetActiveContext()->GetEngine()->GetUserData())
+        ->Print(fmt::format("{}\n", result.count()).data());
 }
 
 std::string q2as_backtrace()
 {
     std::string trace;
-    auto ctx = asGetActiveContext();
-    auto cs = ctx->GetCallstackSize();
+    auto        ctx = asGetActiveContext();
+    auto        cs = ctx->GetCallstackSize();
 
     for (asUINT i = 0; i < cs; i++)
     {
-        auto f = ctx->GetFunction(i);
-        int col;
+        auto        f = ctx->GetFunction(i);
+        int         col;
         const char *section;
-        int row = ctx->GetLineNumber(i, &col, &section);
-        fmt::format_to(std::back_inserter(trace), "{} {}[{}:{}]\n", f->GetDeclaration(true, false, true), section, row, col);
+        int         row = ctx->GetLineNumber(i, &col, &section);
+        fmt::format_to(std::back_inserter(trace), "{} {}[{}:{}]\n", f->GetDeclaration(true, false, true), section, row,
+                       col);
     }
 
     return trace;
@@ -207,7 +212,9 @@ void q2as_dbg_state_t::CheckDebugger(asIScriptContext *ctx)
     // create the debugger
     if (!debugger)
     {
-        debugger_state.workspace = std::make_unique<asIDBWorkspace>(std::filesystem::path(Q2AS_ScriptPath()).generic_string(), std::initializer_list<asIScriptEngine *> { svas.engine, cgas.engine });
+        debugger_state.workspace =
+            std::make_unique<asIDBWorkspace>(std::filesystem::path(Q2AS_ScriptPath()).generic_string(),
+                                             std::initializer_list<asIScriptEngine *> { svas.engine, cgas.engine });
         debugger = std::make_unique<q2as_asIDBDebuggerVSCode>(debugger_state.workspace.get());
     }
 
@@ -248,7 +255,7 @@ static void q2as_sleep(int sec)
 
 static void q2as_typeof(asIScriptGeneric *gen)
 {
-    int typeId = gen->GetArgTypeId(0);
+    int         typeId = gen->GetArgTypeId(0);
     std::string s;
 
     asITypeInfo *ti = gen->GetEngine()->GetTypeInfoById(typeId);
@@ -257,24 +264,24 @@ static void q2as_typeof(asIScriptGeneric *gen)
     {
         switch (typeId & asTYPEID_MASK_SEQNBR)
         {
-        case asTYPEID_BOOL: s = "bool"; break;
-        case asTYPEID_INT8: s = "int8"; break;
-        case asTYPEID_INT16: s = "int16"; break;
-        case asTYPEID_INT32: s = "int32"; break;
-        case asTYPEID_INT64: s = "int64"; break;
-        case asTYPEID_UINT8: s = "uint8"; break;
+        case asTYPEID_BOOL:   s = "bool"; break;
+        case asTYPEID_INT8:   s = "int8"; break;
+        case asTYPEID_INT16:  s = "int16"; break;
+        case asTYPEID_INT32:  s = "int32"; break;
+        case asTYPEID_INT64:  s = "int64"; break;
+        case asTYPEID_UINT8:  s = "uint8"; break;
         case asTYPEID_UINT16: s = "uint16"; break;
         case asTYPEID_UINT32: s = "uint32"; break;
         case asTYPEID_UINT64: s = "uint64"; break;
-        case asTYPEID_FLOAT: s = "float"; break;
+        case asTYPEID_FLOAT:  s = "float"; break;
         case asTYPEID_DOUBLE: s = "double"; break;
-        default: asGetActiveContext()->SetException("bad type"); return;
+        default:              asGetActiveContext()->SetException("bad type"); return;
         }
     }
     else
         s = ti->GetName();
 
-    new(gen->GetAddressOfReturnLocation()) std::string(std::move(s));
+    new (gen->GetAddressOfReturnLocation()) std::string(std::move(s));
 }
 
 static void q2as_print(const std::string &s)

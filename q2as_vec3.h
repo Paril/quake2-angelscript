@@ -1,7 +1,8 @@
+#pragma once
+
 struct vec3
 {
-    union
-    {
+    union {
         struct
         {
             float x;
@@ -12,23 +13,23 @@ struct vec3
         std::array<float, 3> elements;
     };
 
-    float &operator[] (unsigned int i)
+    constexpr float &operator[](unsigned int i)
     {
         i = i > 2 ? 0 : i;
 
         return elements[i];
     }
 
-    const float &operator[] (unsigned int i) const
+    constexpr const float &operator[](unsigned int i) const
     {
         i = i > 2 ? 0 : i;
 
         return elements[i];
     }
 
-    bool operator==(const vec3 &v) const
+    constexpr bool operator==(const vec3 &v) const
     {
-        return elements == v.elements;
+        return elements[0] == v.elements[0] && elements[1] == v.elements[1] && elements[2] == v.elements[2];
     }
 
     bool equals(const vec3 &v, const float relative_tolerance, const float absolute_tolerance) const
@@ -45,26 +46,22 @@ struct vec3
         return equals(v, relative_tolerance, 0.0f);
     }
 
-    explicit operator bool() const
+    constexpr explicit operator bool() const
     {
         return x || y || z;
     }
 
-    float dot(const vec3 &v) const
+    constexpr float dot(const vec3 &v) const
     {
         return x * v.x + y * v.y + z * v.z;
     }
 
-    vec3 scaled(const vec3 &v) const
+    constexpr vec3 scaled(const vec3 &v) const
     {
-        return {
-            x * v.x,
-            y * v.y,
-            z * v.z
-        };
+        return { x * v.x, y * v.y, z * v.z };
     }
 
-    vec3 &scale(const vec3 &v)
+    constexpr vec3 &scale(const vec3 &v)
     {
         x *= v.x;
         y *= v.y;
@@ -73,75 +70,47 @@ struct vec3
         return *this;
     }
 
-    vec3 operator-(const vec3 &v) const
+    constexpr vec3 operator-(const vec3 &v) const
     {
-        return {
-            x - v.x,
-            y - v.y,
-            z - v.z
-        };
+        return { x - v.x, y - v.y, z - v.z };
     }
 
-    vec3 operator+(const vec3 &v) const
+    constexpr vec3 operator+(const vec3 &v) const
     {
-        return {
-            x + v.x,
-            y + v.y,
-            z + v.z
-        };
+        return { x + v.x, y + v.y, z + v.z };
     }
 
-    vec3 operator/(const vec3 &v) const
+    constexpr vec3 operator/(const vec3 &v) const
     {
-        return {
-            x / v.x,
-            y / v.y,
-            z / v.z
-        };
+        return { x / v.x, y / v.y, z / v.z };
     }
 
-    vec3 operator/(const float &v) const
+    constexpr vec3 operator/(const float &v) const
     {
-        return {
-            x / v,
-            y / v,
-            z / v
-        };
+        return { x / v, y / v, z / v };
     }
 
-    vec3 operator/(const int &v) const
+    constexpr vec3 operator/(const int &v) const
     {
-        return {
-            x / v,
-            y / v,
-            z / v
-        };
+        return { x / v, y / v, z / v };
     }
 
-    vec3 operator*(const float &v) const
+    constexpr vec3 operator*(const float &v) const
     {
-        return {
-            x * v,
-            y * v,
-            z * v
-        };
+        return { x * v, y * v, z * v };
     }
 
-    vec3 operator*(const int &v) const
+    constexpr vec3 operator*(const int &v) const
     {
-        return {
-            x * v,
-            y * v,
-            z * v
-        };
+        return { x * v, y * v, z * v };
     }
 
-    vec3 operator-() const
+    constexpr vec3 operator-() const
     {
         return { -x, -y, -z };
     }
 
-    vec3 &operator-=(const vec3 &v)
+    constexpr vec3 &operator-=(const vec3 &v)
     {
         x -= v.x;
         y -= v.y;
@@ -150,7 +119,7 @@ struct vec3
         return *this;
     }
 
-    vec3 &operator+=(const vec3 &v)
+    constexpr vec3 &operator+=(const vec3 &v)
     {
         x += v.x;
         y += v.y;
@@ -159,7 +128,7 @@ struct vec3
         return *this;
     }
 
-    vec3 &operator/=(const vec3 &v)
+    constexpr vec3 &operator/=(const vec3 &v)
     {
         x /= v.x;
         y /= v.y;
@@ -168,7 +137,7 @@ struct vec3
         return *this;
     }
 
-    vec3 &operator/=(const float &v)
+    constexpr vec3 &operator/=(const float &v)
     {
         x /= v;
         y /= v;
@@ -177,7 +146,7 @@ struct vec3
         return *this;
     }
 
-    vec3 &operator/=(const int &v)
+    constexpr vec3 &operator/=(const int &v)
     {
         x /= v;
         y /= v;
@@ -186,7 +155,7 @@ struct vec3
         return *this;
     }
 
-    vec3 &operator*=(const float &v)
+    constexpr vec3 &operator*=(const float &v)
     {
         x *= v;
         y *= v;
@@ -195,7 +164,7 @@ struct vec3
         return *this;
     }
 
-    vec3 &operator*=(const int &v)
+    constexpr vec3 &operator*=(const int &v)
     {
         x *= v;
         y *= v;
@@ -209,7 +178,7 @@ struct vec3
         return sqrtf(lengthSquared());
     }
 
-    float lengthSquared() const
+    constexpr float lengthSquared() const
     {
         return (x * x + y * y + z * z);
     }
@@ -235,7 +204,8 @@ struct vec3
         float len = length();
 
         float f = len;
-        if (len > 0.0f) {
+        if (len > 0.0f)
+        {
             f = 1.0f / len;
         }
 
@@ -246,12 +216,8 @@ struct vec3
         return len;
     }
 
-    vec3 cross(const vec3 &v) const
+    constexpr vec3 cross(const vec3 &v) const
     {
-        return {
-            y * v.z - z * v.y,
-            z * v.x - x * v.z,
-            x * v.y - y * v.x
-        };
+        return { y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x };
     }
 };

@@ -36,7 +36,7 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
         for (asUINT i = 0; i < as->mainModule->GetGlobalVarCount(); i++)
         {
             const char *name, *ns;
-            int typeId;
+            int         typeId;
 
             as->mainModule->GetGlobalVar(i, &name, &ns, &typeId);
 
@@ -48,7 +48,8 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
             if (*in_name != str)
                 continue;
 
-            gen->GetEngine()->RefCastObject(as->mainModule->GetAddressOfGlobalVar(i), as->engine->GetTypeInfoById(typeId), typeInfo, ref);
+            gen->GetEngine()->RefCastObject(as->mainModule->GetAddressOfGlobalVar(i),
+                                            as->engine->GetTypeInfoById(typeId), typeInfo, ref);
             *((bool *) gen->GetAddressOfReturnLocation()) = (*ref != nullptr);
             return;
         }
@@ -61,20 +62,20 @@ static void q2as_reflect_global_from_name(asIScriptGeneric *gen)
 static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
 {
     asUINT i = 0;
-    void *addr = gen->GetArgAddress(0);
-    auto typeId = gen->GetArgTypeId(0);
-    auto typeInfo = gen->GetEngine()->GetTypeInfoById(typeId);
-    auto as = (q2as_state_t *) gen->GetEngine()->GetUserData();
+    void  *addr = gen->GetArgAddress(0);
+    auto   typeId = gen->GetArgTypeId(0);
+    auto   typeInfo = gen->GetEngine()->GetTypeInfoById(typeId);
+    auto   as = (q2as_state_t *) gen->GetEngine()->GetUserData();
 
     if (addr == nullptr)
     {
-        new(gen->GetAddressOfReturnLocation()) std::string();
+        new (gen->GetAddressOfReturnLocation()) std::string();
         return;
     }
 
     if (auto sig = typeInfo->GetFuncdefSignature())
     {
-        auto func = (asIScriptFunction *) addr;
+        auto        func = (asIScriptFunction *) addr;
         const char *name = func->GetName(), *ns = func->GetNamespace();
         std::string str;
         if (!ns || !*ns)
@@ -82,7 +83,7 @@ static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
         else
             str = fmt::format("{}::{}", ns, name);
 
-        new(gen->GetAddressOfReturnLocation()) std::string(std::move(str));
+        new (gen->GetAddressOfReturnLocation()) std::string(std::move(str));
 
         func->Release();
         return;
@@ -102,7 +103,7 @@ static void q2as_reflect_name_of_global(asIScriptGeneric *gen)
                 else
                     str = fmt::format("{}::{}", ns, name);
 
-                new(gen->GetAddressOfReturnLocation()) std::string(std::move(str));
+                new (gen->GetAddressOfReturnLocation()) std::string(std::move(str));
                 ((asIScriptObject *) addr)->Release();
                 return;
             }

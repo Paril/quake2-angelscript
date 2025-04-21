@@ -35,8 +35,8 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
         })
         .methods({
             // equality
-            { "bool opEquals(const vec3_t &in) const",                         asMETHODPR(vec3, operator==, (const vec3 &) const, bool),                                                              asCALL_THISCALL },
-            { "bool equals(const vec3_t &in, float) const",              asMETHODPR(vec3, equals, (const vec3 &v, const float relative_tolerance) const, bool),                                 asCALL_THISCALL },
+            { "bool opEquals(const vec3_t &in) const",             asMETHODPR(vec3, operator==, (const vec3 &) const, bool),                                                              asCALL_THISCALL },
+            { "bool equals(const vec3_t &in, float) const",        asMETHODPR(vec3, equals, (const vec3 &v, const float relative_tolerance) const, bool),                                 asCALL_THISCALL },
             { "bool equals(const vec3_t &in, float, float) const", asMETHODPR(vec3, equals, (const vec3 &v, const float relative_tolerance, const float absolute_tolerance) const, bool), asCALL_THISCALL },
 
             // conversions

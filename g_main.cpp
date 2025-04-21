@@ -8,7 +8,6 @@
 
 mum_prng_generator mum_prng;
 
-
 local_game_import_t gi;
 
 game_export_t globals;

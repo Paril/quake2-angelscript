@@ -1,5 +1,5 @@
-#include "q2as_local.h"
 #include "q2as_fixedarray.h"
+#include "q2as_local.h"
 
 static std::string Q2AS_csurface_t_name(csurface_t *n)
 {
@@ -27,7 +27,8 @@ static void q2as_stat_array_set_stat(uint32_t byte_offset, T value, decltype(pla
     *(reinterpret_cast<T *>((reinterpret_cast<uint8_t *>(stats.data()) + byte_offset))) = value;
 }
 
-static void q2as_stat_array_fill(uint32_t byte_offset, uint8_t value, uint32_t length, decltype(player_state_t::stats) &stats)
+static void q2as_stat_array_fill(uint32_t byte_offset, uint8_t value, uint32_t length,
+                                 decltype(player_state_t::stats) &stats)
 {
     if (byte_offset + length > sizeof(stats))
         return;

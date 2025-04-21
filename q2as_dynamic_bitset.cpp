@@ -3,12 +3,12 @@
 
 static void Q2AS_bitset_construct(uint32_t count, dynamic_bitset *self)
 {
-    new(self) dynamic_bitset(count);
+    new (self) dynamic_bitset(count);
 }
 
 static void Q2AS_bitset_construct_str(const std::string &str, dynamic_bitset *self)
 {
-    new(self) dynamic_bitset(str);
+    new (self) dynamic_bitset(str);
 }
 
 void Q2AS_RegisterDynamicBitset(q2as_registry &registry)

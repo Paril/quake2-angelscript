@@ -7,164 +7,9 @@
 #include <stdexcept>
 #include <type_traits>
 
-using nullptr_t = std::nullptr_t;
+#include "q2as_vec3.h"
 
-struct vec3_t
-{
-    float x, y, z;
-
-    [[nodiscard]] constexpr const float &operator[](int i) const
-    {
-        if (i == 0)
-            return x;
-        else if (i == 1)
-            return y;
-        else if (i == 2)
-            return z;
-        throw std::out_of_range("i");
-    }
-
-    [[nodiscard]] constexpr float &operator[](int i)
-    {
-        if (i == 0)
-            return x;
-        else if (i == 1)
-            return y;
-        else if (i == 2)
-            return z;
-        throw std::out_of_range("i");
-    }
-
-    // comparison
-    [[nodiscard]] constexpr bool equals(const vec3_t &v) const
-    {
-        return x == v.x && y == v.y && z == v.z;
-    }
-    [[nodiscard]] inline bool equals(const vec3_t &v, const float &epsilon) const
-    {
-        return fabsf(x - v.x) <= epsilon && fabsf(y - v.y) <= epsilon && fabsf(z - v.z) <= epsilon;
-    }
-    [[nodiscard]] constexpr bool operator==(const vec3_t &v) const
-    {
-        return equals(v);
-    }
-    [[nodiscard]] constexpr bool operator!=(const vec3_t &v) const
-    {
-        return !(*this == v);
-    }
-    [[nodiscard]] constexpr explicit operator bool() const
-    {
-        return x || y || z;
-    }
-
-    // dot
-    [[nodiscard]] constexpr float dot(const vec3_t &v) const
-    {
-        return (x * v.x) + (y * v.y) + (z * v.z);
-    }
-    [[nodiscard]] constexpr vec3_t scaled(const vec3_t &v) const
-    {
-        return { x * v.x, y * v.y, z * v.z };
-    }
-    constexpr vec3_t &scale(const vec3_t &v)
-    {
-        *this = this->scaled(v);
-        return *this;
-    }
-
-    // basic operators
-    [[nodiscard]] constexpr vec3_t operator-(const vec3_t &v) const
-    {
-        return { x - v.x, y - v.y, z - v.z };
-    }
-    [[nodiscard]] constexpr vec3_t operator+(const vec3_t &v) const
-    {
-        return { x + v.x, y + v.y, z + v.z };
-    }
-    [[nodiscard]] constexpr vec3_t operator/(const vec3_t &v) const
-    {
-        return { x / v.x, y / v.y, z / v.z };
-    }
-    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-    [[nodiscard]] constexpr vec3_t operator/(const T &v) const
-    {
-        return { static_cast<float>(x / v), static_cast<float>(y / v), static_cast<float>(z / v) };
-    }
-    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-    [[nodiscard]] constexpr vec3_t operator*(const T &v) const
-    {
-        return { static_cast<float>(x * v), static_cast<float>(y * v), static_cast<float>(z * v) };
-    }
-    [[nodiscard]] constexpr vec3_t operator-() const
-    {
-        return { -x, -y, -z };
-    }
-
-    constexpr vec3_t &operator-=(const vec3_t &v)
-    {
-        *this = *this - v;
-        return *this;
-    }
-    constexpr vec3_t &operator+=(const vec3_t &v)
-    {
-        *this = *this + v;
-        return *this;
-    }
-    constexpr vec3_t &operator/=(const vec3_t &v)
-    {
-        *this = *this / v;
-        return *this;
-    }
-    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-    constexpr vec3_t &operator/=(const T &v)
-    {
-        *this = *this / v;
-        return *this;
-    }
-    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>>>
-    constexpr vec3_t &operator*=(const T &v)
-    {
-        *this = *this * v;
-        return *this;
-    }
-
-    // operations
-    [[nodiscard]] constexpr float lengthSquared() const
-    {
-        return this->dot(*this);
-    }
-    [[nodiscard]] inline float length() const
-    {
-        return sqrtf(lengthSquared());
-    }
-    [[nodiscard]] inline vec3_t normalized() const
-    {
-        float len = length();
-        return len ? (*this * (1.f / len)) : *this;
-    }
-    [[nodiscard]] inline vec3_t normalized(float &len) const
-    {
-        len = length();
-        return len ? (*this * (1.f / len)) : *this;
-    }
-    inline float normalize()
-    {
-        float len = length();
-
-        if (len)
-            *this *= (1.f / len);
-
-        return len;
-    }
-    [[nodiscard]] constexpr vec3_t cross(const vec3_t &v) const
-    {
-        return {
-            y * v.z - z * v.y,
-            z * v.x - x * v.z,
-            x * v.y - y * v.x
-        };
-    }
-};
+using vec3_t = vec3;
 
 constexpr vec3_t vec3_origin {};
 
@@ -226,23 +71,23 @@ inline void AngleVectors(const vec3_t &angles, vec3_t &forward, vec3_t &right, v
 {
     AngleVectors(angles, &forward, &right, &up);
 }
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, vec3_t &right, nullptr_t)
+inline void AngleVectors(const vec3_t &angles, vec3_t &forward, vec3_t &right, std::nullptr_t)
 {
     AngleVectors(angles, &forward, &right, nullptr);
 }
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, nullptr_t, vec3_t &up)
+inline void AngleVectors(const vec3_t &angles, vec3_t &forward, std::nullptr_t, vec3_t &up)
 {
     AngleVectors(angles, &forward, nullptr, &up);
 }
-inline void AngleVectors(const vec3_t &angles, vec3_t &forward, nullptr_t, nullptr_t)
+inline void AngleVectors(const vec3_t &angles, vec3_t &forward, std::nullptr_t, std::nullptr_t)
 {
     AngleVectors(angles, &forward, nullptr, nullptr);
 }
-inline void AngleVectors(const vec3_t &angles, nullptr_t, nullptr_t, vec3_t &up)
+inline void AngleVectors(const vec3_t &angles, std::nullptr_t, std::nullptr_t, vec3_t &up)
 {
     AngleVectors(angles, nullptr, nullptr, &up);
 }
-inline void AngleVectors(const vec3_t &angles, nullptr_t, vec3_t &right, nullptr_t)
+inline void AngleVectors(const vec3_t &angles, std::nullptr_t, vec3_t &right, std::nullptr_t)
 {
     AngleVectors(angles, nullptr, &right, nullptr);
 }
