@@ -396,9 +396,9 @@ void SV_CalcViewOffset(ASEntity &ent, const vec3_t &in forward, const vec3_t &in
 		{
 			float factor = min(1.0f, (ent.client.quake_time.secondsf() / level.time.secondsf()) * 0.25f);
 
-			angles.x += crandom_open() * factor;
-			angles.z += crandom_open() * factor;
-			angles.y += crandom_open() * factor;
+			angles.x += crandom() * factor;
+			angles.z += crandom() * factor;
+			angles.y += crandom() * factor;
 		}
 	}
 

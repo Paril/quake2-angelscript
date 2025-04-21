@@ -774,7 +774,7 @@ void GunnerCmdrFire(ASEntity &self)
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
 	PredictAim(self, self.enemy, start, 800, false, frandom() * 0.3f, aim);
 	for (int i = 0; i < 3; i++)
-		aim[i] += crandom_open() * 0.025f;
+		aim[i] += crandom() * 0.025f;
 	monster_fire_flechette(self, start, aim, 4, 800, flash_number);
 }
 
@@ -985,10 +985,10 @@ void GunnerCmdrGrenade(ASEntity &self)
 
 		// try search for best pitch
 		if (M_CalculatePitchToFire(self, target, start, aim, speed, 2.5f, (flash_number >= monster_muzzle_t::GUNCMDR_GRENADE_MORTAR_1 && flash_number <= monster_muzzle_t::GUNCMDR_GRENADE_MORTAR_3)))
-			monster_fire_grenade(self, start, aim, 50, speed, flash_number, (crandom_open() * 10.0f), frandom() * 10.f);
+			monster_fire_grenade(self, start, aim, 50, speed, flash_number, (crandom() * 10.0f), frandom() * 10.f);
 		else
 			// normal shot
-			monster_fire_grenade(self, start, aim, 50, speed, flash_number, (crandom_open() * 10.0f), 200.f + (crandom_open() * 10.0f));
+			monster_fire_grenade(self, start, aim, 50, speed, flash_number, (crandom() * 10.0f), 200.f + (crandom() * 10.0f));
 	}
 }
 

@@ -1275,7 +1275,7 @@ void weapon_grenadelauncher_fire(ASEntity &ent)
 
 	P_AddWeaponKick(ent, ent.client.v_forward * -2, { -1.f, 0.f, 0.f });
 
-	fire_grenade(ent, start, dir, damage, 600, time_sec(2.5), radius, (crandom_open() * 10.0f), (200 + crandom_open() * 10.0f), false);
+	fire_grenade(ent, start, dir, damage, 600, time_sec(2.5), radius, (crandom() * 10.0f), (200 + crandom() * 10.0f), false);
 
 	gi_WriteByte(svc_t::muzzleflash);
 	gi_WriteEntity(ent.e);

@@ -28,12 +28,16 @@ void Q2AS_RegisterRandom(q2as_registry &registry)
             { "gtime_t random_time(const gtime_t &in)",                    asFUNCTION(q2as_random_time_1), asCALL_CDECL },
 
             { "float crandom()",      asFUNCTIONPR(crandom, (), float),      asCALL_CDECL },
-            { "float crandom_open()", asFUNCTIONPR(crandom_open, (), float), asCALL_CDECL },
 
             { "uint32 irandom()",            asFUNCTIONPR(irandom, (), uint32_t),                asCALL_CDECL },
             { "int32 irandom(int32, int32)", asFUNCTIONPR(irandom, (int32_t, int32_t), int32_t), asCALL_CDECL },
             { "int32 irandom(int32)",        asFUNCTIONPR(irandom, (int32_t), int32_t),          asCALL_CDECL },
 
-            { "bool brandom()", asFUNCTIONPR(brandom, (), bool), asCALL_CDECL }
+            { "uint64 irandom64()",            asFUNCTIONPR(irandom64, (), uint64_t),                asCALL_CDECL },
+            { "int64 irandom64(int64, int64)", asFUNCTIONPR(irandom64, (int64_t, int64_t), int64_t), asCALL_CDECL },
+            { "int64 irandom64(int64)",        asFUNCTIONPR(irandom64, (int64_t), int64_t),          asCALL_CDECL },
+
+            { "bool brandom()",             asFUNCTIONPR(brandom, (), bool),      asCALL_CDECL },
+            { "bool brandom(float weight)", asFUNCTIONPR(brandom, (float), bool), asCALL_CDECL }
         });
 }

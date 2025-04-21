@@ -255,7 +255,7 @@ void CarrierGrenade(ASEntity &self)
 		aim[2] = -0.5f;
 
 	flash_number = monster_muzzle_t::GUNNER_GRENADE_1;
-	monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), 200.f + (crandom_open() * 10.0f));
+	monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom() * 10.0f), 200.f + (crandom() * 10.0f));
 }
 
 void CarrierPredictiveRocket(ASEntity &self)

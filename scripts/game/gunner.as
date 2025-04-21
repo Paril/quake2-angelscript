@@ -1308,10 +1308,10 @@ void GunnerGrenade(ASEntity &self)
 
 	// try search for best pitch
 	if (M_CalculatePitchToFire(self, target, start, aim, 600, 2.5f, false))
-		monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), frandom() * 10.f);
+		monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom() * 10.0f), frandom() * 10.f);
 	else
 		// normal shot
-		monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom_open() * 10.0f), 200.f + (crandom_open() * 10.0f));
+		monster_fire_grenade(self, start, aim, 50, 600, flash_number, (crandom() * 10.0f), 200.f + (crandom() * 10.0f));
 }
 
 const array<mframe_t> gunner_frames_attack_chain = {

@@ -2366,7 +2366,6 @@ float frandom(float);
 gtime_t random_time(const gtime_t &in, const gtime_t &in);
 gtime_t random_time(const gtime_t &in);
 float crandom();
-float crandom_open();
 uint32 irandom();
 int32 irandom(int32, int32);
 int32 irandom(int32);

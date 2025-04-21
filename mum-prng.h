@@ -57,10 +57,9 @@
 #define EXPECT(cond, v) (cond)
 #endif
 
-#if defined(__GNUC__) && ((__GNUC__ == 4) &&  (__GNUC_MINOR__ >= 9) || (__GNUC__ > 4))
+#if defined(__GNUC__) && ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 9) || (__GNUC__ > 4))
 #define _MUM_PRNG_FRESH_GCC
 #endif
-
 
 struct mum_prng_generator
 {
@@ -68,39 +67,41 @@ struct mum_prng_generator
 
     struct _mum_prng_internal_state
     {
-        int count;
+        int                   count;
         std::function<void()> update_func;
         /* MUM PRNG state */
         uint64_t state[MUM_PRNG_UNROLL];
     };
+
 private:
     _mum_prng_internal_state _mum_prng_state;
 
 public:
-    #if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
+#if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
     /* This code specialized for Haswell generates MULX insns. */
-    inline uint64_t _MUM_TARGET("arch=haswell")
-    _mum_avx2(uint64_t v, uint64_t p) {
-        uint64_t hi, lo;
-        __uint128_t r = (__uint128_t)v * (__uint128_t)p;
-        hi = (uint64_t)(r >> 64);
-        lo = (uint64_t)r;
+    inline uint64_t _MUM_TARGET("arch=haswell") _mum_avx2(uint64_t v, uint64_t p)
+    {
+        uint64_t    hi, lo;
+        __uint128_t r = (__uint128_t) v * (__uint128_t) p;
+        hi = (uint64_t) (r >> 64);
+        lo = (uint64_t) r;
         return hi + lo;
     }
 
-    void _MUM_TARGET("arch=haswell")
-    _mum_prng_update_avx2(void) {
+    void _MUM_TARGET("arch=haswell") _mum_prng_update_avx2(void)
+    {
         int i;
 
         _mum_prng_state.count = 0;
         for (i = 0; i < MUM_PRNG_UNROLL - 1; i++)
             _mum_prng_state.state[i] ^= _mum_avx2(_mum_prng_state.state[i + 1], _mum_primes[i]);
-        _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^= _mum_avx2(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
+        _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^=
+            _mum_avx2(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
     }
-    #endif
+#endif
 
-    void _MUM_NOINLINE
-    _mum_prng_update(void) {
+    void _MUM_NOINLINE _mum_prng_update(void)
+    {
         int i;
 
         _mum_prng_state.count = 0;
@@ -109,45 +110,45 @@ public:
         _mum_prng_state.state[MUM_PRNG_UNROLL - 1] ^= _mum(_mum_prng_state.state[0], _mum_primes[MUM_PRNG_UNROLL - 1]);
     }
 
-    #if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
-    inline void
-    _mum_prng_setup_avx2(void) {
+#if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
+    inline void _mum_prng_setup_avx2(void)
+    {
         __builtin_cpu_init();
         if (__builtin_cpu_supports("avx2"))
             _mum_prng_state.update_func = _mum_prng_update_avx2;
         else
             _mum_prng_state.update_func = _mum_prng_update;
-
     }
-    #endif
+#endif
 
-    inline void
-    _start_mum_prng(uint32_t seed) {
+    inline void _start_mum_prng(uint32_t seed)
+    {
         int i;
 
         _mum_prng_state.count = MUM_PRNG_UNROLL;
         for (i = 0; i < MUM_PRNG_UNROLL; i++)
             _mum_prng_state.state[i] = seed + 1;
-    #if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
+#if defined(__x86_64__) && defined(_MUM_PRNG_FRESH_GCC)
         _mum_prng_setup_avx2();
-    #else
+#else
         _mum_prng_state.update_func = std::bind(&mum_prng_generator::_mum_prng_update, this);
-    #endif
+#endif
     }
 
-    inline void
-    init_mum_prng(void) {
+    inline void init_mum_prng(void)
+    {
         _start_mum_prng(0);
     }
 
-    inline void
-    set_mum_prng_seed(uint32_t seed) {
+    inline void set_mum_prng_seed(uint32_t seed)
+    {
         _start_mum_prng(seed);
     }
 
-    inline uint64_t
-    get_mum_prn(void) {
-        if (EXPECT(_mum_prng_state.count == MUM_PRNG_UNROLL, 0)) {
+    inline uint64_t get_mum_prn(void)
+    {
+        if (EXPECT(_mum_prng_state.count == MUM_PRNG_UNROLL, 0))
+        {
             _mum_prng_state.update_func();
             _mum_prng_state.count = 1;
             return _mum_prng_state.state[0];
@@ -160,16 +161,12 @@ public:
         return get_mum_prn();
     }
 
-    inline void
-    finish_mum_prng(void) {
-    }
-
-    static uint64_t min()
+    static constexpr uint64_t min()
     {
         return 0;
     }
 
-    static uint64_t max()
+    static constexpr uint64_t max()
     {
         return UINT64_MAX;
     }

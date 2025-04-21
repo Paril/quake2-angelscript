@@ -543,7 +543,7 @@ void supertankGrenade(ASEntity &self)
 	start = M_ProjectFlashSource(self, monster_flash_offset[flash_number], forward, right);
 
 	vec3_t aim_point;
-	PredictAim(self, self.enemy, start, 0, false, crandom_open() * 0.1f, forward, aim_point);
+	PredictAim(self, self.enemy, start, 0, false, crandom() * 0.1f, forward, aim_point);
 
 	for (float speed = 500.f; speed < 1000.f; speed += 100.f)
 	{

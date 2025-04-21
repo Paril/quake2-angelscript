@@ -372,7 +372,7 @@ void arachnid_rail_real(ASEntity &self, monster_muzzle_t id)
 			dir = (self.pos1 - start).normalized();
 
 			for (int i = 0; i < 3; i++)
-				dir[i] += crandom_open() * 0.018f;
+				dir[i] += crandom() * 0.018f;
 			dir = dir.normalized();
 		}
 		else

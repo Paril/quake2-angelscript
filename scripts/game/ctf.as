@@ -1862,8 +1862,8 @@ void CTFDeadDropTech(ASEntity @ent)
 		{
 			@dropped = Drop_Item(ent, GetItemByIndex(id));
 			// hack the velocity to make it bounce random
-			dropped.velocity[0] = crandom_open() * 300;
-			dropped.velocity[1] = crandom_open() * 300;
+			dropped.velocity[0] = crandom() * 300;
+			dropped.velocity[1] = crandom() * 300;
 			dropped.nextthink = level.time + CTF_TECH_TIMEOUT;
 			@dropped.think = TechThink;
 			@dropped.owner = null;
