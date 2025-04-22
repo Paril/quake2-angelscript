@@ -3,22 +3,7 @@
 
 #pragma once
 
-/*
- *
- * a lightweight debugger for AngelScript. Built originally for Q2AS,
- * but hopefully usable for other purposes.
- * Design philosophy:
- * - zero overhead unless any debugging features are actually in use
- * - renders to an ImGui window
- * - only renders elements when requested; all rendered elements
- *   are cached by type + address.
- * - subclass to change how certain elements are rendered, etc.
- * - uses STL stuff to be portable.
- * - requires either fmt or std::format
- */
-
 #include <angelscript.h>
-#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -115,9 +100,9 @@ struct asIDBVarName
     inline bool operator<(const asIDBVarName &b) const
     {
         if (ns == b.ns)
-            return name < b.name;
+            return asIDBNatILess()(name, b.name);
 
-        return ns < b.ns;
+        return asIDBNatILess()(ns, b.ns);
     }
 
     inline std::string Combine() const
@@ -135,20 +120,25 @@ struct asIDBVariable
 {
     using Ptr = std::shared_ptr<asIDBVariable>;
     using WeakPtr = std::weak_ptr<asIDBVariable>;
-    using Set = std::unordered_set<Ptr>;
     using WeakVector = std::vector<WeakPtr>;
     using Vector = std::vector<Ptr>;
     using Map = std::unordered_map<int64_t, WeakPtr>;
+    using Set = std::unordered_set<Ptr>;
 
-    struct PtrLess
+    struct Less
     {
-        inline bool operator()(const asIDBVariable::Ptr &a, const asIDBVariable::Ptr &b) const
+        inline bool operator()(const Ptr &a, const Ptr &b) const
         {
-            return a->identifier < b->identifier;
+            return *a < *b;
         }
     };
 
-    using SortedSet = std::set<Ptr, PtrLess>;
+    inline bool operator<(const asIDBVariable &b) const
+    {
+        return identifier < b.identifier;
+    }
+
+    using SortedSet = std::set<Ptr, Less>;
 
     asIDBDebugger &dbg;
     WeakPtr        ptr;
@@ -187,7 +177,7 @@ struct asIDBVariable
         dbg(dbg)
     {
     }
-
+    
     Ptr CreateChildVariable(asIDBVarName identifier, asIDBVarAddr address, std::string_view typeName);
 
     void Evaluate();
@@ -419,6 +409,7 @@ using asIDBSectionFunctionBreakpoints = std::unordered_set<std::string>;
 enum class asIDBAction : uint8_t
 {
     None,
+    Pause,     // pause on next line, whatever it is
     StepInto,
     StepOver,
     StepOut,
@@ -435,21 +426,49 @@ struct asIDBLineCol
     }
 };
 
-using asIDBSectionSet = std::set<std::string, std::less<>>;
+struct asIDBSource
+{
+    std::string     section;
+    uint64_t        ref;
+
+    asIDBSource(std::string_view v, uint64_t ref) :
+        section(v),
+        ref(ref)
+    {
+    }
+
+    struct LessComparator
+    {
+        using is_transparent = std::true_type;
+
+        bool operator()(const std::string_view &a, const asIDBSource &b) const
+        {
+            return a < b.section;
+        }
+
+        bool operator()(const asIDBSource &a, const std::string_view &b) const
+        {
+            return a.section < b;
+        }
+
+        bool operator()(const asIDBSource &a, const asIDBSource &b) const
+        {
+            return a.section < b.section;
+        }
+    };
+
+    inline bool operator<(const std::string_view &a) const { return section < a; }
+};
+
+using asIDBSectionSet = std::set<asIDBSource, asIDBSource::LessComparator>;
 using asIDBEngineSet = std::unordered_set<asIScriptEngine *>;
 using asIDBPotentialBreakpointMap = std::unordered_map<std::string_view, std::set<asIDBLineCol, std::less<>>>;
 
 // The workspace is contains information about the
 // "project" that the debugger is operating within.
-// This should be set, otherwise file comparisons
-// and such may not work. File paths are always
-// stored relatively, because debuggers have different
-// ideas on file paths.
-struct asIDBWorkspace
+/*abstract*/ class asIDBWorkspace
 {
-    // base path for the workspace
-    std::string base_path;
-
+public:
     // sections that this workspace is working with
     asIDBSectionSet sections;
 
@@ -459,7 +478,46 @@ struct asIDBWorkspace
     // map of breakpoint positions
     asIDBPotentialBreakpointMap potential_breakpoints;
 
-    asIDBWorkspace(std::string_view base_path, std::initializer_list<asIScriptEngine *> engines) :
+    // source ref id
+    uint64_t ref_id = 1;
+
+    asIDBWorkspace(std::initializer_list<asIScriptEngine *> engines)
+    {
+        for (auto &engine : engines)
+            if (engine)
+                this->engines.insert(engine);
+    }
+
+    virtual ~asIDBWorkspace() { }
+
+    virtual void AddSection(std::string_view section)
+    {
+        if (auto it = sections.find(section); it == sections.end())
+            sections.emplace(section, ref_id++);
+    }
+
+    // convert section names to physical path and vice versa
+    virtual std::string PathToSection(const std::string_view v) const = 0;
+    virtual std::string SectionToPath(const std::string_view v) const = 0;
+    
+    // check if a section is virtual.
+    virtual bool SectionIsVirtual(const std::string_view v) const = 0;
+
+    // return the full section source of the given section.
+    virtual std::string SectionSource(const std::string_view v) const = 0;
+};
+
+// A basic workspace that expects the sources go into
+// the code unmodified and are just read directly from
+// the filesystem.
+class asIDBFileWorkspace : public asIDBWorkspace
+{
+    // base path for the workspace
+    std::string base_path;
+
+public:
+    asIDBFileWorkspace(std::string_view base_path, std::initializer_list<asIScriptEngine *> engines) :
+        asIDBWorkspace(engines),
         base_path(base_path)
     {
         for (auto &engine : engines)
@@ -470,22 +528,17 @@ struct asIDBWorkspace
         CompileBreakpointPositions();
     }
 
-    virtual void AddSection(std::string_view section)
+    virtual std::string PathToSection(const std::string_view v) const override;
+    virtual std::string SectionToPath(const std::string_view v) const override;
+
+    virtual bool SectionIsVirtual(const std::string_view v) const override
     {
-        if (auto it = sections.find(section); it == sections.end())
-            sections.insert(std::string(section));
+        return false;
     }
 
-    virtual std::string PathToSection(const std::string_view v) const
-    {
-        return std::filesystem::relative(v, base_path).generic_string();
-    }
+    virtual std::string SectionSource(const std::string_view v) const override;
 
-    virtual std::string SectionToPath(const std::string_view v) const
-    {
-        return (base_path + '/').append(v);
-    }
-
+private:
     void CompileScriptSources();
     void CompileBreakpointPositions();
 };
@@ -513,13 +566,8 @@ public:
     // (used to prevent infinite loops)
     std::atomic_bool internal_execution = false;
 
-    // workspace
-    asIDBWorkspace *workspace;
-
-    // active breakpoints
-    asIDBBreakpointMap breakpoints;
-
-    // active function breakpoints
+    asIDBWorkspace                 *workspace;
+    asIDBBreakpointMap              breakpoints;
     asIDBSectionFunctionBreakpoints function_breakpoints;
 
     // cache for the current active broken state.

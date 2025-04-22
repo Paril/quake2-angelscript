@@ -104,7 +104,10 @@ asIDBVariable::Ptr asIDBVariable::CreateChildVariable(asIDBVarName identifier, a
     child->identifier = identifier;
     child->address = address;
     child->typeName = typeName;
-    namedProps.insert(child);
+    if (identifier.name[0] == '[')
+        indexedProps.push_back(child);
+    else
+        namedProps.insert(child);
     return child;
 }
 
@@ -189,7 +192,8 @@ void asIDBScope::CalcLocals(asIDBDebugger &dbg, asIScriptFunction *function, asI
 
     container->evaluated = container->expanded = true;
 
-    if (!container->namedProps.empty())
+    if (!container->namedProps.empty() ||
+        !container->indexedProps.empty())
         container->SetRefId();
 }
 
@@ -373,21 +377,23 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
             {
                 auto var = stack->scope.this_ptr.lock();
                 var->Expand();
-
+                
                 for (auto &param : var->namedProps)
-                {
-                    if (variable_name != param->identifier.name)
-                        continue;
-
-                    matches.push_back({ param, param->identifier.name });
-                }
+                    if (variable_name == param->identifier.name)
+                        matches.push_back({ param, param->identifier.name });
+                for (auto &param : var->indexedProps)
+                    if (variable_name == param->identifier.name)
+                        matches.push_back({ param, param->identifier.name });
             }
         }
 
         // check globals
         CacheGlobals();
-
+        
         for (auto &global : globals->namedProps)
+            if (variable_name == global->identifier.name)
+                matches.push_back({ global, global->identifier.name, global->identifier.ns });
+        for (auto &global : globals->indexedProps)
             if (variable_name == global->identifier.name)
                 matches.push_back({ global, global->identifier.name, global->identifier.ns });
 
@@ -436,7 +442,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
     varp->Expand();
 
-    if (varp->namedProps.empty())
+    if (varp->namedProps.empty() && varp->indexedProps.empty())
         return asIDBExpected("no members");
 
     // check what kind of sub-evaluator to use
@@ -447,6 +453,13 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
         eval_name.remove_prefix(1);
 
     for (auto &child : varp->namedProps)
+    {
+        if (child->identifier.name == eval_name)
+            return ResolveSubExpression(child, eval_start == std::string_view::npos ? std::string_view {}
+                                                                                    : rest.substr(eval_start));
+    }
+
+    for (auto &child : varp->indexedProps)
     {
         if (child->identifier.name == eval_name)
             return ResolveSubExpression(child, eval_start == std::string_view::npos ? std::string_view {}
@@ -561,7 +574,8 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
     globals->evaluated = globals->expanded = true;
 
-    if (!globals->namedProps.empty())
+    if (!globals->namedProps.empty() ||
+        !globals->indexedProps.empty())
         globals->SetRefId();
 }
 
@@ -1007,7 +1021,35 @@ const asIDBTypeEvaluator &asIDBCache::GetEvaluator(const asIDBVarAddr &id) const
     return objectType;
 }
 
-void asIDBWorkspace::CompileScriptSources()
+#include <filesystem>
+#include <fstream>
+
+std::string asIDBFileWorkspace::PathToSection(const std::string_view v) const
+{
+    return std::filesystem::relative(v, base_path).generic_string();
+}
+
+std::string asIDBFileWorkspace::SectionToPath(const std::string_view v) const
+{
+    return (base_path + '/').append(v);
+}
+
+std::string asIDBFileWorkspace::SectionSource(const std::string_view v) const
+{
+    std::filesystem::path p(SectionToPath(v));
+    size_t size = std::filesystem::file_size(p);
+    std::string data(size, '\0');
+    std::ifstream in(p);
+    in.read(data.data(), size);
+
+    // not sure why this is necessary but here we go
+    if (auto nul = data.find_first_of('\0'))
+        data.erase(nul);
+
+    return data;
+}
+
+void asIDBFileWorkspace::CompileScriptSources()
 {
     for (auto &engine : engines)
     {
@@ -1021,7 +1063,7 @@ void asIDBWorkspace::CompileScriptSources()
     }
 }
 
-void asIDBWorkspace::CompileBreakpointPositions()
+void asIDBFileWorkspace::CompileBreakpointPositions()
 {
     potential_breakpoints.clear();
 
@@ -1072,7 +1114,8 @@ void asIDBWorkspace::CompileBreakpointPositions()
     if (debugger->action != asIDBAction::None)
     {
         // Step Into just breaks on whatever happens to be next.
-        if (debugger->action == asIDBAction::StepInto)
+        if (debugger->action == asIDBAction::Pause ||
+            debugger->action == asIDBAction::StepInto)
         {
             debugger->DebugBreak(ctx);
             return;
@@ -1196,7 +1239,9 @@ void asIDBDebugger::SetAction(asIDBAction new_action)
     {
         std::scoped_lock lock(mutex);
         action = new_action;
-        stack_size = cache->ctx->GetCallstackSize();
+
+        if (cache)
+            stack_size = cache->ctx->GetCallstackSize();
     }
 
     Resume();

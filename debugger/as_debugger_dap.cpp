@@ -4,6 +4,7 @@
 #include "as_debugger_dap.h"
 #include "as_debugger.h"
 #include <dap/session.h>
+#include <filesystem>
 
 class asIDBDAPClient
 {
@@ -28,6 +29,7 @@ public:
             response.supportsEvaluateForHovers = true;
             response.supportsFunctionBreakpoints = true;
             response.supportsBreakpointLocationsRequest = true;
+            response.supportsLoadedSourcesRequest = true;
             return response;
         });
 
@@ -42,18 +44,59 @@ public:
         session->registerHandler([&](const dap::StackTraceRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::ScopesRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::VariablesRequest &request) { return this->HandleRequest(request); });
+        session->registerHandler([&](const dap::PauseRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::ContinueRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::StepOutRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::StepInRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::NextRequest &request) { return this->HandleRequest(request); });
         session->registerHandler([&](const dap::EvaluateRequest &request) { return this->HandleRequest(request); });
+        session->registerHandler([&](const dap::AttachRequest &request) { return this->HandleRequest(request); });
         session->registerHandler(
             [&](const dap::BreakpointLocationsRequest &request) { return this->HandleRequest(request); });
+        session->registerHandler(
+            [&](const dap::LoadedSourcesRequest &response) { return this->HandleRequest(response); });
+        session->registerHandler(
+            [&](const dap::SourceRequest &response) { return this->HandleRequest(response); });
 
         session->registerSentHandler(
             [&](const dap::ResponseOrError<dap::InitializeResponse> &response) { OnResponseSent(response); });
         session->registerSentHandler(
             [&](const dap::ResponseOrError<dap::ConfigurationDoneResponse> &response) { OnResponseSent(response); });
+    }
+    
+    dap::AttachResponse HandleRequest(const dap::AttachRequest &request)
+    {
+        return dap::AttachResponse {};
+    }
+    
+    dap::LoadedSourcesResponse HandleRequest(const dap::LoadedSourcesRequest &request)
+    {
+        dap::LoadedSourcesResponse response {};
+
+        for (auto &source : dbg->workspace->sections)
+        {
+            auto &src = response.sources.emplace_back();
+            src.name = source.section;
+            src.path = dbg->workspace->SectionToPath(source.section);
+            if (dbg->workspace->SectionIsVirtual(source.section))
+                src.sourceReference = source.ref;
+        }
+
+        return response;
+    }
+    
+    dap::ResponseOrError<dap::SourceResponse> HandleRequest(const dap::SourceRequest &request)
+    {
+        dap::SourceResponse response {};
+
+        auto source_it = dbg->workspace->sections.find(std::string_view(request.source->name.value()));
+
+        if (source_it == dbg->workspace->sections.end())
+            return dap::Error("can't find source");
+
+        response.content = dbg->workspace->SectionSource(request.source->name.value());
+
+        return response;
     }
 
     dap::BreakpointLocationsResponse HandleRequest(const dap::BreakpointLocationsRequest &request)
@@ -117,8 +160,8 @@ public:
             if (request.breakpoints && !request.breakpoints->empty())
             {
                 auto &pathstrptr = *dbg->workspace->sections.find(pathstr);
-                auto &positions = dbg->workspace->potential_breakpoints[pathstrptr];
-                auto  it = dbg->breakpoints.find(pathstrptr);
+                auto &positions = dbg->workspace->potential_breakpoints[pathstrptr.section];
+                auto  it = dbg->breakpoints.find(pathstrptr.section);
 
                 for (auto &bp : *request.breakpoints)
                 {
@@ -152,7 +195,7 @@ public:
                     placed_bp.verified = true;
 
                     if (it == dbg->breakpoints.end())
-                        it = dbg->breakpoints.insert({ pathstrptr, asIDBSectionBreakpoints {} }).first;
+                        it = dbg->breakpoints.insert({ pathstrptr.section, asIDBSectionBreakpoints {} }).first;
 
                     it->second.push_back({ (int) closest.line, (int) closest.col });
                 }
@@ -257,28 +300,34 @@ public:
             if (stack.id != request.frameId)
                 continue;
 
-            if (!stack.scope.locals->namedProps.empty())
+            if (!stack.scope.locals->namedProps.empty() ||
+                !stack.scope.locals->indexedProps.empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Locals";
                 scope.presentationHint = "locals";
                 scope.namedVariables = stack.scope.locals->namedProps.size();
+                scope.indexedVariables = stack.scope.locals->indexedProps.size();
                 scope.variablesReference = stack.scope.locals->expandRefId.value();
             }
-            if (!stack.scope.parameters->namedProps.empty())
+            if (!stack.scope.parameters->namedProps.empty() ||
+                !stack.scope.parameters->indexedProps.empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Parameters";
                 scope.presentationHint = "parameters";
                 scope.namedVariables = stack.scope.parameters->namedProps.size();
+                scope.indexedVariables = stack.scope.locals->indexedProps.size();
                 scope.variablesReference = stack.scope.parameters->expandRefId.value();
             }
-            if (!stack.scope.registers->namedProps.empty())
+            if (!stack.scope.registers->namedProps.empty() ||
+                !stack.scope.registers->indexedProps.empty())
             {
                 auto &scope = response.scopes.emplace_back();
                 scope.name = "Registers";
                 scope.presentationHint = "registers";
                 scope.namedVariables = stack.scope.registers->namedProps.size();
+                scope.indexedVariables = stack.scope.locals->indexedProps.size();
                 scope.variablesReference = stack.scope.registers->expandRefId.value();
             }
             found = true;
@@ -288,14 +337,16 @@ public:
         if (!found)
             return dap::Error { "invalid stack ID" };
 
-        if (!dbg->cache->globals->namedProps.empty())
+        if (!dbg->cache->globals->namedProps.empty() ||
+            !dbg->cache->globals->indexedProps.empty())
         {
             auto &scope = response.scopes.emplace_back();
             scope.name = "Globals";
             scope.presentationHint = "globals";
             scope.namedVariables = dbg->cache->globals->namedProps.size();
-            scope.expensive = true;
+            scope.indexedVariables = dbg->cache->globals->indexedProps.size();
             scope.variablesReference = dbg->cache->globals->expandRefId.value();
+            scope.expensive = true;
         }
 
         return response;
@@ -314,18 +365,10 @@ public:
 
         varContainer->Evaluate();
         varContainer->Expand();
-
-        int64_t start = request.start.has_value() ? (int64_t) request.start.value() : 0;
-        int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->namedProps.size();
-
-        auto it = varContainer->namedProps.begin();
-        std::advance(it, start);
-
-        for (int64_t i = start; i < count; i++)
+        
+        auto emplace_var = [&](const asIDBVariable::Ptr &local)
         {
-            auto &local = *it;
             auto &var = response.variables.emplace_back();
-
             local->Evaluate();
             var.name = local->identifier.Combine();
             var.type = dap::string(local->typeName);
@@ -341,11 +384,30 @@ public:
                 var.value = local->value.empty() ? local->typeName : local->value;
             }
             var.namedVariables = local->namedProps.size();
+            var.indexedVariables = local->indexedProps.size();
             var.variablesReference = local->expandRefId.value_or(0);
-            it++;
+        };
+
+        if (!request.filter.has_value() || request.filter.value() == "named")
+            for (auto &var : varContainer->namedProps)
+                emplace_var(var);
+        
+        if (!request.filter.has_value() || request.filter.value() == "indexed")
+        {
+            int64_t start = request.start.has_value() ? (int64_t) request.start.value() : 0;
+            int64_t count = request.count.has_value() ? (int64_t) request.count.value() : varContainer->indexedProps.size();
+
+            for (int64_t i = start; i < count; i++)
+                emplace_var(varContainer->indexedProps[i]);
         }
 
         return response;
+    }
+
+    dap::PauseResponse HandleRequest(const dap::PauseRequest &request)
+    {
+        dbg->SetAction(asIDBAction::Pause);
+        return {};
     }
 
     dap::ContinueResponse HandleRequest(const dap::ContinueRequest &request)
@@ -419,11 +481,6 @@ public:
 
     void OnResponseSent(const dap::ResponseOrError<dap::ConfigurationDoneResponse> &response)
     {
-        dap::ThreadEvent threadStartedEvent;
-        threadStartedEvent.reason = "started";
-        threadStartedEvent.threadId = 1;
-        session->send(threadStartedEvent);
-
         configuration_complete = true;
     }
 };
