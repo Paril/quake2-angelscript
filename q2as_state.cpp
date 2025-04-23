@@ -442,6 +442,7 @@ bool q2as_state_t::Build()
     }
 
     stringTypeId = engine->GetStringFactory();
+    debugger_state.outdated = true;
 
     {
         asIScriptFunction *func = mainModule->GetFunctionByDecl("void main(bool)");
@@ -521,7 +522,6 @@ bool q2as_state_t::Execute(asIScriptContext *context)
     {
         Print("AngelScript Exception\n");
         Print((exceptionInfo = GetExceptionInfo(context, true)).c_str());
-        debugger_state.DebugBreak(context);
         return false;
     }
 

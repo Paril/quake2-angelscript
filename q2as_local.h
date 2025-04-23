@@ -144,6 +144,9 @@ constexpr int INSTRU_GC = 8;
 // no need to have a debugger for each one.
 struct q2as_dbg_state_t
 {
+    // set to true to re-set the workspace.
+    bool outdated = false;
+
     std::unique_ptr<asIDBDebugger>  debugger;
     std::unique_ptr<asIDBWorkspace> workspace;
 

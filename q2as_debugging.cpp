@@ -1,5 +1,6 @@
 #include "q2as_local.h"
 #include <chrono>
+#include <filesystem>
 
 // DEBUGGER
 
@@ -44,8 +45,6 @@ public:
     }
 };
 
-// VSCode DAP, will be moved into a separate
-// type eventually.
 class q2as_asIDBDebuggerVSCode : public asIDBDebugger
 {
 public:
@@ -99,35 +98,24 @@ protected:
         if (!server->ClientConnected())
             return;
 
-        if (cache)
+        if (cache && cache->ctx->GetState() == asEXECUTION_EXCEPTION)
         {
             auto ctx = cache->ctx;
-
-            asIScriptFunction *func = nullptr;
-            int                col = 0;
-            const char        *sec = nullptr;
-            int                row = 0;
-
-            if (ctx->GetState() == asEXECUTION_EXCEPTION)
-            {
-                func = ctx->GetExceptionFunction();
-
-                if (func)
-                    row = ctx->GetExceptionLineNumber(&col, &sec);
-            }
-            else
-            {
-                func = ctx->GetFunction(0);
-
-                if (func)
-                    row = ctx->GetLineNumber(0, &col, &sec);
-            }
+            dap::StoppedEvent stoppedEvent;
+            stoppedEvent.reason = "exception";
+            stoppedEvent.description = "Paused on exception";
+            stoppedEvent.allThreadsStopped = true;
+            stoppedEvent.text = cache->ctx->GetExceptionString();
+            stoppedEvent.threadId = 1;
+            server->SendEventToClient(stoppedEvent);
         }
-
+        else
         {
             dap::StoppedEvent stoppedEvent;
+            stoppedEvent.reason = "breakpoint";
             stoppedEvent.description = "Paused on breakpoint";
             stoppedEvent.allThreadsStopped = true;
+            stoppedEvent.threadId = 1;
             server->SendEventToClient(stoppedEvent);
         }
 
@@ -210,18 +198,22 @@ void q2as_dbg_state_t::CheckDebugger(asIScriptContext *ctx)
         return;
 
     // create the debugger
-    if (!debugger)
+    if (!debugger || debugger_state.outdated)
     {
+        debugger.reset();
+        debugger_state.workspace.reset();
+
         debugger_state.workspace =
-            std::make_unique<asIDBWorkspace>(std::filesystem::path(Q2AS_ScriptPath()).generic_string(),
-                                             std::initializer_list<asIScriptEngine *> { svas.engine, cgas.engine });
+            std::make_unique<asIDBFileWorkspace>(std::filesystem::path(Q2AS_ScriptPath()).generic_string(),
+                                                 std::initializer_list<asIScriptEngine *> { svas.engine, cgas.engine });
+
         debugger = std::make_unique<q2as_asIDBDebuggerVSCode>(debugger_state.workspace.get());
+        debugger_state.outdated = false;
     }
 
     // hook the context if the debugger
     // has work to do (breakpoints, etc)
-    if (debugger->HasWork())
-        debugger->HookContext(ctx);
+    debugger->HookContext(ctx, debugger->HasWork());
 }
 
 void q2as_dbg_state_t::DebugBreak(asIScriptContext *ctx)

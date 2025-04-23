@@ -487,10 +487,16 @@ static void Q2AS_CG_Init()
     ctx.Execute();
 }
 
+// just for the exception state thing
+enum
+{
+    STAT_LAYOUTS = 13
+};
+
 static layout_flags_t Q2AS_CG_LayoutFlags(const player_state_t *ps)
 {
     if (q2as_state_t::CheckExceptionState())
-        return LAYOUTS_NONE;
+        return (layout_flags_t) ps->stats[STAT_LAYOUTS];
 
     debugger_state.current_tid = 2;
 

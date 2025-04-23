@@ -476,7 +476,7 @@ void *asIDBCache::ResolvePropertyAddress(const asIDBVarAddr &id, int propertyInd
 
     if (auto sysfunc = ctx->GetSystemFunction())
         call_stack.emplace_back(asIDBCallStackEntry { dbg.frame_offset++, sysfunc->GetDeclaration(true, false, true),
-                                                      "(system function)", 0, 0,
+                                                      "", 0, 0,
                                                       asIDBScope(SCOPE_SYSTEM, dbg, sysfunc) });
 
     for (asUINT n = 0; n < ctx->GetCallstackSize(); n++)
@@ -1185,13 +1185,23 @@ void asIDBFileWorkspace::CompileBreakpointPositions()
         debugger->DebugBreak(ctx);
 }
 
-void asIDBDebugger::HookContext(asIScriptContext *ctx)
+/*static*/ void asIDBDebugger::ExceptionCallback(asIScriptContext *ctx, asIDBDebugger *debugger)
+{
+    if (!debugger->internal_execution)
+        debugger->DebugBreak(ctx);
+}
+
+void asIDBDebugger::HookContext(asIScriptContext *ctx, bool has_work)
 {
     // TODO: is this safe to be called even if
     // the context is being switched?
     if (ctx->GetState() != asEXECUTION_EXCEPTION &&
         workspace->engines.find(ctx->GetEngine()) != workspace->engines.end())
-        ctx->SetLineCallback(asFUNCTION(asIDBDebugger::LineCallback), this, asCALL_CDECL);
+    {
+        if (has_work)
+            ctx->SetLineCallback(asFUNCTION(asIDBDebugger::LineCallback), this, asCALL_CDECL);
+        ctx->SetExceptionCallback(asFUNCTION(asIDBDebugger::ExceptionCallback), this, asCALL_CDECL);
+    }
 }
 
 void asIDBDebugger::DebugBreak(asIScriptContext *ctx)
@@ -1209,7 +1219,8 @@ void asIDBDebugger::DebugBreak(asIScriptContext *ctx)
 
         std::swap(cache, new_cache);
     }
-    HookContext(ctx);
+
+    HookContext(ctx, true);
     Suspend();
 }
 

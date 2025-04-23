@@ -472,8 +472,7 @@ static void Q2AS_PrepFrame()
             if (!e->inuse)
                 continue;
 
-            e->s = {};
-            e->s.number = e - svas.edicts;
+            e->s.sound = 0;
         }
 
         // black out player 1's screen
