@@ -203,11 +203,9 @@ void weapon_tracker_fire(ASEntity &self)
 	if (!G_ShouldPlayersCollide(true))
 		mask = contents_t(mask & ~contents_t::PLAYER);
 
-    // AS_TODO
-	//G_LagCompensate(self, start, dir);
+	G_LagCompensate(self, start, dir);
 	tr = gi_traceline(start, end, self.e, mask);
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 	if (tr.ent is world.e)
 		tr = gi_trace(start, mins, maxs, end, self.e, mask);
 
@@ -399,11 +397,9 @@ void Heatbeam_Fire(ASEntity &ent)
 	P_ProjectSource(ent, ent.client.v_angle, { 7, 2, -3 }, start, dir);
 
 	// This offset is the entity offset
-    // AS_TODO
-	//G_LagCompensate(ent, start, dir);
+	G_LagCompensate(ent, start, dir);
 	fire_heatbeam(ent, start, dir, { 2, 7, -3 }, damage, kick, false);
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 	Weapon_PowerupSound(ent);
 
 	// send muzzle flash

@@ -131,7 +131,6 @@ abstract class pierce_args_t
         // this is fatal and indicative of a code error
         if (!restored)
             gi_Com_Error("pierce restore was not called");
-		//restore();
 	}
 };
 

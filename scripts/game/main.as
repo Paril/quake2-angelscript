@@ -981,7 +981,7 @@ void InitGame()
 	
 	// how far back we should support lag origins for
 	game.max_lag_origins = uint(20 * (0.1f / gi_frame_time_s));
-	game.lag_origins = array<vec3_t>(game.max_lag_origins);
+	game.lag_origins = array<vec3_t>(game.max_lag_origins * max_clients);
 
     FRAME_TIME_MS = FRAME_TIME_S = time_ms(gi_frame_time_ms);
 

@@ -1543,11 +1543,9 @@ void Machinegun_Fire(ASEntity &ent)
 	vec3_t start, dir;
 	// Paril: kill sideways angle on hitscan
 	P_ProjectSource(ent, ent.client.v_angle, vec3_t(0, 0, -8), start, dir, true);
-    // AS_TODO
-	//G_LagCompensate(ent, start, dir);
+	G_LagCompensate(ent, start, dir);
 	fire_bullet(ent, start, dir, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, mod_id_t::MACHINEGUN);
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 	Weapon_PowerupSound(ent);
 
 	gi_WriteByte(svc_t::muzzleflash);
@@ -1675,8 +1673,7 @@ void Chaingun_Fire(ASEntity &ent)
 	vec3_t start, dir;
 	P_ProjectSource(ent, ent.client.v_angle, vec3_t(0, 0, -8), start, dir, true);
 
-    // AS_TODO
-	//G_LagCompensate(ent, start, dir);
+	G_LagCompensate(ent, start, dir);
 	for (i = 0; i < shots; i++)
 	{
 		// get start / end positions
@@ -1687,8 +1684,7 @@ void Chaingun_Fire(ASEntity &ent)
 
 		fire_bullet(ent, start, dir, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, mod_id_t::CHAINGUN);
 	}
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 
 	Weapon_PowerupSound(ent);
 
@@ -1742,14 +1738,12 @@ void weapon_shotgun_fire(ASEntity &ent)
 		kick *= damage_multiplier;
 	}
 
-    // AS_TODO
-	//G_LagCompensate(ent, start, dir);
+	G_LagCompensate(ent, start, dir);
 	if (deathmatch.integer != 0)
 		fire_shotgun(ent, start, dir, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, mod_id_t::SHOTGUN);
 	else
 		fire_shotgun(ent, start, dir, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, mod_id_t::SHOTGUN);
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 
 	// send muzzle flash
 	gi_WriteByte(svc_t::muzzleflash);
@@ -1784,8 +1778,7 @@ void weapon_supershotgun_fire(ASEntity &ent)
 	vec3_t start, dir;
 	// Paril: kill sideways angle on hitscan
 	P_ProjectSource(ent, ent.client.v_angle, vec3_t(0, 0, -8), start, dir);
-    // AS_TODO
-	//G_LagCompensate(ent, start, dir);
+	G_LagCompensate(ent, start, dir);
 	vec3_t v;
 	v.pitch = ent.client.v_angle.pitch;
 	v.yaw = ent.client.v_angle.yaw - 5;
@@ -1796,8 +1789,7 @@ void weapon_supershotgun_fire(ASEntity &ent)
 	v.yaw = ent.client.v_angle.yaw + 5;
 	P_ProjectSource(ent, v, { 0, 0, -8 }, start, dir, true);
 	fire_shotgun(ent, start, dir, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, mod_id_t::SSHOTGUN);
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 
 	P_AddWeaponKick(ent, ent.client.v_forward * -2, vec3_t(-2.0f, 0.0f, 0.0f));
 
@@ -1852,11 +1844,9 @@ void weapon_railgun_fire(ASEntity &ent)
 
 	vec3_t start, dir;
 	P_ProjectSource(ent, ent.client.v_angle, { 0, 7, -8 }, start, dir, true);
-    // AS_TODO
-	//G_LagCompensate(ent, start, dir);
+	G_LagCompensate(ent, start, dir);
 	fire_rail(ent, start, dir, damage, kick);
-    // AS_TODO
-	//G_UnLagCompensate();
+	G_UnLagCompensate();
 
 	P_AddWeaponKick(ent, ent.client.v_forward * -3, { -3.f, 0.f, 0.f });
 
@@ -1942,4 +1932,91 @@ const array<int> bfg_fire_frames = { 9, 17 };
 void Weapon_BFG(ASEntity &ent)
 {
 	Weapon_Generic(ent, 8, 32, 54, 58, bfg_pause_frames, bfg_fire_frames, weapon_bfg_fire);
+}
+
+// Lag compensation code
+// [Paril-KEX] push all players' origins back to match their lag compensation
+void G_LagCompensate(ASEntity &from_player, const vec3_t &in start, const vec3_t &in dir)
+{
+	uint32 current_frame = gi_ServerFrame();
+
+	// if you need this to fight monsters, you need help
+	if (deathmatch.integer == 0)
+		return;
+	else if (g_lag_compensation.integer == 0)
+		return;
+	// don't need this
+	else if (from_player.client.cmd.server_frame >= current_frame ||
+		(from_player.e.svflags & svflags_t::BOT) != 0)
+		return;
+
+	int32 frame_delta = (current_frame - from_player.client.cmd.server_frame) + 1;
+
+	foreach (auto @player : active_players)
+	{
+		// we aren't gonna hit ourselves
+		if (player is from_player)
+			continue;
+
+		// not enough data, spare them
+		if (player.client.num_lag_origins < frame_delta)
+			continue;
+
+		// if they're way outside of cone of vision, they won't be captured in this
+		if ((player.e.origin - start).normalized().dot(dir) < 0.75f)
+			continue;
+
+		int32 lag_id = (player.client.next_lag_origin - 1) - (frame_delta - 1);
+
+		if (lag_id < 0)
+			lag_id = game.max_lag_origins + lag_id;
+
+		if (lag_id < 0 || lag_id >= player.client.num_lag_origins)
+		{
+			gi_Com_Print("lag compensation error\n");
+			G_UnLagCompensate();
+			return;
+		}
+
+		vec3_t lag_origin = game.lag_origins[((player.e.number - 1) * game.max_lag_origins) + lag_id];
+
+		// no way they'd be hit if they aren't in the PVS
+		if (!gi_inPVS(lag_origin, start, false))
+			continue;
+
+		// only back up once
+		if (!player.client.is_lag_compensated)
+		{
+			player.client.is_lag_compensated = true;
+			player.client.lag_restore_origin = player.e.origin;
+		}
+			
+		player.e.origin = lag_origin;
+
+		gi_linkentity(player.e);
+	}
+}
+
+// [Paril-KEX] pop everybody's lag compensation values
+void G_UnLagCompensate()
+{
+	foreach (auto @player : active_players)
+	{
+		if (player.client.is_lag_compensated)
+		{
+			player.client.is_lag_compensated = false;
+			player.e.origin = player.client.lag_restore_origin;
+			gi_linkentity(player.e);
+		}
+	}
+}
+
+// [Paril-KEX] save the current lag compensation value
+void G_SaveLagCompensation(ASEntity &ent)
+{
+	game.lag_origins[((ent.e.number - 1) * game.max_lag_origins) + ent.client.next_lag_origin] = ent.e.origin;
+	ent.client.next_lag_origin = (ent.client.next_lag_origin + 1) % game.max_lag_origins;
+
+	if (ent.client.num_lag_origins < game.max_lag_origins)
+		ent.client.num_lag_origins++;
 }

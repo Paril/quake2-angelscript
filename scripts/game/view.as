@@ -1401,9 +1401,8 @@ void ClientEndServerFrame(ASEntity &ent)
 
 	P_AssignClientSkinnum(ent);
 
-    // AS_TODO
-	//if (deathmatch.integer)
-	//	G_SaveLagCompensation(ent);
+	if (deathmatch.integer != 0)
+		G_SaveLagCompensation(ent);
 
 	Compass_Update(ent, false);
 
