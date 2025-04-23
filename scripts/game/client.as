@@ -2235,7 +2235,12 @@ void P_AssignClientSkinnum(ASEntity &ent)
 	else
 		poi_icon = 0;
 
-	ent.e.s.skinnum = client_num | (vwep_index << 8) | (viewheight << 16) | (team_index << 24) | (poi_icon << 28);
+	ent.e.s.skinnum =
+		(uint32(client_num) 	& 0xFF) 		|
+		((uint32(vwep_index) 	& 0xFF) << 8) 	|
+		((uint32(viewheight) 	& 0xFF) << 16) 	|
+		((uint32(team_index) 	& 0x0F) << 24) 	|
+		((uint32(poi_icon) 		& 0x0F) << 28);
 }
 
 // AS_TODO, enum?
