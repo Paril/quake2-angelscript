@@ -2236,7 +2236,7 @@ void P_AssignClientSkinnum(ASEntity &ent)
 		poi_icon = 0;
 
 	ent.e.s.skinnum =
-		(uint32(client_num)      & 0xFF)        |
+		(uint32(client_num)      & 0xFF)         |
 		((uint32(vwep_index)     & 0xFF) << 8)   |
 		((uint32(viewheight)     & 0xFF) << 16)  |
 		((uint32(team_index)     & 0x0F) << 24)  |
