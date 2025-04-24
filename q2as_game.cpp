@@ -2042,7 +2042,7 @@ static void Q2AS_RegisterPathFinding(q2as_registry &registry)
         .methods({
             { "const vec3_t &getPathPoint(uint i) const", asMETHOD(q2as_PathInfo, getPathPoint),  asCALL_THISCALL },
 
-            { "PathInfo &opAssign (const PathInfo &in)", asFUNCTION(Q2AS_assign<PathInfo>), asCALL_CDECL_OBJLAST },
+            { "PathInfo &opAssign (const PathInfo &in)", asFUNCTION(Q2AS_assign<q2as_PathInfo>), asCALL_CDECL_OBJLAST },
         });
 
     registry
