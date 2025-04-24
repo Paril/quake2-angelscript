@@ -3,6 +3,8 @@
 #include "q2as_platform.h"
 #include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
+
+#ifdef Q2AS_DEBUGGER
 #include <fstream>
 
 #define TRACY_ENABLE
@@ -203,6 +205,12 @@ static void StartInstrumentation(q2as_state_t &as)
     }
 }
 
+static void GarbageCallback(const asSGarbageCollectionInfo *msg, void *param)
+{
+    InstrumentationGarbageCallback((q2as_state_t *) param, msg->popped);
+}
+#endif
+
 static void MessageCallback(const asSMessageInfo *msg, void *param)
 {
     const char *type = "ERR ";
@@ -217,11 +225,6 @@ static void MessageCallback(const asSMessageInfo *msg, void *param)
 
     // if (msg->type == asMSGTYPE_ERROR)
     //__debugbreak();
-}
-
-static void GarbageCallback(const asSGarbageCollectionInfo *msg, void *param)
-{
-    InstrumentationGarbageCallback((q2as_state_t *) param, msg->popped);
 }
 
 static int engines_alive = 0;
@@ -322,7 +325,8 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
         return false;
 
     asSetGlobalMemoryFunctions(allocFunc, freeFunc);
-
+    
+#ifdef Q2AS_DEBUGGER
     if (!debugger_state.cvar)
         debugger_state.cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
     if (!debugger_state.attach_type)
@@ -333,6 +337,7 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
         debugger_state.instrumentation_modules = Cvar("q2as_instrumentation_modules", "1", CVAR_NOFLAGS);
     if (!debugger_state.instrumentation_granularity)
         debugger_state.instrumentation_granularity = Cvar("q2as_instrumentation_granularity", "0", CVAR_NOFLAGS);
+#endif
 
     return CreateEngine();
 }
@@ -442,7 +447,9 @@ bool q2as_state_t::Build()
     }
 
     stringTypeId = engine->GetStringFactory();
+#ifdef Q2AS_DEBUGGER
     debugger_state.outdated = true;
+#endif
 
     {
         asIScriptFunction *func = mainModule->GetFunctionByDecl("void main(bool)");
@@ -460,8 +467,10 @@ bool q2as_state_t::Build()
 
 void q2as_state_t::Destroy()
 {
+#ifdef Q2AS_DEBUGGER
     // destroy debugger
     debugger_state.debugger.reset();
+#endif
 
     if (engine)
         engine->ShutDownAndRelease();
@@ -483,7 +492,8 @@ void q2as_state_t::Destroy()
 q2as_ctx_t q2as_state_t::RequestContext()
 {
     auto ctx = engine->RequestContext();
-
+    
+#ifdef Q2AS_DEBUGGER
     if (debugger_state.instrumentation_type->integer)
     {
         if (debugger_state.instrumentation_modules->integer & instrumentation_bit)
@@ -505,6 +515,7 @@ q2as_ctx_t q2as_state_t::RequestContext()
     }
 
     debugger_state.CheckDebugger(ctx);
+#endif
 
     return { ctx, this };
 }
@@ -528,11 +539,13 @@ bool q2as_state_t::Execute(asIScriptContext *context)
     return true;
 }
 
+#ifdef Q2AS_DEBUGGER
 void q2as_state_t::StartInstrumentation()
 {
     if (debugger_state.instrumentation_modules->integer & instrumentation_bit)
         ::StartInstrumentation(*this);
 }
+#endif
 
 /*static*/ bool q2as_state_t::CheckExceptionState()
 {

@@ -467,6 +467,12 @@ void SP_info_null(ASEntity &self)
 	self.Free();
 }
 
+// unused in AngelScript
+void SP_hint_path(ASEntity &self)
+{
+    self.Free();
+}
+
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for lightning.
 */

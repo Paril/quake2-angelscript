@@ -97,7 +97,9 @@ q2as_sv_state_t svas;
 
 static void Q2AS_PreInitGame()
 {
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.PreInitGame);
@@ -137,8 +139,10 @@ static void Q2AS_InitGame()
         if (i >= 1 && i <= svas.maxclients)
             svas.edicts[i].client = (gclient_t *) &svas.clients[i - 1];
     }
-
+    
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.InitGame);
@@ -151,7 +155,9 @@ static void Q2AS_ShutdownGame()
     if (!svas.engine)
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     if (!q2as_state_t::CheckExceptionState())
     {
@@ -177,7 +183,9 @@ static void Q2AS_SpawnEntities(const char *mapname, const char *entstring, const
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     std::string mapname_ = mapname;
     std::string entstring_ = entstring;
@@ -199,7 +207,9 @@ static char *Q2AS_WriteGameJson(bool autosave, size_t *out_size)
         return (char *) gi.TagMalloc(1, TAG_GAME);
     }
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto                 ti = svas.engine->GetTypeInfoByName("json_mutdoc");
     q2as_yyjson_mut_doc *doc = (q2as_yyjson_mut_doc *) svas.engine->CreateScriptObject(ti);
@@ -224,7 +234,9 @@ static void Q2AS_ReadGameJson(const char *json)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto             ti = svas.engine->GetTypeInfoByName("json_doc");
     q2as_yyjson_doc *doc = (q2as_yyjson_doc *) q2as_sv_state_t::AllocStatic(sizeof(q2as_yyjson_doc));
@@ -248,7 +260,9 @@ static char *Q2AS_WriteLevelJson(bool transition, size_t *out_size)
         return (char *) gi.TagMalloc(1, TAG_GAME);
     }
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto                 ti = svas.engine->GetTypeInfoByName("json_mutdoc");
     q2as_yyjson_mut_doc *doc = (q2as_yyjson_mut_doc *) svas.engine->CreateScriptObject(ti);
@@ -273,7 +287,9 @@ static void Q2AS_ReadLevelJson(const char *json)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto             ti = svas.engine->GetTypeInfoByName("json_doc");
     q2as_yyjson_doc *doc = (q2as_yyjson_doc *) q2as_sv_state_t::AllocStatic(sizeof(q2as_yyjson_doc));
@@ -294,7 +310,9 @@ static bool Q2AS_CanSave()
     if (q2as_state_t::CheckExceptionState())
         return false;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.CanSave);
@@ -314,7 +332,9 @@ static edict_t *Q2AS_ClientChooseSlot(const char *userinfo, const char *social_i
     if (q2as_state_t::CheckExceptionState())
         return nullptr;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     std::string userinfo_ = userinfo;
     std::string social_id_ = social_id;
@@ -343,7 +363,9 @@ static bool Q2AS_ClientConnect(edict_t *ent, char *userinfo, const char *social_
     if (q2as_state_t::CheckExceptionState())
         return false;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     std::string userinfo_ = userinfo;
     std::string social_id_ = social_id;
@@ -371,7 +393,9 @@ static void Q2AS_ClientBegin(edict_t *ent)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.ClientBegin);
@@ -384,7 +408,9 @@ static void Q2AS_ClientUserinfoChanged(edict_t *ent, const char *userinfo)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     std::string userinfo_ = userinfo;
 
@@ -400,7 +426,9 @@ static void Q2AS_ClientDisconnect(edict_t *ent)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.ClientDisconnect);
@@ -413,7 +441,9 @@ static void Q2AS_ClientCommand(edict_t *ent)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     svas.cmd_args = gi.args();
 
@@ -434,7 +464,9 @@ static void Q2AS_ClientThink(edict_t *ent, usercmd_t *cmd)
     if (q2as_state_t::CheckExceptionState())
         return;
 
-    debugger_state.current_tid = 3;
+#ifdef Q2AS_DEBUGGER
+    debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.ClientThink);
@@ -448,7 +480,9 @@ void Q2AS_RunFrame(bool main_loop)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.RunFrame);
@@ -487,7 +521,9 @@ static void Q2AS_PrepFrame()
         return;
     }
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.PrepFrame);
@@ -499,7 +535,9 @@ static void Q2AS_ServerCommand()
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     if (!strcmp(gi.argv(1), "q2as_write_predefined"))
         WritePredefined();
@@ -510,7 +548,9 @@ static void Q2AS_Bot_SetWeapon(edict_t *botEdict, const int weaponIndex, const b
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.Bot_SetWeapon);
@@ -525,7 +565,9 @@ static void Q2AS_Bot_TriggerEdict(edict_t *botEdict, edict_t *edict)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.Bot_TriggerEdict);
@@ -539,7 +581,9 @@ static void Q2AS_Bot_UseItem(edict_t *botEdict, const int32_t itemID)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.Bot_UseItem);
@@ -553,7 +597,9 @@ static int32_t Q2AS_Bot_GetItemID(const char *classname)
     if (q2as_state_t::CheckExceptionState())
         return Item_Null;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     std::string classname_ = classname;
 
@@ -570,7 +616,9 @@ static void Q2AS_Edict_ForceLookAtPoint(edict_t *edict, gvec3_cref_t point)
     if (q2as_state_t::CheckExceptionState())
         return;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.Edict_ForceLookAtPoint);
@@ -584,7 +632,9 @@ static bool Q2AS_Bot_PickedUpItem(edict_t *botEdict, edict_t *itemEdict)
     if (q2as_state_t::CheckExceptionState())
         return false;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.Bot_PickedUpItem);
@@ -600,7 +650,9 @@ static bool Q2AS_Entity_IsVisibleToPlayer(edict_t *ent, edict_t *player)
     if (q2as_state_t::CheckExceptionState())
         return false;
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
+#endif
 
     auto ctx = svas.RequestContext();
     ctx->Prepare(svas.Entity_IsVisibleToPlayer);

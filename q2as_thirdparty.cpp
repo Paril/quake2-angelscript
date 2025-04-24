@@ -8,6 +8,7 @@
 #include "thirdparty/scriptstdstring/scriptstdstring.h"
 #include "thirdparty/weakref/weakref.h"
 
+#ifdef Q2AS_DEBUGGER
 class q2as_asIDBStringTypeEvaluator : public asIDBTypeEvaluator
 {
 public:
@@ -94,6 +95,7 @@ public:
         }
     }
 };
+#endif
 
 void Q2AS_RegisterThirdParty(q2as_registry &registry)
 {
@@ -109,9 +111,11 @@ void Q2AS_RegisterThirdParty(q2as_registry &registry)
     RegisterScriptWeakRef(registry.engine);
 
     RegisterExceptionRoutines(registry.engine);
-
+    
+#ifdef Q2AS_DEBUGGER
     debugger_state.RegisterEvaluator<q2as_asIDBStringTypeEvaluator>(registry.engine, "string");
     debugger_state.RegisterEvaluator<q2as_asIDBArrayTypeEvaluator>(registry.engine, "array");
     debugger_state.RegisterEvaluator<q2as_asIDBAnyTypeEvaluator>(registry.engine, "any");
     debugger_state.RegisterEvaluator<q2as_asIDBDictionaryTypeEvaluator>(registry.engine, "dictionary");
+#endif
 }

@@ -780,9 +780,6 @@ void hover_set_fly_parameters(ASEntity &self)
 
 /*QUAKED monster_hover (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
  */
-/*QUAKED monster_daedalus (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
-This is the improved icarus monster.
-*/
 void SP_monster_hover(ASEntity &self)
 {
 	const spawn_temp_t @st = ED_GetSpawnTemp();
@@ -871,4 +868,12 @@ void SP_monster_hover(ASEntity &self)
 
 	self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags | ai_flags_t::ALTERNATE_FLY);
 	hover_set_fly_parameters(self);
+}
+
+/*QUAKED monster_daedalus (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+This is the improved icarus monster.
+*/
+void SP_monster_daedalus(ASEntity &self)
+{
+    SP_monster_hover(self);
 }

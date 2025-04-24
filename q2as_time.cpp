@@ -96,6 +96,7 @@ static void gtime_formatter(std::string &str, const std::string &args, const q2a
         fmt::format_to(std::back_inserter(str), "{} ms", time.milliseconds());
 }
 
+#ifdef Q2AS_DEBUGGER
 class q2as_asIDBGTimeTypeEvaluator : public asIDBObjectTypeEvaluator
 {
     static constexpr std::tuple<uint64_t, const char *> time_suffixes[] = { { 1000 * 60 * 60, "hr" },
@@ -147,6 +148,7 @@ public:
         }
     }
 };
+#endif
 
 void Q2AS_RegisterTime(q2as_registry &registry)
 {
@@ -223,6 +225,8 @@ void Q2AS_RegisterTime(q2as_registry &registry)
 
             { "void formatter(string &str, const string &in args, const gtime_t &in time)", asFUNCTION(gtime_formatter), asCALL_CDECL }
         });
-
+    
+#ifdef Q2AS_DEBUGGER
     debugger_state.RegisterEvaluator<q2as_asIDBGTimeTypeEvaluator>(registry.engine, "gtime_t");
+#endif
 }

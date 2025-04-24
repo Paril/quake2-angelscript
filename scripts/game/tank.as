@@ -1286,8 +1286,6 @@ bool tank_blocked(ASEntity &self, float dist)
 /*QUAKED monster_tank (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight
 model="models/monsters/tank/tris.md2"
 */
-/*QUAKED monster_tank_commander (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight Guardian HeatSeeking
- */
 void SP_monster_tank(ASEntity &self)
 {
 	const spawn_temp_t @st = ED_GetSpawnTemp();
@@ -1380,6 +1378,13 @@ void SP_monster_tank(ASEntity &self)
 	// pmm
 	if (self.classname == "monster_tank_commander")
 		self.e.s.skinnum = 2;
+}
+
+/*QUAKED monster_tank_commander (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight Guardian HeatSeeking
+ */
+void SP_monster_tank_commander(ASEntity &self)
+{
+    SP_monster_tank(self);
 }
 
 void Think_TankStand(ASEntity &ent)

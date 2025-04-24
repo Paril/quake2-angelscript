@@ -7,6 +7,7 @@ static void vec3_formatter(std::string &str, const std::string &args, const vec3
     fmt::format_to(std::back_inserter(str), "{} {} {}", in.x, in.y, in.z);
 }
 
+#ifdef Q2AS_DEBUGGER
 class q2as_asIDBVec3TypeEvaluator : public asIDBObjectTypeEvaluator
 {
 public:
@@ -17,6 +18,7 @@ public:
         asIDBObjectTypeEvaluator::Evaluate(var);
     }
 };
+#endif
 
 void Q2AS_RegisterVec3(q2as_registry &registry)
 {
@@ -98,5 +100,7 @@ void Q2AS_RegisterVec3(q2as_registry &registry)
             { "void formatter(string &str, const string &in args, const vec3_t &in vec)",                                                    asFUNCTION(vec3_formatter),                                                       asCALL_CDECL }
         });
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.RegisterEvaluator<q2as_asIDBVec3TypeEvaluator>(registry.engine, "vec3_t");
+#endif
 }

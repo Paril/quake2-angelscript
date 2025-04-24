@@ -1,6 +1,7 @@
 #include "q2as_local.h"
 #include <chrono>
 #include <filesystem>
+#include <thread>
 
 // DEBUGGER
 
@@ -9,6 +10,7 @@
 #include "q2as_cgame.h"
 #include "q2as_game.h"
 
+#ifdef Q2AS_DEBUGGER
 #include "debugger/as_debugger_dap.h"
 
 class q2as_asIDBCache : public asIDBCache
@@ -145,6 +147,7 @@ protected:
         return std::make_unique<q2as_asIDBCache>(*this, ctx);
     }
 };
+#endif
 
 static std::chrono::high_resolution_clock             profile_clock;
 static std::chrono::high_resolution_clock::time_point profile_time;
@@ -181,6 +184,7 @@ std::string q2as_backtrace()
     return trace;
 }
 
+#ifdef Q2AS_DEBUGGER
 q2as_dbg_state_t debugger_state;
 
 void q2as_dbg_state_t::CheckDebugger(asIScriptContext *ctx)
@@ -234,10 +238,13 @@ void q2as_dbg_state_t::RegisterEvaluator(int typeId, std::unique_ptr<asIDBTypeEv
     typeId &= asTYPEID_MASK_OBJECT | asTYPEID_MASK_SEQNBR;
     evaluators.insert_or_assign(typeId, std::move(evaluator));
 }
+#endif
 
 static void q2as_debugbreak()
 {
+#ifdef Q2AS_DEBUGGER
     debugger_state.DebugBreak();
+#endif
 }
 
 static void q2as_sleep(int sec)

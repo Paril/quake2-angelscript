@@ -135,6 +135,7 @@ std::string q2as_yyjson_doc::as_string() const
     return s;
 }
 
+#ifdef Q2AS_DEBUGGER
 class q2as_asIDBJsonMutValTypeEvaluator : public asIDBTypeEvaluator
 {
 public:
@@ -211,6 +212,7 @@ public:
         }
     }
 };
+#endif
 
 static void Q2AS_RegisterMutableJson(q2as_registry &registry)
 {
@@ -327,7 +329,9 @@ static void Q2AS_RegisterMutableJson(q2as_registry &registry)
             { "uint64 get_length() const property",                      asMETHOD(q2as_yyjson_mut_val, get_length),     asCALL_THISCALL },
         });
 
+#ifdef Q2AS_DEBUGGER
     debugger_state.RegisterEvaluator<q2as_asIDBJsonMutValTypeEvaluator>(registry.engine, "json_mutval");
+#endif
 
     // AS_TODO iterators?
 
@@ -388,6 +392,7 @@ void q2as_yyjson_obj_iter_from_val(q2as_yyjson_val v, q2as_yyjson_obj_iter *self
     new(self) q2as_yyjson_obj_iter(v);
 }
 
+#ifdef Q2AS_DEBUGGER
 class q2as_asIDBJsonValTypeEvaluator : public asIDBTypeEvaluator
 {
 public:
@@ -464,6 +469,7 @@ public:
         }
     }
 };
+#endif
 
 static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
 {
@@ -571,8 +577,10 @@ static void Q2AS_RegisterImmutableJson(q2as_registry &registry)
             { "json_val opIndex(const string &in) const", asMETHOD(q2as_yyjson_val, obj_get), asCALL_THISCALL },
             { "json_val opIndex(uint64) const",           asMETHOD(q2as_yyjson_val, arr_get), asCALL_THISCALL }
         });
-
+        
+#ifdef Q2AS_DEBUGGER
     debugger_state.RegisterEvaluator<q2as_asIDBJsonValTypeEvaluator>(registry.engine, "json_val");
+#endif
 
     // immutable JSON doc
     registry

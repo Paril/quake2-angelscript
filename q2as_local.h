@@ -44,7 +44,9 @@ struct q2as_state_t
     asIScriptEngine *engine;
     asIScriptModule *mainModule; // the main module
     formatter_map    formatters;
+#ifdef Q2AS_DEBUGGER
     int              instrumentation_bit = 0;
+#endif
 
     int stringTypeId;
 
@@ -81,7 +83,9 @@ struct q2as_state_t
     static std::string GetExceptionData();
 
 private:
+#ifdef Q2AS_DEBUGGER
     void StartInstrumentation();
+#endif
     bool CreateEngine();
 };
 
@@ -125,6 +129,7 @@ static T *Q2AS_assign(const T &in, T *self)
     return self;
 }
 
+#ifdef Q2AS_DEBUGGER
 #include "debugger/as_debugger.h"
 
 struct instrumentation_event_t
@@ -179,6 +184,7 @@ struct q2as_dbg_state_t
 };
 
 extern q2as_dbg_state_t debugger_state;
+#endif
 
 std::string Q2AS_ScriptPath();
 std::string q2as_backtrace();

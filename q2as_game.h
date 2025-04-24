@@ -43,7 +43,9 @@ struct q2as_sv_state_t : q2as_state_t
     q2as_sv_state_t() :
         q2as_state_t()
     {
+#ifdef Q2AS_DEBUGGER
         instrumentation_bit = 1;
+#endif
     }
 
     void LoadFunctions();

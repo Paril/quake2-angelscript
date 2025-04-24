@@ -891,14 +891,14 @@ int asCScriptFunction::FindNextLineWithCode(int line) const
 // interface
 int asCScriptFunction::GetDeclaredAt(const char** scriptSection, int* row, int* col) const
 {
-	if (!scriptData || scriptData->scriptSectionIdx == -1)
+	if (!scriptData)
 	{
 		if (scriptSection) *scriptSection = 0;
 		if (row) *row = 0;
 		if (col) *col = 0;
 		return asNOT_SUPPORTED;
 	}
-	if (scriptSection) *scriptSection = engine->scriptSectionNames[scriptData->scriptSectionIdx]->AddressOf();
+	if (scriptSection) *scriptSection = scriptData->scriptSectionIdx >= 0 ? engine->scriptSectionNames[scriptData->scriptSectionIdx]->AddressOf() : 0;
 	if (row) *row = scriptData->declaredAt & 0xFFFFF;
 	if (col) *col = scriptData->declaredAt >> 20;
 	return 0;
@@ -1571,6 +1571,7 @@ const char *asCScriptFunction::GetDeclaration(bool includeObjectName, bool inclu
 }
 
 // interface
+// TODO: Deprecate this, since GetDeclaredAt is more complete
 const char *asCScriptFunction::GetScriptSectionName() const
 {
 	if( scriptData && scriptData->scriptSectionIdx >= 0 )

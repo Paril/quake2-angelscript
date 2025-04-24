@@ -25,12 +25,14 @@ struct q2as_cg_state_t : q2as_state_t
     asIScriptFunction *CG_Shutdown = nullptr;
     asIScriptFunction *CG_TouchPics = nullptr;
     asIScriptFunction *CG_Pmove = nullptr;
-    as_pmove_t        *pmove_inst;
+    as_pmove_t        *pmove_inst = nullptr;
 
     q2as_cg_state_t() :
         q2as_state_t()
     {
+#ifdef Q2AS_DEBUGGER
         instrumentation_bit = 2;
+#endif
     }
 
     void LoadFunctions();
