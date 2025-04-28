@@ -27,7 +27,6 @@ jobs:
     - name: Copy scripts to build folder
       continue-on-error: true
       run: |
-        robocopy ./scripts ./build/scripts /E; if ($lastexitcode -lt 8) { $global:LASTEXITCODE = $null }
         Compress-Archive -Path build/* -Destination q2as-release-windows-x86_64.zip
 
     - name: Setup variables
