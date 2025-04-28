@@ -588,7 +588,7 @@ void berserk_jump_takeoff(ASEntity &self)
 	self.velocity = forward * fwd_speed;
 	self.velocity.z = 400;
 	@self.groundentity = null;
-	 ~ai_flags_t::DUCKED;
+	self.monsterinfo.aiflags = ai_flags_t(self.monsterinfo.aiflags & ~ai_flags_t::DUCKED);
 	self.monsterinfo.attack_finished = level.time + time_sec(3);
 	@self.touch = berserk_jump_touch;
 	berserk_high_gravity(self);

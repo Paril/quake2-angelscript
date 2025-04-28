@@ -16,6 +16,8 @@
 #include "thirdparty/tracy/tracy/Tracy.hpp"
 #include "thirdparty/tracy/tracy/TracyC.h"
 
+#include "thirdparty/profiler/profiler.h"
+
 static std::chrono::high_resolution_clock cl;
 
 struct TracyCallerHashedData
@@ -94,6 +96,19 @@ static void InstrumentationCallback(asSFunctionInfo *info)
             tracy_zone_ctx.push_back(___tracy_emit_zone_begin(&it->second.source, 1));
         }
     }
+    else if (debugger_state.instrumentation_type->integer == 2)
+    {
+        TracyCallerHashedData data(info);
+        auto                  it = tracy_caller_info.find(data);
+
+        if (it == tracy_caller_info.end())
+            it = tracy_caller_info.emplace(data, TracyCallerInfo(data)).first;
+
+        if (info->popped)
+            LOP::emit_end_event(it->second.decl.c_str());
+        else
+            LOP::emit_begin_event(it->second.decl.c_str());
+    }
     else
     {
         debugger_state.events.push_back(
@@ -105,6 +120,13 @@ static void InstrumentationGarbageCallback(q2as_state_t *state, bool pop)
 {
     if (debugger_state.instrumentation_type->integer == 1)
     {
+    }
+    else if (debugger_state.instrumentation_type->integer == 2)
+    {
+        if (pop)
+            LOP::emit_end_event("GC");
+        else
+            LOP::emit_begin_event("GC");
     }
     else
     {
@@ -123,6 +145,11 @@ static void WriteInstrumentation()
     if (debugger_state.active_instrumentation == 1)
     {
         tracy::ShutdownProfiler();
+    }
+    else if (debugger_state.active_instrumentation == 2)
+    {
+        LOP::profiler_disable();
+        LOP::profiler_flush();
     }
     else
     {
@@ -197,11 +224,15 @@ static void StartInstrumentation(q2as_state_t &as)
         return;
 
     debugger_state.active_instrumentation = debugger_state.instrumentation_type->integer;
-
+    
     if (debugger_state.active_instrumentation == 1)
     {
         tracy::StartupProfiler();
         TracyCSetThreadName("AngelScript");
+    }
+    else if (debugger_state.active_instrumentation == 2)
+    {
+        LOP::profiler_enable();
     }
 }
 
@@ -222,9 +253,6 @@ static void MessageCallback(const asSMessageInfo *msg, void *param)
 
     ((q2as_state_t *) param)
         ->Print(fmt::format("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, type, msg->message).data());
-
-    // if (msg->type == asMSGTYPE_ERROR)
-    //__debugbreak();
 }
 
 static int engines_alive = 0;

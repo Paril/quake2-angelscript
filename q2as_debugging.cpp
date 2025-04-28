@@ -247,9 +247,9 @@ static void q2as_debugbreak()
 #endif
 }
 
-static void q2as_sleep(int sec)
+static void q2as_sleep(uint32_t ms)
 {
-    std::this_thread::sleep_for(std::chrono::seconds(sec));
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 static void q2as_typeof(asIScriptGeneric *gen)
@@ -299,7 +299,7 @@ void Q2AS_RegisterDebugging(q2as_registry &registry)
             { "void profile_end()",                   asFUNCTION(q2as_profile_end),   asCALL_CDECL },
             { "string backtrace()",                   asFUNCTION(q2as_backtrace),     asCALL_CDECL },
             { "void debugbreak()",                    asFUNCTION(q2as_debugbreak),    asCALL_CDECL },
-            { "void sleep(int)",                      asFUNCTION(q2as_sleep),         asCALL_CDECL },
+            { "void sleep(uint ms)",                  asFUNCTION(q2as_sleep),         asCALL_CDECL },
             { "void print(const string &in s)",       asFUNCTION(q2as_print),         asCALL_CDECL },
             { "string typeof(const ? &in)",           asFUNCTION(q2as_typeof),        asCALL_GENERIC }
         });

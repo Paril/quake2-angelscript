@@ -99,12 +99,6 @@ void G_RunBmodelAnimation(ASEntity &ent)
 	}
 }
 
-void test_func()
-{
-    ai_flags_t t = ai_flags_t::NONE;
-    t = ai_flags_t(t & ~ai_flags_t::PATHING);
-}
-
 /*
 ================
 G_RunEntity

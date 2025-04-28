@@ -377,6 +377,27 @@ json_mutval WriteGameLocals(json_mutdoc &doc)
 
     json_add_optional(doc, obj, "autosaved", game.autosaved);
 
+    if (!game.level_entries.empty())
+    {
+        json_mutval arr = doc.val_arr();
+
+        foreach (auto @entry : game.level_entries)
+        {
+            json_mutval arr_entry = doc.val_obj();
+            json_add_optional(doc, arr_entry, "found_secrets", entry.found_secrets);
+            json_add_optional(doc, arr_entry, "killed_monsters", entry.killed_monsters);
+            json_add_optional(doc, arr_entry, "map_name", entry.map_name);
+            json_add_optional(doc, arr_entry, "pretty_name", entry.pretty_name);
+            json_add_optional(doc, arr_entry, "time", entry.time);
+            json_add_optional(doc, arr_entry, "total_monsters", entry.total_monsters);
+            json_add_optional(doc, arr_entry, "total_secrets", entry.total_secrets);
+            json_add_optional(doc, arr_entry, "visit_order", entry.visit_order);
+            arr.arr_append(arr_entry);
+        }
+
+        obj.obj_put("level_entries", arr);
+    }
+
     return obj;
 }
 
@@ -396,6 +417,31 @@ void ReadGameLocals(json_doc &doc, json_val obj)
     obj["cross_unit_flags"].get(game.cross_unit_flags);
 
     obj["autosaved"].get(game.autosaved);
+
+    {
+        json_val entries = obj["level_entries"];
+
+        if (entries.is_arr)
+        {
+            json_arr_iter iter(entries);
+
+            while (iter.has_next)
+            {
+                json_val v = iter.next;
+
+                level_entry_t entry;
+                v["found_secrets"].get(entry.found_secrets);
+                v["killed_monsters"].get(entry.killed_monsters);
+                v["map_name"].get(entry.map_name);
+                v["pretty_name"].get(entry.pretty_name);
+                json_get_optional(doc, v["time"], entry.time);
+                v["total_monsters"].get(entry.total_monsters);
+                v["total_secrets"].get(entry.total_secrets);
+                v["visit_order"].get(entry.visit_order);
+                game.level_entries.push_back(entry);
+            }
+        }
+    }
 }
 
 json_mutval WriteClientPersistent(json_mutdoc &doc, client_persistant_t &p)

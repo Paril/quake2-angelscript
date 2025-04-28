@@ -226,6 +226,9 @@
     <ClCompile Include="debugger\as_helpers.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="thirdparty\profiler\profiler.cpp">
+      <Filter>thirdparty\profiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="g_local.h" />
@@ -513,6 +516,9 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="q2as_time.h" />
+    <ClInclude Include="thirdparty\profiler\profiler.h">
+      <Filter>thirdparty\profiler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debugger">
@@ -583,6 +589,9 @@
     </Filter>
     <Filter Include="thirdparty\mum-hash">
       <UniqueIdentifier>{2ca83bba-601d-408f-b7b0-15924a1c9374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\profiler">
+      <UniqueIdentifier>{13c9a13b-538a-4ccc-ad38-c19fab850afe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -875,6 +884,9 @@
   <ItemGroup>
     <MASM Include="thirdparty\angelscript\source\as_callfunc_x64_msvc_asm.asm">
       <Filter>thirdparty\angelscript\source</Filter>
+    </MASM>
+    <MASM Include="thirdparty\profiler\profiler_asm.asm">
+      <Filter>thirdparty\profiler</Filter>
     </MASM>
   </ItemGroup>
 </Project>
