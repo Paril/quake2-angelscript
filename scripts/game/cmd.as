@@ -1128,7 +1128,8 @@ void Cmd_Players_f(ASEntity &ent)
 				players[index[i]].client.pers.netname);
 
 			if (small.length() + large.length() > MAX_IDEAL_PACKET_SIZE - 50)
-			{ // can't print all of them in one packet
+			{
+                // can't print all of them in one packet
 				large += "...\n";
 				break;
 			}
@@ -1533,29 +1534,27 @@ void Cmd_Switchteam_f(ASEntity &ent)
 		CTFOpenJoinMenu(ent);
 }
 
-/*
-static void Cmd_ListMonsters_f(edict_t *ent)
+void Cmd_ListMonsters_f(ASEntity &ent)
 {
 	if (!G_CheatCheck(ent))
 		return;
-	else if (!g_debug_monster_kills.integer)
+	else if (g_debug_monster_kills.integer == 0)
 		return;
 
-	for (size_t i = 0; i < level.total_monsters; i++)
+	for (uint i = 0; i < level.total_monsters; i++)
 	{
-		edict_t *e = level.monsters_registered[i];
+		ASEntity @e = level.monsters_registered[i];
 
-		if (!e || !e.inuse)
+		if (e is null || !e.e.inuse)
 			continue;
-		else if (!(e.svflags & SVF_MONSTER) || (e.monsterinfo.aiflags & AI_DO_NOT_COUNT))
+		else if ((e.e.svflags & svflags_t::MONSTER) == 0 || (e.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) != 0)
 			continue;
 		else if (e.deadflag)
 			continue;
 
-		gi.Com_PrintFmt("{}\n", *e);
+		gi_Com_Print("{}\n", e);
 	}
 }
-*/
 
 /*
 =================
@@ -1603,8 +1602,7 @@ void ClientCommand(edict_t @ent_handle)
 	}
 	if (Q_strcasecmp(cmd, "listmonsters") == 0)
 	{
-        // AS_TODO
-		//Cmd_ListMonsters_f(ent);
+		Cmd_ListMonsters_f(ent);
 		return;
 	}
 

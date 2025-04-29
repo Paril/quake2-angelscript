@@ -889,7 +889,15 @@ json_mutval WriteLevelLocals(json_mutdoc &doc)
     json_add_optional(doc, obj, "found_goals", level.found_goals);
 
     json_add_optional(doc, obj, "total_monsters", level.total_monsters);
-    // AS_TODO monsters_registered
+    if (!level.monsters_registered.empty())
+    {
+        json_mutval v = doc.val_arr();
+
+        foreach (auto @monster : level.monsters_registered)
+            v.arr_append(doc.val(monster.e.number));
+
+        obj.obj_put("monsters_registered", v);
+    }
     json_add_optional(doc, obj, "killed_monsters", level.killed_monsters);
 
     json_add_optional(doc, obj, "body_que", level.body_que);
@@ -954,7 +962,21 @@ void ReadLevelLocals(json_doc &doc, json_val obj)
     obj["found_goals"].get(level.found_goals);
 
     obj["total_monsters"].get(level.total_monsters);
-    // AS_TODO monsters_registered
+    {
+        json_val v = obj["monsters_registered"];
+
+        if (v.is_arr)
+        {
+            json_arr_iter iter(v);
+
+            while (iter.has_next)
+            {
+                ASEntity @e;
+                json_get_optional(doc, iter.next, e);
+                level.monsters_registered.push_back(e);
+            }
+        }
+    }
     obj["killed_monsters"].get(level.killed_monsters);
 
     obj["body_que"].get(level.body_que);

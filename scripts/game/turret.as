@@ -445,9 +445,8 @@ void SP_turret_driver(ASEntity &self)
 
 	self.flags = ent_flags_t(self.flags | ent_flags_t::NO_KNOCKBACK);
 
-    // AS_TODO
-	//if (g_debug_monster_kills.integer)
-	//	level.monsters_registered[level.total_monsters] = self;
+	if (g_debug_monster_kills.integer != 0)
+		level.monsters_registered.push_back(self);
 	level.total_monsters++;
 
 	self.e.svflags = svflags_t(self.e.svflags | svflags_t::MONSTER);

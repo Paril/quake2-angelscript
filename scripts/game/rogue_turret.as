@@ -1046,9 +1046,8 @@ void SP_monster_turret(ASEntity &self)
 		turret_wall_spawn(self);
 		if ((self.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0)
 		{
-            // AS_TODO
-			//if (g_debug_monster_kills.integer)
-			//	level.monsters_registered[level.total_monsters] = self;
+			if (g_debug_monster_kills.integer != 0)
+				level.monsters_registered.push_back(self);
 			level.total_monsters++;
 		}
 	}

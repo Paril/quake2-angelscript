@@ -609,35 +609,21 @@ void G_MonsterKilled(ASEntity &self)
 
 	if (coop.integer != 0 && self.enemy !is null && self.enemy.client !is null)
 		self.enemy.client.resp.score++;
-/*
-	if (g_debug_monster_kills->integer)
+
+	if (g_debug_monster_kills.integer != 0)
 	{
 		bool found = false;
 
-		for (auto &ent : level.monsters_registered)
-		{
-			if (ent == self)
-			{
-				ent = nullptr;
-				found = true;
-				break;
-			}
-		}
+        int offset = level.monsters_registered.findByRef(self);
 
-		if (!found)
-		{
-#if defined(_DEBUG) && defined(KEX_PLATFORM_WINPC)
-			__debugbreak();
-#endif
-			gi.Center_Print(&g_edicts[1], "found missing monster?");
-		}
+        if (offset != -1)
+            level.monsters_registered.removeAt(offset);
+		else
+			gi_Center_Print(players[0].e, "found missing monster?");
 
 		if (level.killed_monsters == level.total_monsters)
-		{
-			gi.Center_Print(&g_edicts[1], "all monsters dead");
-		}
+			gi_Center_Print(players[0].e, "all monsters dead");
 	}
-*/
 }
 
 void M_ProcessPain(ASEntity &e)
@@ -888,80 +874,123 @@ bool M_CheckGib(ASEntity &self, const mod_t &in mod)
 	return self.health <= self.gib_health;
 }
 
+ bool CheckPathVisibility(const vec3_t &in start, const vec3_t &in end)
+{
+	trace_t tr = gi_traceline(start, end, null, contents_t(contents_t::MASK_SOLID | contents_t::PROJECTILECLIP | contents_t::MONSTERCLIP | contents_t::PLAYERCLIP));
+
+	bool valid = tr.fraction == 1.0f;
+
+	if (!valid)
+	{
+		// try raising some of the points
+		bool can_raise_start = false, can_raise_end = false;
+		vec3_t raised_start = start + vec3_t(0.f, 0.f, 16.f);
+		vec3_t raised_end = end + vec3_t(0.f, 0.f, 16.f);
+
+		if (gi_traceline(start, raised_start, null, contents_t(contents_t::MASK_SOLID | contents_t::PROJECTILECLIP | contents_t::MONSTERCLIP | contents_t::PLAYERCLIP)).fraction == 1.0f)
+			can_raise_start = true;
+
+		if (gi_traceline(end, raised_end, null, contents_t(contents_t::MASK_SOLID | contents_t::PROJECTILECLIP | contents_t::MONSTERCLIP | contents_t::PLAYERCLIP)).fraction == 1.0f)
+			can_raise_end = true;
+
+		// try raised start -> end
+		if (can_raise_start)
+		{
+			tr = gi_traceline(raised_start, end, null, contents_t(contents_t::MASK_SOLID | contents_t::PROJECTILECLIP | contents_t::MONSTERCLIP | contents_t::PLAYERCLIP));
+
+			if (tr.fraction == 1.0f)
+				return true;
+		}
+
+		// try start -> raised end
+		if (can_raise_end)
+		{
+			tr = gi_traceline(start, raised_end, null, contents_t(contents_t::MASK_SOLID | contents_t::PROJECTILECLIP | contents_t::MONSTERCLIP | contents_t::PLAYERCLIP));
+
+			if (tr.fraction == 1.0f)
+				return true;
+		}
+
+		// try both raised
+		if (can_raise_start && can_raise_end)
+		{
+			tr = gi_traceline(raised_start, raised_end, null, contents_t(contents_t::MASK_SOLID | contents_t::PROJECTILECLIP | contents_t::MONSTERCLIP | contents_t::PLAYERCLIP));
+
+			if (tr.fraction == 1.0f)
+				return true;
+		}
+	}
+
+	return valid;
+}
+
 void monster_think(ASEntity &self)
 {
-    /*
 	// [Paril-KEX] monster sniff testing; if we can make an unobstructed path to the player, murder ourselves.
-	if (g_debug_monster_kills->integer)
+	if (g_debug_monster_kills.integer != 0)
 	{
-		if (g_edicts[1].inuse)
+		if (players[0].e.inuse)
 		{
-			trace_t enemy_trace = gi.traceline(self->s.origin, g_edicts[1].s.origin, self, MASK_SHOT);
+            ASEntity @first_player = players[0];
+			trace_t enemy_trace = gi_traceline(self.e.origin, first_player.e.origin, self.e, contents_t::MASK_SHOT);
 
-			if (enemy_trace.fraction < 1.0f && enemy_trace.ent == &g_edicts[1])
-				T_Damage(self, &g_edicts[1], &g_edicts[1], { 0, 0, -1 }, self->s.origin, { 0, 0, -1 }, 9999, 9999, DAMAGE_NO_PROTECTION, MOD_BFG_BLAST);
+			if (enemy_trace.fraction < 1.0f && enemy_trace.ent is first_player.e)
+				T_Damage(self, first_player, first_player, vec3_t(0, 0, -1), self.e.origin, vec3_t(0, 0, -1), 9999, 9999, damageflags_t::NO_PROTECTION, mod_id_t::BFG_BLAST);
 			else
 			{
-				static vec3_t points[64];
-
-				if (self->disintegrator_time <= level.time)
+				if (self.disintegrator_time <= level.time)
 				{
 					PathRequest request;
-					request.goal = g_edicts[1].s.origin;
+					request.goal = first_player.e.origin;
 					request.moveDist = 4.0f;
 					request.nodeSearch.ignoreNodeFlags = true;
 					request.nodeSearch.radius = 9999;
 					request.pathFlags = PathFlags::All;
-					request.start = self->s.origin;
+					request.start = first_player.e.origin;
 					request.traversals.dropHeight = 9999;
 					request.traversals.jumpHeight = 9999;
-					request.pathPoints.array = points;
-					request.pathPoints.count = q_countof(points);
+                    request.maxPathPoints = 64;
 
 					PathInfo info;
 
-					if (gi.GetPathToGoal(request, info))
+					if (gi_GetPathToGoal(request, info))
 					{
-						if (info.returnCode != PathReturnCode::NoStartNode &&
-							info.returnCode != PathReturnCode::NoGoalNode &&
-							info.returnCode != PathReturnCode::NoPathFound &&
-							info.returnCode != PathReturnCode::NoNavAvailable &&
-							info.numPathPoints < q_countof(points))
+						if (info.returnCode < PathReturnCode::StartPathErrors &&
+                            info.numPathPoints >= 2)
 						{
-							if (CheckPathVisibility(g_edicts[1].s.origin + vec3_t { 0.f, 0.f, g_edicts[1].mins.z }, points[info.numPathPoints - 1]) &&
-								CheckPathVisibility(self->s.origin + vec3_t { 0.f, 0.f, self->mins.z }, points[0]))
+							if (CheckPathVisibility(first_player.e.origin + vec3_t(0.f, 0.f, first_player.e.mins.z), info.getPathPoint(info.numPathPoints - 1)) &&
+								CheckPathVisibility(self.e.origin + vec3_t(0.f, 0.f, self.e.mins.z), info.getPathPoint(0)))
 							{
-								size_t i = 0;
+								uint i = 0;
 
 								for (; i < info.numPathPoints - 1; i++)
-									if (!CheckPathVisibility(points[i], points[i + 1]))
+									if (!CheckPathVisibility(info.getPathPoint(i), info.getPathPoint(i + 1)))
 										break;
 
 								if (i == info.numPathPoints - 1)
-									T_Damage(self, &g_edicts[1], &g_edicts[1], { 0, 0, 1 }, self->s.origin, { 0, 0, 1 }, 9999, 9999, DAMAGE_NO_PROTECTION, MOD_BFG_BLAST);
+									T_Damage(self, first_player, first_player, vec3_t(0, 0, 1), self.e.origin, vec3_t(0, 0, 1), 9999, 9999, damageflags_t::NO_PROTECTION, mod_id_t::BFG_BLAST);
 								else
-									self->disintegrator_time = level.time + 500_ms;
+									self.disintegrator_time = level.time + time_ms(500);
 							}
 							else
-								self->disintegrator_time = level.time + 500_ms;
+								self.disintegrator_time = level.time + time_ms(500);
 						}
 						else
 						{
-							self->disintegrator_time = level.time + 1_sec;
+							self.disintegrator_time = level.time + time_sec(1);
 						}
 					}
 					else
 					{
-						self->disintegrator_time = level.time + 1_sec;
+						self.disintegrator_time = level.time + time_sec(1);
 					}
 				}
 			}
 
-			if (!self->deadflag && !(self->monsterinfo.aiflags & AI_DO_NOT_COUNT))
-				gi.Draw_Bounds(self->absmin, self->absmax, rgba_red, gi.frame_time_s, false);
+			if (!self.deadflag && (self.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0)
+				gi_Draw_Bounds(self.e.absmin, self.e.absmax, rgba_red, gi_frame_time_s, false);
 		}
 	}
-    */
 
 	self.e.s.renderfx = renderfx_t(self.e.s.renderfx & ~(renderfx_t::STAIR_STEP | renderfx_t::OLD_FRAME_LERP));
 
@@ -1090,13 +1119,10 @@ void monster_triggered_spawn_use(ASEntity &self, ASEntity &other, ASEntity @acti
 
 void monster_triggered_think(ASEntity &self)
 {
-    // AS_TODO
-    /*
-	if ((self->monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0)
-		gi.Draw_Bounds(self.e.absmin, self->absmax, rgba_blue, gi.frame_time_s, false);
+	if ((self.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0)
+		gi_Draw_Bounds(self.e.absmin, self.e.absmax, rgba_blue, gi_frame_time_s, false);
 
-	self->nextthink = level.time + 1_ms;
-    */
+	self.nextthink = level.time + time_ms(1);
 }
 
 void monster_triggered_start(ASEntity &self)
@@ -1107,13 +1133,13 @@ void monster_triggered_start(ASEntity &self)
 	self.nextthink = time_zero;
 	@self.use = monster_triggered_spawn_use;
 
-    /*
-	if (g_debug_monster_kills->integer)
+	if (g_debug_monster_kills.integer != 0)
 	{
-		self->think = monster_triggered_think;
-		self->nextthink = level.time + 1_ms;
+		@self.think = monster_triggered_think;
+		self.nextthink = level.time + time_ms(1);
 	}
 
+/*
     AS_TODO
 	if (!self->targetname ||
 		(G_FindByString<&edict_t::target>(nullptr, self->targetname) == nullptr &&
@@ -1281,9 +1307,8 @@ bool monster_start(ASEntity &self, const spawn_temp_t &in st)
 	// ROGUE
 	if ((self.monsterinfo.aiflags & ai_flags_t::DO_NOT_COUNT) == 0 && (self.spawnflags & spawnflags::monsters::DEAD) == 0)
 	{
-        // AS_TODO
-		//if (g_debug_monster_kills.integer != 0)
-		//	level.monsters_registered[level.total_monsters] = self;
+		if (g_debug_monster_kills.integer != 0)
+			level.monsters_registered.push_back(self);
 		// ROGUE
 		level.total_monsters++;
 	}
