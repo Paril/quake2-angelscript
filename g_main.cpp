@@ -3,7 +3,6 @@
 
 #include "g_local.h"
 #include "q2as_main.h"
-#include "q2as_platform.h"
 #include "q2as_random.h"
 
 mum_prng_generator mum_prng;
@@ -11,6 +10,10 @@ mum_prng_generator mum_prng;
 local_game_import_t gi;
 
 game_export_t globals;
+
+#ifdef Q2AS_DLL_FALLBACK
+#include "q2as_platform.h"
+#endif
 
 /*
 =================
@@ -31,10 +34,14 @@ Q2GAME_API game_export_t *GetGameAPI(game_import_t *import)
     {
         return api;
     }
-
+    
+#ifdef Q2AS_DLL_FALLBACK
     import->Com_Print("Failed to load AngelScript game API\n");
 
     // Fall back to loading baseq2 game api.
     GetGameAPIEXTERNAL external_game_api = Q2AS_GetGameAPI(import);
     return external_game_api(import);
+#else
+    import->Com_Error("Failed to load AngelScript game API\n");
+#endif
 }

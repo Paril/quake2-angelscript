@@ -8,6 +8,33 @@
 #include "q2as_reg.h"
 #include <memory>
 
+// file wrapper for bytecode
+class q2as_FileBinaryStream : public asIBinaryStream
+{
+    FILE *fp = nullptr;
+
+public:
+    q2as_FileBinaryStream(const char *filename, const char *mode) :
+        fp(fopen(filename, mode))
+    {
+    }
+
+    ~q2as_FileBinaryStream()
+    {
+        fclose(fp);
+    }
+    
+	virtual int Read(void *ptr, asUINT size) override
+    {
+        return fread(ptr, 1, size, fp);
+    }
+
+	virtual int Write(const void *ptr, asUINT size) override
+    {
+        return fwrite(ptr, 1, size, fp);
+    }
+};
+
 // auto-destruct wrapper for an execution context
 struct q2as_ctx_t
 {
@@ -41,6 +68,7 @@ using formatter_map = std::unordered_map<int, asIScriptFunction *>;
 // stores the state for each Q2AS engine.
 struct q2as_state_t
 {
+    const char      *name; // state name
     asIScriptEngine *engine;
     asIScriptModule *mainModule; // the main module
     formatter_map    formatters;
@@ -50,6 +78,13 @@ struct q2as_state_t
 
     int stringTypeId;
 
+protected:
+    q2as_state_t(const char *state_name) :
+        name(state_name)
+    {
+    }
+
+public:
     virtual ~q2as_state_t()
     {
     }

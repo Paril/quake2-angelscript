@@ -109,7 +109,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>Q2AS_DEBUGGER;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>Q2AS_DLL_FALLBACK;Q2AS_ALLOW_WRITE_COMMANDS;Q2AS_DEBUGGER;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -133,7 +133,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>Q2AS_DLL_FALLBACK;Q2AS_ALLOW_WRITE_COMMANDS;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -157,7 +157,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AS_DEBUG;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>Q2AS_DLL_FALLBACK;Q2AS_ALLOW_WRITE_COMMANDS;AS_DEBUG;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -183,7 +183,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>Q2AS_DLL_FALLBACK;Q2AS_ALLOW_WRITE_COMMANDS;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -207,7 +207,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>Q2AS_DEBUGGER;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>Q2AS_DLL_FALLBACK;Q2AS_ALLOW_WRITE_COMMANDS;Q2AS_DEBUGGER;FMT_HEADER_ONLY;CPPDAP_JSON_YYJSON;KEX_Q2_GAME;KEX_Q2GAME_EXPORTS;KEX_Q2GAME_DYNAMIC;ANGELSCRIPT_EXPORT;AS_NO_THREADS;AS_USE_STLNAMES;as_callfunc_x64_msvc_asm;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

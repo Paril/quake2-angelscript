@@ -1,8 +1,11 @@
 #include "debugger/as_debugger.h"
 #include "q2as_local.h"
-#include "q2as_platform.h"
 #include "q_std.h"
 #include "thirdparty/scripthelper/scripthelper.h"
+
+#ifndef Q2AS_LOAD_BYTECODE
+#include "q2as_platform.h"
+#endif
 
 #ifdef Q2AS_DEBUGGER
 #include <fstream>
@@ -317,6 +320,10 @@ static std::string Q2AS_ScriptPathFromBaseDir()
 
 std::string Q2AS_ScriptPath()
 {
+#ifdef Q2AS_LOAD_BYTECODE
+    // no script path when bytecode is used
+    return "";
+#else
     cvar_t *cv = (gi.cvar ? gi.cvar : cgi.cvar)("q2as_path", "", CVAR_NOFLAGS);
 
     if (*cv->string)
@@ -336,6 +343,7 @@ std::string Q2AS_ScriptPath()
         return alongside_dll.generic_string();
 
     return Q2AS_ScriptPathFromBaseDir();
+#endif
 }
 
 bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
@@ -346,6 +354,9 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
     Print("Loading AS engine...\n");
 
+    asSetGlobalMemoryFunctions(allocFunc, freeFunc);
+
+#ifndef Q2AS_LOAD_BYTECODE
     fs::path script_dir(Q2AS_ScriptPath());
 
     Print("Searching for AS scripts in \"");
@@ -358,9 +369,8 @@ bool q2as_state_t::Load(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)
 
     if (!fs::exists(script_path / "init.as"))
         return false;
+#endif
 
-    asSetGlobalMemoryFunctions(allocFunc, freeFunc);
-    
 #ifdef Q2AS_DEBUGGER
     if (!debugger_state.cvar)
         debugger_state.cvar = Cvar("q2as_debugger", "0", CVAR_NOFLAGS);
@@ -429,6 +439,7 @@ std::string q2as_state_t::LoadFile(const char *path)
 
 bool q2as_state_t::LoadFilesFromPath(const char *base, const char *path, asIScriptModule *module)
 {
+#ifndef Q2AS_LOAD_BYTECODE
     fs::path basePath(base);
 
     for (const fs::directory_entry &entry : std::filesystem::recursive_directory_iterator(path))
@@ -454,12 +465,14 @@ bool q2as_state_t::LoadFilesFromPath(const char *base, const char *path, asIScri
             return false;
         }
     }
+#endif
 
     return true;
 }
 
 bool q2as_state_t::LoadFiles(const char *self_scripts, asIScriptModule *module)
 {
+#ifndef Q2AS_LOAD_BYTECODE
     fs::path script_path(Q2AS_ScriptPath());
     fs::path bg_path = script_path / "bgame";
     fs::path g_path = script_path / self_scripts;
@@ -468,18 +481,32 @@ bool q2as_state_t::LoadFiles(const char *self_scripts, asIScriptModule *module)
         return false;
     else if (!LoadFilesFromPath(script_path.string().c_str(), g_path.string().c_str(), module))
         return false;
+#endif
 
     return true;
 }
 
 bool q2as_state_t::Build()
 {
+#ifndef Q2AS_LOAD_BYTECODE
     if (mainModule->Build() < 0)
     {
         Print("Error compiling script module.\n");
         Destroy();
         return false;
     }
+#else
+    {
+        q2as_FileBinaryStream stream(fmt::format("{}.asb", name).c_str(), "rb");
+
+        if (mainModule->LoadByteCode(&stream) < 0)
+        {
+            Print("Error loading script module bytecode.\n");
+            Destroy();
+            return false;
+        }
+    }
+#endif
 
     stringTypeId = engine->GetStringFactory();
 #ifdef Q2AS_DEBUGGER

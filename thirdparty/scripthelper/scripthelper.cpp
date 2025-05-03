@@ -281,7 +281,22 @@ int WriteConfigToStream(asIScriptEngine *engine, ostream &strm)
 			engine->SetDefaultNamespace(currNamespace.c_str());
 		}
 		const char *enumName = ti->GetName();
-		strm << "enum " << enumName << "\n";
+		const char *underlying = "???";
+
+		switch (ti->GetTypedefTypeId())
+		{
+		case asTYPEID_INT8: underlying = "int8"; break;
+		case asTYPEID_INT16: underlying = "int16"; break;
+		case asTYPEID_INT32: underlying = "int32"; break;
+		case asTYPEID_INT64: underlying = "int64"; break;
+		case asTYPEID_UINT8: underlying = "uint8"; break;
+		case asTYPEID_UINT16: underlying = "uint16"; break;
+		case asTYPEID_UINT32: underlying = "uint32"; break;
+		case asTYPEID_UINT64: underlying = "uint64"; break;
+		default: assert(false); break;
+		}
+
+		strm << "enum " << enumName << " " << underlying << "\n";
 		for( asUINT m = 0; m < ti->GetEnumValueCount(); m++ )
 		{
 			const char *valName;
@@ -864,7 +879,10 @@ int ConfigEngineFromStream(asIScriptEngine *engine, istream &strm, const char *c
 			string type;
 			in::GetToken(engine, type, config, pos);
 
-			r = engine->RegisterEnum(type.c_str());
+			string underlying;
+			in::GetToken(engine, underlying, config, pos);
+
+			r = engine->RegisterEnum(type.c_str(), underlying.c_str());
 			if( r < 0 )
 			{
 				engine->WriteMessage(configFile, in::GetLineNumber(config, pos), 0, asMSGTYPE_ERROR, "Failed to register enum type");

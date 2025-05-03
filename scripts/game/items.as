@@ -1691,6 +1691,8 @@ void Compass_Update(ASEntity &ent, bool first)
 	ent.client.help_draw_time = level.time + time_ms(200);
 }
 
+const uint32 MAX_TEMP_POI_POINTS = 128;
+
 void Use_Compass(ASEntity &ent, const gitem_t &inv)
 {
 	if (!level.valid_poi)
@@ -1720,7 +1722,7 @@ void Use_Compass(ASEntity &ent, const gitem_t &inv)
 	request.nodeSearch.minHeight = 128.0f;
 	request.nodeSearch.maxHeight = 128.0f;
 	request.nodeSearch.radius = 1024.0f;
-	request.maxPathPoints = 128;
+	request.maxPathPoints = MAX_TEMP_POI_POINTS;
 
 	PathInfo info;
 
@@ -1729,16 +1731,16 @@ void Use_Compass(ASEntity &ent, const gitem_t &inv)
         points.resize(info.numPathPoints + 1);
 
         points[0] = vec3_origin;
-        for (uint i = 1; i < info.numPathPoints; i++)
-            points[i] = info.getPathPoint(i); // TODO: code-wise copy?
+        for (uint i = 0; i < info.numPathPoints; i++)
+            points[i + 1] = info.getPathPoint(i); // TODO: code-wise copy?
 
 		// TODO: optimize points?
 		ent.client.help_draw_points = true;
-		ent.client.help_draw_count = min(info.numPathPoints, 128);
+		ent.client.help_draw_count = min(info.numPathPoints + 1, MAX_TEMP_POI_POINTS);
 		ent.client.help_draw_index = 1;
 
 		// remove points too close to the player so they don't have to backtrack
-		for (uint i = 1; i < 1 + ent.client.help_draw_count; i++)
+		for (uint i = 1; i < ent.client.help_draw_count; i++)
 		{
 			float distance = (points[i] - ent.e.s.origin).length();
 			if (distance > 192)
@@ -1749,23 +1751,25 @@ void Use_Compass(ASEntity &ent, const gitem_t &inv)
 			ent.client.help_draw_index = i;
 		}
 
-		// create an extra point in front of us if we're facing away from the first real point
-		float d = ((points[ent.client.help_draw_index]) - ent.e.s.origin).normalized().dot(ent.client.v_forward);
+        if (ent.client.help_draw_index < points.size() - 1)
+        {
+            // create an extra point in front of us if we're facing away from the first real point
+            float d = ((points[ent.client.help_draw_index]) - ent.e.s.origin).normalized().dot(ent.client.v_forward);
 
-		if (d < 0.3f)
-		{
-			vec3_t p = ent.e.s.origin + (ent.client.v_forward * 64.f);
+            if (d < 0.3f)
+            {
+                vec3_t p = ent.e.s.origin + (ent.client.v_forward * 64.f);
 
-			trace_t tr = gi_traceline(ent.e.s.origin + vec3_t(0.0f, 0.0f, float(ent.viewheight)), p, null, contents_t::MASK_SOLID);
+                trace_t tr = gi_traceline(ent.e.s.origin + vec3_t(0.0f, 0.0f, float(ent.viewheight)), p, null, contents_t::MASK_SOLID);
 
-			ent.client.help_draw_index--;
-			ent.client.help_draw_count++;
+                ent.client.help_draw_index--;
 
-			if (tr.fraction < 1.0f)
-				tr.endpos += tr.plane.normal * 8.f;
+                if (tr.fraction < 1.0f)
+                    tr.endpos += tr.plane.normal * 8.f;
 
-			points[ent.client.help_draw_index] = tr.endpos;
-		}
+                points[ent.client.help_draw_index] = tr.endpos;
+            }
+        }
 
         level.poi_points[ent.e.s.number - 1] = points;
 

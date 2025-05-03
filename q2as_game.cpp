@@ -538,9 +538,15 @@ static void Q2AS_ServerCommand()
 #ifdef Q2AS_DEBUGGER
     debugger_state.current_tid = 1;
 #endif
-
+    
+#ifdef Q2AS_ALLOW_WRITE_COMMANDS
     if (!strcmp(gi.argv(1), "q2as_write_predefined"))
         WritePredefined();
+    else if (!strcmp(gi.argv(1), "q2as_write_bytecode"))
+        WriteBytecode();
+    else if (!strcmp(gi.argv(1), "q2as_write_engine"))
+        WriteEngine();
+#endif
 }
 
 static void Q2AS_Bot_SetWeapon(edict_t *botEdict, const int weaponIndex, const bool instantSwitch)

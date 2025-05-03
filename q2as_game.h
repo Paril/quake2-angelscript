@@ -7,9 +7,9 @@
 
 struct q2as_sv_state_t : q2as_state_t
 {
-    uint32_t             maxentities, maxclients;
-    struct q2as_edict_t *edicts;
-    gclient_t           *clients;
+    uint32_t             maxentities = 0, maxclients = 0;
+    struct q2as_edict_t *edicts = nullptr;
+    gclient_t           *clients = nullptr;
 
     std::string              cmd_args;
     std::vector<std::string> cmd_argv;
@@ -41,7 +41,7 @@ struct q2as_sv_state_t : q2as_state_t
     asIScriptFunction *Entity_IsVisibleToPlayer = nullptr;
 
     q2as_sv_state_t() :
-        q2as_state_t()
+        q2as_state_t("game")
     {
 #ifdef Q2AS_DEBUGGER
         instrumentation_bit = 1;

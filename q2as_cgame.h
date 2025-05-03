@@ -28,7 +28,7 @@ struct q2as_cg_state_t : q2as_state_t
     as_pmove_t        *pmove_inst = nullptr;
 
     q2as_cg_state_t() :
-        q2as_state_t()
+        q2as_state_t("cgame")
     {
 #ifdef Q2AS_DEBUGGER
         instrumentation_bit = 2;

@@ -1,3 +1,5 @@
+#ifdef Q2AS_ALLOW_WRITE_COMMANDS
+
 #include "q2as_predefined.h"
 #include "q2as_platform.h"
 #include <angelscript.h>
@@ -620,3 +622,30 @@ void WritePredefined()
     WriteConfigToFile(svas.engine,
                       (Q2AS_GetModulePath().path.parent_path() / "engine.config").generic_string().c_str());
 }
+
+void WriteBytecode()
+{
+    if (svas.mainModule)
+    {
+        q2as_FileBinaryStream stream(fmt::format("{}.asb", svas.name).c_str(), "wb");
+        svas.mainModule->SaveByteCode(&stream, true);
+    }
+    if (cgas.mainModule)
+    {
+        q2as_FileBinaryStream stream(fmt::format("{}.asb", cgas.name).c_str(), "wb");
+        cgas.mainModule->SaveByteCode(&stream, true);
+    }
+}
+
+void WriteEngine()
+{
+    if (svas.mainModule)
+    {
+        WriteConfigToFile(svas.engine, fmt::format("{}.engineconfig", svas.name).c_str());
+    }
+    if (cgas.mainModule)
+    {
+        WriteConfigToFile(svas.engine, fmt::format("{}.engineconfig", cgas.name).c_str());
+    }
+}
+#endif
