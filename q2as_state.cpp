@@ -274,6 +274,13 @@ bool q2as_state_t::CreateEngine()
     engine->SetEngineProperty(asEP_USE_CHARACTER_LITERALS, true);
     engine->SetEngineProperty(asEP_DISALLOW_EMPTY_LIST_ELEMENTS, true);
     engine->SetEngineProperty(asEP_BOOL_CONVERSION_MODE, 1);
+#ifdef Q2AS_DEBUGGER
+    engine->SetEngineProperty(asEP_BUILD_WITHOUT_LINE_CUES, false);
+    engine->SetEngineProperty(asEP_NO_DEBUG_OUTPUT, false);
+#else
+    engine->SetEngineProperty(asEP_BUILD_WITHOUT_LINE_CUES, true);
+    engine->SetEngineProperty(asEP_NO_DEBUG_OUTPUT, true);
+#endif
 
     if (int r = engine->SetMessageCallback(asFUNCTION(MessageCallback), this, asCALL_CDECL); r < 0)
     {
