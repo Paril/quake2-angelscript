@@ -1058,7 +1058,11 @@ void asIDBFileWorkspace::CompileScriptSources()
             auto module = engine->GetModuleByIndex(i);
 
             for (size_t f = 0; f < module->GetFunctionCount(); f++)
-                AddSection(module->GetFunctionByIndex(f)->GetScriptSectionName());
+            {
+                const char *section;
+                module->GetFunctionByIndex(f)->GetDeclaredAt(&section, nullptr, nullptr);
+                AddSection(section);
+            }
         }
     }
 }

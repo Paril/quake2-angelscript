@@ -199,6 +199,7 @@ asCContext::asCContext(asCScriptEngine *engine, bool holdRef)
 	m_initialFunction           = 0;
 	m_lineCallback              = false;
 	m_exceptionCallback         = false;
+	m_functionCallback          = false;
 	m_regs.doProcessSuspend     = false;
 	m_doSuspend                 = false;
 	m_exceptionWillBeCaught     = false;

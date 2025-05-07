@@ -944,7 +944,9 @@ string GetExceptionInfo(asIScriptContext *ctx, bool showStack)
 	const asIScriptFunction *function = ctx->GetExceptionFunction();
 	text << "func: " << function->GetDeclaration() << "\n";
 	text << "modl: " << (function->GetModuleName() ? function->GetModuleName() : "") << "\n";
-	text << "sect: " << (function->GetScriptSectionName() ? function->GetScriptSectionName() : "") << "\n";
+	const char *section;
+	function->GetDeclaredAt(&section, nullptr, nullptr);
+	text << "sect: " << (section ? section : "") << "\n";
 	text << "line: " << ctx->GetExceptionLineNumber() << "\n";
 	text << "desc: " << ctx->GetExceptionString() << "\n";
 
@@ -958,7 +960,8 @@ string GetExceptionInfo(asIScriptContext *ctx, bool showStack)
 			{
 				if( function->GetFuncType() == asFUNC_SCRIPT )
 				{
-					text << (function->GetScriptSectionName() ? function->GetScriptSectionName() : "") << " (" << ctx->GetLineNumber(n) << "): " << function->GetDeclaration() << "\n";
+					function->GetDeclaredAt(&section, nullptr, nullptr);
+					text << (section ? section : "") << " (" << ctx->GetLineNumber(n) << "): " << function->GetDeclaration() << "\n";
 				}
 				else
 				{
