@@ -2203,6 +2203,7 @@ game_export_t *Q2AS_GetGameAPI()
     globals.Bot_PickedUpItem = Q2AS_Bot_PickedUpItem;
     globals.Entity_IsVisibleToPlayer = Q2AS_Entity_IsVisibleToPlayer;
     globals.GetShadowLightData = Q2AS_GetShadowLightData;
+    globals.GetExtension = Q2AS_GetExtension;
 
     globals.edict_size = sizeof(q2as_edict_t);
 

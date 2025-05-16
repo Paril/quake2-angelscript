@@ -638,6 +638,11 @@ static void Q2AS_CG_Pmove(pmove_t *pm)
     *pm = cgas.pmove_inst->pm;
 }
 
+static void *Q2AS_CG_GetExtension(const char *name)
+{
+    return nullptr;
+}
+
 cgame_export_t *Q2AS_GetCGameAPI()
 {
     const cvar_t *q2as_use = cgi.cvar("q2as_use_cgame", "1", CVAR_NOFLAGS);
@@ -703,6 +708,7 @@ cgame_export_t *Q2AS_GetCGameAPI()
     cglobals.Shutdown = Q2AS_CG_Shutdown;
     cglobals.TouchPics = Q2AS_CG_TouchPics;
     cglobals.Pmove = Q2AS_CG_Pmove;
+    cglobals.GetExtension = Q2AS_CG_GetExtension;
 
     return &cglobals;
 }
